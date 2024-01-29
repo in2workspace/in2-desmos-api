@@ -3,11 +3,22 @@ package es.in2.desmos.api.util;
 import es.in2.desmos.api.exception.HashLinkException;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.security.NoSuchAlgorithmException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class ApplicationUtilsTest {
+
+    @Test
+    void testPrivateConstructor() throws Exception {
+        Constructor<MessageUtils> constructor = MessageUtils.class.getDeclaredConstructor();
+        assertTrue(Modifier.isPrivate(constructor.getModifiers()), "Constructor is not private");
+        constructor.setAccessible(true); // make the constructor accessible
+        assertThrows(InvocationTargetException.class, constructor::newInstance, "Constructor invocation should throw IllegalStateException");
+    }
 
     @Test
     void testCalculateSHA256Hash() throws NoSuchAlgorithmException {
