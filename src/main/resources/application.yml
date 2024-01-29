@@ -5,12 +5,12 @@ spring:
   main:
     web-application-type: reactive
   r2dbc:
-    url: "r2dbc:postgresql://localhost:5432/desmos"
+    url: "r2dbc:postgresql://localhost:5433/desmos"
     username: "guest"
     password: "guest"
     generate-unique-name: true
   flyway:
-    url: "jdbc:postgresql://localhost:5432/desmos"
+    url: "jdbc:postgresql://localhost:5433/desmos"
     locations: classpath:db/migrations
 
 # Spring Logging Configuration
@@ -18,7 +18,7 @@ logging:
   pattern:
     level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
   level:
-    es.in2.desmos: DEBUG
+    es.in2.desmos: INFO
 
 # Spring Management Configuration - Actuator
 management:
@@ -57,3 +57,61 @@ springdoc:
 # Server Configuration
 server:
   port: 8080
+
+# Application Configuration
+openapi:
+  server:
+    url: "https://localhost:9091"
+    description: "Blockchain Connector Test Server"
+  info:
+    title: "Blockchain Connector"
+    version: "2.0.0-SNAPSHOT"
+    description: "Blockchain Connector Component"
+    termsOfService: "https://example.com/terms-of-service"
+    license:
+      name: "Apache 2.0"
+      url: "https://www.apache.org/licenses/LICENSE-2.0.html"
+    contact:
+      email: "info@example.com"
+      name: "john doe"
+      url: "https://example.com"
+
+# Operator Configuration
+client:
+  organizationId: "VATES-99999999"
+
+# Context Broker Configuration
+broker:
+  provider: "scorpio"
+  externalDomain: "http://localhost:9090"
+  internalDomain: "http://localhost:9090"
+  paths:
+    entities: "/ngsi-ld/v1/entities"
+    subscriptions: "/ngsi-ld/v1/subscriptions"
+
+# NGSI Subscription Configuration
+ngsi-subscription:
+  notificationEndpoint: "http://localhost:8080/notifications/broker"
+  entityTypes: "ProductOffering,ProductOrder"
+
+# Blockchain Node Configuration
+blockchain:
+  provider: "alastria"
+  rpcAddress: "https://red-t.alastria.io/v0/9461d9f4292b41230527d57ee90652a6"
+  userEthereumAddress: "0xb794f5ea0ba39494ce839613fffba74279579268"
+
+# Blockchain Adapter Configuration
+blockchain-adapter:
+  provider: "digitelts"
+  internalDomain: "http://localhost:8080"
+  externalDomain: "http://localhost:8080"
+  paths:
+    nodeConfiguration: "/api/v1/configureNode"
+    publication: "/api/v1/publishEvent"
+    subscription: "/api/v1/subscribe"
+    events: "/api/v1/events"
+
+# Event Subscription Configuration
+event-subscription:
+  notificationEndpoint: "http://localhost:8080/notifications/evm"
+  eventTypes: "ProductOffering,ProductOrder"
