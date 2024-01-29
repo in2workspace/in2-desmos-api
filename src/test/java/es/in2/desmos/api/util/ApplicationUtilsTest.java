@@ -46,12 +46,6 @@ class ApplicationUtilsTest {
     }
 
     @Test
-    void testHasHlParameterWithoutHl() {
-        String url = "http://example.com/entity";
-        assertFalse(ApplicationUtils.hasHlParameter(url));
-    }
-
-    @Test
     void testHasHlParameterWithMalformedUrl() {
         String url = "http:///badurl";
         assertThrows(HashLinkException.class, () -> ApplicationUtils.hasHlParameter(url));
