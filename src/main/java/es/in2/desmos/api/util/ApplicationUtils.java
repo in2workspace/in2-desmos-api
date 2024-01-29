@@ -8,10 +8,9 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HexFormat;
-import java.util.Map;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 public class ApplicationUtils {
@@ -41,9 +40,12 @@ public class ApplicationUtils {
     }
 
     public static String extractEntityIdFromDataLocation(String dataLocation) {
-        return Arrays.stream(dataLocation.split("entities/|\\?hl="))
-                .findFirst()
-                .orElseThrow(IllegalArgumentException::new);
+        Pattern pattern = Pattern.compile("entities/(.*?)\\?hl=");
+        Matcher matcher = pattern.matcher(dataLocation);
+        return Optional.of(matcher)
+                .filter(Matcher::find)
+                .map(m -> m.group(1))
+                .orElseThrow(() -> new IllegalArgumentException("Invalid data location format"));
     }
 
     public static String extractEntityUrlFromDataLocation(String dataLocation) {
@@ -57,7 +59,12 @@ public class ApplicationUtils {
             URL url = new URL(urlString);
             Map<String, String> queryParams = splitQuery(url);
             log.debug("Query params: {}", queryParams);
-            return queryParams.containsKey("hl");
+            if (queryParams.containsKey("hl")) {
+                log.debug("Query param hl: {}", queryParams.get("hl"));
+                return queryParams.containsKey("hl");
+            } else {
+                throw new HashLinkException("Query param hl not found");
+            }
         } catch (MalformedURLException e) {
             throw new HashLinkException("Error parsing dataLocation");
         }
