@@ -31,15 +31,15 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data
 
-  evm-adapter:
+  blockchain-adapter:
     image: quay.io/digitelts/dlt-adapter:1.2.1
     environment:
       - "PRIVATE_KEY=0xe2afef2c880b138d741995ba56936e389b0b5dd2943e21e4363cc70d81c89346"
     ports:
       - "9091:8080"
 
-  blockchain-connector:
-    image: blockchain-connector:latest
+  desmos:
+    image: desmos:latest
     environment:
       LOGGING_LEVEL_ES_IN2_CONNECTOR: "INFO"
       SPRING_R2DBC_URL: "r2dbc:postgresql://postgres:5432/postgres"
@@ -77,7 +77,7 @@ services:
     ports:
       - "9091:8080"
     depends_on:
-      - dlt-adapter
+      - blockchain-adapter
       - postgres
 
 volumes:

@@ -4,7 +4,7 @@ import es.in2.desmos.api.model.BlockchainNotification;
 import es.in2.desmos.api.model.Transaction;
 import es.in2.desmos.api.model.TransactionStatus;
 import es.in2.desmos.api.model.TransactionTrader;
-import es.in2.desmos.api.service.BrokerEntityPublicationService;
+import es.in2.desmos.api.service.BrokerEntityPublisherService;
 import es.in2.desmos.api.service.TransactionService;
 import es.in2.desmos.broker.service.BrokerPublicationService;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ import static es.in2.desmos.api.util.ApplicationUtils.*;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class BrokerEntityPublicationServiceImpl implements BrokerEntityPublicationService {
+public class BrokerEntityPublisherServiceImpl implements BrokerEntityPublisherService {
 
     private final TransactionService transactionService;
     private final BrokerPublicationService brokerPublicationService;

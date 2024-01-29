@@ -2,7 +2,7 @@ package es.in2.desmos.api.facade;
 
 import es.in2.desmos.api.facade.impl.BlockchainToBrokerSynchronizerImpl;
 import es.in2.desmos.api.model.BlockchainNotification;
-import es.in2.desmos.api.service.BrokerEntityPublicationService;
+import es.in2.desmos.api.service.BrokerEntityPublisherService;
 import es.in2.desmos.api.service.BrokerEntityRetrievalService;
 import es.in2.desmos.api.service.NotificationProcessorService;
 import org.junit.jupiter.api.Test;
@@ -32,7 +32,7 @@ class BlockchainToBrokerSynchronizerTest {
     @Mock
     private BrokerEntityRetrievalService brokerEntityRetrievalService;
     @Mock
-    private BrokerEntityPublicationService brokerEntityPublicationService;
+    private BrokerEntityPublisherService brokerEntityPublisherService;
     @InjectMocks
     private BlockchainToBrokerSynchronizerImpl synchronizer;
 
@@ -43,14 +43,14 @@ class BlockchainToBrokerSynchronizerTest {
                 .thenReturn(Mono.empty());
         when(brokerEntityRetrievalService.retrieveEntityFromSourceBroker(processId, blockchainNotification))
                 .thenReturn(Mono.just("entityString"));
-        when(brokerEntityPublicationService.publishRetrievedEntityToBroker(processId, "entityString", blockchainNotification))
+        when(brokerEntityPublisherService.publishRetrievedEntityToBroker(processId, "entityString", blockchainNotification))
                 .thenReturn(Mono.empty());
         // Act
         synchronizer.retrieveAndPublishEntityToBroker(processId, blockchainNotification).block();
         // Assert
         verify(notificationProcessorService).processBlockchainNotification(processId, blockchainNotification);
         verify(brokerEntityRetrievalService).retrieveEntityFromSourceBroker(processId, blockchainNotification);
-        verify(brokerEntityPublicationService).publishRetrievedEntityToBroker(processId, "entityString", blockchainNotification);
+        verify(brokerEntityPublisherService).publishRetrievedEntityToBroker(processId, "entityString", blockchainNotification);
     }
 
     @Test
@@ -68,7 +68,7 @@ class BlockchainToBrokerSynchronizerTest {
         verify(notificationProcessorService).processBlockchainNotification(processId, blockchainNotification);
         verify(brokerEntityRetrievalService).retrieveEntityFromSourceBroker(processId, blockchainNotification);
         // Verificar que la publicación no se realiza debido al error
-        verify(brokerEntityPublicationService, never()).publishRetrievedEntityToBroker(anyString(), anyString(), any());
+        verify(brokerEntityPublisherService, never()).publishRetrievedEntityToBroker(anyString(), anyString(), any());
     }
 
 }

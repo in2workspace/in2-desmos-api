@@ -2,7 +2,7 @@ package es.in2.desmos.api.facade.impl;
 
 import es.in2.desmos.api.facade.BlockchainToBrokerSynchronizer;
 import es.in2.desmos.api.model.BlockchainNotification;
-import es.in2.desmos.api.service.BrokerEntityPublicationService;
+import es.in2.desmos.api.service.BrokerEntityPublisherService;
 import es.in2.desmos.api.service.BrokerEntityRetrievalService;
 import es.in2.desmos.api.service.NotificationProcessorService;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ public class BlockchainToBrokerSynchronizerImpl implements BlockchainToBrokerSyn
 
     private final NotificationProcessorService notificationProcessorService;
     private final BrokerEntityRetrievalService brokerEntityRetrievalService;
-    private final BrokerEntityPublicationService brokerEntityPublicationService;
+    private final BrokerEntityPublisherService brokerEntityPublisherService;
 
     @Override
     public Mono<Void> retrieveAndPublishEntityToBroker(String processId, BlockchainNotification blockchainNotification) {
@@ -26,7 +26,7 @@ public class BlockchainToBrokerSynchronizerImpl implements BlockchainToBrokerSyn
                 // Try to retrieve the Entity from the source Broker
                 .then(brokerEntityRetrievalService.retrieveEntityFromSourceBroker(processId, blockchainNotification))
                 // Publish the retrieved Entity to own Broker
-                .flatMap(retrievedEntity -> brokerEntityPublicationService
+                .flatMap(retrievedEntity -> brokerEntityPublisherService
                         .publishRetrievedEntityToBroker(processId, retrievedEntity, blockchainNotification))
                 .doOnSuccess(voidValue -> log.info("ProcessID: {} - Entity retrieval, validation, and publication completed", processId))
                 .doOnError(e -> log.error("ProcessID: {} - Error retrieving, validating, and publishing entity", processId, e));
