@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -19,6 +20,7 @@ import java.util.List;
 import static es.in2.desmos.ContainerManager.getBaseUriForScorpio;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@ActiveProfiles("it")
 @SpringBootTest
 @Testcontainers
 class BrokerSubscriptionInitializerIT {
