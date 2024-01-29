@@ -27,6 +27,8 @@ This RESTFul API exposes a set of endpoints designed for seamless communication 
 # Architecture
 ![Architecture](docs/images/desmos-architecture.png)
 
+# Functionalities
+
 # Installation
 
 We offer a Docker image to run the application. You can find it in [Docker Hub](https://hub.docker.com/repository/docker/in2kizuna/desmos/general).

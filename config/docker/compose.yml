@@ -1,5 +1,8 @@
 services:
 
+  # Access Node
+
+  # Context Broker
   scorpio:
     image: scorpiobroker/all-in-one-runner:java-latest
     environment:
@@ -20,24 +23,7 @@ services:
     volumes:
       - postgis:/var/lib/postgresql/data
 
-  postgres:
-    image: postgres:16.1
-    ports:
-      - "5433:5432"
-    environment:
-      POSTGRES_PASSWORD: "guest"
-      POSTGRES_USER: "guest"
-      POSTGRES_DB: "postgres"
-    volumes:
-      - postgres:/var/lib/postgresql/data
-
-  blockchain-adapter:
-    image: quay.io/digitelts/dlt-adapter:1.2.1
-    environment:
-      - "PRIVATE_KEY=0xe2afef2c880b138d741995ba56936e389b0b5dd2943e21e4363cc70d81c89346"
-    ports:
-      - "9091:8080"
-
+  # Blockchain Connector
   desmos:
     image: desmos:latest
     environment:
@@ -79,6 +65,25 @@ services:
     depends_on:
       - blockchain-adapter
       - postgres
+
+  postgres:
+    image: postgres:16.1
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_PASSWORD: "guest"
+      POSTGRES_USER: "guest"
+      POSTGRES_DB: "postgres"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
+  # Blockchain Adapter
+  blockchain-adapter:
+    image: quay.io/digitelts/dlt-adapter:1.2.1
+    environment:
+      - "PRIVATE_KEY=0xe2afef2c880b138d741995ba56936e389b0b5dd2943e21e4363cc70d81c89346"
+    ports:
+      - "9091:8080"
 
 volumes:
   postgis:
