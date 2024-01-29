@@ -33,9 +33,12 @@ checkstyleTest {
 
 sonar {
 	properties {
+		property "sonar.projectName", "Desmos"
 		property "sonar.projectKey", "in2workspace_desmos"
 		property "sonar.organization", "in2workspace"
 		property "sonar.host.url", "https://sonarcloud.io"
+		property "sonar.coverage.exclusions",
+				"src/main/java/es/in2/demos/DesmosApplication.java, "
 	}
 }
 
