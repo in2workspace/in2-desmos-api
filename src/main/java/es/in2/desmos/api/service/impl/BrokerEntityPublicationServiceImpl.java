@@ -22,13 +22,14 @@ import static es.in2.desmos.api.util.ApplicationUtils.*;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class BrokerEntityPublisherServiceImpl implements BrokerEntityPublisherService {
+public class BrokerEntityPublicationServiceImpl implements BrokerEntityPublisherService {
 
     private final TransactionService transactionService;
     private final BrokerPublicationService brokerPublicationService;
 
     @Override
-    public Mono<Void> publishRetrievedEntityToBroker(String processId, String retrievedBrokerEntity, BlockchainNotification blockchainNotification) {
+    public Mono<Void> publishRetrievedEntityToBroker(String processId, String retrievedBrokerEntity,
+                                                     BlockchainNotification blockchainNotification) {
         // extract entity id from data location
         String entityId = extractEntityIdFromDataLocation(blockchainNotification.dataLocation());
         // Check if the entity is deleted
