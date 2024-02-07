@@ -1,10 +1,9 @@
-package es.in2.desmos.api.service;//package es.in2.connector.api.service;
+//package es.in2.desmos.api.service;
 //
+//import com.fasterxml.jackson.core.JsonProcessingException;
 //import com.fasterxml.jackson.databind.ObjectMapper;
-//import es.in2.connector.api.model.BlockchainNotification;
-//import es.in2.connector.api.model.BrokerNotification;
-//import es.in2.connector.api.model.Transaction;
-//import es.in2.connector.api.service.impl.NotificationProcessorServiceImpl;
+//import es.in2.desmos.api.model.*;
+//import es.in2.desmos.api.service.impl.NotificationProcessorServiceImpl;
 //import org.junit.jupiter.api.Test;
 //import org.junit.jupiter.api.extension.ExtendWith;
 //import org.mockito.InjectMocks;
@@ -13,12 +12,14 @@ package es.in2.desmos.api.service;//package es.in2.connector.api.service;
 //import reactor.core.publisher.Mono;
 //import reactor.test.StepVerifier;
 //
+//import java.sql.Timestamp;
+//import java.time.Instant;
 //import java.util.HashMap;
 //import java.util.List;
 //import java.util.Map;
 //import java.util.UUID;
 //
-//import static org.mockito.ArgumentMatchers.any;
+//import static org.mockito.ArgumentMatchers.anyString;
 //import static org.mockito.Mockito.when;
 //
 //@ExtendWith(MockitoExtension.class)
@@ -34,7 +35,14 @@ package es.in2.desmos.api.service;//package es.in2.connector.api.service;
 //
 //    private final Transaction transaction = Transaction.builder()
 //            .id(UUID.randomUUID())
+//            .transactionId("testProcessId")
+//            .createdAt(Timestamp.from(Instant.now()))
 //            .entityId("testId")
+//            .entityType("testType")
+//            .entityHash("testHash")
+//            .status(TransactionStatus.PUBLISHED)
+//            .trader(TransactionTrader.CONSUMER)
+//            .hash("testHash")
 //            .dataLocation("testLocation")
 //            .build();
 //
@@ -46,12 +54,14 @@ package es.in2.desmos.api.service;//package es.in2.connector.api.service;
 //    private NotificationProcessorServiceImpl notificationProcessorService;
 //
 //    @Test
-//    void processBrokerNotification_ValidData() {
+//    void processBrokerNotification_ValidData() throws JsonProcessingException {
 //        // Arrange
 //        Map<String, Object> dataMap = new HashMap<>();
 //        dataMap.put("id", "testId");
-//        when(transactionService.findLatestPublishedOrDeletedTransactionForEntity(any(), any()))
+//        when(transactionService.findLatestPublishedOrDeletedTransactionForEntity(anyString(), anyString()))
 //                .thenReturn(Mono.just(transaction));
+//        when(objectMapper.writer()
+//                .writeValueAsString(dataMap)).thenReturn("{\"id\":\"testId\"}");
 //        // Act & Assert
 //        StepVerifier.create(notificationProcessorService.processBrokerNotification("testProcessId", brokerNotification))
 //                .expectNextMatches(returnedDataMap -> returnedDataMap.equals(dataMap))

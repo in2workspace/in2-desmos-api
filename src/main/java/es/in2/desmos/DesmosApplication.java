@@ -11,17 +11,18 @@ import org.springframework.context.annotation.Bean;
 @SpringBootApplication
 @ConfigurationPropertiesScan
 public class DesmosApplication {
+    private static final ObjectMapper OBJECT_MAPPER =
+            JsonMapper.builder()
+                    .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true)
+                    .build();
 
-	private static final ObjectMapper OBJECT_MAPPER =
-			JsonMapper.builder().configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true).build();
+    public static void main(String[] args) {
+        SpringApplication.run(DesmosApplication.class, args);
+    }
 
-	public static void main(String[] args) {
-		SpringApplication.run(DesmosApplication.class, args);
-	}
-
-	@Bean
-	public ObjectMapper objectMapper() {
-		return OBJECT_MAPPER;
-	}
+    @Bean
+    public ObjectMapper objectMapper() {
+        return OBJECT_MAPPER;
+    }
 
 }

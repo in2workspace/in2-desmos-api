@@ -81,8 +81,7 @@ class BlockchainEventCreatorServiceTests {
                     .when(() -> ApplicationUtils.calculateSHA256Hash(anyString()))
                     .thenThrow(new NoSuchAlgorithmException());
             // Act & Assert
-            assertThrows(HashLinkException.class, () -> service.createBlockchainEvent(processId, dataMap)
-                    .block());
+            assertThrows(HashLinkException.class, () -> service.createBlockchainEvent(processId, dataMap));
         }
     }
 }

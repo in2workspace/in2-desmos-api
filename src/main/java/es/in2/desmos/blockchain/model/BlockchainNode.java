@@ -5,8 +5,8 @@ import lombok.Builder;
 
 @Builder
 public record BlockchainNode(
-        @JsonProperty("rpcAddress") String rpcAddress,
         @JsonProperty("userEthereumAddress") String userEthereumAddress,
         @JsonProperty("iss") String organizationId
+
 ) {
 }

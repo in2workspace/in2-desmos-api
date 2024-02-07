@@ -3,8 +3,8 @@ package es.in2.desmos.blockchain.config;
 import es.in2.desmos.api.config.ApplicationConfig;
 import es.in2.desmos.blockchain.config.properties.BlockchainNodeProperties;
 import es.in2.desmos.blockchain.config.properties.EventSubscriptionProperties;
-import es.in2.desmos.blockchain.model.BlockchainNode;
 import es.in2.desmos.blockchain.model.BlockchainAdapterSubscription;
+import es.in2.desmos.blockchain.model.BlockchainNode;
 import es.in2.desmos.blockchain.service.BlockchainAdapterNodeService;
 import es.in2.desmos.blockchain.service.BlockchainAdapterSubscriptionService;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +29,8 @@ public class BlockchainAdapterSubscriptionInitializer {
 
     @EventListener(ApplicationReadyEvent.class)
     public Mono<Void> initializeSubscriptions() {
-        String processId = UUID.randomUUID().toString();
+        String processId = UUID.randomUUID()
+                .toString();
         return setBlockchainNodeConnection(processId)
                 .flatMap(response -> setBlockchainEventSubscription(processId));
     }
@@ -38,7 +39,6 @@ public class BlockchainAdapterSubscriptionInitializer {
         log.info("Setting Blockchain Node connection...");
         // Create the Blockchain Node object
         BlockchainNode blockchainNode = BlockchainNode.builder()
-                .rpcAddress(blockchainNodeProperties.rpcAddress())
                 .userEthereumAddress(blockchainNodeProperties.userEthereumAddress())
                 .organizationId(applicationConfig.organizationIdHash())
                 .build();
