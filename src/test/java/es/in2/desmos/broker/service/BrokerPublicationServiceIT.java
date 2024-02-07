@@ -4,14 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.ContainerManager;
-import es.in2.desmos.broker.config.BrokerSubscriptionInitializer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Profile;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -29,9 +26,6 @@ class BrokerPublicationServiceIT {
     static void setDynamicProperties(DynamicPropertyRegistry registry) {
         ContainerManager.postgresqlProperties(registry);
     }
-
-    @Autowired
-    private BrokerSubscriptionInitializer brokerSubscriptionInitializer;
 
     @Autowired
     private BrokerPublicationService brokerPublicationService;
@@ -111,7 +105,7 @@ class BrokerPublicationServiceIT {
     void shouldDeleteEntity() throws JsonProcessingException {
         // Arrange
         String expectedResponse = """
-                {"type":"https://uri.etsi.org/ngsi-ld/errors/ResourceNotFound","title":"Resource not found.","detail":{"message":"house2:smartrooms:room1 was not found"},"errorCode":404}
+                {"type":"https://uri.etsi.org/ngsi-ld/errors/ResourceNotFound","title":"Resource not found.","detail":"house2:smartrooms:room1 was not found","status":404}
                 """;
         // Act
         brokerPublicationService.deleteEntityById("1234", "house2:smartrooms:room1").block();
