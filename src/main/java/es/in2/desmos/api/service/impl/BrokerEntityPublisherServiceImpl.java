@@ -22,7 +22,7 @@ import static es.in2.desmos.api.util.ApplicationUtils.*;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class BrokerEntityPublicationServiceImpl implements BrokerEntityPublisherService {
+public class BrokerEntityPublisherServiceImpl implements BrokerEntityPublisherService {
 
     private final TransactionService transactionService;
     private final BrokerPublicationService brokerPublicationService;

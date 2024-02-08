@@ -1,7 +1,7 @@
 package es.in2.desmos.api.service;
 
 import es.in2.desmos.api.model.BlockchainNotification;
-import es.in2.desmos.api.service.impl.BrokerEntityPublicationServiceImpl;
+import es.in2.desmos.api.service.impl.BrokerEntityPublisherServiceImpl;
 import es.in2.desmos.api.util.ApplicationUtils;
 import es.in2.desmos.broker.service.BrokerPublicationService;
 import org.junit.jupiter.api.Test;
@@ -26,7 +26,7 @@ class BrokerEntityPublicationServiceTests {
     @Mock
     private BrokerPublicationService brokerPublicationService;
     @InjectMocks
-    private BrokerEntityPublicationServiceImpl brokerEntityPublicationService;
+    private BrokerEntityPublisherServiceImpl brokerEntityPublicationService;
 
     @Test
     void testDeletedEntityNotification() {
