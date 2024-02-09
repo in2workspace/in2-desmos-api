@@ -16,6 +16,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.HashSet;
@@ -50,6 +51,22 @@ public class ScorpioAdapter implements GenericBrokerService {
                 .bodyValue(requestBody)
                 .retrieve()
                 .bodyToMono(Void.class);
+    }
+
+    @Override
+    public Flux<String> getEntitiesByTimeRange(String processId, String timestamp) {
+        return webClient.get()
+                .uri(brokerProperties.externalDomain() +
+                        "/temporal"
+                        + brokerProperties.paths().entities()
+                        + "?timerel=after"
+                        + "&timeproperty=createdAt"
+                        + "&timeAt="
+                        + timestamp
+                        + "&attrs")
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToFlux(String.class);
     }
 
     // todo: getEntitiesByTimeRange() method

@@ -5,11 +5,17 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.api.exception.JsonReadingException;
-import es.in2.desmos.api.model.*;
+import es.in2.desmos.api.facade.BlockchainToBrokerDataSyncSynchronizer;
+import es.in2.desmos.api.facade.BlockchainToBrokerSynchronizer;
+import es.in2.desmos.api.facade.BrokerToBlockchainDataSyncPublisher;
+import es.in2.desmos.api.facade.BrokerToBlockchainPublisher;
+import es.in2.desmos.api.model.BlockchainNotification;
+import es.in2.desmos.api.model.Transaction;
+import es.in2.desmos.api.model.TransactionStatus;
+import es.in2.desmos.api.model.TransactionTrader;
 import es.in2.desmos.api.service.TransactionService;
 import es.in2.desmos.blockchain.config.properties.BlockchainAdapterProperties;
 import es.in2.desmos.blockchain.service.BlockchainAdapterEventPublisher;
-import es.in2.desmos.broker.config.properties.BrokerProperties;
 import es.in2.desmos.broker.service.BrokerPublicationService;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
@@ -42,16 +48,18 @@ public class BlockchainConnectorInitializer {
 
     private final TransactionService transactionService;
     private final BlockchainAdapterProperties blockchainAdapterProperties;
-    private final BrokerProperties brokerProperties;
-    private final ObjectMapper objectMapper;
-    private final OnChainSynchronizationServiceFacade onChainSynchronizationServiceFacade;
-    private final OffChainDataSynchronizationServiceFacade offChainDataSynchronizationServiceFacade;
     private final BlockchainAdapterEventPublisher blockchainAdapterEventPublisher;
+    private final ObjectMapper objectMapper;
+    private final BrokerToBlockchainDataSyncPublisher brokerToBlockchainDataSyncPublisher;
+    private final BrokerToBlockchainPublisher brokerToBlockchainPublisher;
+    private final BlockchainToBrokerSynchronizer blockchainToBrokerSynchronizer;
+    private final BlockchainToBrokerDataSyncSynchronizer blockchainToBrokerDataSyncSynchronizer;
     private final BrokerPublicationService brokerPublicationService;
 
     private Disposable blockchainEventProcessingSubscription;
     private Disposable brokerEntityEventProcessingSubscription;
     private final AtomicBoolean canQueuesEmit = new AtomicBoolean(true);
+
 
     @EventListener(ApplicationReadyEvent.class)
     public void processAllTransactions() {
@@ -61,14 +69,15 @@ public class BlockchainConnectorInitializer {
         log.debug("Synchronization tasks started, searching for previous transactions...");
         transactionService.getAllTransactions(processId)
                 .collectList()
-                .flatMap(transactions -> {
+                .flatMapMany(transactions -> {
                     if (transactions.isEmpty()) {
                         log.info("No previous transactions found, querying DLT Adapter from beginning...");
                         return queryDLTAdapterFromBeginning();
                     } else {
-                        return processTransactions(transactions);
+                        return processTransactions(transactions).flux();
                     }
                 })
+                .then()
                 .doOnTerminate(() -> {
                     canQueuesEmit.set(true);
                     log.info("Synchronization tasks finished, enabling Queue Processing...");
@@ -80,7 +89,7 @@ public class BlockchainConnectorInitializer {
 
     private Mono<Void> processTransactions(List<Transaction> transactions) {
         List<Transaction> consumerTransactionsList = findLastTransactionOfType(transactions, TransactionTrader.CONSUMER);
-        Mono<Void> consumerTransactions = Mono.empty();
+        Flux<Void> consumerTransactions = Flux.empty();
         if (!consumerTransactionsList.isEmpty()) {
             consumerTransactions = processConsumerTransaction(consumerTransactionsList);
         }
@@ -110,24 +119,16 @@ public class BlockchainConnectorInitializer {
             log.debug(convertTimestamp(lastTransactionPublished.getCreatedAt().toString()));
         }
 
-        String url = brokerProperties.internalDomain()
-                + "/temporal"
-                + brokerProperties.paths().entities()
-                + "?timerel=after"
-                + "&timeproperty=createdAt"
-                + "&timeAt="
-                + timestamp
-                + "&attrs";
-
-        log.debug("Url: " + url);
-
-        return Mono.fromFuture(() ->  getRequest(url))
-                .flatMapMany(response -> Flux.fromIterable(extractIdsBasedOnPosition(response.body())))
-                .flatMap(onChainSynchronizationServiceFacade::createAndSynchronizeBlockchainEvents)
+        return brokerPublicationService.getEntitiesByTimeRange(MDC.get("processId"), timestamp)
+                .flatMap(response -> {
+                    List<String> ids = extractIdsBasedOnPosition(response);
+                    return Flux.fromIterable(ids);
+                })
+                .flatMap(ids -> brokerToBlockchainDataSyncPublisher.createAndSynchronizeBlockchainEvents(MDC.get("processId"), ids))
                 .then();
     }
 
-    private Mono<Void> processConsumerTransaction(List<Transaction> transactions) {
+    private Flux<Void> processConsumerTransaction(List<Transaction> transactions) {
         if (transactions.isEmpty()) {
             log.debug("There are no published transactions. Querying DLT Adapter from beginning...");
             return queryDLTAdapterFromBeginning();
@@ -138,23 +139,17 @@ public class BlockchainConnectorInitializer {
         return queryDLTAdapterFromRange(lastDateUnixTimestampMillis, nowUnixTimestampMillis);
     }
 
-    private Mono<Void> queryDLTAdapterFromRange(long startDateUnixTimestampMillis, long endDateUnixTimestampMillis) {
+    private Flux<Void> queryDLTAdapterFromRange(long startDateUnixTimestampMillis, long endDateUnixTimestampMillis) {
         String dltAdapterQueryURL = buildQueryURL(startDateUnixTimestampMillis, endDateUnixTimestampMillis);
         log.debug(dltAdapterQueryURL);
 
         log.debug("Waiting for events to be processed...");
-        return processEvents(dltAdapterQueryURL);
+        return processEvents(startDateUnixTimestampMillis, endDateUnixTimestampMillis);
     }
 
-    private Mono<Void> processEvents(String dltAdapterQueryURL) {
-        return Mono.fromFuture(() -> getRequest(dltAdapterQueryURL))
-                .flatMap(response -> {
-                    if (response.statusCode() == 404) {
-                        log.debug("There are no events to be retrieved.");
-                        return Mono.empty();
-                    }
-                    return processResponse(response.body());
-                })
+    private Flux<Void> processEvents(long from, long to) {
+        return blockchainAdapterEventPublisher.getEventsFromRange(MDC.get("processId"), from, to)
+                .flatMap(this::processResponse)
                 .onErrorResume(e -> {
                     log.error("Error sending requests to blockchain node");
                     return Mono.empty();
@@ -164,7 +159,7 @@ public class BlockchainConnectorInitializer {
     private Mono<Void> processResponse(String responseBody) {
         try {
             log.debug("Processing response: {}", responseBody);
-            List<ActiveBlockchainEvent> events = objectMapper.readValue(responseBody, new TypeReference<>() {});
+            List<BlockchainNotification> events = objectMapper.readValue(responseBody, new TypeReference<>() {});
             return Flux.fromIterable(events)
                     .buffer(50)
                     .flatMap(batch -> Flux.fromIterable(batch)
@@ -178,30 +173,22 @@ public class BlockchainConnectorInitializer {
         }
     }
 
-    private Mono<Void> handleEvent(ActiveBlockchainEvent event) {
+    private Mono<Void> handleEvent(BlockchainNotification event) {
         log.debug(event.toString());
-        BlockchainNotification blockchainNotification = BlockchainNotification.builder()
-                .id(BlockchainNotification.Id.builder().type("").hex("").build())
-                .publisherAddress(event.entityId())
-                .eventType(event.eventType())
-                .timestamp(BlockchainNotification.Timestamp.builder().type("").hex("").build())
-                .dataLocation(event.dataLocation())
-                .relevantMetadata(event.relevantMetadata())
-                .build();
         String processId = UUID.randomUUID().toString();
         MDC.put("processId", processId);
-        return offChainDataSynchronizationServiceFacade.retrieveAndSyncrhonizeEntityIntoBroker(blockchainNotification);
+        return blockchainToBrokerDataSyncSynchronizer.retrieveAndSynchronizeEntityIntoBroker(processId, event);
     }
 
 
 
-    private Mono<Void> queryDLTAdapterFromBeginning() {
+    private Flux<Void> queryDLTAdapterFromBeginning() {
         long startUnixTimestampMillis = Instant.EPOCH.toEpochMilli();
         long nowUnixTimestampMillis = Instant.now().toEpochMilli();
         String dltAdapterQueryURL = buildQueryURL(startUnixTimestampMillis, nowUnixTimestampMillis);
         log.debug(dltAdapterQueryURL);
         log.debug("Waiting for events to be processed...");
-        return processEvents(dltAdapterQueryURL);
+        return processEvents(startUnixTimestampMillis, nowUnixTimestampMillis);
     }
 
     private String buildQueryURL(long startDateUnixTimestampMillis, long endDateUnixTimestampMillis) {
@@ -247,14 +234,14 @@ public class BlockchainConnectorInitializer {
             disposeIfActive(blockchainEventProcessingSubscription);
             disposeIfActive(brokerEntityEventProcessingSubscription);
 
-            blockchainEventProcessingSubscription = blockchainAdapterEventPublisher.startProcessingEvents()
+            blockchainEventProcessingSubscription = blockchainToBrokerSynchronizer.startProcessingEvents()
                     .subscribe(
                             null,
                             error -> log.error("Error occurred during blockchain event processing: {}", error.getMessage(), error),
                             () -> log.info("Blockchain event processing completed")
                     );
 
-            brokerEntityEventProcessingSubscription = brokerPublicationService.startProcessingEvents()
+            brokerEntityEventProcessingSubscription = brokerToBlockchainPublisher.startProcessingEvents()
                     .subscribe(
                             null,
                             error -> log.error("Error occurred during broker entity event processing: {}", error.getMessage(), error),

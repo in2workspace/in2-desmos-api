@@ -3,6 +3,7 @@ package es.in2.desmos.broker.adapter;
 import es.in2.desmos.broker.model.BrokerSubscription;
 import es.in2.desmos.broker.service.GenericBrokerService;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -14,6 +15,9 @@ public class OrionLdAdapter implements GenericBrokerService {
     public Mono<Void> postEntity(String processId, String requestBody) {
         return null;
     }
+
+    @Override
+    public Flux<String> getEntitiesByTimeRange(String processId, String timestamp) {return null;}
 
     @Override
     public Mono<String> getEntityById(String processId, String entityId) {

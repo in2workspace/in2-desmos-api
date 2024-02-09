@@ -2,6 +2,7 @@ package es.in2.desmos.broker.service;
 
 
 import es.in2.desmos.broker.model.BrokerSubscription;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -10,7 +11,9 @@ public interface GenericBrokerService {
 
     Mono<Void> postEntity(String processId, String requestBody);
 
+
     // todo: getEntitiesByTimeRange()
+    Flux<String> getEntitiesByTimeRange(String processId, String timestamp);
 
     Mono<String> getEntityById(String processId, String entityId);
 

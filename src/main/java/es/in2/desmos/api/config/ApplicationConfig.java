@@ -3,6 +3,8 @@ package es.in2.desmos.api.config;
 import es.in2.desmos.api.config.properties.ClientProperties;
 import es.in2.desmos.api.config.properties.OpenApiProperties;
 import es.in2.desmos.api.exception.HashCreationException;
+import es.in2.desmos.api.service.QueueService;
+import es.in2.desmos.api.service.impl.QueueServiceImpl;
 import es.in2.desmos.blockchain.config.properties.BlockchainAdapterProperties;
 import es.in2.desmos.broker.config.properties.BrokerProperties;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -62,6 +64,16 @@ public class ApplicationConfig {
                 .servers(List.of(new Server()
                         .url(openApiProperties.server().url())
                         .description(openApiProperties.server().description())));
+    }
+
+    @Bean
+    public QueueService brokerToBlockchainQueueService() {
+        return new QueueServiceImpl();
+    }
+
+    @Bean
+    public QueueService blockchainToBrokerQueueService() {
+        return new QueueServiceImpl();
     }
 
 }

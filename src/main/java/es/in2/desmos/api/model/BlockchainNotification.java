@@ -9,18 +9,13 @@ import java.util.List;
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record BlockchainNotification(
-        @JsonProperty("id") Id id,
+        @JsonProperty("id") long id,
         @JsonProperty("publisherAddress") String publisherAddress,
         @JsonProperty("eventType") String eventType,
-        @JsonProperty("timestamp") Timestamp timestamp,
+        @JsonProperty("timestamp") long timestamp,
         @JsonProperty("dataLocation") String dataLocation,
-        @JsonProperty("relevantMetadata") List<String> relevantMetadata
+        @JsonProperty("relevantMetadata") List<String> relevantMetadata,
+        @JsonProperty("entityId") String entityId,
+        @JsonProperty("previousEntityHash") String previousEntityHash
 ) {
-
-    @Builder
-    public record Id(String type, String hex) {}
-
-    @Builder
-    public record Timestamp(String type, String hex) {}
-
 }

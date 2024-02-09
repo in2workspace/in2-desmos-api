@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.sql.Timestamp;
@@ -36,18 +37,6 @@ public class DigitelBlockchainAdapter implements GenericBlockchainAdapterService
         this.webClient = WebClient.builder()
                 .baseUrl(blockchainAdapterProperties.internalDomain())
                 .build();
-    }
-
-    @Override
-    public Mono<String> setNodeConnection(String processId, BlockchainNode blockchainNode) {
-        return webClient.post()
-                .uri(blockchainAdapterProperties.paths()
-                        .nodeConfiguration())
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(blockchainNode)
-                .retrieve()
-                .bodyToMono(String.class);
     }
 
     @Override
@@ -105,5 +94,15 @@ public class DigitelBlockchainAdapter implements GenericBlockchainAdapterService
                             }
                         })
                 .bodyToMono(Void.class);
+    }
+
+    @Override
+    public Flux<String> getEventsFromRange(String processId, long from, long to) {
+        return webClient.get()
+                .uri(blockchainAdapterProperties.paths()
+                        .events() +"?startDate=" + from + "&endDate=" + to)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToFlux(String.class);
     }
 }
