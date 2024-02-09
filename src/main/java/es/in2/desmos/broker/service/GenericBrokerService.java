@@ -10,6 +10,8 @@ public interface GenericBrokerService {
 
     Mono<Void> postEntity(String processId, String requestBody);
 
+    // todo: getEntitiesByTimeRange()
+
     Mono<String> getEntityById(String processId, String entityId);
 
     Mono<Void> updateEntity(String processId, String requestBody);

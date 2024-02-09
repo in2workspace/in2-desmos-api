@@ -1,6 +1,5 @@
 package es.in2.desmos.blockchain.service.impl;
 
-import es.in2.desmos.blockchain.model.BlockchainNode;
 import es.in2.desmos.blockchain.service.BlockchainAdapterNodeService;
 import es.in2.desmos.blockchain.service.GenericBlockchainAdapterService;
 import es.in2.desmos.blockchain.util.BlockchainAdapterFactory;

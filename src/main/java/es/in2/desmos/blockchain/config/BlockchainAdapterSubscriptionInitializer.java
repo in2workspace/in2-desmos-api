@@ -1,16 +1,17 @@
 package es.in2.desmos.blockchain.config;
 
-import es.in2.desmos.api.config.ApplicationConfig;
-import es.in2.desmos.blockchain.config.properties.BlockchainNodeProperties;
+import es.in2.desmos.api.exception.RequestErrorException;
 import es.in2.desmos.blockchain.config.properties.EventSubscriptionProperties;
 import es.in2.desmos.blockchain.model.BlockchainAdapterSubscription;
-import es.in2.desmos.blockchain.model.BlockchainNode;
-import es.in2.desmos.blockchain.service.BlockchainAdapterNodeService;
 import es.in2.desmos.blockchain.service.BlockchainAdapterSubscriptionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
@@ -19,33 +20,20 @@ import java.util.UUID;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@EnableRetry
 public class BlockchainAdapterSubscriptionInitializer {
 
     private final EventSubscriptionProperties eventSubscriptionProperties;
-    private final BlockchainNodeProperties blockchainNodeProperties;
-    private final BlockchainAdapterNodeService blockchainAdapterNodeService;
     private final BlockchainAdapterSubscriptionService blockchainAdapterSubscriptionService;
-    private final ApplicationConfig applicationConfig;
 
     @EventListener(ApplicationReadyEvent.class)
+    @Retryable(retryFor = RequestErrorException.class,
+            maxAttempts = 4,
+            backoff = @Backoff(delay = 2000)
+    )
     public Mono<Void> initializeSubscriptions() {
-        String processId = UUID.randomUUID()
-                .toString();
-        return setBlockchainNodeConnection(processId)
-                .flatMap(response -> setBlockchainEventSubscription(processId));
-    }
-
-    private Mono<String> setBlockchainNodeConnection(String processId) {
-        log.info("Setting Blockchain Node connection...");
-        // Create the Blockchain Node object
-        BlockchainNode blockchainNode = BlockchainNode.builder()
-                .userEthereumAddress(blockchainNodeProperties.userEthereumAddress())
-                .organizationId(applicationConfig.organizationIdHash())
-                .build();
-        // Create the subscription
-        return blockchainAdapterNodeService.createBlockchainNodeConnection(processId, blockchainNode)
-                .doOnSuccess(response -> log.info("Blockchain Node connection created successfully"))
-                .doOnError(e -> log.error("Error creating Blockchain Node connection", e));
+        String processId = UUID.randomUUID().toString();
+        return setBlockchainEventSubscription(processId);
     }
 
     private Mono<Void> setBlockchainEventSubscription(String processId) {
@@ -60,5 +48,12 @@ public class BlockchainAdapterSubscriptionInitializer {
                 .doOnSuccess(response -> log.info("Blockchain Event Subscription created successfully"))
                 .doOnError(e -> log.error("Error creating Blockchain Event Subscription", e));
     }
+
+    @Recover
+    public void recover(RequestErrorException e) {
+        log.error("After retries, subscription failed", e);
+        // todo: add recover logic
+    }
+
 
 }

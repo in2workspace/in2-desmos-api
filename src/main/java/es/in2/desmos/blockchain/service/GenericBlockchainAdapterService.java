@@ -2,7 +2,6 @@ package es.in2.desmos.blockchain.service;
 
 
 import es.in2.desmos.api.model.BlockchainEvent;
-import es.in2.desmos.blockchain.model.BlockchainNode;
 import es.in2.desmos.blockchain.model.BlockchainAdapterSubscription;
 import reactor.core.publisher.Mono;
 

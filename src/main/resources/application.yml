@@ -94,19 +94,12 @@ ngsi-subscription:
   notificationEndpoint: "http://localhost:8080/notifications/broker"
   entityTypes: "ProductOffering,ProductOrder"
 
-# Blockchain Node Configuration
-blockchain:
-  provider: "alastria"
-  rpcAddress: "https://red-t.alastria.io/v0/9461d9f4292b41230527d57ee90652a6"
-  userEthereumAddress: "0xb794f5ea0ba39494ce839613fffba74279579268"
-
 # Blockchain Adapter Configuration
 blockchain-adapter:
   provider: "digitelts"
   internalDomain: "http://localhost:8080"
   externalDomain: "http://localhost:8080"
   paths:
-    nodeConfiguration: "/api/v1/configureNode"
     publication: "/api/v1/publishEvent"
     subscription: "/api/v1/subscribe"
     events: "/api/v1/events"

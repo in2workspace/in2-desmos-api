@@ -23,7 +23,7 @@ public record BlockchainAdapterProperties(String provider, String internalDomain
         this.provider = provider;
         this.internalDomain = internalDomain;
         this.externalDomain = externalDomain;
-        this.paths = Optional.ofNullable(paths).orElse(new BlockchainAdapterPathProperties(null, null, null, null));
+        this.paths = Optional.ofNullable(paths).orElse(new BlockchainAdapterPathProperties(null, null, null));
     }
 
 }

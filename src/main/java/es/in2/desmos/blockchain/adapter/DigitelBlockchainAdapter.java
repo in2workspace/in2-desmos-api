@@ -7,7 +7,6 @@ import es.in2.desmos.api.model.TransactionTrader;
 import es.in2.desmos.api.service.TransactionService;
 import es.in2.desmos.blockchain.config.properties.BlockchainAdapterProperties;
 import es.in2.desmos.blockchain.model.BlockchainAdapterSubscription;
-import es.in2.desmos.blockchain.model.BlockchainNode;
 import es.in2.desmos.blockchain.service.GenericBlockchainAdapterService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
