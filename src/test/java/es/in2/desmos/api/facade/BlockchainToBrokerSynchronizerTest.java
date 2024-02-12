@@ -23,9 +23,9 @@ class BlockchainToBrokerSynchronizerTest {
     // Test data
     private final String processId = "testProcessId";
     private final BlockchainNotification blockchainNotification = BlockchainNotification.builder()
-            .id(BlockchainNotification.Id.builder().type("type").hex("hex").build())
+            .id(5478474)
             .publisherAddress("publisherAddress").eventType("eventType")
-            .timestamp(BlockchainNotification.Timestamp.builder().type("type").hex("hex").build())
+            .timestamp(684485648)
             .dataLocation("dataLocation").relevantMetadata(List.of("metadata1", "metadata2")).build();
     @Mock
     private NotificationProcessorService notificationProcessorService;
