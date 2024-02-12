@@ -20,7 +20,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class BrokerEntityProcessorServiceImpl implements BrokerEntityProcessorService {
     private final ObjectMapper objectMapper;
-    private final TransactionService transactionService;
     private final BrokerPublicationService brokerPublicationService;
 
     @Override
