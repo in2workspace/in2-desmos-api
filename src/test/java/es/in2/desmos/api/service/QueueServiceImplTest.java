@@ -31,13 +31,10 @@ class QueueServiceImplTest {
 
     @Test
     void enqueueEventTest() {
-        EventQueue event = new EventQueue(); // Suponiendo que EventQueue es tu clase de evento
+        EventQueue event = new EventQueue();
 
-        // Realizar el test
         StepVerifier.create(queueService.enqueueEvent(event))
                 .verifyComplete();
-
-
 
     }
 }

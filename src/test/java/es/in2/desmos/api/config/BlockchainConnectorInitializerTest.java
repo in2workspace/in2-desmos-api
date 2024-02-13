@@ -1,13 +1,8 @@
 package es.in2.desmos.api.config;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import es.in2.desmos.api.exception.JsonReadingException;
-import es.in2.desmos.api.facade.BlockchainToBrokerDataSyncSynchronizer;
-import es.in2.desmos.api.facade.BlockchainToBrokerSynchronizer;
-import es.in2.desmos.api.facade.BrokerToBlockchainDataSyncPublisher;
-import es.in2.desmos.api.facade.BrokerToBlockchainPublisher;
+import es.in2.desmos.api.facade.*;
 import es.in2.desmos.api.model.Transaction;
 import es.in2.desmos.api.model.TransactionStatus;
 import es.in2.desmos.api.model.TransactionTrader;
@@ -21,12 +16,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -142,7 +134,6 @@ class BlockchainConnectorInitializerTest {
         // Assuming queryDLTAdapterFromRange returns an empty Flux for simplicity
 
         when(transactionService.getAllTransactions(any())).thenReturn(transactionsFlux);
-        // Configura el comportamiento simulado para el WebClient
         when(webClientMock.get()).thenReturn(requestHeadersUriSpecMock);
         when(requestHeadersUriSpecMock.uri((String) org.mockito.ArgumentMatchers.any())).thenReturn(requestHeadersSpecMock);
         when(requestHeadersSpecMock.accept((org.springframework.http.MediaType) org.mockito.ArgumentMatchers.any())).thenReturn(requestHeadersSpecMock);

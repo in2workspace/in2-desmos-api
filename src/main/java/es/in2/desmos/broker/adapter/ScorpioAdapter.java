@@ -69,9 +69,6 @@ public class ScorpioAdapter implements GenericBrokerService {
                 .bodyToFlux(String.class);
     }
 
-    // todo: getEntitiesByTimeRange() method
-
-
 
     @Override
     public Mono<String> getEntityById(String processId, String entityId) {
