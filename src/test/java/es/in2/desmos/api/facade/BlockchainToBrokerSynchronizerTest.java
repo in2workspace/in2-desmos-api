@@ -4,7 +4,6 @@ import es.in2.desmos.api.facade.impl.BlockchainToBrokerSynchronizerImpl;
 import es.in2.desmos.api.model.BlockchainNotification;
 import es.in2.desmos.api.model.EventQueue;
 import es.in2.desmos.api.model.EventQueuePriority;
-import es.in2.desmos.api.model.Transaction;
 import es.in2.desmos.api.service.BrokerEntityPublisherService;
 import es.in2.desmos.api.service.BrokerEntityRetrievalService;
 import es.in2.desmos.api.service.NotificationProcessorService;
@@ -20,7 +19,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -45,6 +43,7 @@ class BlockchainToBrokerSynchronizerTest {
     private BrokerEntityPublisherService brokerEntityPublisherService;
     @Mock
     private QueueService blockchainToBrokerQueueService;
+
     @InjectMocks
     private BlockchainToBrokerSynchronizerImpl synchronizer;
 
@@ -84,14 +83,12 @@ class BlockchainToBrokerSynchronizerTest {
                 .thenReturn(Mono.empty()); // Simulate successful completion
 
 
-
         // Act
         StepVerifier.create(synchronizer.startProcessingEvents())
                 .expectSubscription()
                 .verifyComplete();
     }
-
-
+    
     @Test
     void testRetrieveAndPublishEntityIntoBrokerWithError() {
         // Mocking the behavior to simulate an error during entity retrieval

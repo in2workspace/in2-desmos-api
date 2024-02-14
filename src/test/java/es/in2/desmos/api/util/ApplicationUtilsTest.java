@@ -14,11 +14,20 @@ class ApplicationUtilsTest {
 
     @Test
     void testPrivateConstructor() throws Exception {
-        Constructor<MessageUtils> constructor = MessageUtils.class.getDeclaredConstructor();
+        Constructor<ApplicationUtils> constructor = ApplicationUtils.class.getDeclaredConstructor();
         assertTrue(Modifier.isPrivate(constructor.getModifiers()), "Constructor is not private");
         constructor.setAccessible(true); // make the constructor accessible
-        assertThrows(InvocationTargetException.class, constructor::newInstance, "Constructor invocation should throw IllegalStateException");
+
+        // Catch the exception and assert on the message
+        try {
+            constructor.newInstance();
+            fail("Expected an IllegalStateException to be thrown");
+        } catch (InvocationTargetException ite) {
+            assertInstanceOf(IllegalStateException.class, ite.getCause());
+            assertEquals("Utility class", ite.getCause().getMessage());
+        }
     }
+
 
     @Test
     void testCalculateSHA256Hash() throws NoSuchAlgorithmException {
@@ -57,8 +66,14 @@ class ApplicationUtilsTest {
     }
 
     @Test
-    void testHasHlParameterWithMalformedUrl() {
+    void testHasHlParameterWithoutHl() {
         String url = "http:///badurl";
+        assertThrows(HashLinkException.class, () -> ApplicationUtils.hasHlParameter(url));
+    }
+
+    @Test
+    void testHasHlParameterWithMalformedUrl() {
+        String url = "badurl";
         assertThrows(HashLinkException.class, () -> ApplicationUtils.hasHlParameter(url));
     }
 

@@ -8,14 +8,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 import reactor.test.StepVerifier;
 
+import java.lang.reflect.Field;
 import java.util.concurrent.PriorityBlockingQueue;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
+
 
 @ExtendWith(MockitoExtension.class)
 class QueueServiceImplTest {
@@ -29,12 +29,27 @@ class QueueServiceImplTest {
     @Mock
     private PriorityBlockingQueue<EventQueue> mockQueue;
 
+    private EventQueue event;
+
+    @BeforeEach
+    void setUp() {
+        event = new EventQueue();
+    }
+
     @Test
     void enqueueEventTest() {
-        EventQueue event = new EventQueue();
-
         StepVerifier.create(queueService.enqueueEvent(event))
                 .verifyComplete();
 
+    }
+
+    @Test
+    void unboundedQueueTest() throws IllegalAccessException, NoSuchFieldException {
+        when(mockQueue.offer(event)).thenReturn(false);
+        Field field = QueueServiceImpl.class.getDeclaredField("queue");
+        field.setAccessible(true);
+        field.set(queueService, mockQueue);
+        StepVerifier.create(queueService.enqueueEvent(event))
+                .verifyComplete();
     }
 }

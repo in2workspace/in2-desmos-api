@@ -3,12 +3,16 @@ package es.in2.desmos.api.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import es.in2.desmos.api.exception.BrokerNotificationParserException;
 import es.in2.desmos.api.model.*;
 import es.in2.desmos.api.service.impl.NotificationProcessorServiceImpl;
+import es.in2.desmos.api.util.ApplicationUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -43,7 +47,6 @@ class NotificationProcessorServiceTests {
     private BlockchainNotification blockchainNotification = BlockchainNotification.builder()
             .dataLocation("testLocation")
             .build();
-    // Test data
     private BrokerNotification brokerNotification = BrokerNotification.builder()
             .data(List.of(Map.of("id", "testId")))
             .build();
@@ -81,8 +84,64 @@ class NotificationProcessorServiceTests {
     }
 
     @Test
+    void testNullNotificationData() {
+        // Arrange
+        List<Map<String, Object>> mockList = mock(List.class);
+        when(mockList.get(0)).thenReturn(null);
+        BrokerNotification brokerNotification = mock(BrokerNotification.class);
+        when(brokerNotification.data()).thenReturn(mockList);
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> {
+            notificationProcessorService.processBrokerNotification("testProcessId", brokerNotification);
+        });
+    }
+
+
+    @Test
+    void testBrokerFromExternalSource() throws JsonProcessingException {
+        // Arrange
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("id", "testId");
+        Transaction transactionFound = mock(Transaction.class);
+        when(transactionService.findLatestPublishedOrDeletedTransactionForEntity(anyString(), anyString()))
+                .thenReturn(Mono.just(transaction));
+        when(objectMapper.writer()).thenReturn(objectWriter);
+        when(objectWriter.writeValueAsString(dataMap)).thenReturn("{\"id\":\"testId\"}");
+        try (MockedStatic<ApplicationUtils> applicationUtils = Mockito.mockStatic(ApplicationUtils.class)) {
+            applicationUtils
+                    .when(() -> ApplicationUtils.calculateSHA256Hash(anyString()))
+                    .thenReturn("testHash");
+            // Act & Assert
+            StepVerifier.create(notificationProcessorService.processBrokerNotification("testProcessId", brokerNotification))
+                    .expectNext(dataMap)
+                    .verifyComplete();
+        }
+    }
+
+    @Test
+    void testTransactionError() throws JsonProcessingException {
+        // Arrange
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("id", "testId");
+        Transaction transactionFound = mock(Transaction.class);
+        when(transactionService.findLatestPublishedOrDeletedTransactionForEntity(anyString(), anyString()))
+                .thenReturn(Mono.just(transaction));
+        when(objectMapper.writer()).thenReturn(objectWriter);
+        when(objectWriter.writeValueAsString(dataMap)).thenThrow(new JsonProcessingException("") {
+        });
+        try (MockedStatic<ApplicationUtils> applicationUtils = Mockito.mockStatic(ApplicationUtils.class)) {
+            applicationUtils
+                    .when(() -> ApplicationUtils.calculateSHA256Hash(anyString()))
+                    .thenReturn("testHash");
+            // Act & Assert
+            StepVerifier.create(notificationProcessorService.processBrokerNotification("testProcessId", brokerNotification))
+                    .verifyError(BrokerNotificationParserException.class);
+        }
+    }
+
+    @Test
     void processBlockchainNotification_ValidNotification() {
-        // Mock
+        // Arrange
         when(transactionService.saveTransaction(any(), any())).thenReturn(Mono.empty());
         // Act & Assert
         StepVerifier.create(notificationProcessorService
@@ -92,7 +151,7 @@ class NotificationProcessorServiceTests {
 
     @Test
     void processBlockchainNotification_InvalidNotification() {
-        // Mock
+        // Arrange
         blockchainNotification = mock(BlockchainNotification.class);
         when(blockchainNotification.dataLocation()).thenReturn("");
         // Act & Assert

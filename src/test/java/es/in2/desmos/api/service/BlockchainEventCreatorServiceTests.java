@@ -3,6 +3,7 @@ package es.in2.desmos.api.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.api.config.ApplicationConfig;
+import es.in2.desmos.api.exception.HashCreationException;
 import es.in2.desmos.api.exception.HashLinkException;
 import es.in2.desmos.api.model.BlockchainEvent;
 import es.in2.desmos.api.model.Transaction;
@@ -19,6 +20,7 @@ import reactor.core.publisher.Mono;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -50,24 +52,42 @@ class BlockchainEventCreatorServiceTests {
         service = new BlockchainEventCreatorServiceImpl(brokerProperties, transactionService, applicationConfig, objectMapper);
     }
 
-//    @Test
-//    void createBlockchainEvent_Success() throws JsonProcessingException, NoSuchAlgorithmException {
-//        // Arrange
-//        String processId = "testProcessId";
-//        Map<String, Object> dataMap = Collections.singletonMap("id", "sampleId");
-//        when(applicationConfig.organizationIdHash()).thenReturn("orgHash");
-//        when(transactionService.saveTransaction(anyString(), any(Transaction.class))).thenReturn(Mono.empty());
-//        when(objectMapper.writeValueAsString(any())).thenReturn("sampleData");
-//        // Act
-//        Mono<BlockchainEvent> resultMono = service.createBlockchainEvent(processId, dataMap);
-//        // Assert
-//        BlockchainEvent result = resultMono.block(); // Blocks until the Mono is completed
-//        assert result != null;
-//        assert result.entityId()
-//                .equals("sampleId");
-//        // Verify that saveTransaction was called exactly once with any Transaction object as an argument
-//        verify(transactionService, times(1)).saveTransaction(anyString(), any(Transaction.class));
-//    }
+    @Test
+    void createBlockchainEvent_Success() throws JsonProcessingException {
+        // Arrange
+        String processId = "testProcessId";
+        Map<String, Object> dataMap = Collections.singletonMap("id", "sampleId");
+        when(applicationConfig.organizationIdHash()).thenReturn("orgHash");
+        when(transactionService.saveTransaction(anyString(), any(Transaction.class))).thenReturn(Mono.empty());
+        when(objectMapper.writeValueAsString(any())).thenReturn("sampleData");
+        // Act
+        try (MockedStatic<ApplicationUtils> applicationUtils = Mockito.mockStatic(ApplicationUtils.class)) {
+            applicationUtils
+                    .when(() -> ApplicationUtils.calculateSHA256Hash(anyString()))
+                    .thenReturn("sampleId");
+            // Act & Assert
+            Mono<BlockchainEvent> resultMono = service.createBlockchainEvent(processId, dataMap);
+            BlockchainEvent result = resultMono.block(); // Blocks until the Mono is completed
+            assert result != null;
+            assert result.entityId()
+                    .equals("sampleId");
+            // Verify that saveTransaction was called exactly once with any Transaction object as an argument
+            verify(transactionService, times(1)).saveTransaction(anyString(), any(Transaction.class));
+        }
+    }
+
+    @Test
+    void errorGeneratingEntityIdHashFromDataLocation() throws JsonProcessingException {
+        // Arrange
+        String processId = "testProcessId";
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("id", "sampleId invalidUri");
+        when(objectMapper.writeValueAsString(any())).thenReturn("sampleData");
+        when(applicationConfig.organizationIdHash()).thenReturn("orgHash");
+        // Act & Assert
+        assertThrows(HashCreationException.class, () -> service.createBlockchainEvent(processId, dataMap));
+    }
+
 
     @Test
     void createBlockchainEvent_WithHashLinkException() throws JsonProcessingException {

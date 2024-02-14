@@ -2,7 +2,10 @@ package es.in2.desmos.api.config;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import es.in2.desmos.api.facade.*;
+import es.in2.desmos.api.facade.BlockchainToBrokerDataSyncSynchronizer;
+import es.in2.desmos.api.facade.BlockchainToBrokerSynchronizer;
+import es.in2.desmos.api.facade.BrokerToBlockchainDataSyncPublisher;
+import es.in2.desmos.api.facade.BrokerToBlockchainPublisher;
 import es.in2.desmos.api.model.Transaction;
 import es.in2.desmos.api.model.TransactionStatus;
 import es.in2.desmos.api.model.TransactionTrader;
@@ -24,7 +27,6 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 
-import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -77,7 +79,8 @@ class BlockchainConnectorInitializerTest {
     @BeforeEach
     void setUp() {
         // Corrected to include all dependencies
-        blockchainAdapterProperties = new BlockchainAdapterProperties("http://localhost:8080", "http://localhost:8080", "http://localhost:8080", new BlockchainAdapterPathProperties("/configureNode", "/publish", "/subscribe"));
+        blockchainAdapterProperties = new BlockchainAdapterProperties("http://localhost:8080", "http://localhost:8080", "http" +
+                "://localhost:8080", new BlockchainAdapterPathProperties("/configureNode", "/publish", "/subscribe"));
         blockchainConnectorInitializer = new BlockchainConnectorInitializer(transactionService, blockchainAdapterProperties,
                 blockchainAdapterEventPublisher, new ObjectMapper(), brokerToBlockchainDataSyncPublisher,
                 brokerToBlockchainPublisher, blockchainToBrokerSynchronizer, blockchainToBrokerDataSyncSynchronizer,
@@ -138,12 +141,13 @@ class BlockchainConnectorInitializerTest {
         when(requestHeadersUriSpecMock.uri((String) org.mockito.ArgumentMatchers.any())).thenReturn(requestHeadersSpecMock);
         when(requestHeadersSpecMock.accept((org.springframework.http.MediaType) org.mockito.ArgumentMatchers.any())).thenReturn(requestHeadersSpecMock);
         when(requestHeadersSpecMock.retrieve()).thenReturn(responseSpecMock);
-        String dltNotificationDTOexample = "{\"id\":1,\"publisherAddress\":\"String\",\"eventType\":\"ProductOffering\",\"timestamp\":3,\"dataLocation\":\"http://scorpio:9090/ngsi-ld/v1/entities/urn:ngsi-ld:product-offering:443734333?hl=0xd6e502951d411812220f92c9eb3795eb2674aa71918128f19daf296deb40942\",\"relevantMetadata\":[]}";
+        String dltNotificationDTOexample = "{\"id\":1,\"publisherAddress\":\"String\",\"eventType\":\"ProductOffering\"," +
+                "\"timestamp\":3,\"dataLocation\":\"http://scorpio:9090/ngsi-ld/v1/entities/urn:ngsi-ld:product-offering:443734333" +
+                "?hl=0xd6e502951d411812220f92c9eb3795eb2674aa71918128f19daf296deb40942\",\"relevantMetadata\":[]}";
         when(blockchainAdapterEventPublisher.getEventsFromRange(any(String.class), any(Long.class), any(Long.class)))
                 .thenReturn(Flux.just(dltNotificationDTOexample));
         Flux<String> mockResponse = Flux.just(dltNotificationDTOexample);
         when(responseSpecMock.bodyToFlux(String.class)).thenReturn(mockResponse);
-
 
 
         // Then
@@ -154,6 +158,61 @@ class BlockchainConnectorInitializerTest {
 
     }
 
+//    @Test
+//    void testGetPreviousTransactions() {
+//        // Given
+//        Transaction lastTransactionPublished = Transaction.builder()
+//                .transactionId("e1e07f6d-e8e7-48ae-bb4d-afab5b63c1f5")
+//                .createdAt(Timestamp.from(Instant.now()))
+//                .dataLocation("https://domain.org/ngsi-ld/v1/entities/urn:ngsi-ld:Entity:1234")
+//                .entityId("urn:ngsi-ld:Entity:1234")
+//                .entityType("Entity")
+//                .entityHash("0x1234")
+//                .status(TransactionStatus.PUBLISHED)
+//                .trader(TransactionTrader.CONSUMER)
+//                .hash("0x9876")
+//                .build(); // Populate this as needed
+//        Transaction lastTransactionCreated = Transaction.builder()
+//                .transactionId("e1e07f6d-e8e7-48ae-bb4d-afab5b63c1f6")
+//                .createdAt(Timestamp.from(Instant.now()))
+//                .dataLocation("https://domain.org/ngsi-ld/v1/entities/urn:ngsi-ld:Entity:12345")
+//                .entityId("urn:ngsi-ld:Entity:12345")
+//                .entityType("Entity")
+//                .entityHash("0x1235")
+//                .status(TransactionStatus.CREATED)
+//                .trader(TransactionTrader.CONSUMER)
+//                .hash("0x9876")
+//                .build();
+//        lastTransactionPublished.setCreatedAt(Timestamp.valueOf("2024-02-06 10:07:01.529"));
+//        List<Transaction> transactionList = List.of(lastTransactionPublished, lastTransactionCreated);
+//
+//        Flux<Transaction> transactionsFlux = Flux.fromIterable(transactionList);
+//
+//        // Assuming queryDLTAdapterFromRange returns an empty Flux for simplicity
+//
+//        when(transactionService.getAllTransactions(any())).thenReturn(transactionsFlux);
+////        when(webClientMock.get()).thenReturn(requestHeadersUriSpecMock);
+//        when(requestHeadersUriSpecMock.uri((String) org.mockito.ArgumentMatchers.any())).thenReturn(requestHeadersSpecMock);
+//        when(requestHeadersSpecMock.accept((org.springframework.http.MediaType) org.mockito.ArgumentMatchers.any())).thenReturn
+//        (requestHeadersSpecMock);
+//        when(requestHeadersSpecMock.retrieve()).thenReturn(responseSpecMock);
+//
+//
+//        String dltNotificationDTOexample = "{\"id\":1,\"publisherAddress\":\"String\",\"eventType\":\"ProductOffering\"," +
+//                "\"timestamp\":3,\"dataLocation\":\"http://scorpio:9090/ngsi-ld/v1/entities/urn:ngsi-ld:product-offering:443734333"
+//                +
+//                "?hl=0xd6e502951d411812220f92c9eb3795eb2674aa71918128f19daf296deb40942\",\"relevantMetadata\":[]}";
+//        when(blockchainAdapterEventPublisher.getEventsFromRange(any(String.class), any(Long.class), any(Long.class)))
+//                .thenReturn(Flux.just(dltNotificationDTOexample));
+//        Flux<String> mockResponse = Flux.just(dltNotificationDTOexample);
+//        when(responseSpecMock.bodyToFlux(String.class)).thenReturn(mockResponse);
+//
+//        // When
+//        blockchainConnectorInitializer.processAllTransactions();
+//
+//        // Then
+//        verify(transactionService, times(1)).getAllTransactions(any());
+//    }
 
 
 }
