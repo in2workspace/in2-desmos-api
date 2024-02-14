@@ -48,6 +48,7 @@ class TransactionRepositoryIT {
             .status(TransactionStatus.CREATED)
             .trader(TransactionTrader.PRODUCER)
             .hash("0x9876")
+            .newTransaction(true)
             .build();
 
     @Order(1)
