@@ -56,9 +56,8 @@ public class ScorpioAdapter implements GenericBrokerService {
     @Override
     public Flux<String> getEntitiesByTimeRange(String processId, String timestamp) {
         return webClient.get()
-                .uri(brokerProperties.externalDomain() +
-                        "/temporal"
-                        + brokerProperties.paths().entities()
+                .uri(brokerProperties.externalDomain()
+                        + brokerProperties.paths().temporal()
                         + "?timerel=after"
                         + "&timeproperty=createdAt"
                         + "&timeAt="

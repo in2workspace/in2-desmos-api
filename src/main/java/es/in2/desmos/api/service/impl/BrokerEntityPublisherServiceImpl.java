@@ -43,11 +43,12 @@ public class BrokerEntityPublisherServiceImpl implements BrokerEntityPublisherSe
                             .createdAt(Timestamp.from(Instant.now()))
                             .dataLocation(blockchainNotification.dataLocation())
                             .entityId(entityId)
+                            .entityType(blockchainNotification.eventType())
                             .entityHash("")
                             .status(TransactionStatus.DELETED)
                             .trader(TransactionTrader.CONSUMER)
                             .hash("")
-//                            .newTransaction(true)
+                            .newTransaction(true)
                             .build()));
         } else {
             log.debug("ProcessID: {} - Detected entity notification", processId);
@@ -75,11 +76,12 @@ public class BrokerEntityPublisherServiceImpl implements BrokerEntityPublisherSe
                                     .createdAt(Timestamp.from(Instant.now()))
                                     .dataLocation(blockchainNotification.dataLocation())
                                     .entityId(entityId)
+                                    .entityType(blockchainNotification.eventType())
                                     .entityHash(entityHash)
                                     .status(TransactionStatus.PUBLISHED)
                                     .trader(TransactionTrader.CONSUMER)
                                     .hash("")
-//                                    .newTransaction(true)
+                                    .newTransaction(true)
                                     .build()));
                 } else {
                     log.error("ProcessID: {} - Entity integrity is not valid", processId);

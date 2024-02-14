@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import es.in2.desmos.api.config.ApplicationConfig;
+import es.in2.desmos.api.exception.HashCreationException;
 import es.in2.desmos.api.exception.HashLinkException;
 import es.in2.desmos.api.model.BlockchainEvent;
 import es.in2.desmos.api.model.Transaction;
@@ -17,6 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -55,8 +58,8 @@ public class BlockchainEventCreatorServiceImpl implements BlockchainEventCreator
         BlockchainEvent blockchainEvent = BlockchainEvent.builder()
                 .eventType((String) dataMap.get("type"))
                 .organizationId(applicationConfig.organizationIdHash())
-                .entityId((String) dataMap.get("id"))
-                .previousEntityHash("")
+                .entityId(generateEntityIdHashFromDataLocation(dataLocation))
+                .previousEntityHash("0x0000000000000000000000000000000000000000000000000000000000000000")
                 .dataLocation(dataLocation)
                 .metadata(List.of())
                 .build();
@@ -72,8 +75,20 @@ public class BlockchainEventCreatorServiceImpl implements BlockchainEventCreator
                 .status(TransactionStatus.CREATED)
                 .trader(TransactionTrader.PRODUCER)
                 .hash("")
+                        .newTransaction(true)
                 .build())
                 .thenReturn(blockchainEvent);
+    }
+
+    private static String generateEntityIdHashFromDataLocation(String datalocation) {
+        try {
+            URI uri = new URI(datalocation);
+            String path = uri.getPath();
+            String entityId = path.substring(path.lastIndexOf('/') + 1);
+            return calculateSHA256Hash(entityId);
+        } catch (NoSuchAlgorithmException | URISyntaxException ex) {
+            throw new HashCreationException("Error while calculating hash to create onChainEvent");
+        }
     }
 
 }

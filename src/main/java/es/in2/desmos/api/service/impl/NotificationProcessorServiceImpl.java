@@ -73,7 +73,10 @@ public class NotificationProcessorServiceImpl implements NotificationProcessorSe
                     } catch (JsonProcessingException | NoSuchAlgorithmException e) {
                         return Mono.error(new BrokerNotificationParserException("Error processing JSON", e));
                     }
-                });
+                }).switchIfEmpty(Mono.defer(() -> {
+                    log.debug("ProcessID: {} - No transaction found; assuming BrokerNotification is from external source", processId);
+                    return Mono.just(dataMap);
+                }));
     }
 
     @Override
@@ -87,10 +90,11 @@ public class NotificationProcessorServiceImpl implements NotificationProcessorSe
                         .createdAt(Timestamp.from(Instant.now()))
                         .dataLocation(blockchainNotification.dataLocation())
                         .entityId("")
+                        .entityType(blockchainNotification.eventType())
                         .entityHash("")
                         .status(TransactionStatus.RECEIVED)
                         .trader(TransactionTrader.CONSUMER)
-//                        .newTransaction(true)
+                        .newTransaction(true)
                         .build());
     }
 

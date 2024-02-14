@@ -88,6 +88,7 @@ broker:
   paths:
     entities: "/ngsi-ld/v1/entities"
     subscriptions: "/ngsi-ld/v1/subscriptions"
+    temporal: "/ngsi-ld/v1/temporal/entities"
 
 # NGSI Subscription Configuration
 ngsi-subscription:

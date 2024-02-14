@@ -74,6 +74,7 @@ public class DigitelBlockchainAdapter implements GenericBlockchainAdapterService
                                                 .entityHash(extractEntityHashFromDataLocation(blockchainEvent.dataLocation()))
                                                 .status(TransactionStatus.DELETED)
                                                 .trader(TransactionTrader.PRODUCER)
+                                                .newTransaction(true)
                                                 .hash("")
                                                 .build())
                                         .then(Mono.empty());
@@ -89,6 +90,7 @@ public class DigitelBlockchainAdapter implements GenericBlockchainAdapterService
                                                 .status(TransactionStatus.PUBLISHED)
                                                 .trader(TransactionTrader.PRODUCER)
                                                 .hash("")
+                                                .newTransaction(true)
                                                 .build())
                                         .then(Mono.empty());
                             }

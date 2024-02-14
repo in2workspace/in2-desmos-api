@@ -44,9 +44,9 @@ class BlockchainEventCreatorServiceTests {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        BrokerPathProperties brokerPathProperties = new BrokerPathProperties("/v2", "/entities");
+        BrokerPathProperties brokerPathProperties = new BrokerPathProperties("/v2", "/entities", "/subscriptions");
         BrokerProperties brokerProperties = new BrokerProperties("scorpio", "http://localhost:1026",
-                "http://localhost:1026", new BrokerPathProperties("/entities", "/subscriptions"));
+                "http://localhost:1026", new BrokerPathProperties("/entities", "/subscriptions", "/v2"));
         service = new BlockchainEventCreatorServiceImpl(brokerProperties, transactionService, applicationConfig, objectMapper);
     }
 

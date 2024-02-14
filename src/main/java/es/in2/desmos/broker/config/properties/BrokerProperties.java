@@ -23,7 +23,7 @@ public record BrokerProperties(String provider, String externalDomain, String in
         this.provider = provider;
         this.externalDomain = externalDomain;
         this.internalDomain = internalDomain;
-        this.paths = Optional.ofNullable(paths).orElse(new BrokerPathProperties(null, null));
+        this.paths = Optional.ofNullable(paths).orElse(new BrokerPathProperties(null, null, null));
     }
 
 }

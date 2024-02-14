@@ -88,15 +88,11 @@ public class BlockchainConnectorInitializer {
     }
 
     private Mono<Void> processTransactions(List<Transaction> transactions) {
-        List<Transaction> consumerTransactionsList = findLastTransactionOfType(transactions, TransactionTrader.CONSUMER);
-        Flux<Void> consumerTransactions = Flux.empty();
-        if (!consumerTransactionsList.isEmpty()) {
-            consumerTransactions = processConsumerTransaction(consumerTransactionsList);
-        }
-
-        Mono<Void> producerTransactions = processProducerTransaction(findLastTransactionOfType(transactions, TransactionTrader.PRODUCER));
-
-        return Flux.merge(consumerTransactions, producerTransactions).then();
+        return Flux.just(findLastTransactionOfType(transactions, TransactionTrader.CONSUMER))
+                .flatMap(this::processConsumerTransaction)
+                .then(Mono.justOrEmpty(findLastTransactionOfType(transactions, TransactionTrader.PRODUCER))
+                        .flatMap(this::processProducerTransaction))
+                .then();
     }
 
 
@@ -108,7 +104,7 @@ public class BlockchainConnectorInitializer {
 
     private Mono<Void> processProducerTransaction(List<Transaction> transactions) {
         String timestamp;
-
+        log.debug("Processing Producer Transactions...");
         if (transactions.isEmpty()) {
             log.debug("Empty Transactions");
             timestamp = convertTimestamp("1970-01-01 08:49:01.953");
@@ -124,7 +120,7 @@ public class BlockchainConnectorInitializer {
                     List<String> ids = extractIdsBasedOnPosition(response);
                     return Flux.fromIterable(ids);
                 })
-                .flatMap(ids -> brokerToBlockchainDataSyncPublisher.createAndSynchronizeBlockchainEvents(MDC.get("processId"), ids))
+                .flatMap(id -> brokerToBlockchainDataSyncPublisher.createAndSynchronizeBlockchainEvents(MDC.get("processId"), id))
                 .then();
     }
 
@@ -234,14 +230,14 @@ public class BlockchainConnectorInitializer {
             disposeIfActive(blockchainEventProcessingSubscription);
             disposeIfActive(brokerEntityEventProcessingSubscription);
 
-            blockchainEventProcessingSubscription = blockchainToBrokerSynchronizer.startProcessingEvents()
+            blockchainEventProcessingSubscription = brokerToBlockchainPublisher.startProcessingEvents()
                     .subscribe(
                             null,
                             error -> log.error("Error occurred during blockchain event processing: {}", error.getMessage(), error),
                             () -> log.info("Blockchain event processing completed")
                     );
 
-            brokerEntityEventProcessingSubscription = brokerToBlockchainPublisher.startProcessingEvents()
+            brokerEntityEventProcessingSubscription = blockchainToBrokerSynchronizer.startProcessingEvents()
                     .subscribe(
                             null,
                             error -> log.error("Error occurred during broker entity event processing: {}", error.getMessage(), error),

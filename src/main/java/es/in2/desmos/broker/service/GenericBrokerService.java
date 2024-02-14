@@ -11,8 +11,6 @@ public interface GenericBrokerService {
 
     Mono<Void> postEntity(String processId, String requestBody);
 
-
-    // todo: getEntitiesByTimeRange()
     Flux<String> getEntitiesByTimeRange(String processId, String timestamp);
 
     Mono<String> getEntityById(String processId, String entityId);
