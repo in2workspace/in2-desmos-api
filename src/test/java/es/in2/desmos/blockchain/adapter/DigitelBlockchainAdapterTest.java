@@ -1,15 +1,12 @@
 package es.in2.desmos.blockchain.adapter;
 
 import es.in2.desmos.api.model.BlockchainEvent;
-import es.in2.desmos.api.model.Transaction;
-import es.in2.desmos.api.model.TransactionStatus;
 import es.in2.desmos.api.service.TransactionService;
 import es.in2.desmos.blockchain.config.properties.BlockchainAdapterPathProperties;
 import es.in2.desmos.blockchain.config.properties.BlockchainAdapterProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
@@ -17,13 +14,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DigitelBlockchainAdapterTest {
@@ -53,8 +48,9 @@ class DigitelBlockchainAdapterTest {
 
 
     @BeforeEach
-    void setUp() throws IOException, NoSuchFieldException, IllegalAccessException {
-        blockchainAdapterProperties = new BlockchainAdapterProperties("http://localhost:8080", "http://localhost:8080", "http://localhost:8080", new BlockchainAdapterPathProperties("/publish", "/publish", "/subscribe"));
+    void setUp() throws NoSuchFieldException, IllegalAccessException {
+        blockchainAdapterProperties = new BlockchainAdapterProperties("http://localhost:8080", "http://localhost:8080", "http" +
+                "://localhost:8080", new BlockchainAdapterPathProperties("/publish", "/publish", "/subscribe"));
         TransactionService transactionService = mock(TransactionService.class);
         WebClient webClient = mock(WebClient.class);
 
@@ -93,5 +89,3 @@ class DigitelBlockchainAdapterTest {
     }
 
 }
-
-

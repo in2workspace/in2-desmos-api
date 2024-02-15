@@ -3,10 +3,7 @@ package es.in2.desmos.api.model;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -62,5 +59,32 @@ class BrokerNotificationTest {
         assertEquals("value1", notification.data().get(0).get("key1"));
     }
 
-}
+    @Test
+    void testBrokerNotificationBuilderToString() {
+        // Arrange
+        String id = "123";
+        String type = "type";
+        List<Map<String, Object>> data = List.of(Collections.singletonMap("key", "value"));
+        String subscriptionId = "subscriptionId";
+        String notifiedAt = "notifiedAt";
 
+        String expectedToString = "BrokerNotification.BrokerNotificationBuilder(id=" + id
+                + ", type=" + type
+                + ", data=" + data
+                + ", subscriptionId=" + subscriptionId
+                + ", notifiedAt=" + notifiedAt + ")";
+
+        // Act
+        BrokerNotification.BrokerNotificationBuilder brokerNotificationBuilder = BrokerNotification.builder()
+                .id(id)
+                .type(type)
+                .data(data)
+                .subscriptionId(subscriptionId)
+                .notifiedAt(notifiedAt);
+
+        // Assert
+        assertEquals(expectedToString, brokerNotificationBuilder.toString());
+    }
+
+
+}

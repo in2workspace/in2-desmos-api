@@ -7,7 +7,8 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BlockchainEventTest {
 
@@ -67,5 +68,34 @@ class BlockchainEventTest {
         assertEquals("Org123", event.organizationId());
     }
 
-}
+    @Test
+    void testBlockchainEventBuilderToString() {
+        // Arrange
+        String eventType = "eventType";
+        String organizationId = "organizationId";
+        String entityId = "entityId";
+        String previousEntityHash = "previousEntityHash";
+        String dataLocation = "dataLocation";
+        List<String> metadata = Arrays.asList("metadata1", "metadata2");
 
+        String expectedToString = "BlockchainEvent.BlockchainEventBuilder(eventType=" + eventType
+                + ", organizationId=" + organizationId
+                + ", entityId=" + entityId
+                + ", previousEntityHash=" + previousEntityHash
+                + ", dataLocation=" + dataLocation
+                + ", metadata=" + metadata + ")";
+
+        // Act
+        BlockchainEvent.BlockchainEventBuilder blockchainEventBuilder = BlockchainEvent.builder()
+                .eventType(eventType)
+                .organizationId(organizationId)
+                .entityId(entityId)
+                .previousEntityHash(previousEntityHash)
+                .dataLocation(dataLocation)
+                .metadata(metadata);
+
+        // Assert
+        assertEquals(expectedToString, blockchainEventBuilder.toString());
+    }
+
+}

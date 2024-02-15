@@ -196,7 +196,7 @@ class BlockchainConnectorInitializerTest {
 //        when(webClientMock.get()).thenReturn(requestHeadersUriSpecMock);
         when(requestHeadersUriSpecMock.uri((String) org.mockito.ArgumentMatchers.any())).thenReturn(requestHeadersSpecMock);
         when(requestHeadersSpecMock.accept((org.springframework.http.MediaType) org.mockito.ArgumentMatchers.any())).thenReturn
-        (requestHeadersSpecMock);
+                (requestHeadersSpecMock);
         when(requestHeadersSpecMock.retrieve()).thenReturn(responseSpecMock);
 
 
@@ -225,8 +225,10 @@ class BlockchainConnectorInitializerTest {
         when(brokerEntityEventSubscription.isDisposed()).thenReturn(false);
 
         // Asigna las suscripciones simuladas
-        ReflectionTestUtils.setField(blockchainConnectorInitializer, "blockchainEventProcessingSubscription", blockchainEventSubscription);
-        ReflectionTestUtils.setField(blockchainConnectorInitializer, "brokerEntityEventProcessingSubscription", brokerEntityEventSubscription);
+        ReflectionTestUtils.setField(blockchainConnectorInitializer, "blockchainEventProcessingSubscription",
+                blockchainEventSubscription);
+        ReflectionTestUtils.setField(blockchainConnectorInitializer, "brokerEntityEventProcessingSubscription",
+                brokerEntityEventSubscription);
 
         // Ejecuta cleanUp
         blockchainConnectorInitializer.cleanUp();
@@ -235,7 +237,6 @@ class BlockchainConnectorInitializerTest {
         verify(blockchainEventSubscription).dispose();
         verify(brokerEntityEventSubscription).dispose();
     }
-
 
 
 }
