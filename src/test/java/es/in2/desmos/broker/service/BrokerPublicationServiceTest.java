@@ -1,4 +1,4 @@
-package es.in2.desmos.broker.service;
-
-public class BrokerPublicationServiceTest {
-}
+//package es.in2.desmos.broker.service;
+//
+//public class BrokerPublicationServiceTest {
+//}

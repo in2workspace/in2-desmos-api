@@ -52,7 +52,6 @@ public class BlockchainAdapterSubscriptionInitializer {
     @Recover
     public void recover(RequestErrorException e) {
         log.error("After retries, subscription failed", e);
-        // todo: add recover logic
     }
 
 

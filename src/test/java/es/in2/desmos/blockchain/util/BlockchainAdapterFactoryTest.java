@@ -12,7 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class BlockchainAdapterFactoryTest {
+class BlockchainAdapterFactoryTest {
 
     @Mock
     BlockchainAdapterProperties blockchainAdapterProperties;
@@ -24,7 +24,7 @@ public class BlockchainAdapterFactoryTest {
     BlockchainAdapterFactory blockchainAdapterFactory;
 
     @Test
-    public void getEVMAdapterWithAnError() {
+    void getEVMAdapterWithAnError() {
         when(blockchainAdapterProperties.provider()).thenReturn("invalid");
         Assertions.assertThrows(IllegalArgumentException.class, () -> blockchainAdapterFactory.getEVMAdapter());
     }

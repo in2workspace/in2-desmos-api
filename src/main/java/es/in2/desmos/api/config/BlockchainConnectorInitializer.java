@@ -46,6 +46,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @RequiredArgsConstructor
 public class BlockchainConnectorInitializer {
 
+    private static final String PROCESS_ID = "processId";
     private final TransactionService transactionService;
     private final BlockchainAdapterProperties blockchainAdapterProperties;
     private final BlockchainAdapterEventPublisher blockchainAdapterEventPublisher;
@@ -55,17 +56,28 @@ public class BlockchainConnectorInitializer {
     private final BlockchainToBrokerSynchronizer blockchainToBrokerSynchronizer;
     private final BlockchainToBrokerDataSyncSynchronizer blockchainToBrokerDataSyncSynchronizer;
     private final BrokerPublicationService brokerPublicationService;
-
+    private final AtomicBoolean canQueuesEmit = new AtomicBoolean(true);
     private Disposable blockchainEventProcessingSubscription;
     private Disposable brokerEntityEventProcessingSubscription;
-    private final AtomicBoolean canQueuesEmit = new AtomicBoolean(true);
 
+    public static String convertTimestamp(String timestamp) {
+        SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        try {
+            String truncatedTimestamp = timestamp.substring(0, 19);
+            Date parsedDate = inputFormat.parse(truncatedTimestamp);
+            LocalDateTime dateTime = LocalDateTime.ofInstant(parsedDate.toInstant(), ZoneId.of("UTC"));
+            DateTimeFormatter outputFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+            return dateTime.atZone(ZoneId.of("UTC")).format(outputFormat);
+        } catch (ParseException e) {
+            throw new IllegalArgumentException("Invalid timestamp");
+        }
+    }
 
     @EventListener(ApplicationReadyEvent.class)
     public void processAllTransactions() {
         canQueuesEmit.set(false);
         String processId = UUID.randomUUID().toString();
-        MDC.put("processId", processId);
+        MDC.put(PROCESS_ID, processId);
         log.debug("Synchronization tasks started, searching for previous transactions...");
         transactionService.getAllTransactions(processId)
                 .collectList()
@@ -97,7 +109,6 @@ public class BlockchainConnectorInitializer {
         return Flux.merge(consumerTransactions, producerTransactions).then();
     }
 
-
     private List<Transaction> findLastTransactionOfType(List<Transaction> transactions, TransactionTrader traderType) {
         return transactions.stream()
                 .filter(t -> t.getTrader() == traderType && t.getStatus() == TransactionStatus.PUBLISHED)
@@ -108,7 +119,7 @@ public class BlockchainConnectorInitializer {
         String timestamp = determineTimestampForQuery(transactions);
         log.debug("Timestamp for query: {}", timestamp);
 
-        return brokerPublicationService.getEntitiesByTimeRange(MDC.get("processId"), timestamp)
+        return brokerPublicationService.getEntitiesByTimeRange(MDC.get(PROCESS_ID), timestamp)
                 .flatMap(this::extractIdsAndProcess)
                 .then()
                 .onErrorResume(e -> {
@@ -128,9 +139,9 @@ public class BlockchainConnectorInitializer {
     private Flux<Void> extractIdsAndProcess(String response) {
         List<String> ids = extractIdsBasedOnPosition(response);
         return Flux.fromIterable(ids)
-                .flatMap(id -> brokerToBlockchainDataSyncPublisher.createAndSynchronizeBlockchainEvents(MDC.get("processId"), id));
+                .flatMap(id -> brokerToBlockchainDataSyncPublisher.createAndSynchronizeBlockchainEvents(MDC.get(PROCESS_ID),
+                        id));
     }
-
 
     private Flux<Void> processConsumerTransaction(List<Transaction> transactions) {
         if (transactions.isEmpty()) {
@@ -152,14 +163,15 @@ public class BlockchainConnectorInitializer {
     }
 
     private Flux<Void> processEvents(long from, long to) {
-        return blockchainAdapterEventPublisher.getEventsFromRange(MDC.get("processId"), from, to)
+        return blockchainAdapterEventPublisher.getEventsFromRange(MDC.get(PROCESS_ID), from, to)
                 .flatMap(this::processResponse);
     }
 
     private Mono<Void> processResponse(String responseBody) {
         try {
             log.debug("Processing response: {}", responseBody);
-            List<BlockchainNotification> events = objectMapper.readValue(responseBody, new TypeReference<>() {});
+            List<BlockchainNotification> events = objectMapper.readValue(responseBody, new TypeReference<>() {
+            });
             return Flux.fromIterable(events)
                     .buffer(50)
                     .flatMap(batch -> Flux.fromIterable(batch)
@@ -179,11 +191,9 @@ public class BlockchainConnectorInitializer {
     private Mono<Void> handleEvent(BlockchainNotification event) {
         log.debug(event.toString());
         String processId = UUID.randomUUID().toString();
-        MDC.put("processId", processId);
+        MDC.put(PROCESS_ID, processId);
         return blockchainToBrokerDataSyncSynchronizer.retrieveAndSynchronizeEntityIntoBroker(processId, event);
     }
-
-
 
     private Flux<Void> queryDLTAdapterFromBeginning() {
         long startUnixTimestampMillis = Instant.EPOCH.toEpochMilli();
@@ -197,19 +207,6 @@ public class BlockchainConnectorInitializer {
     private String buildQueryURL(long startDateUnixTimestampMillis, long endDateUnixTimestampMillis) {
         return blockchainAdapterProperties.externalDomain() + blockchainAdapterProperties.paths().events() +
                 "?startDate=" + startDateUnixTimestampMillis + "&endDate=" + endDateUnixTimestampMillis;
-    }
-
-    public static String convertTimestamp(String timestamp) {
-        SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        try {
-            String truncatedTimestamp = timestamp.substring(0, 19);
-            Date parsedDate = inputFormat.parse(truncatedTimestamp);
-            LocalDateTime dateTime = LocalDateTime.ofInstant(parsedDate.toInstant(), ZoneId.of("UTC"));
-            DateTimeFormatter outputFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
-            return dateTime.atZone(ZoneId.of("UTC")).format(outputFormat);
-        } catch (ParseException e) {
-            throw new IllegalArgumentException("Invalid timestamp");
-        }
     }
 
     public List<String> extractIdsBasedOnPosition(String json) {
@@ -269,6 +266,3 @@ public class BlockchainConnectorInitializer {
 
 
 }
-
-
-

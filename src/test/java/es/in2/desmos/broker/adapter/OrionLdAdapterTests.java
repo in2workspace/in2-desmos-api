@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 
 @ExtendWith(MockitoExtension.class)
-public class OrionLdAdapterTests {
+class OrionLdAdapterTests {
 
     private String processId;
     @Mock

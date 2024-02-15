@@ -1,4 +1,4 @@
-package es.in2.desmos.broker.model;
-
-public class BrokerSubscriptionTest {
-}
+//package es.in2.desmos.broker.model;
+//
+//public class BrokerSubscriptionTest {
+//}
