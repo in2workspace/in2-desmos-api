@@ -88,11 +88,13 @@ public class BlockchainConnectorInitializer {
     }
 
     private Mono<Void> processTransactions(List<Transaction> transactions) {
-        return Flux.just(findLastTransactionOfType(transactions, TransactionTrader.CONSUMER))
-                .flatMap(this::processConsumerTransaction)
-                .then(Mono.justOrEmpty(findLastTransactionOfType(transactions, TransactionTrader.PRODUCER))
-                        .flatMap(this::processProducerTransaction))
-                .then();
+        Flux<Void> consumerTransactions = Flux.just(findLastTransactionOfType(transactions, TransactionTrader.CONSUMER))
+                .flatMap(this::processConsumerTransaction);
+
+        Flux<Void> producerTransactions = Flux.just(findLastTransactionOfType(transactions, TransactionTrader.PRODUCER))
+                .flatMap(this::processProducerTransaction);
+
+        return Flux.merge(consumerTransactions, producerTransactions).then();
     }
 
 
