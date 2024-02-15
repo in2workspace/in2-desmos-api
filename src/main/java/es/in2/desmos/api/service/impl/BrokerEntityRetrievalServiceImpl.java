@@ -50,7 +50,6 @@ public class BrokerEntityRetrievalServiceImpl implements BrokerEntityRetrievalSe
                                             .status(TransactionStatus.DELETED)
                                             .trader(TransactionTrader.CONSUMER)
                                             .hash("")
-                                            .newTransaction(true)
                                             .build())
                                     .then(Mono.empty());
                         }
@@ -63,11 +62,9 @@ public class BrokerEntityRetrievalServiceImpl implements BrokerEntityRetrievalSe
                                         .dataLocation(blockchainNotification.dataLocation())
                                         .entityId(extractEntityIdFromDataLocation(blockchainNotification.dataLocation()))
                                         .entityHash("")
-                                        .entityType(blockchainNotification.eventType())
                                         .status(TransactionStatus.RETRIEVED)
                                         .trader(TransactionTrader.CONSUMER)
                                         .hash("")
-                                        .newTransaction(true)
                                         .build())
                                 .then(Mono.empty())
                 )

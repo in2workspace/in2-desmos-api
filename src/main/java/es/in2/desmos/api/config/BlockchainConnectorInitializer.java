@@ -105,26 +105,32 @@ public class BlockchainConnectorInitializer {
     }
 
     private Mono<Void> processProducerTransaction(List<Transaction> transactions) {
-        String timestamp;
-        log.debug("Processing Producer Transactions...");
-        if (transactions.isEmpty()) {
-            log.debug("Empty Transactions");
-            timestamp = convertTimestamp("1970-01-01 08:49:01.953");
-        } else {
-            Transaction lastTransactionPublished = transactions.get(0);
-            timestamp = convertTimestamp(lastTransactionPublished.getCreatedAt().toString());
-            log.debug(String.valueOf(lastTransactionPublished.getCreatedAt()));
-            log.debug(convertTimestamp(lastTransactionPublished.getCreatedAt().toString()));
-        }
+        String timestamp = determineTimestampForQuery(transactions);
+        log.debug("Timestamp for query: {}", timestamp);
 
         return brokerPublicationService.getEntitiesByTimeRange(MDC.get("processId"), timestamp)
-                .flatMap(response -> {
-                    List<String> ids = extractIdsBasedOnPosition(response);
-                    return Flux.fromIterable(ids);
-                })
-                .flatMap(id -> brokerToBlockchainDataSyncPublisher.createAndSynchronizeBlockchainEvents(MDC.get("processId"), id))
-                .then();
+                .flatMap(this::extractIdsAndProcess)
+                .then()
+                .onErrorResume(e -> {
+                    log.error("Error processing producer transactions");
+                    return Mono.empty();
+                });
     }
+
+    private String determineTimestampForQuery(List<Transaction> transactions) {
+        if (transactions.isEmpty()) {
+            return convertTimestamp("1970-01-01 08:49:01.953");
+        }
+        Transaction lastTransaction = transactions.get(0);
+        return convertTimestamp(lastTransaction.getCreatedAt().toString());
+    }
+
+    private Flux<Void> extractIdsAndProcess(String response) {
+        List<String> ids = extractIdsBasedOnPosition(response);
+        return Flux.fromIterable(ids)
+                .flatMap(id -> brokerToBlockchainDataSyncPublisher.createAndSynchronizeBlockchainEvents(MDC.get("processId"), id));
+    }
+
 
     private Flux<Void> processConsumerTransaction(List<Transaction> transactions) {
         if (transactions.isEmpty()) {
@@ -147,11 +153,7 @@ public class BlockchainConnectorInitializer {
 
     private Flux<Void> processEvents(long from, long to) {
         return blockchainAdapterEventPublisher.getEventsFromRange(MDC.get("processId"), from, to)
-                .flatMap(this::processResponse)
-                .onErrorResume(e -> {
-                    log.error("Error sending requests to blockchain node");
-                    return Mono.empty();
-                });
+                .flatMap(this::processResponse);
     }
 
     private Mono<Void> processResponse(String responseBody) {
@@ -161,7 +163,10 @@ public class BlockchainConnectorInitializer {
             return Flux.fromIterable(events)
                     .buffer(50)
                     .flatMap(batch -> Flux.fromIterable(batch)
-                                    .flatMap(this::handleEvent)
+                                    .flatMap(this::handleEvent).onErrorResume(e -> {
+                                        log.error("Error processing event");
+                                        return Mono.empty();
+                                    })
                                     .subscribeOn(Schedulers.parallel()),
                             10)
                     .then();
@@ -235,14 +240,14 @@ public class BlockchainConnectorInitializer {
             blockchainEventProcessingSubscription = brokerToBlockchainPublisher.startProcessingEvents()
                     .subscribe(
                             null,
-                            error -> log.error("Error occurred during blockchain event processing: {}", error.getMessage(), error),
+                            error -> log.error("Error occurred during blockchain event processing"),
                             () -> log.info("Blockchain event processing completed")
                     );
 
             brokerEntityEventProcessingSubscription = blockchainToBrokerSynchronizer.startProcessingEvents()
                     .subscribe(
                             null,
-                            error -> log.error("Error occurred during broker entity event processing: {}", error.getMessage(), error),
+                            error -> log.error("Error occurred during broker entity event processing"),
                             () -> log.info("Broker entity event processing completed")
                     );
         } else {

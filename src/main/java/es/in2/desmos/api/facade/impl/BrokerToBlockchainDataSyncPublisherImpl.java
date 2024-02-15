@@ -23,6 +23,7 @@ public class BrokerToBlockchainDataSyncPublisherImpl implements BrokerToBlockcha
 
     @Override
     public Mono<Void> createAndSynchronizeBlockchainEvents(String processId, String brokerEntityId) {
+        log.debug("Creating and synchronizing Blockchain Events for Broker Entity with id: {}", brokerEntityId);
         return brokerEntityProcessorService.processBrokerEntity(processId, brokerEntityId)
                 .filter(Objects::nonNull)
                 // Create a Blockchain Event -> BlockchainEventCreator
@@ -30,6 +31,6 @@ public class BrokerToBlockchainDataSyncPublisherImpl implements BrokerToBlockcha
                 // Publish the Blockchain Event into the Blockchain Node -> BlockchainEventPublisher
                 .flatMap(blockchainEvent -> blockchainAdapterEventPublisher.publishBlockchainEvent(processId, blockchainEvent))
                 .doOnSuccess(success -> log.info("Blockchain Event created and published successfully."))
-                .doOnError(error -> log.error("Error creating or publishing Blockchain Event: {}", error.getMessage(), error));
+                .doOnError(error -> log.error("Error creating or publishing Blockchain Event"));
     }
 }

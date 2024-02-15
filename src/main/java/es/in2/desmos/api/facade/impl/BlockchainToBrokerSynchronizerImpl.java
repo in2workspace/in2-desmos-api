@@ -49,7 +49,7 @@ public class BlockchainToBrokerSynchronizerImpl implements BlockchainToBrokerSyn
                 .flatMap(retrievedEntity -> brokerEntityPublisherService
                         .publishRetrievedEntityToBroker(processId, retrievedEntity, blockchainNotification))
                 .doOnSuccess(voidValue -> log.info("ProcessID: {} - Entity retrieval, validation, and publication completed", processId))
-                .doOnError(e -> log.error("ProcessID: {} - Error retrieving, validating, and publishing entity", processId, e));
+                .doOnError(e -> log.error("ProcessID: {} - Error retrieving, validating, and publishing entity", processId));
     }
 
 }
