@@ -62,6 +62,7 @@ public class BrokerEntityRetrievalServiceImpl implements BrokerEntityRetrievalSe
                                         .dataLocation(blockchainNotification.dataLocation())
                                         .entityId(extractEntityIdFromDataLocation(blockchainNotification.dataLocation()))
                                         .entityHash("")
+                                        .entityType(blockchainNotification.eventType())
                                         .status(TransactionStatus.RETRIEVED)
                                         .trader(TransactionTrader.CONSUMER)
                                         .hash("")
