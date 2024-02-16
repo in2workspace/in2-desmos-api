@@ -68,7 +68,12 @@ public class BrokerEntityPublisherServiceImpl implements BrokerEntityPublisherSe
                                     log.info("ProcessId: {} - Entity exists", processId);
                                     return brokerPublicationService.updateEntity(processId, retrievedBrokerEntity);
                                 }
-                            })
+                            }).onErrorResume(
+                                    error -> {
+                                        log.info("ProcessID: {} - Entity doesn't exist", processId);
+                                        return brokerPublicationService.postEntity(processId, retrievedBrokerEntity);
+                                    }
+                            )
                             // This function SHOULD be changed when intertwined hash will be implemented
                             .then(transactionService.saveTransaction(processId, Transaction.builder()
                                     .id(UUID.randomUUID())

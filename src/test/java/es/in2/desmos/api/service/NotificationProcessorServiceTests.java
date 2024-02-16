@@ -14,13 +14,17 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
 
+import static es.in2.desmos.api.util.ApplicationUtils.calculateSHA256Hash;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -28,6 +32,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class NotificationProcessorServiceTests {
 
     private final Transaction transaction = Transaction.builder()
@@ -42,6 +47,9 @@ class NotificationProcessorServiceTests {
             .hash("testHash")
             .dataLocation("testLocation")
             .build();
+
+    private final Mono<Transaction> emptyTransaction = Mono.empty().cast(Transaction.class);
+
     @Mock
     ObjectWriter objectWriter;
     private BlockchainNotification blockchainNotification = BlockchainNotification.builder()
@@ -71,6 +79,27 @@ class NotificationProcessorServiceTests {
                 .expectNextMatches(returnedDataMap -> returnedDataMap.equals(dataMap))
                 .verifyComplete();
     }
+
+    @Test
+    void processBrokerNotification_ValidData_selfGenerated() throws JsonProcessingException, NoSuchAlgorithmException {
+        // Arrange
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("id", "testId");
+        String brokerEntityAsAString = "{\"id\":\"testId\"}";
+        when(transactionService.findLatestPublishedOrDeletedTransactionForEntity(anyString(), anyString()))
+                .thenReturn(Mono.just(transaction));
+        when(objectMapper.writer()).thenReturn(objectWriter);
+        when(objectWriter.writeValueAsString(dataMap)).thenReturn(brokerEntityAsAString);
+
+        try (MockedStatic<ApplicationUtils> utilities = Mockito.mockStatic(ApplicationUtils.class)) {
+            utilities.when(() -> ApplicationUtils.calculateSHA256Hash(brokerEntityAsAString)).thenReturn("testHash");
+
+            // Act & Assert
+            StepVerifier.create(notificationProcessorService.processBrokerNotification("testProcessId", brokerNotification))
+                    .verifyComplete();
+        }
+    }
+
 
     @Test
     void processBrokerNotification_InvalidData() {
@@ -104,12 +133,12 @@ class NotificationProcessorServiceTests {
         dataMap.put("id", "testId");
         Transaction transactionFound = mock(Transaction.class);
         when(transactionService.findLatestPublishedOrDeletedTransactionForEntity(anyString(), anyString()))
-                .thenReturn(Mono.just(transaction));
+                .thenReturn(emptyTransaction);
         when(objectMapper.writer()).thenReturn(objectWriter);
         when(objectWriter.writeValueAsString(dataMap)).thenReturn("{\"id\":\"testId\"}");
         try (MockedStatic<ApplicationUtils> applicationUtils = Mockito.mockStatic(ApplicationUtils.class)) {
             applicationUtils
-                    .when(() -> ApplicationUtils.calculateSHA256Hash(anyString()))
+                    .when(() -> calculateSHA256Hash(anyString()))
                     .thenReturn("testHash");
             // Act & Assert
             StepVerifier.create(notificationProcessorService.processBrokerNotification("testProcessId", brokerNotification))
@@ -131,7 +160,7 @@ class NotificationProcessorServiceTests {
         });
         try (MockedStatic<ApplicationUtils> applicationUtils = Mockito.mockStatic(ApplicationUtils.class)) {
             applicationUtils
-                    .when(() -> ApplicationUtils.calculateSHA256Hash(anyString()))
+                    .when(() -> calculateSHA256Hash(anyString()))
                     .thenReturn("testHash");
             // Act & Assert
             StepVerifier.create(notificationProcessorService.processBrokerNotification("testProcessId", brokerNotification))
