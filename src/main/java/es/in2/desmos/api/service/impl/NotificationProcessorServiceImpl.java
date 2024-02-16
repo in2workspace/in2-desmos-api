@@ -15,6 +15,7 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static es.in2.desmos.api.util.ApplicationUtils.calculateSHA256Hash;
@@ -57,9 +58,16 @@ public class NotificationProcessorServiceImpl implements NotificationProcessorSe
     }
 
     private Mono<Map<String, Object>> isBrokerNotificationFromExternalSource(String processId, Map<String, Object> dataMap) {
-        // isBrokerNotificationFromExternalSource
         return transactionService.findLatestPublishedOrDeletedTransactionForEntity(processId, dataMap.get("id").toString())
-                .flatMap(transactionFound -> {
+                .map(Optional::of)
+                .defaultIfEmpty(Optional.empty())
+                .flatMap(optionalTransaction -> {
+                    if (optionalTransaction.isEmpty()) {
+                        log.debug("ProcessID: {} - No transaction found; assuming BrokerNotification is from external source", processId);
+                        return Mono.just(dataMap);
+                    }
+
+                    Transaction transactionFound = optionalTransaction.get();
                     try {
                         String brokerEntityAsString = objectMapper.writer().writeValueAsString(dataMap);
                         String brokerEntityHash = calculateSHA256Hash(brokerEntityAsString);
@@ -73,11 +81,9 @@ public class NotificationProcessorServiceImpl implements NotificationProcessorSe
                     } catch (JsonProcessingException | NoSuchAlgorithmException e) {
                         return Mono.error(new BrokerNotificationParserException("Error processing JSON", e));
                     }
-                }).switchIfEmpty(Mono.defer(() -> {
-                    log.debug("ProcessID: {} - No transaction found; assuming BrokerNotification is from external source", processId);
-                    return Mono.just(dataMap);
-                }));
+                });
     }
+
 
     @Override
     public Mono<Void> processBlockchainNotification(String processId, BlockchainNotification blockchainNotification) {
