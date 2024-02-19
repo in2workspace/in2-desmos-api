@@ -46,9 +46,10 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Flux<Transaction> getLastProducerTransaction(String processId) {
-        log.debug("ProcessID: {} - Getting last published producer transaction for entity: {}", processId);
-        return transactionRepository.findLastProducerTransaction();
+    public Mono<Transaction> getLastProducerTransaction(String processId) {
+        log.debug("ProcessID: {} - Getting last published producer transaction...", processId);
+        return transactionRepository.findLastProducerTransaction().next();
     }
+
 
 }

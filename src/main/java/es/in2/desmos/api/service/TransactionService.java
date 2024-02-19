@@ -17,6 +17,6 @@ public interface TransactionService {
 
     Mono<Transaction> findLatestPublishedOrDeletedTransactionForEntity(String processId, String entityId);
 
-    Flux<Transaction> getLastProducerTransaction(String processIdd);
+    Mono<Transaction> getLastProducerTransaction(String processIdd);
 
 }
