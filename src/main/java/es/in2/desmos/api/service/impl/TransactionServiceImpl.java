@@ -45,4 +45,10 @@ public class TransactionServiceImpl implements TransactionService {
         return transactionRepository.findLatestByEntityIdAndStatusPublishedOrDeleted(entityId);
     }
 
+    @Override
+    public Flux<Transaction> getLastProducerTransaction(String processId) {
+        log.debug("ProcessID: {} - Getting last published producer transaction for entity: {}", processId);
+        return transactionRepository.findLastProducerTransaction();
+    }
+
 }
