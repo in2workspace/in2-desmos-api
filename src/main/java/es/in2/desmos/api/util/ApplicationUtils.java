@@ -30,11 +30,18 @@ public class ApplicationUtils {
         byte[] hash = messageDigest.digest(data.getBytes(StandardCharsets.UTF_8));
         return HexFormat.of().formatHex(hash);
     }
-    public static String calculateIntertwinedHash(byte[] hash1, byte[] hash2) throws NoSuchAlgorithmException {
+    public static String calculateIntertwinedHash(String hash1Hex, String hash2Hex) throws NoSuchAlgorithmException {
+        // Convert the hexadecimal strings to byte arrays
+        byte[] hash1 = hexStringToByteArray(hash1Hex);
+        byte[] hash2 = hexStringToByteArray(hash2Hex);
+
+        // Start the MessageDigest with the first hash and update it with the second hash
         MessageDigest digest = MessageDigest.getInstance(SHA_256_ALGORITHM);
         digest.update(hash1);
         digest.update(hash2);
         byte[] result = digest.digest();
+
+        // Convert the result to a hexadecimal string
         return bytesAHex(result);
     }
 
@@ -46,6 +53,14 @@ public class ApplicationUtils {
             hexString.append(hex);
         }
         return hexString.toString();
+    }
+
+    private static byte[] hexStringToByteArray(String s) {
+        if (s.startsWith("0x")) {
+            s = s.substring(2);
+        }
+
+        return HexFormat.of().parseHex(s);
     }
 
     public static String extractEntityHashFromDataLocation(String dataLocation) {
