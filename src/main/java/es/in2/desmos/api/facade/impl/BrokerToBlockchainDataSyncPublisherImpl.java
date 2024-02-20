@@ -3,7 +3,6 @@ package es.in2.desmos.api.facade.impl;
 import es.in2.desmos.api.facade.BrokerToBlockchainDataSyncPublisher;
 import es.in2.desmos.api.service.BlockchainEventCreatorService;
 import es.in2.desmos.api.service.BrokerEntityProcessorService;
-import es.in2.desmos.api.service.NotificationProcessorService;
 import es.in2.desmos.blockchain.service.BlockchainAdapterEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

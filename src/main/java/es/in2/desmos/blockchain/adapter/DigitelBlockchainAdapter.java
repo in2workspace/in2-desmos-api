@@ -86,7 +86,7 @@ public class DigitelBlockchainAdapter implements GenericBlockchainAdapterService
                                                 .dataLocation(blockchainEvent.dataLocation())
                                                 .entityId(extractEntityIdFromDataLocation(blockchainEvent.dataLocation()))
                                                 .entityType(blockchainEvent.eventType())
-                                                .entityHash(extractEntityIdFromDataLocation(blockchainEvent.dataLocation()))
+                                                .entityHash(extractEntityHashFromDataLocation(blockchainEvent.dataLocation()))
                                                 .status(TransactionStatus.PUBLISHED)
                                                 .trader(TransactionTrader.PRODUCER)
                                                 .hash("")
