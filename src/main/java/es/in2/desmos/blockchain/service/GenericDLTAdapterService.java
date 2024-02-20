@@ -1,13 +1,13 @@
 package es.in2.desmos.blockchain.service;
 
-
 import es.in2.desmos.api.model.BlockchainEvent;
-import es.in2.desmos.blockchain.model.BlockchainAdapterSubscription;
+import es.in2.desmos.blockchain.model.DLTAdapterSubscription;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-public interface GenericBlockchainAdapterService {
-    Mono<Void> createSubscription(String processId, BlockchainAdapterSubscription blockchainAdapterSubscription);
+public interface GenericDLTAdapterService {
+
+    Mono<Void> createSubscription(String processId, DLTAdapterSubscription dltAdapterSubscription);
 
     Mono<Void> publishEvent(String processId, BlockchainEvent blockchainEvent);
 

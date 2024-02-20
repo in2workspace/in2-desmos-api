@@ -3,16 +3,10 @@ package es.in2.desmos.api.facade.impl;
 import es.in2.desmos.api.facade.BlockchainToBrokerDataSyncSynchronizer;
 import es.in2.desmos.api.model.BlockchainNotification;
 import es.in2.desmos.api.service.*;
-import es.in2.desmos.blockchain.service.BlockchainAdapterEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.Objects;
-import java.util.UUID;
 
 @Slf4j
 @Service
