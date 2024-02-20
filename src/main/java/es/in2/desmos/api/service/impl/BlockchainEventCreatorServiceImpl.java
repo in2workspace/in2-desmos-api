@@ -57,12 +57,13 @@ public class BlockchainEventCreatorServiceImpl implements BlockchainEventCreator
         }
         BlockchainEvent blockchainEvent = BlockchainEvent.builder()
                 .eventType((String) dataMap.get("type"))
-                .organizationId(applicationConfig.organizationIdHash())
-                .entityId(generateEntityIdHashFromDataLocation(dataLocation))
+                .organizationId(HASH_PREFIX + applicationConfig.organizationIdHash())
+                .entityId(HASH_PREFIX + generateEntityIdHashFromDataLocation(dataLocation))
                 .previousEntityHash("0x0000000000000000000000000000000000000000000000000000000000000000")
                 .dataLocation(dataLocation)
                 .metadata(List.of())
                 .build();
+        log.debug("ProcessID: {} - BlockchainEvent created: {}", processId, blockchainEvent.toString());
         // Build BlockchainEvent
         return transactionService.saveTransaction(processId, Transaction.builder()
                 .id(UUID.randomUUID())

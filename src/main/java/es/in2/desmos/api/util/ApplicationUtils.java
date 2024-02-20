@@ -28,8 +28,24 @@ public class ApplicationUtils {
     public static String calculateSHA256Hash(String data) throws NoSuchAlgorithmException {
         MessageDigest messageDigest = MessageDigest.getInstance(SHA_256_ALGORITHM);
         byte[] hash = messageDigest.digest(data.getBytes(StandardCharsets.UTF_8));
-        String hashString = HexFormat.of().formatHex(hash);
-        return HASH_PREFIX + hashString;
+        return HexFormat.of().formatHex(hash);
+    }
+    public static String calculateIntertwinedHash(byte[] hash1, byte[] hash2) throws NoSuchAlgorithmException {
+        MessageDigest digest = MessageDigest.getInstance(SHA_256_ALGORITHM);
+        digest.update(hash1);
+        digest.update(hash2);
+        byte[] result = digest.digest();
+        return bytesAHex(result);
+    }
+
+    private static String bytesAHex(byte[] bytes) {
+        StringBuilder hexString = new StringBuilder();
+        for (byte b : bytes) {
+            String hex = Integer.toHexString(0xff & b);
+            if (hex.length() == 1) hexString.append('0');
+            hexString.append(hex);
+        }
+        return hexString.toString();
     }
 
     public static String extractEntityHashFromDataLocation(String dataLocation) {
