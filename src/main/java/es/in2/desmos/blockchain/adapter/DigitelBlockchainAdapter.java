@@ -71,11 +71,10 @@ public class DigitelBlockchainAdapter implements GenericBlockchainAdapterService
                                                 .dataLocation(blockchainEvent.dataLocation())
                                                 .entityId(extractEntityIdFromDataLocation(blockchainEvent.dataLocation()))
                                                 .entityType(blockchainEvent.eventType())
-                                                .entityHash(extractEntityHashFromDataLocation(blockchainEvent.dataLocation()))
+                                                .hash(extractEntityHashFromDataLocation(blockchainEvent.dataLocation()))
                                                 .status(TransactionStatus.DELETED)
                                                 .trader(TransactionTrader.PRODUCER)
                                                 .newTransaction(true)
-                                                .hash("")
                                                 .build())
                                         .then(Mono.empty());
                             } else {
@@ -86,10 +85,9 @@ public class DigitelBlockchainAdapter implements GenericBlockchainAdapterService
                                                 .dataLocation(blockchainEvent.dataLocation())
                                                 .entityId(extractEntityIdFromDataLocation(blockchainEvent.dataLocation()))
                                                 .entityType(blockchainEvent.eventType())
-                                                .entityHash(extractEntityHashFromDataLocation(blockchainEvent.dataLocation()))
+                                                .hash(extractEntityHashFromDataLocation(blockchainEvent.dataLocation()))
                                                 .status(TransactionStatus.PUBLISHED)
                                                 .trader(TransactionTrader.PRODUCER)
-                                                .hash("")
                                                 .newTransaction(true)
                                                 .build())
                                         .then(Mono.empty());

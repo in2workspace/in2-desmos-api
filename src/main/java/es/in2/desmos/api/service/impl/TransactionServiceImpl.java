@@ -51,5 +51,11 @@ public class TransactionServiceImpl implements TransactionService {
         return transactionRepository.findLastProducerTransaction().next();
     }
 
+    @Override
+    public Mono<Transaction> getLastProducerTransactionByEntityId(String processId, String entityId) {
+        log.debug("ProcessID: {} - Getting last published producer transaction with id: {}", processId, entityId);
+        return transactionRepository.findLastProducerTransactionByEntityId(entityId).next();
+    }
+
 
 }

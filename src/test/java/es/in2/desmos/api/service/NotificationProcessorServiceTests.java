@@ -41,7 +41,7 @@ class NotificationProcessorServiceTests {
             .createdAt(Timestamp.from(Instant.now()))
             .entityId("testId")
             .entityType("testType")
-            .entityHash("testHash")
+            .hash("testHash")
             .status(TransactionStatus.PUBLISHED)
             .trader(TransactionTrader.CONSUMER)
             .hash("testHash")

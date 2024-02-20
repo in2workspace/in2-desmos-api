@@ -115,7 +115,7 @@ class BlockchainConnectorInitializerTest {
                 .dataLocation("https://domain.org/ngsi-ld/v1/entities/urn:ngsi-ld:Entity:1234")
                 .entityId("urn:ngsi-ld:Entity:1234")
                 .entityType("Entity")
-                .entityHash("0x1234")
+                .hash("0x1234")
                 .status(TransactionStatus.PUBLISHED)
                 .trader(TransactionTrader.CONSUMER)
                 .hash("0x9876")
@@ -126,10 +126,9 @@ class BlockchainConnectorInitializerTest {
                 .dataLocation("https://domain.org/ngsi-ld/v1/entities/urn:ngsi-ld:Entity:12345")
                 .entityId("urn:ngsi-ld:Entity:12345")
                 .entityType("Entity")
-                .entityHash("0x1235")
+                .hash("0x1235")
                 .status(TransactionStatus.CREATED)
                 .trader(TransactionTrader.CONSUMER)
-                .hash("0x9876")
                 .build();
         lastTransactionPublished.setCreatedAt(Timestamp.valueOf("2024-02-06 10:07:01.529"));
         List<Transaction> transactionList = List.of(lastTransactionPublished, lastTransactionCreated);
@@ -169,7 +168,7 @@ class BlockchainConnectorInitializerTest {
                 .dataLocation("https://domain.org/ngsi-ld/v1/entities/urn:ngsi-ld:Entity:1234")
                 .entityId("urn:ngsi-ld:Entity:1234")
                 .entityType("Entity")
-                .entityHash("0x1234")
+                .hash("0x1234")
                 .status(TransactionStatus.PUBLISHED)
                 .trader(TransactionTrader.CONSUMER)
                 .hash("0x9876")
@@ -180,7 +179,7 @@ class BlockchainConnectorInitializerTest {
                 .dataLocation("https://domain.org/ngsi-ld/v1/entities/urn:ngsi-ld:Entity:12345")
                 .entityId("urn:ngsi-ld:Entity:12345")
                 .entityType("Entity")
-                .entityHash("0x1235")
+                .hash("0x1235")
                 .status(TransactionStatus.CREATED)
                 .trader(TransactionTrader.CONSUMER)
                 .hash("0x9876")

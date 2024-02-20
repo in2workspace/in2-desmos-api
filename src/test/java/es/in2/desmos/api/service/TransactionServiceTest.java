@@ -33,10 +33,9 @@ class TransactionServiceTest {
             .createdAt(Timestamp.from(Instant.now()))
             .dataLocation("sampleDataLocation")
             .entityId("sampleEntityId")
-            .entityHash("sampleEntityHash")
+            .hash("sampleEntityHash")
             .status(TransactionStatus.CREATED)
             .trader(TransactionTrader.PRODUCER)
-            .hash("sampleHash")
             .build();
 
     @Mock

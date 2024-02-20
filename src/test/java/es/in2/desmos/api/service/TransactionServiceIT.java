@@ -46,10 +46,9 @@ class TransactionServiceIT {
             .dataLocation("https://domain.org/ngsi-ld/v1/entities/urn:ngsi-ld:Entity:1234")
             .entityId("urn:ngsi-ld:Entity:1234")
             .entityType("Entity")
-            .entityHash("0x1234")
+            .hash("0x1234")
             .status(TransactionStatus.CREATED)
             .trader(TransactionTrader.PRODUCER)
-            .hash("0x9876")
             .newTransaction(true)
             .build();
 
@@ -91,7 +90,7 @@ class TransactionServiceIT {
                 .dataLocation("https://domain.org/ngsi-ld/v1/entities/urn:ngsi-ld:Entity:1235")
                 .entityId("urn:ngsi-ld:Entity:1235")
                 .entityType("Entity")
-                .entityHash("0x1234")
+                .hash("0x1234")
                 .status(TransactionStatus.PUBLISHED)
                 .trader(TransactionTrader.PRODUCER)
                 .hash("0x9876")

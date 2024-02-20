@@ -44,10 +44,9 @@ public class BrokerEntityPublisherServiceImpl implements BrokerEntityPublisherSe
                             .dataLocation(blockchainNotification.dataLocation())
                             .entityId(entityId)
                             .entityType(blockchainNotification.eventType())
-                            .entityHash("")
+                            .hash("")
                             .status(TransactionStatus.DELETED)
                             .trader(TransactionTrader.CONSUMER)
-                            .hash("")
                             .newTransaction(true)
                             .build()));
         } else {
@@ -82,7 +81,7 @@ public class BrokerEntityPublisherServiceImpl implements BrokerEntityPublisherSe
                                     .dataLocation(blockchainNotification.dataLocation())
                                     .entityId(entityId)
                                     .entityType(blockchainNotification.eventType())
-                                    .entityHash(entityHash)
+                                    .hash(entityHash)
                                     .status(TransactionStatus.PUBLISHED)
                                     .trader(TransactionTrader.CONSUMER)
                                     .hash("")

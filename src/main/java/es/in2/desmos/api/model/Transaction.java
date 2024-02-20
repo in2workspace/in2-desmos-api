@@ -39,16 +39,13 @@ public class Transaction implements Persistable<UUID> {
     private String entityType;
 
     @Column("entity_hash")
-    private String entityHash;
+    private String hash;
 
     @Column("status")
     private TransactionStatus status;
 
     @Column("trader")
     private TransactionTrader trader;
-
-    @Column("hash")
-    private String hash;
 
     @Transient
     private boolean newTransaction;

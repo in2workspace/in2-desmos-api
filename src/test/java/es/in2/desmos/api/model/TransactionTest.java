@@ -21,10 +21,9 @@ class TransactionTest {
         assertNull(transaction.getDataLocation(), "Expected dataLocation to be null");
         assertNull(transaction.getEntityId(), "Expected entityId to be null");
         assertNull(transaction.getEntityType(), "Expected entityType to be null");
-        assertNull(transaction.getEntityHash(), "Expected entityHash to be null");
+        assertNull(transaction.getHash(), "Expected entityHash to be null");
         assertNull(transaction.getStatus(), "Expected status to be null");
         assertNull(transaction.getTrader(), "Expected trader to be null");
-        assertNull(transaction.getHash(), "Expected hash to be null");
         assertTrue(transaction.isNew(), "Expected newTransaction to be false");
     }
 
@@ -51,7 +50,7 @@ class TransactionTest {
         transaction.setDataLocation(dataLocation);
         transaction.setEntityId(entityId);
         transaction.setEntityType(entityType);
-        transaction.setEntityHash(entityHash);
+        transaction.setHash(entityHash);
         transaction.setStatus(status);
         transaction.setTrader(trader);
         transaction.setHash(hash);
@@ -63,7 +62,7 @@ class TransactionTest {
         assertEquals(dataLocation, transaction.getDataLocation());
         assertEquals(entityId, transaction.getEntityId());
         assertEquals(entityType, transaction.getEntityType());
-        assertEquals(entityHash, transaction.getEntityHash());
+        assertEquals(entityHash, transaction.getHash());
         assertEquals(status, transaction.getStatus());
         assertEquals(trader, transaction.getTrader());
         assertEquals(hash, transaction.getHash());
@@ -81,7 +80,7 @@ class TransactionTest {
                 .dataLocation("location1")
                 .entityId("entity1")
                 .entityType("type1")
-                .entityHash("hash1")
+                .hash("hash1")
                 .status(TransactionStatus.CREATED)
                 .trader(TransactionTrader.PRODUCER)
                 .hash("hash2")
@@ -125,7 +124,7 @@ class TransactionTest {
                 .dataLocation(dataLocation)
                 .entityId(entityId)
                 .entityType(entityType)
-                .entityHash(entityHash)
+                .hash(entityHash)
                 .status(status)
                 .trader(trader)
                 .hash(hash)
@@ -157,7 +156,7 @@ class TransactionTest {
                 .dataLocation(dataLocation)
                 .entityId(entityId)
                 .entityType(entityType)
-                .entityHash(entityHash)
+                .hash(entityHash)
                 .status(status)
                 .trader(trader)
                 .hash(hash)
@@ -173,7 +172,7 @@ class TransactionTest {
                 .dataLocation(dataLocation)
                 .entityId(entityId)
                 .entityType(entityType)
-                .entityHash(entityHash)
+                .hash(entityHash)
                 .status(status)
                 .trader(trader)
                 .hash(hash)
@@ -190,7 +189,7 @@ class TransactionTest {
                 .dataLocation(dataLocation)
                 .entityId(entityId)
                 .entityType(entityType)
-                .entityHash(entityHash)
+                .hash(entityHash)
                 .status(status)
                 .trader(trader)
                 .hash(hash)
@@ -237,7 +236,7 @@ class TransactionTest {
                 .dataLocation(dataLocation)
                 .entityId(entityId)
                 .entityType(entityType)
-                .entityHash(entityHash)
+                .hash(entityHash)
                 .status(status)
                 .trader(trader)
                 .hash(hash)

@@ -46,11 +46,10 @@ public class BrokerEntityRetrievalServiceImpl implements BrokerEntityRetrievalSe
                                             .createdAt(Timestamp.from(Instant.now()))
                                             .dataLocation(blockchainNotification.dataLocation())
                                             .entityId(extractEntityIdFromDataLocation(blockchainNotification.dataLocation()))
-                                            .entityHash("")
+                                            .hash("")
                                             .status(TransactionStatus.DELETED)
                                             .trader(TransactionTrader.CONSUMER)
                                             .newTransaction(true)
-                                            .hash("")
                                             .build())
                                     .then(Mono.empty());
                         }
@@ -62,7 +61,7 @@ public class BrokerEntityRetrievalServiceImpl implements BrokerEntityRetrievalSe
                                         .createdAt(Timestamp.from(Instant.now()))
                                         .dataLocation(blockchainNotification.dataLocation())
                                         .entityId(extractEntityIdFromDataLocation(blockchainNotification.dataLocation()))
-                                        .entityHash("")
+                                        .hash("")
                                         .entityType(blockchainNotification.eventType())
                                         .status(TransactionStatus.RETRIEVED)
                                         .trader(TransactionTrader.CONSUMER)
