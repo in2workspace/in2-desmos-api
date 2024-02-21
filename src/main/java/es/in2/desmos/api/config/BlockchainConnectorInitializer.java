@@ -14,8 +14,8 @@ import es.in2.desmos.api.model.Transaction;
 import es.in2.desmos.api.model.TransactionStatus;
 import es.in2.desmos.api.model.TransactionTrader;
 import es.in2.desmos.api.service.TransactionService;
-import es.in2.desmos.blockchain.config.properties.BlockchainAdapterProperties;
-import es.in2.desmos.blockchain.service.BlockchainAdapterEventPublisher;
+import es.in2.desmos.blockchain.config.properties.DLTAdapterProperties;
+import es.in2.desmos.blockchain.service.DLTAdapterEventPublisher;
 import es.in2.desmos.broker.service.BrokerPublicationService;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
@@ -48,8 +48,8 @@ public class BlockchainConnectorInitializer {
 
     private static final String PROCESS_ID = "processId";
     private final TransactionService transactionService;
-    private final BlockchainAdapterProperties blockchainAdapterProperties;
-    private final BlockchainAdapterEventPublisher blockchainAdapterEventPublisher;
+    private final DLTAdapterProperties dltAdapterProperties;
+    private final DLTAdapterEventPublisher dltAdapterEventPublisher;
     private final ObjectMapper objectMapper;
     private final BrokerToBlockchainDataSyncPublisher brokerToBlockchainDataSyncPublisher;
     private final BrokerToBlockchainPublisher brokerToBlockchainPublisher;
@@ -102,10 +102,8 @@ public class BlockchainConnectorInitializer {
     private Mono<Void> processTransactions(List<Transaction> transactions) {
         Flux<Void> consumerTransactions = Flux.just(findLastTransactionOfType(transactions, TransactionTrader.CONSUMER))
                 .flatMap(this::processConsumerTransaction);
-
         Flux<Void> producerTransactions = Flux.just(findLastTransactionOfType(transactions, TransactionTrader.PRODUCER))
                 .flatMap(this::processProducerTransaction);
-
         return Flux.merge(consumerTransactions, producerTransactions).then();
     }
 
@@ -118,7 +116,6 @@ public class BlockchainConnectorInitializer {
     private Mono<Void> processProducerTransaction(List<Transaction> transactions) {
         String timestamp = determineTimestampForQuery(transactions);
         log.debug("Timestamp for query: {}", timestamp);
-
         return brokerPublicationService.getEntitiesByTimeRange(MDC.get(PROCESS_ID), timestamp)
                 .flatMap(this::extractIdsAndProcess)
                 .then()
@@ -157,13 +154,12 @@ public class BlockchainConnectorInitializer {
     private Flux<Void> queryDLTAdapterFromRange(long startDateUnixTimestampMillis, long endDateUnixTimestampMillis) {
         String dltAdapterQueryURL = buildQueryURL(startDateUnixTimestampMillis, endDateUnixTimestampMillis);
         log.debug(dltAdapterQueryURL);
-
         log.debug("Waiting for events to be processed...");
         return processEvents(startDateUnixTimestampMillis, endDateUnixTimestampMillis);
     }
 
     private Flux<Void> processEvents(long from, long to) {
-        return blockchainAdapterEventPublisher.getEventsFromRange(MDC.get(PROCESS_ID), from, to)
+        return dltAdapterEventPublisher.getEventsFromRange(MDC.get(PROCESS_ID), from, to)
                 .flatMap(this::processResponse);
     }
 
@@ -205,7 +201,7 @@ public class BlockchainConnectorInitializer {
     }
 
     private String buildQueryURL(long startDateUnixTimestampMillis, long endDateUnixTimestampMillis) {
-        return blockchainAdapterProperties.externalDomain() + blockchainAdapterProperties.paths().events() +
+        return dltAdapterProperties.externalDomain() + dltAdapterProperties.paths().events() +
                 "?startDate=" + startDateUnixTimestampMillis + "&endDate=" + endDateUnixTimestampMillis;
     }
 
@@ -217,7 +213,6 @@ public class BlockchainConnectorInitializer {
             throw new JsonReadingException("");
         }
         List<String> ids = new ArrayList<>();
-
         if (rootNode.isArray()) {
             for (JsonNode node : rootNode) {
                 JsonNode idNode = node.get("id");
@@ -233,14 +228,12 @@ public class BlockchainConnectorInitializer {
         if (canQueuesEmit.get()) {
             disposeIfActive(blockchainEventProcessingSubscription);
             disposeIfActive(brokerEntityEventProcessingSubscription);
-
             blockchainEventProcessingSubscription = brokerToBlockchainPublisher.startProcessingEvents()
                     .subscribe(
                             null,
                             error -> log.error("Error occurred during blockchain event processing"),
                             () -> log.info("Blockchain event processing completed")
                     );
-
             brokerEntityEventProcessingSubscription = blockchainToBrokerSynchronizer.startProcessingEvents()
                     .subscribe(
                             null,
@@ -263,6 +256,5 @@ public class BlockchainConnectorInitializer {
             subscription.dispose();
         }
     }
-
 
 }

@@ -4,7 +4,7 @@ import es.in2.desmos.api.model.BlockchainEvent;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-public interface BlockchainAdapterEventPublisher {
+public interface DLTAdapterEventPublisher {
 
     Mono<Void> publishBlockchainEvent(String processId, BlockchainEvent blockchainEvent);
 

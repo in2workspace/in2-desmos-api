@@ -1,6 +1,5 @@
 package es.in2.desmos.api.config.properties;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -8,7 +7,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *
  * @param organizationId - Client OrganizationID information
  */
-@Slf4j
 @ConfigurationProperties(prefix = "client")
 public record ClientProperties(String organizationId) {
 }

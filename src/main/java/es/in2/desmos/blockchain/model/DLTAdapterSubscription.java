@@ -6,7 +6,7 @@ import lombok.Builder;
 import java.util.List;
 
 @Builder
-public record BlockchainAdapterSubscription(
+public record DLTAdapterSubscription(
         @JsonProperty("eventTypes") List<String> eventTypes,
         @JsonProperty("notificationEndpoint") String notificationEndpoint
 ) {

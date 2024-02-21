@@ -95,8 +95,8 @@ ngsi-subscription:
   notificationEndpoint: "http://localhost:8080/notifications/broker"
   entityTypes: "ProductOffering,ProductOrder"
 
-# Blockchain Adapter Configuration
-blockchain-adapter:
+# DLT Adapter Configuration
+dlt-adapter:
   provider: "digitelts"
   internalDomain: "http://localhost:8080"
   externalDomain: "http://localhost:8080"

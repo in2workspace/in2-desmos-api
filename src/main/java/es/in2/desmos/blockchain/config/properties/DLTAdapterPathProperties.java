@@ -7,5 +7,5 @@ package es.in2.desmos.blockchain.config.properties;
  * @param subscription      - subscribe path
  * @param events            - events path
  */
-public record BlockchainAdapterPathProperties(String publication, String subscription, String events) {
+public record DLTAdapterPathProperties(String publication, String subscription, String events) {
 }
