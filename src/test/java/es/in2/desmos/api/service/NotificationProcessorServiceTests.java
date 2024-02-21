@@ -45,7 +45,7 @@ class NotificationProcessorServiceTests {
             .status(TransactionStatus.PUBLISHED)
             .trader(TransactionTrader.CONSUMER)
             .hash("testHash")
-            .dataLocation("testLocation")
+            .hashlink("testLocation")
             .build();
 
     private final Mono<Transaction> emptyTransaction = Mono.empty().cast(Transaction.class);

@@ -66,18 +66,18 @@ public class BlockchainEventCreatorServiceImpl implements BlockchainEventCreator
         log.debug("ProcessID: {} - BlockchainEvent created: {}", processId, blockchainEvent.toString());
         // Build BlockchainEvent
         return transactionService.saveTransaction(processId, Transaction.builder()
-                .id(UUID.randomUUID())
-                .transactionId(processId)
-                .createdAt(Timestamp.from(Instant.now()))
-                .dataLocation(blockchainEvent.dataLocation())
-                .entityId(extractEntityIdFromDataLocation(dataLocation))
-                .entityType(blockchainEvent.eventType())
-                .hash(extractEntityHashFromDataLocation(blockchainEvent.dataLocation()))
-                .status(TransactionStatus.CREATED)
-                .trader(TransactionTrader.PRODUCER)
-                        .newTransaction(true)
-                .build())
-                .thenReturn(blockchainEvent);
+                                .id(UUID.randomUUID())
+                                .transactionId(processId)
+                                .createdAt(Timestamp.from(Instant.now()))
+                                .entityId(extractEntityIdFromDataLocation(blockchainEvent.dataLocation()))
+                                .entityType(blockchainEvent.eventType())
+                                .hash(extractEntityHashFromDataLocation(blockchainEvent.dataLocation()))
+                                .status(TransactionStatus.CREATED)
+                                .trader(TransactionTrader.PRODUCER)
+                                .hashlink("")
+                                .newTransaction(true)
+                                .build())
+                        .thenReturn(blockchainEvent);
     }
 
     private static String generateEntityIdHashFromDataLocation(String datalocation) {

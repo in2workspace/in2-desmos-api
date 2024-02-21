@@ -18,7 +18,7 @@ class TransactionTest {
         assertNull(transaction.getId(), "Expected id to be null");
         assertNull(transaction.getTransactionId(), "Expected transactionId to be null");
         assertNull(transaction.getCreatedAt(), "Expected createdAt to be null");
-        assertNull(transaction.getDataLocation(), "Expected dataLocation to be null");
+        assertNull(transaction.getHashlink(), "Expected dataLocation to be null");
         assertNull(transaction.getEntityId(), "Expected entityId to be null");
         assertNull(transaction.getEntityType(), "Expected entityType to be null");
         assertNull(transaction.getHash(), "Expected entityHash to be null");
@@ -47,7 +47,7 @@ class TransactionTest {
         transaction.setId(id);
         transaction.setTransactionId(transactionId);
         transaction.setCreatedAt(createdAt);
-        transaction.setDataLocation(dataLocation);
+        transaction.setHashlink(dataLocation);
         transaction.setEntityId(entityId);
         transaction.setEntityType(entityType);
         transaction.setHash(entityHash);
@@ -59,7 +59,7 @@ class TransactionTest {
         assertEquals(id, transaction.getId());
         assertEquals(transactionId, transaction.getTransactionId());
         assertEquals(createdAt, transaction.getCreatedAt());
-        assertEquals(dataLocation, transaction.getDataLocation());
+        assertEquals(dataLocation, transaction.getHashlink());
         assertEquals(entityId, transaction.getEntityId());
         assertEquals(entityType, transaction.getEntityType());
         assertEquals(entityHash, transaction.getHash());
@@ -77,7 +77,7 @@ class TransactionTest {
                 .id(id)
                 .transactionId("trans123")
                 .createdAt(new Timestamp(System.currentTimeMillis()))
-                .dataLocation("location1")
+                .hashlink("location1")
                 .entityId("entity1")
                 .entityType("type1")
                 .hash("hash1")
@@ -121,7 +121,7 @@ class TransactionTest {
                 .id(id)
                 .transactionId(transactionId)
                 .createdAt(createdAt)
-                .dataLocation(dataLocation)
+                .hashlink(dataLocation)
                 .entityId(entityId)
                 .entityType(entityType)
                 .hash(entityHash)
@@ -153,7 +153,7 @@ class TransactionTest {
                 .id(id)
                 .transactionId(transactionId)
                 .createdAt(createdAt)
-                .dataLocation(dataLocation)
+                .hashlink(dataLocation)
                 .entityId(entityId)
                 .entityType(entityType)
                 .hash(entityHash)
@@ -169,7 +169,7 @@ class TransactionTest {
         transaction = Transaction.builder()
                 .transactionId(transactionId)
                 .createdAt(createdAt)
-                .dataLocation(dataLocation)
+                .hashlink(dataLocation)
                 .entityId(entityId)
                 .entityType(entityType)
                 .hash(entityHash)
@@ -186,7 +186,7 @@ class TransactionTest {
                 .id(id)
                 .transactionId(transactionId)
                 .createdAt(createdAt)
-                .dataLocation(dataLocation)
+                .hashlink(dataLocation)
                 .entityId(entityId)
                 .entityType(entityType)
                 .hash(entityHash)
@@ -233,7 +233,7 @@ class TransactionTest {
                 .id(id)
                 .transactionId(transactionId)
                 .createdAt(createdAt)
-                .dataLocation(dataLocation)
+                .hashlink(dataLocation)
                 .entityId(entityId)
                 .entityType(entityType)
                 .hash(entityHash)

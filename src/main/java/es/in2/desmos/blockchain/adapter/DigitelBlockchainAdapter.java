@@ -68,13 +68,13 @@ public class DigitelBlockchainAdapter implements GenericBlockchainAdapterService
                                                 .id(UUID.randomUUID())
                                                 .transactionId(processId)
                                                 .createdAt(Timestamp.from(Instant.now()))
-                                                .dataLocation(blockchainEvent.dataLocation())
                                                 .entityId(extractEntityIdFromDataLocation(blockchainEvent.dataLocation()))
                                                 .entityType(blockchainEvent.eventType())
                                                 .hash(extractEntityHashFromDataLocation(blockchainEvent.dataLocation()))
                                                 .status(TransactionStatus.DELETED)
                                                 .trader(TransactionTrader.PRODUCER)
                                                 .newTransaction(true)
+                                                .hash(extractEntityHashFromDataLocation(blockchainEvent.dataLocation()))
                                                 .build())
                                         .then(Mono.empty());
                             } else {
@@ -82,7 +82,6 @@ public class DigitelBlockchainAdapter implements GenericBlockchainAdapterService
                                                 .id(UUID.randomUUID())
                                                 .transactionId(processId)
                                                 .createdAt(Timestamp.from(Instant.now()))
-                                                .dataLocation(blockchainEvent.dataLocation())
                                                 .entityId(extractEntityIdFromDataLocation(blockchainEvent.dataLocation()))
                                                 .entityType(blockchainEvent.eventType())
                                                 .hash(extractEntityHashFromDataLocation(blockchainEvent.dataLocation()))

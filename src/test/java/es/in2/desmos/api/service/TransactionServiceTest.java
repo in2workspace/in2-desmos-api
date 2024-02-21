@@ -31,7 +31,7 @@ class TransactionServiceTest {
             .id(UUID.randomUUID())
             .transactionId("sampleTransactionId")
             .createdAt(Timestamp.from(Instant.now()))
-            .dataLocation("sampleDataLocation")
+            .hashlink("sampleDataLocation")
             .entityId("sampleEntityId")
             .hash("sampleEntityHash")
             .status(TransactionStatus.CREATED)
