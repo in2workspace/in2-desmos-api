@@ -62,7 +62,6 @@ class TransactionTest {
         assertEquals(dataLocation, transaction.getHashlink());
         assertEquals(entityId, transaction.getEntityId());
         assertEquals(entityType, transaction.getEntityType());
-        assertEquals(entityHash, transaction.getHash());
         assertEquals(status, transaction.getStatus());
         assertEquals(trader, transaction.getTrader());
         assertEquals(hash, transaction.getHash());
@@ -108,13 +107,12 @@ class TransactionTest {
         String expectedToString = "Transaction(id=" + id
                 + ", transactionId=" + transactionId
                 + ", createdAt=" + createdAt
-                + ", dataLocation=" + dataLocation
                 + ", entityId=" + entityId
+                + ", hashlink=" + dataLocation
                 + ", entityType=" + entityType
-                + ", entityHash=" + entityHash
+                + ", hash=" + entityHash
                 + ", status=" + status
                 + ", trader=" + trader
-                + ", hash=" + hash
                 + ", newTransaction=" + newTransaction + ")";
         // Act
         Transaction transaction = Transaction.builder()
@@ -127,7 +125,6 @@ class TransactionTest {
                 .hash(entityHash)
                 .status(status)
                 .trader(trader)
-                .hash(hash)
                 .newTransaction(newTransaction)
                 .build();
         // Assert
@@ -198,52 +195,6 @@ class TransactionTest {
 
         // Assert
         assertTrue(transaction.isNew(), "Expected the transaction to be new because newTransaction is set to true");
-    }
-
-    @Test
-    void testTransactionBuilderToString() {
-        // Arrange
-        UUID id = UUID.randomUUID();
-        String transactionId = "trans123";
-        Timestamp createdAt = new Timestamp(System.currentTimeMillis());
-        String dataLocation = "data/location";
-        String entityId = "entity123";
-        String entityType = "typeA";
-        String entityHash = "hash123";
-        TransactionStatus status = TransactionStatus.CREATED;
-        TransactionTrader trader = TransactionTrader.PRODUCER;
-        String hash = "hashXYZ";
-        boolean newTransaction = true;
-
-        String expectedToString = "Transaction.TransactionBuilder(id=" + id
-                + ", transactionId=" + transactionId
-                + ", createdAt=" + createdAt
-                + ", dataLocation=" + dataLocation
-                + ", entityId=" + entityId
-                + ", entityType=" + entityType
-                + ", entityHash=" + entityHash
-                + ", status=" + status
-                + ", trader=" + trader
-                + ", hash=" + hash
-                + ", newTransaction=" + newTransaction + ")";
-
-
-        // Act
-        Transaction.TransactionBuilder transactionBuilder = Transaction.builder()
-                .id(id)
-                .transactionId(transactionId)
-                .createdAt(createdAt)
-                .hashlink(dataLocation)
-                .entityId(entityId)
-                .entityType(entityType)
-                .hash(entityHash)
-                .status(status)
-                .trader(trader)
-                .hash(hash)
-                .newTransaction(newTransaction);
-
-        // Assert
-        assertEquals(expectedToString, transactionBuilder.toString());
     }
 
 

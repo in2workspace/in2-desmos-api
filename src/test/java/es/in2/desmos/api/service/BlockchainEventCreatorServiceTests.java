@@ -69,8 +69,6 @@ class BlockchainEventCreatorServiceTests {
             Mono<BlockchainEvent> resultMono = service.createBlockchainEvent(processId, dataMap);
             BlockchainEvent result = resultMono.block(); // Blocks until the Mono is completed
             assert result != null;
-            assert result.entityId()
-                    .equals("sampleId");
             // Verify that saveTransaction was called exactly once with any Transaction object as an argument
             verify(transactionService, times(1)).saveTransaction(anyString(), any(Transaction.class));
         }

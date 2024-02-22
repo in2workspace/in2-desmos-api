@@ -30,7 +30,7 @@ class ApplicationConfigTest {
     void testOrganizationIdHash() {
         // Arrange
         String mockOrganizationId = "org123";
-        String expectedHash = "0xd086b84163a6de3f31d4686dbeca31ab484c6f832e2c70ab5f2171ccef0cfecf";
+        String expectedHash = "d086b84163a6de3f31d4686dbeca31ab484c6f832e2c70ab5f2171ccef0cfecf";
         // Mock the behavior of organizationId in ClientProperties
         when(clientProperties.organizationId()).thenReturn(mockOrganizationId);
         // Act & Assert

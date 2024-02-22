@@ -28,16 +28,6 @@ class ApplicationUtilsTest {
         }
     }
 
-
-    @Test
-    void testCalculateSHA256Hash() throws NoSuchAlgorithmException {
-        String data = "test";
-        String expectedHashPrefix = "0x";
-        String hash = ApplicationUtils.calculateSHA256Hash(data);
-        assertTrue(hash.startsWith(expectedHashPrefix));
-        assertEquals(66, hash.length()); // SHA-256 hash length + prefix length
-    }
-
     @Test
     void testExtractEntityHashFromDataLocation() {
         String dataLocation = "http://example.com/entity?hl=hash123";

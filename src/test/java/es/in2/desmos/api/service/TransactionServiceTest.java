@@ -4,11 +4,16 @@ import es.in2.desmos.api.model.Transaction;
 import es.in2.desmos.api.model.TransactionStatus;
 import es.in2.desmos.api.model.TransactionTrader;
 import es.in2.desmos.api.repository.TransactionRepository;
+import es.in2.desmos.api.service.impl.BlockchainEventCreatorServiceImpl;
 import es.in2.desmos.api.service.impl.TransactionServiceImpl;
+import es.in2.desmos.broker.config.properties.BrokerPathProperties;
+import es.in2.desmos.broker.config.properties.BrokerProperties;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -31,7 +36,7 @@ class TransactionServiceTest {
             .id(UUID.randomUUID())
             .transactionId("sampleTransactionId")
             .createdAt(Timestamp.from(Instant.now()))
-            .hashlink("sampleDataLocation")
+            .hashlink("http://scorpio:9090/ngsi-ld/v1/entities/urn:ngsi-ld:product-offering:in2-0092?hl=0502b524143e41325d7d60aa1e5c19ab1597f1af9f2acd4d4101d643a9494d2b")
             .entityId("sampleEntityId")
             .hash("sampleEntityHash")
             .status(TransactionStatus.CREATED)
@@ -41,14 +46,30 @@ class TransactionServiceTest {
     @Mock
     private TransactionRepository transactionRepository;
 
+    @Mock
+    private BrokerProperties brokerProperties;
+
+    @Mock
+    private BrokerPathProperties brokerPathProperties;
+
     @InjectMocks
     private TransactionServiceImpl transactionService;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        BrokerPathProperties brokerPathProperties = new BrokerPathProperties("/v2", "/entities", "/subscriptions");
+        BrokerProperties brokerProperties = new BrokerProperties("scorpio", "http://localhost:1026",
+                "http://localhost:1026", new BrokerPathProperties("/entities", "/subscriptions", "/v2"));
+        transactionService = new TransactionServiceImpl(transactionRepository, brokerProperties);
+    }
 
     @Test
     void saveTransaction_Success() {
         // Arrange
         String processId = "testProcessId";
         when(transactionRepository.save(any(Transaction.class))).thenReturn(Mono.empty());
+        when(transactionRepository.findLastProducerTransaction()).thenReturn(Flux.empty());
         // Act
         Mono<Void> resultMono = transactionService.saveTransaction(processId, transactionSample);
         // Assert
@@ -62,6 +83,8 @@ class TransactionServiceTest {
         String processId = "testProcessId";
         RuntimeException testException = new RuntimeException("Test Error");
         when(transactionRepository.save(transactionSample)).thenReturn(Mono.error(testException));
+        when(transactionRepository.findLastProducerTransaction()).thenReturn(Flux.empty());
+
         // Act
         Mono<Void> resultMono = transactionService.saveTransaction(processId, transactionSample);
         // Assert
