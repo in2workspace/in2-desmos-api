@@ -1,6 +1,7 @@
 package es.in2.desmos.api.service.impl;
 
 import es.in2.desmos.api.exception.HashCreationException;
+import es.in2.desmos.api.exception.HashLinkException;
 import es.in2.desmos.api.model.Transaction;
 import es.in2.desmos.api.model.TransactionTrader;
 import es.in2.desmos.api.repository.TransactionRepository;
@@ -28,6 +29,8 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public Mono<Void> saveTransaction(String processId, Transaction transaction) {
         log.debug("ProcessID: {} - Saving transaction...", processId);
+        try {
+
         if (transaction.getTrader() == TransactionTrader.PRODUCER && hasHlParameter(transaction.getHashlink())) {
             return calculateTransactionIntertwinedHash(transaction.getHash(), processId)
                     .flatMap(intertwinedHash -> {
@@ -39,6 +42,10 @@ public class TransactionServiceImpl implements TransactionService {
                     });
         } else {
             return transactionRepository.save(transaction).doOnSuccess(success -> log.info("ProcessID: {} - Transaction saved successfully", processId))
+                    .doOnError(error -> log.error("ProcessID: {} - Error saving transaction: {}", processId, error.getMessage()))
+                    .then();
+        }}catch (HashLinkException e) {
+            return transactionRepository.save(transaction).doOnSuccess(success -> log.info("ProcessID: {} - Deletion transaction saved successfully", processId))
                     .doOnError(error -> log.error("ProcessID: {} - Error saving transaction: {}", processId, error.getMessage()))
                     .then();
         }

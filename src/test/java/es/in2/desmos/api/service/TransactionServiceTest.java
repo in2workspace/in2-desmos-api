@@ -43,6 +43,28 @@ class TransactionServiceTest {
             .trader(TransactionTrader.PRODUCER)
             .build();
 
+    private final Transaction transactionSample_deleted = Transaction.builder()
+            .id(UUID.randomUUID())
+            .transactionId("sampleTransactionId")
+            .createdAt(Timestamp.from(Instant.now()))
+            .hashlink("http://scorpio:9090/ngsi-ld/v1/entities/urn:ngsi-ld:product-offering:in2-0092")
+            .entityId("sampleEntityId")
+            .hash("")
+            .status(TransactionStatus.DELETED)
+            .trader(TransactionTrader.PRODUCER)
+            .build();
+
+    private final Transaction consumerTransactionSample = Transaction.builder()
+            .id(UUID.randomUUID())
+            .transactionId("sampleTransactionId")
+            .createdAt(Timestamp.from(Instant.now()))
+            .hashlink("http://scorpio:9090/ngsi-ld/v1/entities/urn:ngsi-ld:product-offering:in2-0092")
+            .entityId("sampleEntityId")
+            .hash("")
+            .status(TransactionStatus.DELETED)
+            .trader(TransactionTrader.CONSUMER)
+            .build();
+
     @Mock
     private TransactionRepository transactionRepository;
 
@@ -72,6 +94,30 @@ class TransactionServiceTest {
         when(transactionRepository.findLastProducerTransaction()).thenReturn(Flux.empty());
         // Act
         Mono<Void> resultMono = transactionService.saveTransaction(processId, transactionSample);
+        // Assert
+        Void resultTransaction = resultMono.block();
+        assertNull(resultTransaction);
+    }
+
+    @Test
+    void saveDeletedTransaction_Success() {
+        // Arrange
+        String processId = "testProcessId";
+        when(transactionRepository.save(any(Transaction.class))).thenReturn(Mono.empty());
+        // Act
+        Mono<Void> resultMono = transactionService.saveTransaction(processId, transactionSample_deleted);
+        // Assert
+        Void resultTransaction = resultMono.block();
+        assertNull(resultTransaction);
+    }
+
+    @Test
+    void saveConsumerTransaction_Success() {
+        // Arrange
+        String processId = "testProcessId";
+        when(transactionRepository.save(any(Transaction.class))).thenReturn(Mono.empty());
+        // Act
+        Mono<Void> resultMono = transactionService.saveTransaction(processId, consumerTransactionSample);
         // Assert
         Void resultTransaction = resultMono.block();
         assertNull(resultTransaction);
