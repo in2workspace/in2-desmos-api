@@ -37,16 +37,16 @@ public class TransactionServiceImpl implements TransactionService {
                         String brokerEntityLocation = brokerProperties.internalDomain() + brokerProperties.paths().entities();
                         transaction.setHashlink(brokerEntityLocation + "/" + transaction.getEntityId() + HASHLINK_PREFIX + intertwinedHash);
                         return transactionRepository.save(transaction).doOnSuccess(success -> log.info("ProcessID: {} - Transaction saved successfully", processId))
-                                .doOnError(error -> log.error("ProcessID: {} - Error saving transaction: {}", processId, error.getMessage()))
+                                .doOnError(error -> log.error("ProcessID: {} - Error saving producer transaction: {}", processId, error.getMessage()))
                                 .then();
                     });
         } else {
             return transactionRepository.save(transaction).doOnSuccess(success -> log.info("ProcessID: {} - Transaction saved successfully", processId))
-                    .doOnError(error -> log.error("ProcessID: {} - Error saving transaction: {}", processId, error.getMessage()))
+                    .doOnError(error -> log.error("ProcessID: {} - Error saving consumer transaction: {}", processId, error.getMessage()))
                     .then();
         }}catch (HashLinkException e) {
             return transactionRepository.save(transaction).doOnSuccess(success -> log.info("ProcessID: {} - Deletion transaction saved successfully", processId))
-                    .doOnError(error -> log.error("ProcessID: {} - Error saving transaction: {}", processId, error.getMessage()))
+                    .doOnError(error -> log.error("ProcessID: {} - Error saving deleted transaction: {}", processId, error.getMessage()))
                     .then();
         }
 

@@ -29,7 +29,7 @@ class ApplicationUtilsTest {
     }
 
     @Test
-    public void testCalculateIntertwinedHash() throws NoSuchAlgorithmException {
+    void testCalculateIntertwinedHash() throws NoSuchAlgorithmException {
         String hash1Hex = "9e107d9d372bb6826bd81d3542a419d6";
         String hash2Hex = "e4d909c290d0fb1ca068ffaddf22cbd0";
 

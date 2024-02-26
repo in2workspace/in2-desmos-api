@@ -140,7 +140,7 @@ class TransactionServiceTest {
     }
 
     @Test
-    public void getLastProducerTransactionByEntityId_ReturnsLastTransaction() {
+    void getLastProducerTransactionByEntityId_ReturnsLastTransaction() {
         String processId = "processId";
         String entityId = "entityId";
         Transaction transaction = new Transaction();
