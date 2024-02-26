@@ -1,5 +1,5 @@
 package es.in2.desmos.blockchain.util;
-
+import es.in2.desmos.blockchain.adapter.DigitelDLTAdapter;
 import es.in2.desmos.blockchain.config.properties.DLTAdapterProperties;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
