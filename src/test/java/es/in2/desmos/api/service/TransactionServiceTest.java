@@ -4,7 +4,6 @@ import es.in2.desmos.api.model.Transaction;
 import es.in2.desmos.api.model.TransactionStatus;
 import es.in2.desmos.api.model.TransactionTrader;
 import es.in2.desmos.api.repository.TransactionRepository;
-import es.in2.desmos.api.service.impl.BlockchainEventCreatorServiceImpl;
 import es.in2.desmos.api.service.impl.TransactionServiceImpl;
 import es.in2.desmos.broker.config.properties.BrokerPathProperties;
 import es.in2.desmos.broker.config.properties.BrokerProperties;
@@ -38,7 +37,7 @@ class TransactionServiceTest {
             .createdAt(Timestamp.from(Instant.now()))
             .hashlink("http://scorpio:9090/ngsi-ld/v1/entities/urn:ngsi-ld:product-offering:in2-0092?hl=0502b524143e41325d7d60aa1e5c19ab1597f1af9f2acd4d4101d643a9494d2b")
             .entityId("sampleEntityId")
-            .hash("sampleEntityHash")
+            .hash("9520d52c750e7ee0678b67849f075958346811c866bcf46be4a5da166ac95470")
             .status(TransactionStatus.CREATED)
             .trader(TransactionTrader.PRODUCER)
             .build();
@@ -91,13 +90,14 @@ class TransactionServiceTest {
         // Arrange
         String processId = "testProcessId";
         when(transactionRepository.save(any(Transaction.class))).thenReturn(Mono.empty());
-        when(transactionRepository.findLastProducerTransaction()).thenReturn(Flux.empty());
+        when(transactionRepository.findLastProducerTransaction()).thenReturn(Flux.just(transactionSample));
         // Act
         Mono<Void> resultMono = transactionService.saveTransaction(processId, transactionSample);
         // Assert
         Void resultTransaction = resultMono.block();
         assertNull(resultTransaction);
     }
+
 
     @Test
     void saveDeletedTransaction_Success() {
@@ -137,6 +137,19 @@ class TransactionServiceTest {
         StepVerifier.create(resultMono)
                 .expectErrorMatches(throwable -> throwable instanceof RuntimeException && throwable.getMessage().equals("Test Error"))
                 .verify();
+    }
+
+    @Test
+    public void getLastProducerTransactionByEntityId_ReturnsLastTransaction() {
+        String processId = "processId";
+        String entityId = "entityId";
+        Transaction transaction = new Transaction();
+        when(transactionRepository.findLastProducerTransactionByEntityId(entityId)).thenReturn(Flux.just(transaction));
+
+        StepVerifier.create(transactionService.getLastProducerTransactionByEntityId(processId, entityId))
+                .expectNext(transaction)
+                .verifyComplete();
+        verify(transactionRepository).findLastProducerTransactionByEntityId(entityId);
     }
 
     @Test
@@ -207,5 +220,7 @@ class TransactionServiceTest {
 
         verify(transactionRepository).findLatestByEntityIdAndStatusPublishedOrDeleted(entityId);
     }
+
+
 
 }
