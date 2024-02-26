@@ -10,9 +10,9 @@ import es.in2.desmos.api.model.Transaction;
 import es.in2.desmos.api.model.TransactionStatus;
 import es.in2.desmos.api.model.TransactionTrader;
 import es.in2.desmos.api.service.TransactionService;
-import es.in2.desmos.blockchain.config.properties.BlockchainAdapterPathProperties;
-import es.in2.desmos.blockchain.config.properties.BlockchainAdapterProperties;
-import es.in2.desmos.blockchain.service.BlockchainAdapterEventPublisher;
+import es.in2.desmos.blockchain.config.properties.DLTAdapterPathProperties;
+import es.in2.desmos.blockchain.config.properties.DLTAdapterProperties;
+import es.in2.desmos.blockchain.service.DLTAdapterEventPublisher;
 import es.in2.desmos.broker.service.BrokerPublicationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,10 +41,10 @@ class BlockchainConnectorInitializerTest {
     private TransactionService transactionService;
 
     @Mock
-    private BlockchainAdapterProperties blockchainAdapterProperties;
+    private DLTAdapterProperties DLTAdapterProperties;
 
     @Mock
-    private BlockchainAdapterEventPublisher blockchainAdapterEventPublisher;
+    private DLTAdapterEventPublisher DLTAdapterEventPublisher;
 
     @Mock
     private ObjectMapper objectMapper;
@@ -82,10 +82,10 @@ class BlockchainConnectorInitializerTest {
     @BeforeEach
     void setUp() {
         // Corrected to include all dependencies
-        blockchainAdapterProperties = new BlockchainAdapterProperties("http://localhost:8080", "http://localhost:8080", "http" +
-                "://localhost:8080", new BlockchainAdapterPathProperties("/configureNode", "/publish", "/subscribe"));
-        blockchainConnectorInitializer = new BlockchainConnectorInitializer(transactionService, blockchainAdapterProperties,
-                blockchainAdapterEventPublisher, new ObjectMapper(), brokerToBlockchainDataSyncPublisher,
+        DLTAdapterProperties = new DLTAdapterProperties("http://localhost:8080", "http://localhost:8080", "http" +
+                "://localhost:8080", new DLTAdapterPathProperties("/configureNode", "/publish", "/subscribe"));
+        blockchainConnectorInitializer = new BlockchainConnectorInitializer(transactionService, DLTAdapterProperties,
+                DLTAdapterEventPublisher, new ObjectMapper(), brokerToBlockchainDataSyncPublisher,
                 brokerToBlockchainPublisher, blockchainToBrokerSynchronizer, blockchainToBrokerDataSyncSynchronizer,
                 brokerPublicationService);
     }
@@ -146,7 +146,7 @@ class BlockchainConnectorInitializerTest {
         String dltNotificationDTOexample = "{\"id\":1,\"publisherAddress\":\"String\",\"eventType\":\"ProductOffering\"," +
                 "\"timestamp\":3,\"dataLocation\":\"http://scorpio:9090/ngsi-ld/v1/entities/urn:ngsi-ld:product-offering:443734333" +
                 "?hl=0xd6e502951d411812220f92c9eb3795eb2674aa71918128f19daf296deb40942\",\"relevantMetadata\":[]}";
-        when(blockchainAdapterEventPublisher.getEventsFromRange(any(String.class), any(Long.class), any(Long.class)))
+        when(DLTAdapterEventPublisher.getEventsFromRange(any(String.class), any(Long.class), any(Long.class)))
                 .thenReturn(Flux.just(dltNotificationDTOexample));
         Flux<String> mockResponse = Flux.just(dltNotificationDTOexample);
         when(responseSpecMock.bodyToFlux(String.class)).thenReturn(mockResponse);
@@ -204,7 +204,7 @@ class BlockchainConnectorInitializerTest {
                 "\"timestamp\":3,\"dataLocation\":\"http://scorpio:9090/ngsi-ld/v1/entities/urn:ngsi-ld:product-offering:443734333"
                 +
                 "?hl=0xd6e502951d411812220f92c9eb3795eb2674aa71918128f19daf296deb40942\",\"relevantMetadata\":[]}";
-        when(blockchainAdapterEventPublisher.getEventsFromRange(any(String.class), any(Long.class), any(Long.class)))
+        when(DLTAdapterEventPublisher.getEventsFromRange(any(String.class), any(Long.class), any(Long.class)))
                 .thenReturn(Flux.just(dltNotificationDTOexample));
         Flux<String> mockResponse = Flux.just(dltNotificationDTOexample);
         when(responseSpecMock.bodyToFlux(String.class)).thenReturn(mockResponse);

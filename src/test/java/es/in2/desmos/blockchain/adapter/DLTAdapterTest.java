@@ -2,8 +2,8 @@ package es.in2.desmos.blockchain.adapter;
 
 import es.in2.desmos.api.model.BlockchainEvent;
 import es.in2.desmos.api.service.TransactionService;
-import es.in2.desmos.blockchain.config.properties.BlockchainAdapterPathProperties;
-import es.in2.desmos.blockchain.config.properties.BlockchainAdapterProperties;
+import es.in2.desmos.blockchain.config.properties.DLTAdapterPathProperties;
+import es.in2.desmos.blockchain.config.properties.DLTAdapterProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,10 +21,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class DigitelBlockchainAdapterTest {
+class DLTAdapterTest {
 
     @Mock
-    private BlockchainAdapterProperties blockchainAdapterProperties;
+    private DLTAdapterProperties DLTAdapterProperties;
 
     @Mock
     private TransactionService transactionService;
@@ -44,20 +44,20 @@ class DigitelBlockchainAdapterTest {
     @Mock
     private WebClient.ResponseSpec responseSpecMock;
 
-    private DigitelBlockchainAdapter digitelBlockchainAdapter;
+    private DigitelDLTAdapter digitelDLTAdapter;
 
 
     @BeforeEach
     void setUp() throws NoSuchFieldException, IllegalAccessException {
-        blockchainAdapterProperties = new BlockchainAdapterProperties("http://localhost:8080", "http://localhost:8080", "http" +
-                "://localhost:8080", new BlockchainAdapterPathProperties("/publish", "/publish", "/subscribe"));
+        DLTAdapterProperties = new DLTAdapterProperties("http://localhost:8080", "http://localhost:8080", "http" +
+                "://localhost:8080", new DLTAdapterPathProperties("/publish", "/publish", "/subscribe"));
         TransactionService transactionService = mock(TransactionService.class);
         WebClient webClient = mock(WebClient.class);
 
-        digitelBlockchainAdapter = new DigitelBlockchainAdapter(blockchainAdapterProperties, transactionService);
-        Field webClientField = DigitelBlockchainAdapter.class.getDeclaredField("webClient");
+        digitelDLTAdapter = new DigitelDLTAdapter(DLTAdapterProperties, transactionService);
+        Field webClientField = DigitelDLTAdapter.class.getDeclaredField("webClient");
         webClientField.setAccessible(true);
-        webClientField.set(digitelBlockchainAdapter, webClient);
+        webClientField.set(digitelDLTAdapter, webClient);
         when(webClient.post()).thenReturn(requestBodyUriSpecMock);
         when(requestBodyUriSpecMock.uri(any(String.class))).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.accept(any(MediaType.class))).thenReturn(requestBodySpecMock);
@@ -81,7 +81,7 @@ class DigitelBlockchainAdapterTest {
                 .build();
 
 
-        Mono<Void> result = digitelBlockchainAdapter.publishEvent("processId", blockchainEvent);
+        Mono<Void> result = digitelDLTAdapter.publishEvent("processId", blockchainEvent);
 
         StepVerifier.create(result)
                 .verifyComplete();

@@ -5,9 +5,9 @@ import es.in2.desmos.api.model.Transaction;
 import es.in2.desmos.api.model.TransactionStatus;
 import es.in2.desmos.api.model.TransactionTrader;
 import es.in2.desmos.api.service.TransactionService;
-import es.in2.desmos.blockchain.config.properties.BlockchainAdapterProperties;
-import es.in2.desmos.blockchain.model.BlockchainAdapterSubscription;
-import es.in2.desmos.blockchain.service.GenericBlockchainAdapterService;
+import es.in2.desmos.blockchain.config.properties.DLTAdapterProperties;
+import es.in2.desmos.blockchain.model.DLTAdapterSubscription;
+import es.in2.desmos.blockchain.service.GenericDLTAdapterService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,28 +26,28 @@ import static es.in2.desmos.api.util.ApplicationUtils.*;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class DigitelBlockchainAdapter implements GenericBlockchainAdapterService {
+public class DigitelDLTAdapter implements GenericDLTAdapterService {
 
-    private final BlockchainAdapterProperties blockchainAdapterProperties;
+    private final DLTAdapterProperties dltAdapterProperties;
     private final TransactionService transactionService;
     private WebClient webClient;
 
     @PostConstruct
     public void init() {
         this.webClient = WebClient.builder()
-                .baseUrl(blockchainAdapterProperties.internalDomain())
+                .baseUrl(dltAdapterProperties.internalDomain())
                 .build();
     }
 
     @Override
-    public Mono<Void> createSubscription(String processId, BlockchainAdapterSubscription blockchainAdapterSubscription) {
+    public Mono<Void> createSubscription(String processId, DLTAdapterSubscription dltAdapterSubscription) {
         log.info("ProcessId: {} - Creating subscription...", processId);
         return webClient.post()
-                .uri(blockchainAdapterProperties.paths()
+                .uri(dltAdapterProperties.paths()
                         .subscription())
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(blockchainAdapterSubscription)
+                .bodyValue(dltAdapterSubscription)
                 .retrieve()
                 .bodyToMono(Void.class);
     }
@@ -55,7 +55,7 @@ public class DigitelBlockchainAdapter implements GenericBlockchainAdapterService
     @Override
     public Mono<Void> publishEvent(String processId, BlockchainEvent blockchainEvent) {
         return webClient.post()
-                .uri(blockchainAdapterProperties.paths()
+                .uri(dltAdapterProperties.paths()
                         .publication())
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -100,10 +100,11 @@ public class DigitelBlockchainAdapter implements GenericBlockchainAdapterService
     @Override
     public Flux<String> getEventsFromRange(String processId, long from, long to) {
         return webClient.get()
-                .uri(blockchainAdapterProperties.paths()
-                        .events() +"?startDate=" + from + "&endDate=" + to)
+                .uri(dltAdapterProperties.paths()
+                        .events() + "?startDate=" + from + "&endDate=" + to)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToFlux(String.class);
     }
+
 }

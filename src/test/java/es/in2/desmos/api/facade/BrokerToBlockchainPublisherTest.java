@@ -8,7 +8,7 @@ import es.in2.desmos.api.model.EventQueuePriority;
 import es.in2.desmos.api.service.BlockchainEventCreatorService;
 import es.in2.desmos.api.service.NotificationProcessorService;
 import es.in2.desmos.api.service.QueueService;
-import es.in2.desmos.blockchain.service.BlockchainAdapterEventPublisher;
+import es.in2.desmos.blockchain.service.DLTAdapterEventPublisher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -45,7 +45,7 @@ class BrokerToBlockchainPublisherTest {
     @Mock
     private BlockchainEventCreatorService blockchainEventCreatorService;
     @Mock
-    private BlockchainAdapterEventPublisher blockchainAdapterEventPublisher;
+    private DLTAdapterEventPublisher DLTAdapterEventPublisher;
     @Mock
     private QueueService brokerToBlockchainQueueService;
     @InjectMocks
@@ -60,14 +60,14 @@ class BrokerToBlockchainPublisherTest {
                 .thenReturn(Mono.just(dataMap));
         when(blockchainEventCreatorService.createBlockchainEvent(anyString(), any()))
                 .thenReturn(Mono.just(blockchainEvent));
-        when(blockchainAdapterEventPublisher.publishBlockchainEvent(anyString(), any()))
+        when(DLTAdapterEventPublisher.publishBlockchainEvent(anyString(), any()))
                 .thenReturn(Mono.empty());
         // Act
         brokerToBlockchainPublisher.processAndPublishBrokerNotificationToBlockchain(processId, brokerNotification).block();
         // Assert - Verify that services are called with the expected parameters
         verify(notificationProcessorService).processBrokerNotification(processId, brokerNotification);
         verify(blockchainEventCreatorService).createBlockchainEvent(processId, dataMap);
-        verify(blockchainAdapterEventPublisher).publishBlockchainEvent(processId, blockchainEvent);
+        verify(DLTAdapterEventPublisher).publishBlockchainEvent(processId, blockchainEvent);
     }
 
     @Test
@@ -82,7 +82,7 @@ class BrokerToBlockchainPublisherTest {
                 .thenReturn(Mono.just(dataMap));
         when(blockchainEventCreatorService.createBlockchainEvent(processId, dataMap))
                 .thenReturn(Mono.just(blockchainEvent));
-        when(blockchainAdapterEventPublisher.publishBlockchainEvent(processId, blockchainEvent))
+        when(DLTAdapterEventPublisher.publishBlockchainEvent(processId, blockchainEvent))
                 .thenReturn(Mono.empty());
 
         // Mock downstream services for successful execution
@@ -110,7 +110,7 @@ class BrokerToBlockchainPublisherTest {
         // Verify that the first service is called and others are not due to the error
         verify(notificationProcessorService).processBrokerNotification(processId, brokerNotification);
         verifyNoInteractions(blockchainEventCreatorService);
-        verifyNoInteractions(blockchainAdapterEventPublisher);
+        verifyNoInteractions(DLTAdapterEventPublisher);
         // Verify error logging - This part is tricky as Mockito doesn't directly support verifying log statements.
         // You may need to use additional tools or frameworks to assert log output, or alternatively,
         // verify that the subsequent steps after the error are not executed, as done here.

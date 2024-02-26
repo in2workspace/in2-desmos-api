@@ -1,9 +1,9 @@
 package es.in2.desmos.blockchain.service.impl;
 
 import es.in2.desmos.api.model.BlockchainEvent;
-import es.in2.desmos.blockchain.service.BlockchainAdapterEventPublisher;
-import es.in2.desmos.blockchain.service.GenericBlockchainAdapterService;
-import es.in2.desmos.blockchain.util.BlockchainAdapterFactory;
+import es.in2.desmos.blockchain.service.DLTAdapterEventPublisher;
+import es.in2.desmos.blockchain.service.GenericDLTAdapterService;
+import es.in2.desmos.blockchain.util.DLTAdapterFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -11,12 +11,12 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @Service
-public class BlockchainAdapterEventPublisherImpl implements BlockchainAdapterEventPublisher {
+public class DLTAdapterEventPublisherImpl implements DLTAdapterEventPublisher {
 
-    private final GenericBlockchainAdapterService evmAdapter;
+    private final GenericDLTAdapterService evmAdapter;
 
-    public BlockchainAdapterEventPublisherImpl(BlockchainAdapterFactory blockchainAdapterFactory) {
-        this.evmAdapter = blockchainAdapterFactory.getEVMAdapter();
+    public DLTAdapterEventPublisherImpl(DLTAdapterFactory dltAdapterFactory) {
+        this.evmAdapter = dltAdapterFactory.getEVMAdapter();
     }
 
     @Override

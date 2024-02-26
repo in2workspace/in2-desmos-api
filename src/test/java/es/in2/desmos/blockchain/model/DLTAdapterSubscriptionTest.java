@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
-class BlockchainAdapterSubscriptionTest {
+class DLTAdapterSubscriptionTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -15,7 +15,7 @@ class BlockchainAdapterSubscriptionTest {
         List<String> eventTypes = List.of("type1", "type2");
         String notificationEndpoint = "http://example.com/notify";
         // Act
-        BlockchainAdapterSubscription subscription = BlockchainAdapterSubscription.builder()
+        DLTAdapterSubscription subscription = DLTAdapterSubscription.builder()
                 .eventTypes(eventTypes)
                 .notificationEndpoint(notificationEndpoint)
                 .build();
@@ -27,7 +27,7 @@ class BlockchainAdapterSubscriptionTest {
     @Test
     void testSerialization() throws Exception {
         // Arrange
-        BlockchainAdapterSubscription subscription = BlockchainAdapterSubscription.builder()
+        DLTAdapterSubscription subscription = DLTAdapterSubscription.builder()
                 .eventTypes(List.of("type1", "type2"))
                 .notificationEndpoint("http://example.com/notify")
                 .build();
@@ -43,7 +43,7 @@ class BlockchainAdapterSubscriptionTest {
         // Arrange
         String json = "{\"eventTypes\":[\"type1\",\"type2\"],\"notificationEndpoint\":\"http://example.com/notify\"}";
         // Act
-        BlockchainAdapterSubscription subscription = objectMapper.readValue(json, BlockchainAdapterSubscription.class);
+        DLTAdapterSubscription subscription = objectMapper.readValue(json, DLTAdapterSubscription.class);
         // Assert
         assertEquals(List.of("type1", "type2"), subscription.eventTypes());
         assertEquals("http://example.com/notify", subscription.notificationEndpoint());

@@ -14,16 +14,16 @@ import java.util.Optional;
  * @param externalDomain - external domain
  * @param paths          - paths
  */
-@ConfigurationProperties(prefix = "blockchain-adapter")
-public record BlockchainAdapterProperties(String provider, String internalDomain, String externalDomain,
-                                          @NestedConfigurationProperty BlockchainAdapterPathProperties paths) {
+@ConfigurationProperties(prefix = "dlt-adapter")
+public record DLTAdapterProperties(String provider, String internalDomain, String externalDomain,
+                                   @NestedConfigurationProperty DLTAdapterPathProperties paths) {
 
     @ConstructorBinding
-    public BlockchainAdapterProperties(String provider, String internalDomain, String externalDomain, BlockchainAdapterPathProperties paths) {
+    public DLTAdapterProperties(String provider, String internalDomain, String externalDomain, DLTAdapterPathProperties paths) {
         this.provider = provider;
         this.internalDomain = internalDomain;
         this.externalDomain = externalDomain;
-        this.paths = Optional.ofNullable(paths).orElse(new BlockchainAdapterPathProperties(null, null, null));
+        this.paths = Optional.ofNullable(paths).orElse(new DLTAdapterPathProperties(null, null, null));
     }
 
 }

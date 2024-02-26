@@ -5,7 +5,7 @@ import es.in2.desmos.api.config.properties.OpenApiProperties;
 import es.in2.desmos.api.exception.HashCreationException;
 import es.in2.desmos.api.service.QueueService;
 import es.in2.desmos.api.service.impl.QueueServiceImpl;
-import es.in2.desmos.blockchain.config.properties.BlockchainAdapterProperties;
+import es.in2.desmos.blockchain.config.properties.DLTAdapterProperties;
 import es.in2.desmos.broker.config.properties.BrokerProperties;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
@@ -30,14 +30,14 @@ public class ApplicationConfig {
 
     private final OpenApiProperties openApiProperties;
     private final ClientProperties clientProperties;
-    private final BlockchainAdapterProperties blockchainAdapterProperties;
+    private final DLTAdapterProperties dltAdapterProperties;
     private final BrokerProperties brokerProperties;
 
     @PostConstruct
     public void init() {
         log.debug("OpenApi properties: {}", openApiProperties);
         log.debug("Operator properties: {}", clientProperties);
-        log.debug("DLT adapter properties: {}", blockchainAdapterProperties);
+        log.debug("DLT adapter properties: {}", dltAdapterProperties);
         log.debug("Broker properties: {}", brokerProperties);
     }
 

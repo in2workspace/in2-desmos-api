@@ -1,12 +1,11 @@
 package es.in2.desmos.api.facade.impl;
 
 import es.in2.desmos.api.facade.BrokerToBlockchainPublisher;
-import es.in2.desmos.api.model.BlockchainNotification;
 import es.in2.desmos.api.model.BrokerNotification;
 import es.in2.desmos.api.service.BlockchainEventCreatorService;
 import es.in2.desmos.api.service.NotificationProcessorService;
 import es.in2.desmos.api.service.QueueService;
-import es.in2.desmos.blockchain.service.BlockchainAdapterEventPublisher;
+import es.in2.desmos.blockchain.service.DLTAdapterEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -24,9 +23,8 @@ public class BrokerToBlockchainPublisherImpl implements BrokerToBlockchainPublis
 
     private final NotificationProcessorService notificationProcessorService;
     private final BlockchainEventCreatorService blockchainEventCreatorService;
-    private final BlockchainAdapterEventPublisher blockchainAdapterEventPublisher;
+    private final DLTAdapterEventPublisher dltAdapterEventPublisher;
     private final QueueService brokerToBlockchainQueueService;
-
 
     @Override
     public Flux<Void> startProcessingEvents() {
@@ -34,7 +32,7 @@ public class BrokerToBlockchainPublisherImpl implements BrokerToBlockchainPublis
                 .flatMap(eventQueue -> {
                     String processId = UUID.randomUUID().toString();
                     MDC.put("processId", processId);
-                    return processAndPublishBrokerNotificationToBlockchain(processId,(BrokerNotification) eventQueue.getEvent().get(0))
+                    return processAndPublishBrokerNotificationToBlockchain(processId, (BrokerNotification) eventQueue.getEvent().get(0))
                             .doOnSuccess(voidValue -> log.debug("Blockchain Event Published Successfully"));
                 })
                 .onErrorResume(error -> {
@@ -51,7 +49,7 @@ public class BrokerToBlockchainPublisherImpl implements BrokerToBlockchainPublis
                 // Create a Blockchain Event -> BlockchainEventCreator
                 .flatMap(dataMap -> blockchainEventCreatorService.createBlockchainEvent(processId, dataMap))
                 // Publish the Blockchain Event into the Blockchain Node -> BlockchainEventPublisher
-                .flatMap(blockchainEvent -> blockchainAdapterEventPublisher.publishBlockchainEvent(processId, blockchainEvent))
+                .flatMap(blockchainEvent -> dltAdapterEventPublisher.publishBlockchainEvent(processId, blockchainEvent))
                 .doOnSuccess(success -> log.info("Blockchain Event created and published successfully."))
                 .doOnError(error -> log.error("Error creating or publishing Blockchain Event: {}", error.getMessage(), error));
     }

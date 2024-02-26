@@ -2,8 +2,8 @@ package es.in2.desmos.blockchain.config;
 
 import es.in2.desmos.api.exception.RequestErrorException;
 import es.in2.desmos.blockchain.config.properties.EventSubscriptionProperties;
-import es.in2.desmos.blockchain.model.BlockchainAdapterSubscription;
-import es.in2.desmos.blockchain.service.BlockchainAdapterSubscriptionService;
+import es.in2.desmos.blockchain.model.DLTAdapterSubscription;
+import es.in2.desmos.blockchain.service.DLTAdapterSubscriptionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -21,10 +21,10 @@ import java.util.UUID;
 @Component
 @RequiredArgsConstructor
 @EnableRetry
-public class BlockchainAdapterSubscriptionInitializer {
+public class DLTAdapterSubscriptionInitializer {
 
     private final EventSubscriptionProperties eventSubscriptionProperties;
-    private final BlockchainAdapterSubscriptionService blockchainAdapterSubscriptionService;
+    private final DLTAdapterSubscriptionService dltAdapterSubscriptionService;
 
     @EventListener(ApplicationReadyEvent.class)
     @Retryable(retryFor = RequestErrorException.class,
@@ -39,12 +39,12 @@ public class BlockchainAdapterSubscriptionInitializer {
     private Mono<Void> setBlockchainEventSubscription(String processId) {
         log.info("Setting Blockchain Event Subscription...");
         // Create the EVM Subscription object
-        BlockchainAdapterSubscription blockchainAdapterSubscription = BlockchainAdapterSubscription.builder()
+        DLTAdapterSubscription dltAdapterSubscription = DLTAdapterSubscription.builder()
                 .eventTypes(eventSubscriptionProperties.eventTypes())
                 .notificationEndpoint(eventSubscriptionProperties.notificationEndpoint())
                 .build();
         // Create the subscription
-        return blockchainAdapterSubscriptionService.createSubscription(processId, blockchainAdapterSubscription)
+        return dltAdapterSubscriptionService.createSubscription(processId, dltAdapterSubscription)
                 .doOnSuccess(response -> log.info("Blockchain Event Subscription created successfully"))
                 .doOnError(e -> log.error("Error creating Blockchain Event Subscription", e));
     }
@@ -53,6 +53,5 @@ public class BlockchainAdapterSubscriptionInitializer {
     public void recover(RequestErrorException e) {
         log.error("After retries, subscription failed", e);
     }
-
 
 }
