@@ -41,11 +41,11 @@ class NotificationProcessorServiceTests {
             .createdAt(Timestamp.from(Instant.now()))
             .entityId("testId")
             .entityType("testType")
-            .hash("testHash")
+            .entityHash("testHash")
             .status(TransactionStatus.PUBLISHED)
             .trader(TransactionTrader.CONSUMER)
-            .hash("testHash")
-            .hashlink("testLocation?hl=testHash")
+            .entityHash("testHash")
+            .datalocation("testLocation?hl=testHash")
             .build();
 
     private final Mono<Transaction> emptyTransaction = Mono.empty().cast(Transaction.class);

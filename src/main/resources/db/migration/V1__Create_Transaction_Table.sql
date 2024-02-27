@@ -6,9 +6,10 @@ CREATE TABLE IF NOT EXISTS transactions
     transaction_id varchar(256),
     created_at TIMESTAMP NOT NULL,
     entity_id varchar(256),
-    hashlink varchar(256),
-    entity_hash varchar(256),
+    datalocation varchar(256),
     entity_type varchar(256),
+    entity_hash varchar(256),
     status varchar(256),
-    trader varchar(256)
+    trader varchar(256),
+    hash varchar(256)
 );

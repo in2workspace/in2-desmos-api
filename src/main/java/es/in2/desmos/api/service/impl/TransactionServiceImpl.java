@@ -30,27 +30,36 @@ public class TransactionServiceImpl implements TransactionService {
     public Mono<Void> saveTransaction(String processId, Transaction transaction) {
         log.debug("ProcessID: {} - Saving transaction...", processId);
         try {
+            if (transaction.getTrader() == TransactionTrader.PRODUCER && hasHlParameter(transaction.getDatalocation())) {
+                // In case of a producer transaction, we calculate the intertwined hash and save it
+                Mono<String> entityHashMono = getLastProducerTransactionByEntityId(processId, transaction.getEntityId())
+                        .flatMap(lastTransaction -> getEntityHashFromLastTransaction(processId, transaction.getEntityId()))
+                        .switchIfEmpty(Mono.just(transaction.getEntityHash()));
 
-        if (transaction.getTrader() == TransactionTrader.PRODUCER && hasHlParameter(transaction.getHashlink())) {
-            return calculateTransactionIntertwinedHash(transaction.getHash(), processId)
-                    .flatMap(intertwinedHash -> {
-                        String brokerEntityLocation = brokerProperties.internalDomain() + brokerProperties.paths().entities();
-                        transaction.setHashlink(brokerEntityLocation + "/" + transaction.getEntityId() + HASHLINK_PREFIX + intertwinedHash);
-                        return transactionRepository.save(transaction).doOnSuccess(success -> log.info("ProcessID: {} - Transaction saved successfully", processId))
-                                .doOnError(error -> log.error("ProcessID: {} - Error saving producer transaction: {}", processId, error.getMessage()))
-                                .then();
-                    });
-        } else {
-            return transactionRepository.save(transaction).doOnSuccess(success -> log.info("ProcessID: {} - Transaction saved successfully", processId))
-                    .doOnError(error -> log.error("ProcessID: {} - Error saving consumer transaction: {}", processId, error.getMessage()))
-                    .then();
-        }}catch (HashLinkException e) {
-            return transactionRepository.save(transaction).doOnSuccess(success -> log.info("ProcessID: {} - Deletion transaction saved successfully", processId))
+                return calculateTransactionIntertwinedHash(transaction.getEntityHash(), processId)
+                        .flatMap(intertwinedHash -> entityHashMono.flatMap(entityHash -> {
+                            transaction.setHash(intertwinedHash);
+                            transaction.setEntityHash(entityHash);
+                            return transactionRepository.save(transaction)
+                                    .doOnSuccess(success -> log.info("ProcessID: {} - Transaction saved successfully", processId))
+                                    .doOnError(error -> log.error("ProcessID: {} - Error saving producer transaction: {}", processId, error.getMessage()));
+                        })).then();
+            } else {
+                // In case of a consumer transaction, we save it without calculating the intertwined hash
+                return transactionRepository.save(transaction)
+                        .doOnSuccess(success -> log.info("ProcessID: {} - Transaction saved successfully", processId))
+                        .doOnError(error -> log.error("ProcessID: {} - Error saving consumer transaction: {}", processId, error.getMessage()))
+                        .then();
+            }
+        } catch (HashLinkException e) {
+            // In case of an error while calculating the intertwined hash, it means that the transaction is a deleted one
+            return transactionRepository.save(transaction)
+                    .doOnSuccess(success -> log.info("ProcessID: {} - Deletion transaction saved successfully", processId))
                     .doOnError(error -> log.error("ProcessID: {} - Error saving deleted transaction: {}", processId, error.getMessage()))
                     .then();
         }
-
     }
+
 
     @Override
     public Mono<List<Transaction>> getTransactionsByEntityId(String processId, String entityId) {
@@ -87,11 +96,16 @@ public class TransactionServiceImpl implements TransactionService {
         return getLastProducerTransaction(processId)
                 .flatMap(transaction -> Mono.fromCallable(() -> {
                     try {
-                        return calculateIntertwinedHash(entityHash, extractEntityHashFromDataLocation(transaction.getHashlink()));
+                        return calculateIntertwinedHash(entityHash, transaction.getHash());
                     } catch (NoSuchAlgorithmException e) {
                         throw new HashCreationException("Error while calculating intertwined hash", e);
                     }
                 })).switchIfEmpty(Mono.just(entityHash));
+    }
+
+    private Mono<String> getEntityHashFromLastTransaction(String processId, String entityId) {
+        return getLastProducerTransactionByEntityId(processId, entityId)
+                .map(Transaction::getEntityHash);
     }
 
 

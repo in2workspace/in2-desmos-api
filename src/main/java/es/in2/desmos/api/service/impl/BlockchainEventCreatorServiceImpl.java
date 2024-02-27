@@ -71,10 +71,10 @@ public class BlockchainEventCreatorServiceImpl implements BlockchainEventCreator
                                 .createdAt(Timestamp.from(Instant.now()))
                                 .entityId(extractEntityIdFromDataLocation(blockchainEvent.dataLocation()))
                                 .entityType(blockchainEvent.eventType())
-                                .hash(extractEntityHashFromDataLocation(blockchainEvent.dataLocation()))
+                                .entityHash("prova")
                                 .status(TransactionStatus.CREATED)
                                 .trader(TransactionTrader.PRODUCER)
-                                .hashlink(blockchainEvent.dataLocation())
+                                .datalocation(blockchainEvent.dataLocation())
                                 .newTransaction(true)
                                 .build())
                         .thenReturn(blockchainEvent);

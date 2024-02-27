@@ -18,10 +18,10 @@ class TransactionTest {
         assertNull(transaction.getId(), "Expected id to be null");
         assertNull(transaction.getTransactionId(), "Expected transactionId to be null");
         assertNull(transaction.getCreatedAt(), "Expected createdAt to be null");
-        assertNull(transaction.getHashlink(), "Expected dataLocation to be null");
+        assertNull(transaction.getDatalocation(), "Expected dataLocation to be null");
         assertNull(transaction.getEntityId(), "Expected entityId to be null");
         assertNull(transaction.getEntityType(), "Expected entityType to be null");
-        assertNull(transaction.getHash(), "Expected entityHash to be null");
+        assertNull(transaction.getEntityHash(), "Expected entityHash to be null");
         assertNull(transaction.getStatus(), "Expected status to be null");
         assertNull(transaction.getTrader(), "Expected trader to be null");
         assertTrue(transaction.isNew(), "Expected newTransaction to be false");
@@ -47,24 +47,24 @@ class TransactionTest {
         transaction.setId(id);
         transaction.setTransactionId(transactionId);
         transaction.setCreatedAt(createdAt);
-        transaction.setHashlink(dataLocation);
+        transaction.setDatalocation(dataLocation);
         transaction.setEntityId(entityId);
         transaction.setEntityType(entityType);
-        transaction.setHash(entityHash);
+        transaction.setEntityHash(entityHash);
         transaction.setStatus(status);
         transaction.setTrader(trader);
-        transaction.setHash(hash);
+        transaction.setEntityHash(hash);
         transaction.setNewTransaction(newTransaction);
         // Assert
         assertEquals(id, transaction.getId());
         assertEquals(transactionId, transaction.getTransactionId());
         assertEquals(createdAt, transaction.getCreatedAt());
-        assertEquals(dataLocation, transaction.getHashlink());
+        assertEquals(dataLocation, transaction.getDatalocation());
         assertEquals(entityId, transaction.getEntityId());
         assertEquals(entityType, transaction.getEntityType());
         assertEquals(status, transaction.getStatus());
         assertEquals(trader, transaction.getTrader());
-        assertEquals(hash, transaction.getHash());
+        assertEquals(hash, transaction.getEntityHash());
         assertEquals(newTransaction, transaction.isNew());
     }
 
@@ -76,13 +76,13 @@ class TransactionTest {
                 .id(id)
                 .transactionId("trans123")
                 .createdAt(new Timestamp(System.currentTimeMillis()))
-                .hashlink("location1")
+                .datalocation("location1")
                 .entityId("entity1")
                 .entityType("type1")
-                .hash("hash1")
+                .entityHash("hash1")
                 .status(TransactionStatus.CREATED)
                 .trader(TransactionTrader.PRODUCER)
-                .hash("hash2")
+                .entityHash("hash2")
                 .build();
         // Assert
         assertNotNull(transaction);
@@ -119,10 +119,10 @@ class TransactionTest {
                 .id(id)
                 .transactionId(transactionId)
                 .createdAt(createdAt)
-                .hashlink(dataLocation)
+                .datalocation(dataLocation)
                 .entityId(entityId)
                 .entityType(entityType)
-                .hash(entityHash)
+                .entityHash(entityHash)
                 .status(status)
                 .trader(trader)
                 .newTransaction(newTransaction)
@@ -150,13 +150,13 @@ class TransactionTest {
                 .id(id)
                 .transactionId(transactionId)
                 .createdAt(createdAt)
-                .hashlink(dataLocation)
+                .datalocation(dataLocation)
                 .entityId(entityId)
                 .entityType(entityType)
-                .hash(entityHash)
+                .entityHash(entityHash)
                 .status(status)
                 .trader(trader)
-                .hash(hash)
+                .entityHash(hash)
                 .build();
 
         // Assert
@@ -166,13 +166,13 @@ class TransactionTest {
         transaction = Transaction.builder()
                 .transactionId(transactionId)
                 .createdAt(createdAt)
-                .hashlink(dataLocation)
+                .datalocation(dataLocation)
                 .entityId(entityId)
                 .entityType(entityType)
-                .hash(entityHash)
+                .entityHash(entityHash)
                 .status(status)
                 .trader(trader)
-                .hash(hash)
+                .entityHash(hash)
                 .build();
 
         // Assert
@@ -183,13 +183,13 @@ class TransactionTest {
                 .id(id)
                 .transactionId(transactionId)
                 .createdAt(createdAt)
-                .hashlink(dataLocation)
+                .datalocation(dataLocation)
                 .entityId(entityId)
                 .entityType(entityType)
-                .hash(entityHash)
+                .entityHash(entityHash)
                 .status(status)
                 .trader(trader)
-                .hash(hash)
+                .entityHash(hash)
                 .newTransaction(true)
                 .build();
 

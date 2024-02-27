@@ -39,13 +39,13 @@ class TransactionRepositoryIT {
     private final Transaction transaction = Transaction.builder()
             .transactionId("e1e07f6d-e8e7-48ae-bb4d-afab5b63c1f5")
             .createdAt(Timestamp.from(Instant.now()))
-            .hashlink("https://domain.org/ngsi-ld/v1/entities/urn:ngsi-ld:Entity:1234")
+            .datalocation("https://domain.org/ngsi-ld/v1/entities/urn:ngsi-ld:Entity:1234")
             .entityId("urn:ngsi-ld:Entity:1234")
             .entityType("Entity")
-            .hash("0x1234")
+            .entityHash("0x1234")
             .status(TransactionStatus.CREATED)
             .trader(TransactionTrader.PRODUCER)
-            .hash("0x9876")
+            .entityHash("0x9876")
             .newTransaction(true)
             .build();
 

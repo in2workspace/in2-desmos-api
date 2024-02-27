@@ -71,7 +71,7 @@ public class NotificationProcessorServiceImpl implements NotificationProcessorSe
                     try {
                         String brokerEntityAsString = objectMapper.writer().writeValueAsString(dataMap);
                         String brokerEntityHash = calculateSHA256Hash(brokerEntityAsString);
-                        if (transactionFound.getHash().equals(brokerEntityHash)) {
+                        if (transactionFound.getEntityHash().equals(brokerEntityHash)) {
                             log.debug("ProcessID: {} - BrokerNotification is self-generated", processId);
                             return Mono.empty();
                         } else {
@@ -94,10 +94,10 @@ public class NotificationProcessorServiceImpl implements NotificationProcessorSe
                         .id(UUID.randomUUID())
                         .transactionId(processId)
                         .createdAt(Timestamp.from(Instant.now()))
-                        .hashlink(blockchainNotification.dataLocation())
+                        .datalocation(blockchainNotification.dataLocation())
                         .entityId(extractEntityIdFromDataLocation(blockchainNotification.dataLocation()))
                         .entityType(blockchainNotification.eventType())
-                        .hash(extractEntityHashFromDataLocation(blockchainNotification.dataLocation()))
+                        .entityHash(extractEntityHashFromDataLocation(blockchainNotification.dataLocation()))
                         .status(TransactionStatus.RECEIVED)
                         .trader(TransactionTrader.CONSUMER)
                         .newTransaction(true)
