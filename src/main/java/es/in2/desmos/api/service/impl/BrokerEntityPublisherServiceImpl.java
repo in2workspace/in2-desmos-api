@@ -43,7 +43,7 @@ public class BrokerEntityPublisherServiceImpl implements BrokerEntityPublisherSe
                             .createdAt(Timestamp.from(Instant.now()))
                             .entityId(entityId)
                             .entityType(blockchainNotification.eventType())
-                            .entityHash("")
+                            .entityHash(extractEntityHashFromDataLocation(blockchainNotification.dataLocation()))
                             .datalocation(blockchainNotification.dataLocation())
                             .status(TransactionStatus.DELETED)
                             .trader(TransactionTrader.CONSUMER)
@@ -54,6 +54,8 @@ public class BrokerEntityPublisherServiceImpl implements BrokerEntityPublisherSe
             // Create Hash from the retrieved entity
             try {
                 String entityHash = calculateSHA256Hash(retrievedBrokerEntity);
+                String previousHash = blockchainNotification.previousEntityHash();
+                entityHash = previousHash.isEmpty() ? entityHash : calculateIntertwinedHash(entityHash, previousHash);
                 String sourceEntityHash = extractEntityHashFromDataLocation(blockchainNotification.dataLocation());
                 if (entityHash.equals(sourceEntityHash)) {
                     log.debug("ProcessID: {} - Entity integrity is valid", processId);

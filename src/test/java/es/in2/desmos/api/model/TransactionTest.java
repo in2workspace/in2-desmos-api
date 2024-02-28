@@ -95,8 +95,8 @@ class TransactionTest {
         UUID id = UUID.randomUUID();
         String transactionId = "trans123";
         Timestamp createdAt = new Timestamp(System.currentTimeMillis());
-        String dataLocation = "data/location";
         String entityId = "entity123";
+        String dataLocation = "data/location";
         String entityType = "typeA";
         String entityHash = "hash123";
         TransactionStatus status = TransactionStatus.CREATED;
@@ -108,11 +108,12 @@ class TransactionTest {
                 + ", transactionId=" + transactionId
                 + ", createdAt=" + createdAt
                 + ", entityId=" + entityId
-                + ", hashlink=" + dataLocation
+                + ", datalocation=" + dataLocation
                 + ", entityType=" + entityType
-                + ", hash=" + entityHash
+                + ", entityHash=" + entityHash
                 + ", status=" + status
                 + ", trader=" + trader
+                + ", hash=" + hash
                 + ", newTransaction=" + newTransaction + ")";
         // Act
         Transaction transaction = Transaction.builder()
@@ -125,6 +126,7 @@ class TransactionTest {
                 .entityHash(entityHash)
                 .status(status)
                 .trader(trader)
+                .hash(hash)
                 .newTransaction(newTransaction)
                 .build();
         // Assert
