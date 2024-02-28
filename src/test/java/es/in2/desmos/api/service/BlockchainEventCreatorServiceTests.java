@@ -86,8 +86,10 @@ class BlockchainEventCreatorServiceTests {
         when(transactionService.getLastProducerTransactionByEntityId(anyString(), anyString())).thenReturn(Mono.empty());
         when(objectMapper.writeValueAsString(any())).thenReturn("sampleData");
         when(applicationConfig.organizationIdHash()).thenReturn("orgHash");
-        // Act & Assert
-        assertThrows(HashCreationException.class, () -> service.createBlockchainEvent(processId, dataMap).block());
+        // Act
+        Mono<BlockchainEvent> resultMono = service.createBlockchainEvent(processId, dataMap);
+        // Assert
+        assertThrows(HashCreationException.class, resultMono::block);
     }
 
 
@@ -103,8 +105,11 @@ class BlockchainEventCreatorServiceTests {
             applicationUtils
                     .when(() -> ApplicationUtils.calculateSHA256Hash(anyString()))
                     .thenThrow(new NoSuchAlgorithmException());
-            // Act & Assert
-            assertThrows(HashLinkException.class, () -> service.createBlockchainEvent(processId, dataMap).block());
+            // Act
+            Mono<BlockchainEvent> resultMono = service.createBlockchainEvent(processId, dataMap);
+
+            // Assert
+            assertThrows(HashLinkException.class, resultMono::block);
         }
     }
 }
