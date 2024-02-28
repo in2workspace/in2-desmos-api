@@ -25,8 +25,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionServiceTest {
@@ -41,7 +40,7 @@ class TransactionServiceTest {
             .entityHash("9520d52c750e7ee0678b67849f075958346811c866bcf46be4a5da166ac95470")
             .status(TransactionStatus.CREATED)
             .trader(TransactionTrader.PRODUCER)
-            .hash("sampleHash")
+            .hash("0502b524143e41325d7d60b67849f075958346811c866bcf46be4a5da166ac95")
             .build();
 
     private final Transaction transactionSample_deleted = Transaction.builder()
@@ -87,24 +86,26 @@ class TransactionServiceTest {
         transactionService = new TransactionServiceImpl(transactionRepository, brokerProperties);
     }
 
-//    @Test
-//    void saveTransaction_Success() {
-//        // Arrange
-//        String processId = "testProcessId";
-//
-//        when(transactionRepository.save(any(Transaction.class))).thenReturn(Mono.empty());
-//        when(transactionService.getLastProducerTransactionByEntityId(anyString(), anyString())).thenReturn(Mono.just(transactionSample));
-//
-//        // Act
-//        Mono<Void> resultMono = transactionService.saveTransaction(processId, transactionSample);
-//
-//        // Assert
-//        Void resultTransaction = resultMono.block();
-//        assertNull(resultTransaction);
-//
-//        // Verify that save was called exactly once with any Transaction object as an argument
-//        verify(transactionRepository, times(1)).save(any(Transaction.class));
-//    }
+    @Test
+    void saveTransaction_Success() {
+        // Arrange
+        String processId = "testProcessId";
+
+        when(transactionRepository.findLastProducerTransactionByEntityId("sampleEntityId")).thenReturn(Flux.just(transactionSample));
+        when(transactionRepository.findLastProducerTransaction()).thenReturn(Flux.just(transactionSample));
+        when(transactionRepository.save(any(Transaction.class))).thenReturn(Mono.empty());
+
+        // Act
+        Mono<Void> resultMono = transactionService.saveTransaction(processId, transactionSample)
+                .doOnError(e -> e.printStackTrace());
+
+        // Assert
+        Void resultTransaction = resultMono.block();
+        assertNull(resultTransaction);
+
+        // Verify that save was called exactly once with any Transaction object as an argument
+        verify(transactionRepository, times(1)).save(any(Transaction.class));
+    }
 
 
     @Test
@@ -131,21 +132,22 @@ class TransactionServiceTest {
         assertNull(resultTransaction);
     }
 
-//    @Test
-//    void saveTransaction_Error() {
-//        // Arrange
-//        String processId = "testProcessId";
-//        RuntimeException testException = new RuntimeException("Test Error");
-//        when(transactionRepository.save(transactionSample)).thenReturn(Mono.error(testException));
-//        when(transactionRepository.findLastProducerTransaction()).thenReturn(Flux.empty());
-//
-//        // Act
-//        Mono<Void> resultMono = transactionService.saveTransaction(processId, transactionSample);
-//        // Assert
-//        StepVerifier.create(resultMono)
-//                .expectErrorMatches(throwable -> throwable instanceof RuntimeException && throwable.getMessage().equals("Test Error"))
-//                .verify();
-//    }
+    @Test
+    void saveTransaction_Error() {
+        // Arrange
+        String processId = "testProcessId";
+        RuntimeException testException = new RuntimeException("Test Error");
+        when(transactionRepository.findLastProducerTransactionByEntityId("sampleEntityId")).thenReturn(Flux.just(transactionSample));
+        when(transactionRepository.findLastProducerTransaction()).thenReturn(Flux.empty());
+        when(transactionRepository.save(transactionSample)).thenReturn(Mono.error(testException));
+
+        // Act
+        Mono<Void> resultMono = transactionService.saveTransaction(processId, transactionSample);
+        // Assert
+        StepVerifier.create(resultMono)
+                .expectErrorMatches(throwable -> throwable instanceof RuntimeException && throwable.getMessage().equals("Test Error"))
+                .verify();
+    }
 
     @Test
     void getLastProducerTransactionByEntityId_ReturnsLastTransaction() {
