@@ -85,8 +85,8 @@ dependencies {
 	implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
 
 	// Monitoring
-	implementation 'io.micrometer:micrometer-tracing-bridge-brave'
-	implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
+//	implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+//	implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
 	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 
 	// Resilience
