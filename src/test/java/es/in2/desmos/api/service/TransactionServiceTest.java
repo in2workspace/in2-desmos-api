@@ -97,7 +97,7 @@ class TransactionServiceTest {
 
         // Act
         Mono<Void> resultMono = transactionService.saveTransaction(processId, transactionSample)
-                .doOnError(e -> e.printStackTrace());
+                .doOnError(Throwable::printStackTrace);
 
         // Assert
         Void resultTransaction = resultMono.block();
