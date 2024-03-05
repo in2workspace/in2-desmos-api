@@ -31,12 +31,22 @@ public class BlockchainToBrokerSynchronizerImpl implements BlockchainToBrokerSyn
                 .flatMap(eventQueue -> {
                     String processId = UUID.randomUUID().toString();
                     MDC.put("processId", processId);
+                    if (eventQueue.getPriority().name().startsWith("RECOVER")) {
+                        log.debug("Detected event from recover queue, processing...");
+                        return brokerEntityPublisherService.publishRetrievedEntityToBroker(processId, (String) eventQueue.getEvent().get(1), (BlockchainNotification) eventQueue.getEvent().get(0))
+                                .doOnSuccess(voidValue -> log.debug("Broker Entity Published Successfully"))
+                                .onErrorResume(error -> {
+                                    log.error("Error in processing, moving to next event");
+                                    return Mono.empty();
+                                });
+                    }
                     return retrieveAndPublishEntityToBroker(processId,(BlockchainNotification) eventQueue.getEvent().get(0))
-                            .doOnSuccess(voidValue -> log.debug("Blockchain Event Published Successfully"));
-                })
-                .onErrorResume(error -> {
-                    log.error("Error processing event: {}", error.getMessage(), error);
-                    return Mono.empty();
+                            .doOnSuccess(voidValue -> log.debug("Broker Entity Published Successfully"))
+                            .doOnError(error -> log.error("Error processing entity"))
+                            .onErrorResume(error -> {
+                                log.error("Error in processing, moving to next event");
+                                return Mono.empty();
+                            });
                 });
     }
     @Override

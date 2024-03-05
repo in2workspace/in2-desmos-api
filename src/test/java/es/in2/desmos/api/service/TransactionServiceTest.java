@@ -1,8 +1,8 @@
 package es.in2.desmos.api.service;
 
-import es.in2.desmos.api.model.Transaction;
-import es.in2.desmos.api.model.TransactionStatus;
-import es.in2.desmos.api.model.TransactionTrader;
+import es.in2.desmos.api.model.*;
+import es.in2.desmos.api.repository.FailedEntityTransactionRepository;
+import es.in2.desmos.api.repository.FailedEventTransactionRepository;
 import es.in2.desmos.api.repository.TransactionRepository;
 import es.in2.desmos.api.service.impl.TransactionServiceImpl;
 import es.in2.desmos.broker.config.properties.BrokerPathProperties;
@@ -65,8 +65,25 @@ class TransactionServiceTest {
             .trader(TransactionTrader.CONSUMER)
             .build();
 
+    private final FailedEventTransaction failedEventTransaction = FailedEventTransaction.builder()
+            .id(UUID.randomUUID())
+            .transactionId("sampleTransactionId")
+            .createdAt(Timestamp.from(Instant.now()))
+            .datalocation("http://scorpio:9090/ngsi-ld/v1/entities/urn:ngsi-ld:product-offering:in2-0092")
+            .entityId("sampleEntityId")
+            .previousEntityHash("previousEntityHash")
+            .priority(EventQueuePriority.SYNCHRONIZATION)
+            .newTransaction(true)
+            .build();
+
     @Mock
     private TransactionRepository transactionRepository;
+
+    @Mock
+    private FailedEventTransactionRepository failedTransactionRepository;
+
+    @Mock
+    private FailedEntityTransactionRepository failedEntityTransactionRepository;
 
     @Mock
     private BrokerProperties brokerProperties;
@@ -83,8 +100,70 @@ class TransactionServiceTest {
         BrokerPathProperties brokerPathProperties = new BrokerPathProperties("/v2", "/entities", "/subscriptions");
         BrokerProperties brokerProperties = new BrokerProperties("scorpio", "http://localhost:1026",
                 "http://localhost:1026", new BrokerPathProperties("/entities", "/subscriptions", "/v2"));
-        transactionService = new TransactionServiceImpl(transactionRepository, brokerProperties);
+        transactionService = new TransactionServiceImpl(transactionRepository, brokerProperties, failedTransactionRepository, failedEntityTransactionRepository);
     }
+
+    @Test
+    void saveFailedEventTransactionTest() {
+        // Arrange
+        String processId = "process123";
+        FailedEventTransaction failedEventTransaction = FailedEventTransaction.builder()
+                .id(UUID.randomUUID())
+                .transactionId("transaction123")
+                .createdAt(new Timestamp(System.currentTimeMillis()))
+                .entityId("entity123")
+                .datalocation("http://example.com/data/location")
+                .entityType("EntityType")
+                .organizationId("org123")
+                .previousEntityHash("hash123")
+                .priority(EventQueuePriority.PUBLICATIONPUBLISH)
+                .newTransaction(true)
+                .build();
+
+        when(failedTransactionRepository.save(any(FailedEventTransaction.class)))
+                .thenReturn(Mono.just(failedEventTransaction));
+
+        // Act & Assert
+        StepVerifier.create(transactionService.saveFailedEventTransaction(processId, failedEventTransaction))
+                .verifyComplete();
+
+        verify(failedTransactionRepository).save(failedEventTransaction);
+    }
+
+    @Test
+    void deleteFailedEntityTransactionTest() {
+        // Arrange
+        String processId = "process123";
+        UUID transactionId = UUID.randomUUID();
+
+        when(failedEntityTransactionRepository.deleteById(transactionId))
+                .thenReturn(Mono.empty());
+
+        // Act & Assert
+        StepVerifier.create(transactionService.deleteFailedEntityTransaction(processId, transactionId))
+                .verifyComplete();
+
+        verify(failedEntityTransactionRepository).deleteById(transactionId);
+    }
+
+    @Test
+    void deleteFailedEventTransactionTest() {
+        // Arrange
+        String processId = "process123";
+        UUID transactionId = UUID.randomUUID();
+
+        when(failedTransactionRepository.deleteById(transactionId))
+                .thenReturn(Mono.empty());
+
+        // Act & Assert
+        StepVerifier.create(transactionService.deleteFailedEventTransaction(processId, transactionId))
+                .verifyComplete();
+
+        verify(failedTransactionRepository).deleteById(transactionId);
+    }
+
+
+
 
     @Test
     void saveTransaction_Success() {
@@ -105,6 +184,31 @@ class TransactionServiceTest {
 
         // Verify that save was called exactly once with any Transaction object as an argument
         verify(transactionRepository, times(1)).save(any(Transaction.class));
+    }
+
+    @Test
+    void saveFailedEntityTransaction() {
+        String processId = "processId";
+        FailedEntityTransaction transaction = new FailedEntityTransaction();
+        when(failedEntityTransactionRepository.save(transaction)).thenReturn(Mono.just(transaction));
+
+        StepVerifier.create(transactionService.saveFailedEntityTransaction(processId, transaction))
+                .verifyComplete();
+
+        verify(failedEntityTransactionRepository).save(transaction);
+    }
+
+    @Test
+    void saveFailedEntityTransactionWithError() {
+        String processId = "processId";
+        FailedEntityTransaction transaction = new FailedEntityTransaction();
+        when(failedEntityTransactionRepository.save(transaction)).thenReturn(Mono.error(new RuntimeException("Simulated error")));
+
+        StepVerifier.create(transactionService.saveFailedEntityTransaction(processId, transaction))
+                .expectErrorMessage("Simulated error")
+                .verify();
+
+        verify(failedEntityTransactionRepository).save(transaction);
     }
 
 
