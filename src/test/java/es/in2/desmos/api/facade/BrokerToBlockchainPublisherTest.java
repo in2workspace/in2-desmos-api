@@ -1,8 +1,7 @@
 package es.in2.desmos.api.facade;
 
 import es.in2.desmos.api.facade.impl.BrokerToBlockchainPublisherImpl;
-import es.in2.desmos.api.model.BlockchainEvent;
-import es.in2.desmos.api.model.BrokerNotification;
+import es.in2.desmos.api.model.*;
 import es.in2.desmos.api.service.BlockchainEventCreatorService;
 import es.in2.desmos.api.service.NotificationProcessorService;
 import es.in2.desmos.api.service.QueueService;
@@ -14,7 +13,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.util.HashMap;
 import java.util.List;
@@ -41,11 +42,51 @@ class BrokerToBlockchainPublisherTest {
     @Mock
     private BlockchainEventCreatorService blockchainEventCreatorService;
     @Mock
-    private DLTAdapterEventPublisher DLTAdapterEventPublisher;
+    private DLTAdapterEventPublisher dltAdapterEventPublisher;
     @Mock
     private QueueService brokerToBlockchainQueueService;
     @InjectMocks
     private BrokerToBlockchainPublisherImpl brokerToBlockchainPublisher;
+
+    @Test
+    void testStartProcessingEventsSuccessfulFlow() {
+        // Arrange
+        EventQueue eventQueue = new EventQueue(List.of(brokerNotification), EventQueuePriority.PUBLICATIONPUBLISH);
+        when(brokerToBlockchainQueueService.getEventStream()).thenReturn(Flux.just(eventQueue));
+
+
+        HashMap<String, Object> dataMap = new HashMap<>();
+        // Mock the behavior of services
+        when(notificationProcessorService.processBrokerNotification(anyString(), any()))
+                .thenReturn(Mono.just(dataMap));
+        when(blockchainEventCreatorService.createBlockchainEvent(anyString(), any()))
+                .thenReturn(Mono.just(blockchainEvent));
+        when(dltAdapterEventPublisher.publishBlockchainEvent(anyString(), any()))
+                .thenReturn(Mono.empty());
+
+        // Act and Assert
+        StepVerifier.create(brokerToBlockchainPublisher.startProcessingEvents())
+                .expectSubscription()
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+    @Test
+    void testStartProcessingEventsSuccessfulFlow_recover() {
+        // Arrange
+        EventQueue eventQueue = new EventQueue(List.of(blockchainEvent), EventQueuePriority.RECOVERPUBLISH);
+
+        when(brokerToBlockchainQueueService.getEventStream()).thenReturn(Flux.just(eventQueue));
+
+        when(dltAdapterEventPublisher.publishBlockchainEvent(anyString(), any(BlockchainEvent.class)))
+                .thenReturn(Mono.empty());
+
+        // Act and Assert
+        StepVerifier.create(brokerToBlockchainPublisher.startProcessingEvents())
+                .expectSubscription()
+                .expectNextCount(0)
+                .verifyComplete();
+    }
 
     @Test
     void testProcessAndPublishBrokerNotificationToBlockchain_Success() {
@@ -56,41 +97,15 @@ class BrokerToBlockchainPublisherTest {
                 .thenReturn(Mono.just(dataMap));
         when(blockchainEventCreatorService.createBlockchainEvent(anyString(), any()))
                 .thenReturn(Mono.just(blockchainEvent));
-        when(DLTAdapterEventPublisher.publishBlockchainEvent(anyString(), any()))
+        when(dltAdapterEventPublisher.publishBlockchainEvent(anyString(), any()))
                 .thenReturn(Mono.empty());
         // Act
         brokerToBlockchainPublisher.processAndPublishBrokerNotificationToBlockchain(processId, brokerNotification).block();
         // Assert - Verify that services are called with the expected parameters
         verify(notificationProcessorService).processBrokerNotification(processId, brokerNotification);
         verify(blockchainEventCreatorService).createBlockchainEvent(processId, dataMap);
-        verify(DLTAdapterEventPublisher).publishBlockchainEvent(processId, blockchainEvent);
+        verify(dltAdapterEventPublisher).publishBlockchainEvent(processId, blockchainEvent);
     }
-
-//    @Test
-//    void testStartProcessingEventsSuccessfulFlow_broker() {
-//        HashMap<String, Object> dataMap = new HashMap<>();
-//        // Mock the event stream with a single event
-//        EventQueue eventQueue = new EventQueue(List.of(brokerNotification), EventQueuePriority.PUBLICATION);
-//        when(brokerToBlockchainQueueService.getEventStream())
-//                .thenReturn(Flux.just(eventQueue));
-//
-//        when(notificationProcessorService.processBrokerNotification(processId, brokerNotification))
-//                .thenReturn(Mono.just(dataMap));
-//        when(blockchainEventCreatorService.createBlockchainEvent(processId, dataMap))
-//                .thenReturn(Mono.just(blockchainEvent));
-//        when(DLTAdapterEventPublisher.publishBlockchainEvent(processId, blockchainEvent))
-//                .thenReturn(Mono.empty());
-//
-//        // Mock downstream services for successful execution
-//        when(brokerToBlockchainPublisher.processAndPublishBrokerNotificationToBlockchain(processId, brokerNotification))
-//                .thenReturn(Mono.empty()); // Simulate successful completion
-//
-//
-//
-//        // Act
-//        StepVerifier.create(brokerToBlockchainPublisher.startProcessingEvents())
-//                .verifyComplete();
-//    }
 
 
     @Test
@@ -106,7 +121,7 @@ class BrokerToBlockchainPublisherTest {
         // Verify that the first service is called and others are not due to the error
         verify(notificationProcessorService).processBrokerNotification(processId, brokerNotification);
         verifyNoInteractions(blockchainEventCreatorService);
-        verifyNoInteractions(DLTAdapterEventPublisher);
+        verifyNoInteractions(dltAdapterEventPublisher);
         // Verify error logging - This part is tricky as Mockito doesn't directly support verifying log statements.
         // You may need to use additional tools or frameworks to assert log output, or alternatively,
         // verify that the subsequent steps after the error are not executed, as done here.

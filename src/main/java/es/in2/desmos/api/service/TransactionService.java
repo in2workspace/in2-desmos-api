@@ -1,7 +1,6 @@
 package es.in2.desmos.api.service;
 
 
-import es.in2.desmos.api.model.BrokerNotification;
 import es.in2.desmos.api.model.FailedEntityTransaction;
 import es.in2.desmos.api.model.FailedEventTransaction;
 import es.in2.desmos.api.model.Transaction;

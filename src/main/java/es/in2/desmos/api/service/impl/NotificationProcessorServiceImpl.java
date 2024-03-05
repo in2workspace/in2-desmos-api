@@ -15,10 +15,7 @@ import reactor.core.publisher.Mono;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static es.in2.desmos.api.util.ApplicationUtils.*;
 
@@ -57,7 +54,7 @@ public class NotificationProcessorServiceImpl implements NotificationProcessorSe
         EventQueuePriority eventQueuePriority = EventQueuePriority.PUBLICATIONPUBLISH;
         if (!hasHlParameter(blockchainNotification.dataLocation())) {
             eventQueuePriority = EventQueuePriority.PUBLICATIONDELETE;
-        } else if (blockchainNotification.previousEntityHash() != "0x0000000000000000000000000000000000000000000000000000000000000000") {
+        } else if (!Objects.equals(blockchainNotification.previousEntityHash(), "0x0000000000000000000000000000000000000000000000000000000000000000")) {
             eventQueuePriority = EventQueuePriority.PUBLICATIONEDIT;
         }
 

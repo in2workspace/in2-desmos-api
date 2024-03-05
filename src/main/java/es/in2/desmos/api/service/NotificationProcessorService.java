@@ -3,7 +3,6 @@ package es.in2.desmos.api.service;
 
 import es.in2.desmos.api.model.BlockchainNotification;
 import es.in2.desmos.api.model.BrokerNotification;
-import es.in2.desmos.api.model.EventQueuePriority;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
