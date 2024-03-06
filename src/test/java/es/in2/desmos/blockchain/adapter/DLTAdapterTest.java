@@ -67,7 +67,6 @@ class DLTAdapterTest {
         when(responseSpecMock.bodyToMono(Void.class)).thenReturn(Mono.empty());
         when(responseSpecMock.onStatus(any(), any())).thenReturn(responseSpecMock);
         when(responseSpecMock.bodyToMono(Void.class)).thenReturn(Mono.empty());
-
     }
 
     @Test

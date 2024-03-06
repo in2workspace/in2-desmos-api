@@ -1,9 +1,11 @@
 package es.in2.desmos.api.config;
 
-import es.in2.desmos.api.model.*;
+import es.in2.desmos.api.model.EventQueue;
+import es.in2.desmos.api.model.EventQueuePriority;
+import es.in2.desmos.api.model.FailedEntityTransaction;
+import es.in2.desmos.api.model.FailedEventTransaction;
 import es.in2.desmos.api.service.QueueService;
 import es.in2.desmos.api.service.TransactionService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,7 +14,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;

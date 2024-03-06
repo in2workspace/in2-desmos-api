@@ -46,9 +46,11 @@ public class ContainerManager {
                 .withNetworkAliases("scorpio");
         scorpioContainer.start();
 
-        blockchainAdapterContainer = new GenericContainer<>(DockerImageName.parse("quay.io/digitelts/dlt-adapter:1.2.1"))
+        blockchainAdapterContainer = new GenericContainer<>(DockerImageName.parse("quay.io/digitelts/dlt-adapter:1.3"))
                 .withExposedPorts(8080)
                 .withEnv("PRIVATE_KEY", "0xe2afef2c880b138d741995ba56936e389b0b5dd2943e21e4363cc70d81c89346")
+                .withEnv("RPC_ADDRESS", "https://red-t.alastria.io/v0/9461d9f4292b41230527d57ee90652a6")
+                .withEnv("ISS", "0x983c5a1eb59ea6861c3e27b64dd3f1fd50233c3229149b8d139798a17b4cb0ec")
                 .withNetwork(testNetwork)
                 .withNetworkAliases("blockchain-adapter")
                 .waitingFor(Wait.forHttp("/health").forStatusCode(200));
@@ -78,6 +80,10 @@ public class ContainerManager {
     }
 
     protected static String getBaseUriAlastriaAdapter() {
+        return "http://" + blockchainAdapterContainer.getHost() + ":" + blockchainAdapterContainer.getMappedPort(8080);
+    }
+
+    public static String getBaseUriBlockchainAdapter() {
         return "http://" + blockchainAdapterContainer.getHost() + ":" + blockchainAdapterContainer.getMappedPort(8080);
     }
 

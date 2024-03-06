@@ -43,6 +43,7 @@ public class FailedTransactionScheduler {
                                             .entityId(event.getEntityId())
                                             .previousEntityHash(event.getPreviousEntityHash())
                                             .organizationId(event.getOrganizationId())
+                                            .metadata(List.of())
                                             .build();
                                     return brokerToBlockchainQueueService.enqueueEvent(EventQueue.builder()
                                             .event(Collections.singletonList(blkEvent))
