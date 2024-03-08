@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <springProperty name="LOGS" source="logging.path" defaultValue="logs"/>
+    <springProperty name="LOGSTASH_PORT" source="logstash_port"/>
     <appender name="jsonConsole" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
+    <appender name="logstash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>logstash:${LOGSTASH_PORT}</destination>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+    </appender>
     <root level="info">
         <appender-ref ref="jsonConsole"/>
+        <appender-ref ref="logstash"/>
     </root>
 </configuration>

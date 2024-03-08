@@ -109,3 +109,24 @@ dlt-adapter:
 event-subscription:
   notificationEndpoint: "http://localhost:8080/notifications/evm"
   eventTypes: "ProductOffering,ProductOrder"
+
+#ELK Configuration
+elasticsearch:
+  username: elastic
+  password: "elastic"
+
+kibana:
+  username: kibana_system
+  password: "kibana"
+
+stack_version: 8.12.2
+
+cluster_name: "ELK cluster"
+
+es_port: 9200
+kibana_port: 5601
+logstash_port: 5044
+
+es_mem_limit: 4294967296
+kb_mem_limit: 1073741824
+ls_mem_limit: 1073741824
