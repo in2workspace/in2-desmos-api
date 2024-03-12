@@ -27,6 +27,7 @@ public class NotificationProcessorServiceImpl implements NotificationProcessorSe
     private final ObjectMapper objectMapper;
     private final TransactionService transactionService;
     private final QueueService brokerToBlockchainQueueService;
+    private final QueueService blockchainToBrokerQueueService;
 
 
     @Override
@@ -58,7 +59,7 @@ public class NotificationProcessorServiceImpl implements NotificationProcessorSe
             eventQueuePriority = EventQueuePriority.PUBLICATIONEDIT;
         }
 
-        return brokerToBlockchainQueueService.enqueueEvent(EventQueue.builder()
+        return blockchainToBrokerQueueService.enqueueEvent(EventQueue.builder()
                 .event(Collections.singletonList(blockchainNotification))
                 .priority(eventQueuePriority)
                 .build()).then();
