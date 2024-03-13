@@ -50,7 +50,7 @@ class FailedTransactionSchedulerTest {
     @Test
     void testProcessFailedEntities() {
         when(transactionService.getAllFailedEntityTransactions(anyString()))
-                .thenReturn(Flux.empty()); // Simula no encontrar entidades fallidas
+                .thenReturn(Flux.empty());
 
         failedTransactionScheduler.processFailedEntities();
 
@@ -71,7 +71,7 @@ class FailedTransactionSchedulerTest {
         failedTransactionScheduler.processFailedEvents();
 
         verify(transactionService).deleteFailedEventTransaction(anyString(), any());
-        verify(brokerToBlockchainQueueService).enqueueEvent(any(EventQueue.class));
+        verify(brokerToBlockchainQueueService).enqueueEvent(any());
     }
 
     @Test
