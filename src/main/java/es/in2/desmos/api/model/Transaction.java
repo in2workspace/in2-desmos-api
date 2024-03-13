@@ -29,11 +29,11 @@ public class Transaction implements Persistable<UUID> {
     @Column("created_at")
     private Timestamp createdAt;
 
-    @Column("data_location")
-    private String dataLocation;
-
     @Column("entity_id")
     private String entityId;
+
+    @Column("datalocation")
+    private String datalocation;
 
     @Column("entity_type")
     private String entityType;

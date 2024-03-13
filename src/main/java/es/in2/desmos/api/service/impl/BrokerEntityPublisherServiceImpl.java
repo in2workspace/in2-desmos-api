@@ -41,13 +41,12 @@ public class BrokerEntityPublisherServiceImpl implements BrokerEntityPublisherSe
                             .id(UUID.randomUUID())
                             .transactionId(processId)
                             .createdAt(Timestamp.from(Instant.now()))
-                            .dataLocation(blockchainNotification.dataLocation())
                             .entityId(entityId)
                             .entityType(blockchainNotification.eventType())
-                            .entityHash("")
+                            .entityHash(extractEntityHashFromDataLocation(blockchainNotification.dataLocation()))
+                            .datalocation(blockchainNotification.dataLocation())
                             .status(TransactionStatus.DELETED)
                             .trader(TransactionTrader.CONSUMER)
-                            .hash("")
                             .newTransaction(true)
                             .build()));
         } else {
@@ -55,6 +54,8 @@ public class BrokerEntityPublisherServiceImpl implements BrokerEntityPublisherSe
             // Create Hash from the retrieved entity
             try {
                 String entityHash = calculateSHA256Hash(retrievedBrokerEntity);
+                String previousHash = blockchainNotification.previousEntityHash();
+                entityHash = previousHash.isEmpty() ? entityHash : calculateIntertwinedHash(entityHash, previousHash);
                 String sourceEntityHash = extractEntityHashFromDataLocation(blockchainNotification.dataLocation());
                 if (entityHash.equals(sourceEntityHash)) {
                     log.debug("ProcessID: {} - Entity integrity is valid", processId);
@@ -79,13 +80,12 @@ public class BrokerEntityPublisherServiceImpl implements BrokerEntityPublisherSe
                                     .id(UUID.randomUUID())
                                     .transactionId(processId)
                                     .createdAt(Timestamp.from(Instant.now()))
-                                    .dataLocation(blockchainNotification.dataLocation())
                                     .entityId(entityId)
                                     .entityType(blockchainNotification.eventType())
                                     .entityHash(entityHash)
+                                    .datalocation(blockchainNotification.dataLocation())
                                     .status(TransactionStatus.PUBLISHED)
                                     .trader(TransactionTrader.CONSUMER)
-                                    .hash("")
                                     .newTransaction(true)
                                     .build()));
                 } else {

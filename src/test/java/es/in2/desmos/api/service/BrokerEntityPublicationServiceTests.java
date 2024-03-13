@@ -20,6 +20,7 @@ import java.security.NoSuchAlgorithmException;
 import static es.in2.desmos.api.util.ApplicationUtils.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,6 +42,7 @@ class BrokerEntityPublicationServiceTests {
         entityId = "entity123";
         notification = BlockchainNotification.builder()
                 .dataLocation("http://broker.internal/entities/entity123")
+                .previousEntityHash("previousHash")
                 .build();
     }
 
@@ -65,6 +67,9 @@ class BrokerEntityPublicationServiceTests {
     void testNotDeletedEntityNotification() {
         // Arrange
         String retrievedBrokerEntity = "brokerEntity";
+        BlockchainNotification mockBlockchainNotification = mock(BlockchainNotification.class);
+        when(mockBlockchainNotification.previousEntityHash()).thenReturn("");
+        when(mockBlockchainNotification.dataLocation()).thenReturn("http://broker.internal/entities/entity123");
         when(brokerPublicationService.getEntityById(processId, entityId)).thenReturn(Mono.just("{errorCode: 404}"));
         when(brokerPublicationService.postEntity(processId, retrievedBrokerEntity)).thenReturn(Mono.empty());
         when(transactionService.saveTransaction(any(), any())).thenReturn(Mono.empty());
@@ -80,7 +85,8 @@ class BrokerEntityPublicationServiceTests {
                     .thenReturn(entityId);
             // Act & Assert
             StepVerifier.create(
-                            brokerEntityPublicationService.publishRetrievedEntityToBroker(processId, retrievedBrokerEntity, notification))
+                            brokerEntityPublicationService.publishRetrievedEntityToBroker(processId, retrievedBrokerEntity,
+                                    mockBlockchainNotification))
                     .verifyComplete();
         }
     }
@@ -89,6 +95,9 @@ class BrokerEntityPublicationServiceTests {
     void testValidEntityIntegrity() {
         // Arrange
         String retrievedBrokerEntity = "brokerEntity";
+        BlockchainNotification mockBlockchainNotification = mock(BlockchainNotification.class);
+        when(mockBlockchainNotification.previousEntityHash()).thenReturn("");
+        when(mockBlockchainNotification.dataLocation()).thenReturn("http://broker.internal/entities/entity123");
         when(brokerPublicationService.getEntityById(processId, entityId)).thenReturn(Mono.just("Ok"));
         when(brokerPublicationService.updateEntity(processId, retrievedBrokerEntity)).thenReturn(Mono.empty());
         when(transactionService.saveTransaction(any(), any())).thenReturn(Mono.empty());
@@ -104,7 +113,8 @@ class BrokerEntityPublicationServiceTests {
                     .thenReturn(entityId);
             // Act & Assert
             StepVerifier.create(
-                            brokerEntityPublicationService.publishRetrievedEntityToBroker(processId, retrievedBrokerEntity, notification))
+                            brokerEntityPublicationService.publishRetrievedEntityToBroker(processId, retrievedBrokerEntity,
+                                    mockBlockchainNotification))
                     .verifyComplete();
         }
     }
@@ -113,6 +123,10 @@ class BrokerEntityPublicationServiceTests {
     void testInvalidEntityIntegrity() {
         // Arrange
         String retrievedBrokerEntity = "brokerEntity";
+
+        BlockchainNotification mockBlockchainNotification = mock(BlockchainNotification.class);
+        when(mockBlockchainNotification.previousEntityHash()).thenReturn("");
+        when(mockBlockchainNotification.dataLocation()).thenReturn("http://broker.internal/entities/entity123");
 
         try (MockedStatic<ApplicationUtils> applicationUtils = Mockito.mockStatic(ApplicationUtils.class)) {
             applicationUtils
@@ -126,7 +140,8 @@ class BrokerEntityPublicationServiceTests {
                     .thenReturn("entity2");
             // Act & Assert
             StepVerifier.create(
-                            brokerEntityPublicationService.publishRetrievedEntityToBroker(processId, retrievedBrokerEntity, notification))
+                            brokerEntityPublicationService.publishRetrievedEntityToBroker(processId, retrievedBrokerEntity,
+                                    mockBlockchainNotification))
                     .verifyError(IllegalArgumentException.class);
         }
     }

@@ -31,13 +31,15 @@ public class BrokerToBlockchainPublisherImpl implements BrokerToBlockchainPublis
         return brokerToBlockchainQueueService.getEventStream()
                 .flatMap(eventQueue -> {
                     String processId = UUID.randomUUID().toString();
+                    log.debug("Processing event with processId: {}", processId);
                     MDC.put("processId", processId);
                     return processAndPublishBrokerNotificationToBlockchain(processId, (BrokerNotification) eventQueue.getEvent().get(0))
-                            .doOnSuccess(voidValue -> log.debug("Blockchain Event Published Successfully"));
-                })
-                .onErrorResume(error -> {
-                    log.error("Error processing event: {}", error.getMessage(), error);
-                    return Mono.empty();
+                            .doOnSuccess(voidValue -> log.debug("Blockchain Event Published Successfully"))
+                            .doOnError(error -> log.error("Error processing event: {}", error.getMessage(), error))
+                            .onErrorResume(error -> {
+                                log.error("Error in processing, moving to next event: {}", error.getMessage(), error);
+                                return Mono.empty();
+                            });
                 });
     }
 

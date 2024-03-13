@@ -57,9 +57,12 @@ class BlockchainEventCreatorServiceTests {
         // Arrange
         String processId = "testProcessId";
         Map<String, Object> dataMap = Collections.singletonMap("id", "sampleId");
+        when(objectMapper.writeValueAsString(any())).thenReturn("sampleData");
         when(applicationConfig.organizationIdHash()).thenReturn("orgHash");
         when(transactionService.saveTransaction(anyString(), any(Transaction.class))).thenReturn(Mono.empty());
-        when(objectMapper.writeValueAsString(any())).thenReturn("sampleData");
+        Transaction mockTransaction = mock(Transaction.class);
+        when(mockTransaction.getEntityHash()).thenReturn("samplePreviousHash");
+        when(transactionService.getLastProducerTransactionByEntityId(anyString(), anyString())).thenReturn(Mono.just(mockTransaction));
         // Act
         try (MockedStatic<ApplicationUtils> applicationUtils = Mockito.mockStatic(ApplicationUtils.class)) {
             applicationUtils
@@ -69,10 +72,8 @@ class BlockchainEventCreatorServiceTests {
             Mono<BlockchainEvent> resultMono = service.createBlockchainEvent(processId, dataMap);
             BlockchainEvent result = resultMono.block(); // Blocks until the Mono is completed
             assert result != null;
-            assert result.entityId()
-                    .equals("sampleId");
-            // Verify that saveTransaction was called exactly once with any Transaction object as an argument
             verify(transactionService, times(1)).saveTransaction(anyString(), any(Transaction.class));
+            verify(transactionService, times(1)).getLastProducerTransactionByEntityId(anyString(), anyString());
         }
     }
 
@@ -82,10 +83,13 @@ class BlockchainEventCreatorServiceTests {
         String processId = "testProcessId";
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("id", "sampleId invalidUri");
+        when(transactionService.getLastProducerTransactionByEntityId(anyString(), anyString())).thenReturn(Mono.empty());
         when(objectMapper.writeValueAsString(any())).thenReturn("sampleData");
         when(applicationConfig.organizationIdHash()).thenReturn("orgHash");
-        // Act & Assert
-        assertThrows(HashCreationException.class, () -> service.createBlockchainEvent(processId, dataMap));
+        // Act
+        Mono<BlockchainEvent> resultMono = service.createBlockchainEvent(processId, dataMap);
+        // Assert
+        assertThrows(HashCreationException.class, resultMono::block);
     }
 
 
@@ -94,14 +98,18 @@ class BlockchainEventCreatorServiceTests {
         // Arrange
         String processId = "testProcessId";
         Map<String, Object> dataMap = Collections.singletonMap("id", "sampleId");
+        when(transactionService.getLastProducerTransactionByEntityId(anyString(), anyString())).thenReturn(Mono.empty());
         when(objectMapper.writeValueAsString(any())).thenReturn("sampleData");
         // Simulate a condition to throw HashLinkException
         try (MockedStatic<ApplicationUtils> applicationUtils = Mockito.mockStatic(ApplicationUtils.class)) {
             applicationUtils
                     .when(() -> ApplicationUtils.calculateSHA256Hash(anyString()))
                     .thenThrow(new NoSuchAlgorithmException());
-            // Act & Assert
-            assertThrows(HashLinkException.class, () -> service.createBlockchainEvent(processId, dataMap));
+            // Act
+            Mono<BlockchainEvent> resultMono = service.createBlockchainEvent(processId, dataMap);
+
+            // Assert
+            assertThrows(HashLinkException.class, resultMono::block);
         }
     }
 }

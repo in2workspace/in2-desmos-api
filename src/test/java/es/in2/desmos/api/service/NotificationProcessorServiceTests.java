@@ -44,8 +44,8 @@ class NotificationProcessorServiceTests {
             .entityHash("testHash")
             .status(TransactionStatus.PUBLISHED)
             .trader(TransactionTrader.CONSUMER)
-            .hash("testHash")
-            .dataLocation("testLocation")
+            .entityHash("testHash")
+            .datalocation("testLocation?hl=testHash")
             .build();
 
     private final Mono<Transaction> emptyTransaction = Mono.empty().cast(Transaction.class);
@@ -53,7 +53,7 @@ class NotificationProcessorServiceTests {
     @Mock
     ObjectWriter objectWriter;
     private BlockchainNotification blockchainNotification = BlockchainNotification.builder()
-            .dataLocation("testLocation")
+            .dataLocation("http://scorpio:9090/ngsi-ld/v1/entities/urn:ngsi-ld:product-offering:9?hl=0xb0a5c22d46e83a3c5633460214254952019022db09251a858975d16548164ae8")
             .build();
     private BrokerNotification brokerNotification = BrokerNotification.builder()
             .data(List.of(Map.of("id", "testId")))

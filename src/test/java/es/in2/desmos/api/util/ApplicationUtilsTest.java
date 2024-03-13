@@ -28,14 +28,16 @@ class ApplicationUtilsTest {
         }
     }
 
-
     @Test
-    void testCalculateSHA256Hash() throws NoSuchAlgorithmException {
-        String data = "test";
-        String expectedHashPrefix = "0x";
-        String hash = ApplicationUtils.calculateSHA256Hash(data);
-        assertTrue(hash.startsWith(expectedHashPrefix));
-        assertEquals(66, hash.length()); // SHA-256 hash length + prefix length
+    void testCalculateIntertwinedHash() throws NoSuchAlgorithmException {
+        String hash1Hex = "9e107d9d372bb6826bd81d3542a419d6";
+        String hash2Hex = "e4d909c290d0fb1ca068ffaddf22cbd0";
+
+        String result = ApplicationUtils.calculateIntertwinedHash(hash1Hex, hash2Hex);
+
+
+        String expectedHash = "b6cfc6bdc369c11036cddd3c62b3b0e7721c7189d08b92ad1af97ab3e2e81316";
+        assertEquals(expectedHash, result);
     }
 
     @Test

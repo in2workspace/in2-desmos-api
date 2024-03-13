@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import static es.in2.desmos.api.util.ApplicationUtils.calculateSHA256Hash;
+import static es.in2.desmos.api.util.ApplicationUtils.*;
 
 @Slf4j
 @Service
@@ -94,10 +94,10 @@ public class NotificationProcessorServiceImpl implements NotificationProcessorSe
                         .id(UUID.randomUUID())
                         .transactionId(processId)
                         .createdAt(Timestamp.from(Instant.now()))
-                        .dataLocation(blockchainNotification.dataLocation())
-                        .entityId("")
+                        .datalocation(blockchainNotification.dataLocation())
+                        .entityId(extractEntityIdFromDataLocation(blockchainNotification.dataLocation()))
                         .entityType(blockchainNotification.eventType())
-                        .entityHash("")
+                        .entityHash(extractEntityHashFromDataLocation(blockchainNotification.dataLocation()))
                         .status(TransactionStatus.RECEIVED)
                         .trader(TransactionTrader.CONSUMER)
                         .newTransaction(true)

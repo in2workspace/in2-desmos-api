@@ -10,8 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Profile;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -41,13 +39,13 @@ class TransactionRepositoryIT {
     private final Transaction transaction = Transaction.builder()
             .transactionId("e1e07f6d-e8e7-48ae-bb4d-afab5b63c1f5")
             .createdAt(Timestamp.from(Instant.now()))
-            .dataLocation("https://domain.org/ngsi-ld/v1/entities/urn:ngsi-ld:Entity:1234")
+            .datalocation("https://domain.org/ngsi-ld/v1/entities/urn:ngsi-ld:Entity:1234")
             .entityId("urn:ngsi-ld:Entity:1234")
             .entityType("Entity")
             .entityHash("0x1234")
             .status(TransactionStatus.CREATED)
             .trader(TransactionTrader.PRODUCER)
-            .hash("0x9876")
+            .entityHash("0x9876")
             .newTransaction(true)
             .build();
 

@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -112,24 +113,23 @@ class BlockchainConnectorInitializerTest {
         Transaction lastTransactionPublished = Transaction.builder()
                 .transactionId("e1e07f6d-e8e7-48ae-bb4d-afab5b63c1f5")
                 .createdAt(Timestamp.from(Instant.now()))
-                .dataLocation("https://domain.org/ngsi-ld/v1/entities/urn:ngsi-ld:Entity:1234")
+                .datalocation("https://domain.org/ngsi-ld/v1/entities/urn:ngsi-ld:Entity:1234")
                 .entityId("urn:ngsi-ld:Entity:1234")
                 .entityType("Entity")
                 .entityHash("0x1234")
                 .status(TransactionStatus.PUBLISHED)
                 .trader(TransactionTrader.CONSUMER)
-                .hash("0x9876")
+                .entityHash("0x9876")
                 .build(); // Populate this as needed
         Transaction lastTransactionCreated = Transaction.builder()
                 .transactionId("e1e07f6d-e8e7-48ae-bb4d-afab5b63c1f6")
                 .createdAt(Timestamp.from(Instant.now()))
-                .dataLocation("https://domain.org/ngsi-ld/v1/entities/urn:ngsi-ld:Entity:12345")
+                .datalocation("https://domain.org/ngsi-ld/v1/entities/urn:ngsi-ld:Entity:12345")
                 .entityId("urn:ngsi-ld:Entity:12345")
                 .entityType("Entity")
                 .entityHash("0x1235")
                 .status(TransactionStatus.CREATED)
                 .trader(TransactionTrader.CONSUMER)
-                .hash("0x9876")
                 .build();
         lastTransactionPublished.setCreatedAt(Timestamp.valueOf("2024-02-06 10:07:01.529"));
         List<Transaction> transactionList = List.of(lastTransactionPublished, lastTransactionCreated);
@@ -140,8 +140,8 @@ class BlockchainConnectorInitializerTest {
 
         when(transactionService.getAllTransactions(any())).thenReturn(transactionsFlux);
         when(webClientMock.get()).thenReturn(requestHeadersUriSpecMock);
-        when(requestHeadersUriSpecMock.uri((String) org.mockito.ArgumentMatchers.any())).thenReturn(requestHeadersSpecMock);
-        when(requestHeadersSpecMock.accept((org.springframework.http.MediaType) org.mockito.ArgumentMatchers.any())).thenReturn(requestHeadersSpecMock);
+        when(requestHeadersUriSpecMock.uri((String) any())).thenReturn(requestHeadersSpecMock);
+        when(requestHeadersSpecMock.accept((MediaType) any())).thenReturn(requestHeadersSpecMock);
         when(requestHeadersSpecMock.retrieve()).thenReturn(responseSpecMock);
         String dltNotificationDTOexample = "{\"id\":1,\"publisherAddress\":\"String\",\"eventType\":\"ProductOffering\"," +
                 "\"timestamp\":3,\"dataLocation\":\"http://scorpio:9090/ngsi-ld/v1/entities/urn:ngsi-ld:product-offering:443734333" +
@@ -166,24 +166,24 @@ class BlockchainConnectorInitializerTest {
         Transaction lastTransactionPublished = Transaction.builder()
                 .transactionId("e1e07f6d-e8e7-48ae-bb4d-afab5b63c1f5")
                 .createdAt(Timestamp.from(Instant.now()))
-                .dataLocation("https://domain.org/ngsi-ld/v1/entities/urn:ngsi-ld:Entity:1234")
+                .datalocation("https://domain.org/ngsi-ld/v1/entities/urn:ngsi-ld:Entity:1234")
                 .entityId("urn:ngsi-ld:Entity:1234")
                 .entityType("Entity")
                 .entityHash("0x1234")
                 .status(TransactionStatus.PUBLISHED)
                 .trader(TransactionTrader.CONSUMER)
-                .hash("0x9876")
+                .entityHash("0x9876")
                 .build(); // Populate this as needed
         Transaction lastTransactionCreated = Transaction.builder()
                 .transactionId("e1e07f6d-e8e7-48ae-bb4d-afab5b63c1f6")
                 .createdAt(Timestamp.from(Instant.now()))
-                .dataLocation("https://domain.org/ngsi-ld/v1/entities/urn:ngsi-ld:Entity:12345")
+                .datalocation("https://domain.org/ngsi-ld/v1/entities/urn:ngsi-ld:Entity:12345")
                 .entityId("urn:ngsi-ld:Entity:12345")
                 .entityType("Entity")
                 .entityHash("0x1235")
                 .status(TransactionStatus.CREATED)
                 .trader(TransactionTrader.CONSUMER)
-                .hash("0x9876")
+                .entityHash("0x9876")
                 .build();
         lastTransactionPublished.setCreatedAt(Timestamp.valueOf("2024-02-06 10:07:01.529"));
         List<Transaction> transactionList = List.of(lastTransactionPublished, lastTransactionCreated);
@@ -194,8 +194,8 @@ class BlockchainConnectorInitializerTest {
 
         when(transactionService.getAllTransactions(any())).thenReturn(transactionsFlux);
 //        when(webClientMock.get()).thenReturn(requestHeadersUriSpecMock);
-        when(requestHeadersUriSpecMock.uri((String) org.mockito.ArgumentMatchers.any())).thenReturn(requestHeadersSpecMock);
-        when(requestHeadersSpecMock.accept((org.springframework.http.MediaType) org.mockito.ArgumentMatchers.any())).thenReturn
+        when(requestHeadersUriSpecMock.uri((String) any())).thenReturn(requestHeadersSpecMock);
+        when(requestHeadersSpecMock.accept((MediaType) any())).thenReturn
                 (requestHeadersSpecMock);
         when(requestHeadersSpecMock.retrieve()).thenReturn(responseSpecMock);
 

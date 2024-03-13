@@ -43,13 +43,12 @@ class TransactionServiceIT {
     private final Transaction transactionSample = Transaction.builder()
             .transactionId("e1e07f6d-e8e7-48ae-bb4d-afab5b63c1f5")
             .createdAt(Timestamp.from(Instant.now()))
-            .dataLocation("https://domain.org/ngsi-ld/v1/entities/urn:ngsi-ld:Entity:1234")
+            .datalocation("https://domain.org/ngsi-ld/v1/entities/urn:ngsi-ld:Entity:1234?hl=0502b524143e41325d7d60aa1e5c19ab1597f1af9f2acd4d4101d643a9494d2b")
             .entityId("urn:ngsi-ld:Entity:1234")
             .entityType("Entity")
             .entityHash("0x1234")
             .status(TransactionStatus.CREATED)
             .trader(TransactionTrader.PRODUCER)
-            .hash("0x9876")
             .newTransaction(true)
             .build();
 
@@ -88,13 +87,13 @@ class TransactionServiceIT {
         transactionService.saveTransaction("9876", Transaction.builder()
                 .transactionId("e1e07f6d-e8e7-48ae-bb4d-afab5b63c1f6")
                 .createdAt(Timestamp.from(Instant.now()))
-                .dataLocation("https://domain.org/ngsi-ld/v1/entities/urn:ngsi-ld:Entity:1235")
+                .datalocation("https://domain.org/ngsi-ld/v1/entities/urn:ngsi-ld:Entity:1235?hl=0502b524143e41325d7d60aa1e5c19ab1597f1af9f2acd4d4101d643a9494d2b")
                 .entityId("urn:ngsi-ld:Entity:1235")
                 .entityType("Entity")
                 .entityHash("0x1234")
                 .status(TransactionStatus.PUBLISHED)
                 .trader(TransactionTrader.PRODUCER)
-                .hash("0x9876")
+                .entityHash("0x9876")
                         .newTransaction(true)
                 .build()).block();
         // Act
