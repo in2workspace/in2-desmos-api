@@ -2,8 +2,12 @@ package es.in2.desmos.api.service.impl;
 
 import es.in2.desmos.api.exception.HashCreationException;
 import es.in2.desmos.api.exception.HashLinkException;
+import es.in2.desmos.api.model.FailedEntityTransaction;
+import es.in2.desmos.api.model.FailedEventTransaction;
 import es.in2.desmos.api.model.Transaction;
 import es.in2.desmos.api.model.TransactionTrader;
+import es.in2.desmos.api.repository.FailedEntityTransactionRepository;
+import es.in2.desmos.api.repository.FailedEventTransactionRepository;
 import es.in2.desmos.api.repository.TransactionRepository;
 import es.in2.desmos.api.service.TransactionService;
 import es.in2.desmos.broker.config.properties.BrokerProperties;
@@ -15,8 +19,10 @@ import reactor.core.publisher.Mono;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.UUID;
 
-import static es.in2.desmos.api.util.ApplicationUtils.*;
+import static es.in2.desmos.api.util.ApplicationUtils.calculateIntertwinedHash;
+import static es.in2.desmos.api.util.ApplicationUtils.hasHlParameter;
 
 @Slf4j
 @Service
@@ -25,6 +31,8 @@ public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final BrokerProperties brokerProperties;
+    private final FailedEventTransactionRepository failedEventTransactionRepository;
+    private final FailedEntityTransactionRepository failedEntityTransactionRepository;
 
     @Override
     public Mono<Void> saveTransaction(String processId, Transaction transaction) {
@@ -59,6 +67,53 @@ public class TransactionServiceImpl implements TransactionService {
                     .then();
         }
     }
+
+
+    @Override
+    public Mono<Void> saveFailedEventTransaction(String processId, FailedEventTransaction transaction) {
+        log.debug("ProcessID: {} - Saving failed transaction...", processId);
+        return failedEventTransactionRepository.save(transaction).doOnSuccess(success -> log.info("ProcessID: {} - Failed transaction saved successfully", processId))
+                .doOnError(error -> log.error("ProcessID: {} - Error saving failed transaction: {}", processId, error.getMessage()))
+                .then();
+    }
+
+    @Override
+    public Mono<Void> saveFailedEntityTransaction(String processId, FailedEntityTransaction transaction) {
+        log.debug("ProcessID: {} - Saving failed entity transaction...", processId);
+        return failedEntityTransactionRepository.save(transaction).doOnSuccess(success -> log.info("ProcessID: {} - Failed entity transaction saved successfully", processId))
+                .doOnError(error -> log.error("ProcessID: {} - Error saving failed entity transaction: {}", processId, error.getMessage()))
+                .then();
+    }
+
+
+    @Override
+    public Mono<Void> deleteFailedEntityTransaction(String processId, UUID transactionId) {
+        log.debug("ProcessID: {} - Deleting failed entity transaction...", processId);
+        return failedEntityTransactionRepository.deleteById(transactionId).doOnSuccess(success -> log.info("ProcessID: {} - Failed entity transaction deleted successfully", processId))
+                .doOnError(error -> log.error("ProcessID: {} - Error deleting failed entity transaction: {}", processId, error.getMessage()))
+                .then();
+    }
+
+    @Override
+    public Mono<Void> deleteFailedEventTransaction(String processId, UUID transactionId) {
+        log.debug("ProcessID: {} - Deleting failed transaction...", processId);
+        return failedEventTransactionRepository.deleteById(transactionId).doOnSuccess(success -> log.info("ProcessID: {} - Failed transaction deleted successfully", processId))
+                .doOnError(error -> log.error("ProcessID: {} - Error deleting failed transaction: {}", processId, error.getMessage()))
+                .then();
+    }
+
+    @Override
+    public Flux<FailedEventTransaction> getAllFailedEventTransactions(String processId) {
+        log.debug("ProcessID: {} - Getting all failed transactions", processId);
+        return failedEventTransactionRepository.findAll();
+    }
+
+    @Override
+    public Flux<FailedEntityTransaction> getAllFailedEntityTransactions(String processId) {
+        log.debug("ProcessID: {} - Getting all failed entity transactions", processId);
+        return failedEntityTransactionRepository.findAll();
+    }
+
 
 
     @Override

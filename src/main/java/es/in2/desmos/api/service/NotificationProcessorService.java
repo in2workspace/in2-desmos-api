@@ -11,6 +11,10 @@ public interface NotificationProcessorService {
 
     Mono<Map<String, Object>> processBrokerNotification(String processId, BrokerNotification brokerNotification);
 
+    Mono<Void> detectBrokerNotificationPriority(String processId, BrokerNotification brokerNotification);
+
+    Mono<Void> detectBlockchainNotificationPriority(String processId, BlockchainNotification blockchainNotification);
+
     Mono<Void> processBlockchainNotification(String processId, BlockchainNotification blockchainNotification);
 
 }

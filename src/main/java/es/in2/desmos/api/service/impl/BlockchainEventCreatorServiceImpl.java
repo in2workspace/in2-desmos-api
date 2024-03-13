@@ -76,6 +76,9 @@ public class BlockchainEventCreatorServiceImpl implements BlockchainEventCreator
                             throw new HashLinkException("Error creating blockchain event", e.getCause());
                         }
                     }
+                    if(previousHash.isEmpty()) {
+                        previousHash = "0x0000000000000000000000000000000000000000000000000000000000000000";
+                    }
                     // Build BlockchainEvent
                     BlockchainEvent blockchainEvent = BlockchainEvent.builder()
                             .eventType((String) dataMap.get("type"))

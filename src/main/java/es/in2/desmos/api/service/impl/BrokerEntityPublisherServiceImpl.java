@@ -1,9 +1,6 @@
 package es.in2.desmos.api.service.impl;
 
-import es.in2.desmos.api.model.BlockchainNotification;
-import es.in2.desmos.api.model.Transaction;
-import es.in2.desmos.api.model.TransactionStatus;
-import es.in2.desmos.api.model.TransactionTrader;
+import es.in2.desmos.api.model.*;
 import es.in2.desmos.api.service.BrokerEntityPublisherService;
 import es.in2.desmos.api.service.TransactionService;
 import es.in2.desmos.broker.service.BrokerPublicationService;
@@ -36,7 +33,24 @@ public class BrokerEntityPublisherServiceImpl implements BrokerEntityPublisherSe
         if (retrievedBrokerEntity.contains("errorCode")) {
             log.debug("ProcessID: {} - Detected deleted entity notification", processId);
             // delete entity from Broker
-            return brokerPublicationService.deleteEntityById(processId, entityId)
+            return brokerPublicationService.deleteEntityById(processId, entityId).onErrorResume(
+                    error -> {
+                        log.error("ProcessID: {} - Error deleting entity", processId);
+                        return transactionService.saveFailedEntityTransaction(processId, FailedEntityTransaction.builder()
+                                .id(UUID.randomUUID())
+                                .transactionId(processId)
+                                .notificationId(blockchainNotification.id())
+                                .createdAt(Timestamp.from(Instant.now()))
+                                .entityId(entityId)
+                                .entityType(blockchainNotification.eventType())
+                                .datalocation(blockchainNotification.dataLocation())
+                                .priority(EventQueuePriority.RECOVERDELETE)
+                                .previousEntityHash(blockchainNotification.previousEntityHash())
+                                .entity(retrievedBrokerEntity)
+                                .newTransaction(true)
+                                .build());
+                    }
+                    )
                     .then(transactionService.saveTransaction(processId, Transaction.builder()
                             .id(UUID.randomUUID())
                             .transactionId(processId)
@@ -64,10 +78,43 @@ public class BrokerEntityPublisherServiceImpl implements BrokerEntityPublisherSe
                             .flatMap(response -> {
                                 if (response.contains("errorCode")) {
                                     log.info("ProcessID: {} - Entity doesn't exist", processId);
-                                    return brokerPublicationService.postEntity(processId, retrievedBrokerEntity);
+                                    return brokerPublicationService.postEntity(processId, retrievedBrokerEntity).onErrorResume(
+                                            error -> {
+                                                log.error("ProcessID: {} - Error publishing entity", processId);
+                                                return transactionService.saveFailedEntityTransaction(processId, FailedEntityTransaction.builder()
+                                                        .id(UUID.randomUUID())
+                                                        .transactionId(processId)
+                                                        .notificationId(blockchainNotification.id())
+                                                        .createdAt(Timestamp.from(Instant.now()))
+                                                        .entityId(entityId)
+                                                        .entityType(blockchainNotification.eventType())
+                                                        .datalocation(blockchainNotification.dataLocation())
+                                                        .priority(EventQueuePriority.RECOVERPUBLISH)
+                                                        .previousEntityHash(blockchainNotification.previousEntityHash())
+                                                        .entity(retrievedBrokerEntity)
+                                                        .newTransaction(true)
+                                                        .build());
+                                            });
                                 } else {
                                     log.info("ProcessId: {} - Entity exists", processId);
-                                    return brokerPublicationService.updateEntity(processId, retrievedBrokerEntity);
+                                    return brokerPublicationService.updateEntity(processId, retrievedBrokerEntity).onErrorResume(
+                                            error -> {
+                                                log.error("ProcessID: {} - Error updating entity", processId);
+                                                return transactionService.saveFailedEntityTransaction(processId, FailedEntityTransaction.builder()
+                                                        .id(UUID.randomUUID())
+                                                        .notificationId(blockchainNotification.id())
+                                                        .transactionId(processId)
+                                                        .createdAt(Timestamp.from(Instant.now()))
+                                                        .entityId(entityId)
+                                                        .entityType(blockchainNotification.eventType())
+                                                        .datalocation(blockchainNotification.dataLocation())
+                                                        .priority(EventQueuePriority.RECOVEREDIT)
+                                                        .previousEntityHash(blockchainNotification.previousEntityHash())
+                                                        .entity(retrievedBrokerEntity)
+                                                        .newTransaction(true)
+                                                        .build());
+                                            }
+                                    );
                                 }
                             }).onErrorResume(
                                     error -> {

@@ -6,6 +6,7 @@ import es.in2.desmos.api.model.BlockchainNotification;
 import es.in2.desmos.api.model.BrokerNotification;
 import es.in2.desmos.api.model.EventQueue;
 import es.in2.desmos.api.model.EventQueuePriority;
+import es.in2.desmos.api.service.NotificationProcessorService;
 import es.in2.desmos.api.service.QueueService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,20 +23,15 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class NotificationController {
 
-    private final BrokerToBlockchainPublisher brokerToBlockchainPublisher;
-    private final BlockchainToBrokerSynchronizer blockchainToBrokerSynchronizer;
-    private final QueueService blockchainToBrokerQueueService;
-    private final QueueService brokerToBlockchainQueueService;
+
+    private final NotificationProcessorService notificationProcessorService;
 
     @PostMapping("/broker")
     @ResponseStatus(HttpStatus.OK)
     public Mono<Void> captureBrokerNotification(@RequestBody BrokerNotification brokerNotification) {
         String processId = UUID.randomUUID().toString();
         log.debug("ProcessID: {} - Broker Notification received: {}", processId, brokerNotification.toString());
-        return brokerToBlockchainQueueService.enqueueEvent(EventQueue.builder()
-                .event(Collections.singletonList(brokerNotification))
-                .priority(EventQueuePriority.PUBLICATION)
-                .build());
+        return notificationProcessorService.detectBrokerNotificationPriority(processId, brokerNotification);
     }
 
     @PostMapping("/dlt")
@@ -43,10 +39,7 @@ public class NotificationController {
     public Mono<Void> captureBlockchainNotification(@RequestBody BlockchainNotification blockchainNotification) {
         String processId = UUID.randomUUID().toString();
         log.debug("ProcessID: {}, Blockchain Notification received: {}", processId, blockchainNotification);
-        return blockchainToBrokerQueueService.enqueueEvent(EventQueue.builder()
-                .event(Collections.singletonList(blockchainNotification))
-                .priority(EventQueuePriority.PUBLICATION)
-                .build());
+        return notificationProcessorService.detectBlockchainNotificationPriority(processId, blockchainNotification);
     }
 
 }

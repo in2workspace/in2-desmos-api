@@ -1,9 +1,6 @@
 package es.in2.desmos.blockchain.adapter;
 
-import es.in2.desmos.api.model.BlockchainEvent;
-import es.in2.desmos.api.model.Transaction;
-import es.in2.desmos.api.model.TransactionStatus;
-import es.in2.desmos.api.model.TransactionTrader;
+import es.in2.desmos.api.model.*;
 import es.in2.desmos.api.service.TransactionService;
 import es.in2.desmos.blockchain.config.properties.DLTAdapterProperties;
 import es.in2.desmos.blockchain.model.DLTAdapterSubscription;
@@ -12,6 +9,8 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.retry.annotation.Recover;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
@@ -19,6 +18,7 @@ import reactor.core.publisher.Mono;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Objects;
 import java.util.UUID;
 
 import static es.in2.desmos.api.util.ApplicationUtils.*;
@@ -26,6 +26,7 @@ import static es.in2.desmos.api.util.ApplicationUtils.*;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@EnableRetry
 public class DigitelDLTAdapter implements GenericDLTAdapterService {
 
     private final DLTAdapterProperties dltAdapterProperties;
@@ -52,7 +53,7 @@ public class DigitelDLTAdapter implements GenericDLTAdapterService {
                 .bodyToMono(Void.class);
     }
 
-    @Override
+
     public Mono<Void> publishEvent(String processId, BlockchainEvent blockchainEvent) {
         return webClient.post()
                 .uri(dltAdapterProperties.paths()
@@ -93,7 +94,9 @@ public class DigitelDLTAdapter implements GenericDLTAdapterService {
                                         .then(Mono.empty());
                             }
                         })
-                .bodyToMono(Void.class);
+                .bodyToMono(Void.class)
+                .retry(3)
+                .onErrorResume(e -> recover(processId, blockchainEvent));
     }
 
     @Override
@@ -104,6 +107,30 @@ public class DigitelDLTAdapter implements GenericDLTAdapterService {
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToFlux(String.class);
+    }
+
+    @Recover
+    public Mono<Void> recover(String processId, BlockchainEvent blockchainEvent) {
+        log.debug("Recovering from WebClientResponseException");
+        EventQueuePriority eventQueuePriority = EventQueuePriority.RECOVERPUBLISH;
+        if (!hasHlParameter(blockchainEvent.dataLocation())) {
+            eventQueuePriority = EventQueuePriority.RECOVERDELETE;
+        } else if (!Objects.equals(blockchainEvent.previousEntityHash(), "0x0000000000000000000000000000000000000000000000000000000000000000")){
+            eventQueuePriority = EventQueuePriority.RECOVEREDIT;
+        }
+        return transactionService.saveFailedEventTransaction(processId, FailedEventTransaction.builder()
+                        .id(UUID.randomUUID())
+                        .transactionId(processId)
+                        .createdAt(Timestamp.from(Instant.now()))
+                        .entityId(extractEntityIdFromDataLocation(blockchainEvent.dataLocation()))
+                        .entityType(blockchainEvent.eventType())
+                        .datalocation(blockchainEvent.dataLocation())
+                        .organizationId(blockchainEvent.organizationId())
+                        .previousEntityHash(blockchainEvent.previousEntityHash())
+                        .priority(eventQueuePriority)
+                        .newTransaction(true)
+                        .build())
+                .then(Mono.empty());
     }
 
 }

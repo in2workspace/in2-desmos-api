@@ -66,28 +66,50 @@ class BlockchainToBrokerSynchronizerTest {
 
     @Test
     void testStartProcessingEventsSuccessfulFlow() {
-        // Mock the event stream with a single event
-        EventQueue eventQueue = new EventQueue(List.of(blockchainNotification), EventQueuePriority.PUBLICATION);
-        when(blockchainToBrokerQueueService.getEventStream())
-                .thenReturn(Flux.just(eventQueue));
+        // Arrange
+        EventQueue eventQueue = new EventQueue(List.of(blockchainNotification), EventQueuePriority.PUBLICATIONPUBLISH);
 
-        when(notificationProcessorService.processBlockchainNotification(processId, blockchainNotification))
+        when(blockchainToBrokerQueueService.getEventStream()).thenReturn(Flux.just(eventQueue));
+
+        when(notificationProcessorService.processBlockchainNotification(anyString(), any(BlockchainNotification.class)))
                 .thenReturn(Mono.empty());
-        when(brokerEntityRetrievalService.retrieveEntityFromSourceBroker(processId, blockchainNotification))
+
+        when(brokerEntityRetrievalService.retrieveEntityFromSourceBroker(anyString(), any(BlockchainNotification.class)))
                 .thenReturn(Mono.just("entityString"));
-        when(brokerEntityPublisherService.publishRetrievedEntityToBroker(processId, "entityString", blockchainNotification))
+
+        when(brokerEntityPublisherService.publishRetrievedEntityToBroker(anyString(), anyString(), any(BlockchainNotification.class)))
                 .thenReturn(Mono.empty());
 
-        // Mock downstream services for successful execution
-        when(synchronizer.retrieveAndPublishEntityToBroker(processId, blockchainNotification))
-                .thenReturn(Mono.empty()); // Simulate successful completion
-
-
-        // Act
+        // Act and Assert
         StepVerifier.create(synchronizer.startProcessingEvents())
                 .expectSubscription()
+                .expectNextCount(0)
                 .verifyComplete();
     }
+
+    @Test
+    void testStartProcessingEventsSuccessfulFlowRecover() {
+        // Arrange
+        EventQueue eventQueue = new EventQueue(List.of(blockchainNotification, "Entity"), EventQueuePriority.RECOVERPUBLISH);
+
+        when(blockchainToBrokerQueueService.getEventStream()).thenReturn(Flux.just(eventQueue));
+
+        when(notificationProcessorService.processBlockchainNotification(anyString(), any(BlockchainNotification.class)))
+                .thenReturn(Mono.empty());
+
+        when(brokerEntityRetrievalService.retrieveEntityFromSourceBroker(anyString(), any(BlockchainNotification.class)))
+                .thenReturn(Mono.just("entityString"));
+
+        when(brokerEntityPublisherService.publishRetrievedEntityToBroker(anyString(), anyString(), any(BlockchainNotification.class)))
+                .thenReturn(Mono.empty());
+
+        // Act and Assert
+        StepVerifier.create(synchronizer.startProcessingEvents())
+                .expectSubscription()
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
     
     @Test
     void testRetrieveAndPublishEntityIntoBrokerWithError() {
