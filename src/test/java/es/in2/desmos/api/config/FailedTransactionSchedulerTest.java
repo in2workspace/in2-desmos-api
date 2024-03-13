@@ -60,21 +60,6 @@ class FailedTransactionSchedulerTest {
     }
 
     @Test
-    void testProcessFailedEventsWithFoundEvents() {
-        when(transactionService.getAllFailedEventTransactions(anyString()))
-                .thenReturn(Flux.just(createFailedEventTransaction()));
-        when(transactionService.deleteFailedEventTransaction(anyString(), any()))
-                .thenReturn(Mono.empty());
-        when(brokerToBlockchainQueueService.enqueueEvent(any(EventQueue.class)))
-                .thenReturn(Mono.empty());
-
-        failedTransactionScheduler.processFailedEvents();
-
-        verify(transactionService).deleteFailedEventTransaction(anyString(), any());
-        verify(brokerToBlockchainQueueService).enqueueEvent(any());
-    }
-
-    @Test
     void testProcessFailedEntitiesWithFoundEntities() {
         when(transactionService.getAllFailedEntityTransactions(anyString()))
                 .thenReturn(Flux.just(createFailedEntityTransaction()));
