@@ -19,6 +19,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import static es.in2.desmos.api.util.ApplicationUtils.HASH_PREFIX;
+
 
 @Slf4j
 @Component
@@ -45,7 +47,7 @@ public class FailedTransactionScheduler {
                                         blkEvent = BlockchainEvent.builder()
                                                 .eventType(event.getEntityType())
                                                 .dataLocation(event.getDatalocation())
-                                                .entityId(ApplicationUtils.calculateSHA256Hash(event.getEntityId()))
+                                                .entityId(HASH_PREFIX + ApplicationUtils.calculateSHA256Hash(event.getEntityId()))
                                                 .previousEntityHash(event.getPreviousEntityHash())
                                                 .organizationId(event.getOrganizationId())
                                                 .metadata(List.of())
