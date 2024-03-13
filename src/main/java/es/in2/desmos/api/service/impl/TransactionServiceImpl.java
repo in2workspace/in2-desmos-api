@@ -8,8 +8,6 @@ import es.in2.desmos.api.model.Transaction;
 import es.in2.desmos.api.model.TransactionTrader;
 import es.in2.desmos.api.repository.FailedEntityTransactionRepository;
 import es.in2.desmos.api.repository.FailedEventTransactionRepository;
-import es.in2.desmos.api.model.Transaction;
-import es.in2.desmos.api.model.TransactionTrader;
 import es.in2.desmos.api.repository.TransactionRepository;
 import es.in2.desmos.api.service.TransactionService;
 import es.in2.desmos.broker.config.properties.BrokerProperties;
@@ -23,9 +21,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.UUID;
 
-import static es.in2.desmos.api.util.ApplicationUtils.*;
-
-import static es.in2.desmos.api.util.ApplicationUtils.*;
+import static es.in2.desmos.api.util.ApplicationUtils.calculateIntertwinedHash;
+import static es.in2.desmos.api.util.ApplicationUtils.hasHlParameter;
 
 @Slf4j
 @Service

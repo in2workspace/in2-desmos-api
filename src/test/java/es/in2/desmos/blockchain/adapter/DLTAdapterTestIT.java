@@ -14,11 +14,15 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.util.List;
 
 import static es.in2.desmos.ContainerManager.getBaseUriBlockchainAdapter;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 
 @SpringBootTest
 @Testcontainers
-public class DLTAdapterTestIT {
+class DLTAdapterTestIT {
     @DynamicPropertySource
     static void setDynamicProperties(DynamicPropertyRegistry registry) {
         ContainerManager.postgresqlProperties(registry);
@@ -72,6 +76,7 @@ public class DLTAdapterTestIT {
                     return body;
                 })
                 .block();
+        assertNotNull(response);
     }
 
 

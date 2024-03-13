@@ -22,17 +22,17 @@ public class FailedEventTransaction implements Persistable<UUID> {
     @Column("id")
     private UUID id;
 
-    @Column("transaction_id")
-    private String transactionId;
+    @Column("entity_id")
+    private String entityId;
 
     @Column("created_at")
     private Timestamp createdAt;
 
-    @Column("entity_id")
-    private String entityId;
-
     @Column("datalocation")
     private String datalocation;
+
+    @Column("transaction_id")
+    private String transactionId;
 
     @Column("entity_type")
     private String entityType;
