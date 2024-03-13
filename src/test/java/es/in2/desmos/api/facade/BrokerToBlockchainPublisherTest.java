@@ -2,6 +2,8 @@ package es.in2.desmos.api.facade;
 
 import es.in2.desmos.api.facade.impl.BrokerToBlockchainPublisherImpl;
 import es.in2.desmos.api.model.*;
+import es.in2.desmos.api.model.BlockchainEvent;
+import es.in2.desmos.api.model.BrokerNotification;
 import es.in2.desmos.api.service.BlockchainEventCreatorService;
 import es.in2.desmos.api.service.NotificationProcessorService;
 import es.in2.desmos.api.service.QueueService;
@@ -13,9 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
 import java.util.HashMap;
 import java.util.List;

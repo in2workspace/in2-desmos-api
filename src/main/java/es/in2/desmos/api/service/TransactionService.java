@@ -35,6 +35,4 @@ public interface TransactionService {
     Mono<Transaction> getLastProducerTransaction(String processIdd);
 
     Mono<Transaction> getLastProducerTransactionByEntityId(String processId, String entityId);
-
-
 }
