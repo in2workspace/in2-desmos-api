@@ -89,7 +89,7 @@ public class DLTAdapterTestIT {
         // Assert
         String response = webClient
                 .post()
-                .uri("/api/v1/createSubscription")
+                .uri("/api/v1/subscribe")
                 .exchangeToMono(clientResponse -> {
                     var body = clientResponse.bodyToMono(String.class);
                     System.out.println(clientResponse.statusCode());

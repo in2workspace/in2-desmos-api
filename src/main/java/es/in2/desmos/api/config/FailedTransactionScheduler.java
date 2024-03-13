@@ -1,10 +1,12 @@
 package es.in2.desmos.api.config;
 
+import es.in2.desmos.api.exception.HashCreationException;
 import es.in2.desmos.api.model.BlockchainEvent;
 import es.in2.desmos.api.model.BlockchainNotification;
 import es.in2.desmos.api.model.EventQueue;
 import es.in2.desmos.api.service.QueueService;
 import es.in2.desmos.api.service.TransactionService;
+import es.in2.desmos.api.util.ApplicationUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -12,6 +14,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -37,14 +40,19 @@ public class FailedTransactionScheduler {
                 .flatMap(event ->
                         transactionService.deleteFailedEventTransaction(processId, event.getId())
                                 .then(Mono.defer(() -> {
-                                    BlockchainEvent blkEvent = BlockchainEvent.builder()
-                                            .eventType(event.getEntityType())
-                                            .dataLocation(event.getDatalocation())
-                                            .entityId(event.getEntityId())
-                                            .previousEntityHash(event.getPreviousEntityHash())
-                                            .organizationId(event.getOrganizationId())
-                                            .metadata(List.of())
-                                            .build();
+                                    BlockchainEvent blkEvent;
+                                    try {
+                                        blkEvent = BlockchainEvent.builder()
+                                                .eventType(event.getEntityType())
+                                                .dataLocation(event.getDatalocation())
+                                                .entityId(ApplicationUtils.calculateSHA256Hash(event.getEntityId()))
+                                                .previousEntityHash(event.getPreviousEntityHash())
+                                                .organizationId(event.getOrganizationId())
+                                                .metadata(List.of())
+                                                .build();
+                                    } catch (NoSuchAlgorithmException e) {
+                                        throw new HashCreationException("Error creating hash");
+                                    }
                                     return brokerToBlockchainQueueService.enqueueEvent(EventQueue.builder()
                                             .event(Collections.singletonList(blkEvent))
                                             .priority(event.getPriority())
