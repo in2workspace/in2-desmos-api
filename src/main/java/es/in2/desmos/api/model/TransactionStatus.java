@@ -13,4 +13,5 @@ public enum TransactionStatus {
     DELETED("deleted");
 
     private final String description;
+
 }

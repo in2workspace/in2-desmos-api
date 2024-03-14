@@ -2,7 +2,9 @@ package es.in2.desmos.api.facade.impl;
 
 import es.in2.desmos.api.facade.BlockchainToBrokerDataSyncSynchronizer;
 import es.in2.desmos.api.model.BlockchainNotification;
-import es.in2.desmos.api.service.*;
+import es.in2.desmos.api.service.BrokerEntityPublisherService;
+import es.in2.desmos.api.service.BrokerEntityRetrievalService;
+import es.in2.desmos.api.service.NotificationProcessorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,10 +19,8 @@ public class BlockchainToBrokerDataSyncSynchronizerImpl implements BlockchainToB
     private final BrokerEntityRetrievalService brokerEntityRetrievalService;
     private final BrokerEntityPublisherService brokerEntityPublisherService;
 
-
     @Override
     public Mono<Void> retrieveAndSynchronizeEntityIntoBroker(String processId, BlockchainNotification blockchainNotification) {
-
         return notificationProcessorService.processBlockchainNotification(processId, blockchainNotification)
                 // Try to retrieve the Entity from the source Broker
                 .then(brokerEntityRetrievalService.retrieveEntityFromSourceBroker(processId, blockchainNotification))
@@ -30,4 +30,5 @@ public class BlockchainToBrokerDataSyncSynchronizerImpl implements BlockchainToB
                 .doOnSuccess(voidValue -> log.info("ProcessID: {} - Entity retrieval, validation, and publication completed", processId))
                 .doOnError(e -> log.error("ProcessID: {} - Error retrieving, validating, and publishing entity", processId, e));
     }
+
 }

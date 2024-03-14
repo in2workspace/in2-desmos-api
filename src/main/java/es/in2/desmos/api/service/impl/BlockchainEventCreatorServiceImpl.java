@@ -28,7 +28,6 @@ import java.util.UUID;
 
 import static es.in2.desmos.api.util.ApplicationUtils.*;
 
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -39,10 +38,11 @@ public class BlockchainEventCreatorServiceImpl implements BlockchainEventCreator
     private final ApplicationConfig applicationConfig;
     private final ObjectMapper objectMapper;
 
+    private static final String ID_KEY_ATTRIBUTE = "id";
 
-    private static String generateEntityIdHashFromDataLocation(String datalocation) {
+    private static String generateEntityIdHashFromDataLocation(String dataLocation) {
         try {
-            URI uri = new URI(datalocation);
+            URI uri = new URI(dataLocation);
             String path = uri.getPath();
             String entityId = path.substring(path.lastIndexOf('/') + 1);
             return calculateSHA256Hash(entityId);
@@ -57,23 +57,22 @@ public class BlockchainEventCreatorServiceImpl implements BlockchainEventCreator
                 .switchIfEmpty(Mono.just(""));
     }
 
-
     @Override
     public Mono<BlockchainEvent> createBlockchainEvent(String processId, Map<String, Object> dataMap) {
-        return getPreviousEntityHashFromTransaction(processId, dataMap.get("id").toString())
+        return getPreviousEntityHashFromTransaction(processId, dataMap.get(ID_KEY_ATTRIBUTE).toString())
                 .flatMap(previousHash -> {
                     // Build DataLocation parameter
                     String brokerEntityLocation = brokerProperties.internalDomain() + brokerProperties.paths().entities();
-                    String dataLocation = brokerEntityLocation + "/" + dataMap.get("id").toString();
+                    String dataLocation = brokerEntityLocation + "/" + dataMap.get(ID_KEY_ATTRIBUTE).toString();
                     if (!dataMap.containsKey("deletedAt")) {
                         try {
                             String dataMapAsString = objectMapper.writeValueAsString(dataMap);
                             String entityHashed = calculateSHA256Hash(dataMapAsString);
                             entityHashed = previousHash.isEmpty() ? entityHashed : calculateIntertwinedHash(entityHashed, previousHash);
-                            dataLocation = brokerEntityLocation + "/" + dataMap.get("id").toString() + HASHLINK_PREFIX + entityHashed;
+                            dataLocation = brokerEntityLocation + "/" + dataMap.get(ID_KEY_ATTRIBUTE).toString() + HASHLINK_PREFIX + entityHashed;
                         } catch (JsonProcessingException | NoSuchAlgorithmException e) {
                             log.error("ProcessID: {} - Error creating blockchain event: {}", processId, e.getMessage());
-                            throw new HashLinkException("Error creating blockchain event", e.getCause());
+                            return Mono.error(new HashLinkException("Error creating blockchain event", e.getCause()));
                         }
                     }
                     if(previousHash.isEmpty()) {
@@ -104,4 +103,5 @@ public class BlockchainEventCreatorServiceImpl implements BlockchainEventCreator
                             .thenReturn(blockchainEvent);
                 });
     }
+
 }

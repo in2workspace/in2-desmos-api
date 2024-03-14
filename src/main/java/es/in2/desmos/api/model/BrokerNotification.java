@@ -14,4 +14,5 @@ public record BrokerNotification(
         @JsonProperty("subscriptionId") String subscriptionId,
         @JsonProperty("notifiedAt") String notifiedAt
 ) {
+
 }

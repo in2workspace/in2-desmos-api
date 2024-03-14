@@ -12,6 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class EventQueue implements Comparable<EventQueue> {
+
     private List<Object> event;
     private EventQueuePriority priority;
 
@@ -19,4 +20,5 @@ public class EventQueue implements Comparable<EventQueue> {
     public int compareTo(EventQueue o) {
         return Integer.compare(this.priority.getPriority(), o.priority.getPriority());
     }
+
 }

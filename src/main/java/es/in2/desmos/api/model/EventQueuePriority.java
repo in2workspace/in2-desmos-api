@@ -7,12 +7,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum EventQueuePriority {
     SYNCHRONIZATION(1),
-    RECOVERPUBLISH(2),
-    RECOVEREDIT(3),
-    RECOVERDELETE(4),
-    PUBLICATIONPUBLISH(5),
-    PUBLICATIONEDIT(6),
-    PUBLICATIONDELETE(7);
+    RECOVER_PUBLISH(2),
+    RECOVER_EDIT(3),
+    RECOVER_DELETE(4),
+    PUBLICATION_PUBLISH(5),
+    PUBLICATION_EDIT(6),
+    PUBLICATION_DELETE(7);
 
     private final int priority;
+
 }

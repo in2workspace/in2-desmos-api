@@ -4,6 +4,7 @@ import es.in2.desmos.api.model.EventQueue;
 import es.in2.desmos.api.model.EventQueuePriority;
 import es.in2.desmos.api.model.FailedEntityTransaction;
 import es.in2.desmos.api.model.FailedEventTransaction;
+import es.in2.desmos.api.scheduler.FailedTransactionScheduler;
 import es.in2.desmos.api.service.QueueService;
 import es.in2.desmos.api.service.TransactionService;
 import org.junit.jupiter.api.Test;
@@ -79,7 +80,7 @@ class FailedTransactionSchedulerTest {
         failedEventTransaction.setEntityId("Test Entity ID");
         failedEventTransaction.setPreviousEntityHash("Test Previous Entity Hash");
         failedEventTransaction.setOrganizationId("Test Organization ID");
-        failedEventTransaction.setPriority(EventQueuePriority.RECOVEREDIT);
+        failedEventTransaction.setPriority(EventQueuePriority.RECOVER_EDIT);
         return failedEventTransaction;
     }
 
@@ -93,7 +94,7 @@ private FailedEntityTransaction createFailedEntityTransaction() {
     failedEntityTransaction.setEntityId("Test Entity ID");
     failedEntityTransaction.setPreviousEntityHash("Test Previous Entity Hash");
     failedEntityTransaction.setEntity("Test Entity");
-    failedEntityTransaction.setPriority(EventQueuePriority.RECOVERPUBLISH);
+    failedEntityTransaction.setPriority(EventQueuePriority.RECOVER_PUBLISH);
     return failedEntityTransaction;
 }
 

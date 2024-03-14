@@ -18,6 +18,7 @@ import java.util.UUID;
 @ToString
 @Table("failed_entity_transactions")
 public class FailedEntityTransaction implements Persistable<UUID> {
+
     @Id
     @Column("id")
     private UUID id;
@@ -60,4 +61,5 @@ public class FailedEntityTransaction implements Persistable<UUID> {
     public boolean isNew() {
         return this.newTransaction || id == null;
     }
+
 }

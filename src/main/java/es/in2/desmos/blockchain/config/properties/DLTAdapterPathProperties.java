@@ -8,4 +8,5 @@ package es.in2.desmos.blockchain.config.properties;
  * @param events            - events path
  */
 public record DLTAdapterPathProperties(String publication, String subscription, String events) {
+
 }

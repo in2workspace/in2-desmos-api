@@ -9,4 +9,5 @@ public class HashCreationException extends RuntimeException {
     public HashCreationException(String message, Throwable cause) {
         super(message, cause);
     }
+
 }

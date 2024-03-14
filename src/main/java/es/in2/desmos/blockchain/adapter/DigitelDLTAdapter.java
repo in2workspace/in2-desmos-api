@@ -53,7 +53,6 @@ public class DigitelDLTAdapter implements GenericDLTAdapterService {
                 .bodyToMono(Void.class);
     }
 
-
     public Mono<Void> publishEvent(String processId, BlockchainEvent blockchainEvent) {
         return webClient.post()
                 .uri(dltAdapterProperties.paths()
@@ -112,11 +111,11 @@ public class DigitelDLTAdapter implements GenericDLTAdapterService {
     @Recover
     public Mono<Void> recover(String processId, BlockchainEvent blockchainEvent) {
         log.debug("Recovering from WebClientResponseException");
-        EventQueuePriority eventQueuePriority = EventQueuePriority.RECOVERPUBLISH;
+        EventQueuePriority eventQueuePriority = EventQueuePriority.RECOVER_PUBLISH;
         if (!hasHlParameter(blockchainEvent.dataLocation())) {
-            eventQueuePriority = EventQueuePriority.RECOVERDELETE;
+            eventQueuePriority = EventQueuePriority.RECOVER_DELETE;
         } else if (!Objects.equals(blockchainEvent.previousEntityHash(), "0x0000000000000000000000000000000000000000000000000000000000000000")){
-            eventQueuePriority = EventQueuePriority.RECOVEREDIT;
+            eventQueuePriority = EventQueuePriority.RECOVER_EDIT;
         }
         return transactionService.saveFailedEventTransaction(processId, FailedEventTransaction.builder()
                         .id(UUID.randomUUID())

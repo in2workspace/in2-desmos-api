@@ -13,7 +13,7 @@ class FailedEventTransactionTest {
         UUID id = UUID.randomUUID();
         Timestamp now = new Timestamp(System.currentTimeMillis());
 
-        FailedEventTransaction transactionWithId = new FailedEventTransaction(id, "tx123", now, "entity123", "http://example.com", "ExampleType", "org123", "0xhash", EventQueuePriority.PUBLICATIONPUBLISH, false);
+        FailedEventTransaction transactionWithId = new FailedEventTransaction(id, "tx123", now, "entity123", "http://example.com", "ExampleType", "org123", "0xhash", EventQueuePriority.PUBLICATION_PUBLISH, false);
         assertFalse(transactionWithId.isNew());
 
         FailedEventTransaction transactionWithoutId = new FailedEventTransaction();
@@ -40,7 +40,7 @@ class FailedEventTransactionTest {
                 .entityType("ExampleType")
                 .organizationId("org123")
                 .previousEntityHash("0xhash")
-                .priority(EventQueuePriority.PUBLICATIONPUBLISH)
+                .priority(EventQueuePriority.PUBLICATION_PUBLISH)
                 .newTransaction(true)
                 .build();
 
@@ -52,7 +52,7 @@ class FailedEventTransactionTest {
         assertEquals("ExampleType", transaction.getEntityType());
         assertEquals("org123", transaction.getOrganizationId());
         assertEquals("0xhash", transaction.getPreviousEntityHash());
-        assertEquals(EventQueuePriority.PUBLICATIONPUBLISH, transaction.getPriority());
+        assertEquals(EventQueuePriority.PUBLICATION_PUBLISH, transaction.getPriority());
         assertTrue(transaction.isNew());
     }
 }

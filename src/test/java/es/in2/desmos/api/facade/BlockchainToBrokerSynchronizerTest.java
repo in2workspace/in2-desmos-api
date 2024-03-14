@@ -67,7 +67,7 @@ class BlockchainToBrokerSynchronizerTest {
     @Test
     void testStartProcessingEventsSuccessfulFlow() {
         // Arrange
-        EventQueue eventQueue = new EventQueue(List.of(blockchainNotification), EventQueuePriority.PUBLICATIONPUBLISH);
+        EventQueue eventQueue = new EventQueue(List.of(blockchainNotification), EventQueuePriority.PUBLICATION_PUBLISH);
 
         when(blockchainToBrokerQueueService.getEventStream()).thenReturn(Flux.just(eventQueue));
 
@@ -90,7 +90,7 @@ class BlockchainToBrokerSynchronizerTest {
     @Test
     void testStartProcessingEventsSuccessfulFlowRecover() {
         // Arrange
-        EventQueue eventQueue = new EventQueue(List.of(blockchainNotification, "Entity"), EventQueuePriority.RECOVERPUBLISH);
+        EventQueue eventQueue = new EventQueue(List.of(blockchainNotification, "Entity"), EventQueuePriority.RECOVER_PUBLISH);
 
         when(blockchainToBrokerQueueService.getEventStream()).thenReturn(Flux.just(eventQueue));
 

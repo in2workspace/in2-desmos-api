@@ -18,6 +18,7 @@ import java.util.UUID;
 @ToString
 @Table("failed_event_transactions")
 public class FailedEventTransaction implements Persistable<UUID> {
+
     @Id
     @Column("id")
     private UUID id;
@@ -54,4 +55,5 @@ public class FailedEventTransaction implements Persistable<UUID> {
     public boolean isNew() {
         return this.newTransaction || id == null;
     }
+
 }

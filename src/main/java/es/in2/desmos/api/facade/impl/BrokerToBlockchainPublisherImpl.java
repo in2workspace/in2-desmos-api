@@ -3,7 +3,6 @@ package es.in2.desmos.api.facade.impl;
 import es.in2.desmos.api.facade.BrokerToBlockchainPublisher;
 import es.in2.desmos.api.model.BlockchainEvent;
 import es.in2.desmos.api.model.BrokerNotification;
-import es.in2.desmos.api.model.EventQueuePriority;
 import es.in2.desmos.api.service.BlockchainEventCreatorService;
 import es.in2.desmos.api.service.NotificationProcessorService;
 import es.in2.desmos.api.service.QueueService;

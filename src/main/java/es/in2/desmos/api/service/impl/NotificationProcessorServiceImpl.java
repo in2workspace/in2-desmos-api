@@ -29,19 +29,14 @@ public class NotificationProcessorServiceImpl implements NotificationProcessorSe
     private final QueueService brokerToBlockchainQueueService;
     private final QueueService blockchainToBrokerQueueService;
 
-
     @Override
     public Mono<Void> detectBrokerNotificationPriority(String processId, BrokerNotification brokerNotification) {
         return validateBrokerNotification(brokerNotification)
                 .flatMap(dataMap -> {
                     if (dataMap.containsKey("deletedAt")) {
-                        return Mono.just(EventQueuePriority.PUBLICATIONDELETE);
+                        return Mono.just(EventQueuePriority.PUBLICATION_DELETE);
                     } else {
-                        return transactionService.findLatestPublishedOrDeletedTransactionForEntity(processId, dataMap.get("id").toString())
-                                .flatMap(transaction ->
-                                        Mono.just(EventQueuePriority.PUBLICATIONEDIT)
-                                )
-                                .defaultIfEmpty(EventQueuePriority.PUBLICATIONPUBLISH);
+                        return transactionService.findLatestPublishedOrDeletedTransactionForEntity(processId, dataMap.get("id").toString()).flatMap(transaction -> Mono.just(EventQueuePriority.PUBLICATION_EDIT)).defaultIfEmpty(EventQueuePriority.PUBLICATION_PUBLISH);
                     }
                 }).flatMap(eventQueuePriority -> brokerToBlockchainQueueService.enqueueEvent(EventQueue.builder()
                         .event(Collections.singletonList(brokerNotification))
@@ -52,21 +47,17 @@ public class NotificationProcessorServiceImpl implements NotificationProcessorSe
     @Override
     public Mono<Void> detectBlockchainNotificationPriority(String processId, BlockchainNotification blockchainNotification) {
         checkIfNotificationIsNullOrDataLocationIsEmpty(blockchainNotification);
-        EventQueuePriority eventQueuePriority = EventQueuePriority.PUBLICATIONPUBLISH;
+        EventQueuePriority eventQueuePriority = EventQueuePriority.PUBLICATION_PUBLISH;
         if (!hasHlParameter(blockchainNotification.dataLocation())) {
-            eventQueuePriority = EventQueuePriority.PUBLICATIONDELETE;
+            eventQueuePriority = EventQueuePriority.PUBLICATION_DELETE;
         } else if (!Objects.equals(blockchainNotification.previousEntityHash(), "0x0000000000000000000000000000000000000000000000000000000000000000")) {
-            eventQueuePriority = EventQueuePriority.PUBLICATIONEDIT;
+            eventQueuePriority = EventQueuePriority.PUBLICATION_EDIT;
         }
-
         return blockchainToBrokerQueueService.enqueueEvent(EventQueue.builder()
                 .event(Collections.singletonList(blockchainNotification))
                 .priority(eventQueuePriority)
                 .build()).then();
     }
-
-
-
 
     @Override
     public Mono<Map<String, Object>> processBrokerNotification(String processId, BrokerNotification brokerNotification) {
@@ -106,7 +97,6 @@ public class NotificationProcessorServiceImpl implements NotificationProcessorSe
                         log.debug("ProcessID: {} - No transaction found; assuming BrokerNotification is from external source", processId);
                         return Mono.just(dataMap);
                     }
-
                     Transaction transactionFound = optionalTransaction.get();
                     try {
                         String brokerEntityAsString = objectMapper.writer().writeValueAsString(dataMap);
@@ -123,7 +113,6 @@ public class NotificationProcessorServiceImpl implements NotificationProcessorSe
                     }
                 });
     }
-
 
     @Override
     public Mono<Void> processBlockchainNotification(String processId, BlockchainNotification blockchainNotification) {

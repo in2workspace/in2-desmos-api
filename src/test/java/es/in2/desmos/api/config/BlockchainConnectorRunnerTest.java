@@ -35,7 +35,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
-class BlockchainConnectorInitializerTest {
+class BlockchainConnectorRunnerTest {
 
     @Mock
     private TransactionService transactionService;
@@ -77,14 +77,14 @@ class BlockchainConnectorInitializerTest {
     private WebClient.ResponseSpec responseSpecMock;
 
     @InjectMocks
-    private BlockchainConnectorInitializer blockchainConnectorInitializer;
+    private BlockchainConnectorRunner blockchainConnectorRunner;
 
     @BeforeEach
     void setUp() {
         // Corrected to include all dependencies
         DLTAdapterProperties = new DLTAdapterProperties("http://localhost:8080", "http://localhost:8080", "http" +
                 "://localhost:8080", new DLTAdapterPathProperties("/configureNode", "/publish", "/subscribe"));
-        blockchainConnectorInitializer = new BlockchainConnectorInitializer(transactionService, DLTAdapterProperties,
+        blockchainConnectorRunner = new BlockchainConnectorRunner(transactionService, DLTAdapterProperties,
                 DLTAdapterEventPublisher, new ObjectMapper(), brokerToBlockchainDataSyncPublisher,
                 brokerToBlockchainPublisher, blockchainToBrokerSynchronizer, blockchainToBrokerDataSyncSynchronizer,
                 brokerPublicationService);
@@ -99,7 +99,7 @@ class BlockchainConnectorInitializerTest {
         when(objectMapper.readTree(json)).thenReturn(rootNode);
 
         //When
-        List<String> actualIds = blockchainConnectorInitializer.extractIdsBasedOnPosition(json);
+        List<String> actualIds = blockchainConnectorRunner.extractIdsBasedOnPosition(json);
 
 
         //Then
@@ -153,7 +153,7 @@ class BlockchainConnectorInitializerTest {
 
 
         // Then
-        blockchainConnectorInitializer.processAllTransactions();
+        blockchainConnectorRunner.processAllTransactions();
 
         verify(transactionService, times(1)).getAllTransactions(any());
 
@@ -210,7 +210,7 @@ class BlockchainConnectorInitializerTest {
         when(responseSpecMock.bodyToFlux(String.class)).thenReturn(mockResponse);
 
         // When
-        blockchainConnectorInitializer.processAllTransactions();
+        blockchainConnectorRunner.processAllTransactions();
 
         // Then
         verify(transactionService, times(1)).getAllTransactions(any());
@@ -225,13 +225,13 @@ class BlockchainConnectorInitializerTest {
         when(brokerEntityEventSubscription.isDisposed()).thenReturn(false);
 
         // Asigna las suscripciones simuladas
-        ReflectionTestUtils.setField(blockchainConnectorInitializer, "blockchainEventProcessingSubscription",
+        ReflectionTestUtils.setField(blockchainConnectorRunner, "blockchainEventProcessingSubscription",
                 blockchainEventSubscription);
-        ReflectionTestUtils.setField(blockchainConnectorInitializer, "brokerEntityEventProcessingSubscription",
+        ReflectionTestUtils.setField(blockchainConnectorRunner, "brokerEntityEventProcessingSubscription",
                 brokerEntityEventSubscription);
 
         // Ejecuta cleanUp
-        blockchainConnectorInitializer.cleanUp();
+        blockchainConnectorRunner.cleanUp();
 
         // Verificaciones
         verify(blockchainEventSubscription).dispose();

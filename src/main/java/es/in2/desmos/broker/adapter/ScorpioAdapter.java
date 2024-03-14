@@ -3,7 +3,6 @@ package es.in2.desmos.broker.adapter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import es.in2.desmos.api.exception.JsonReadingException;
 import es.in2.desmos.api.exception.SubscriptionCreationException;
 import es.in2.desmos.broker.config.properties.BrokerProperties;
@@ -25,7 +24,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static es.in2.desmos.api.util.MessageUtils.*;
-
 
 @Slf4j
 @Component

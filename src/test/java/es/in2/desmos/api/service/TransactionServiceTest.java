@@ -85,12 +85,6 @@ class TransactionServiceTest {
     @Mock
     private FailedEntityTransactionRepository failedEntityTransactionRepository;
 
-    @Mock
-    private BrokerProperties brokerProperties;
-
-    @Mock
-    private BrokerPathProperties brokerPathProperties;
-
     @InjectMocks
     private TransactionServiceImpl transactionService;
 
@@ -100,7 +94,7 @@ class TransactionServiceTest {
         BrokerPathProperties brokerPathProperties = new BrokerPathProperties("/v2", "/entities", "/subscriptions");
         BrokerProperties brokerProperties = new BrokerProperties("scorpio", "http://localhost:1026",
                 "http://localhost:1026", new BrokerPathProperties("/entities", "/subscriptions", "/v2"));
-        transactionService = new TransactionServiceImpl(transactionRepository, brokerProperties, failedTransactionRepository, failedEntityTransactionRepository);
+        transactionService = new TransactionServiceImpl(transactionRepository, failedTransactionRepository, failedEntityTransactionRepository);
     }
 
     @Test
@@ -116,7 +110,7 @@ class TransactionServiceTest {
                 .entityType("EntityType")
                 .organizationId("org123")
                 .previousEntityHash("hash123")
-                .priority(EventQueuePriority.PUBLICATIONPUBLISH)
+                .priority(EventQueuePriority.PUBLICATION_PUBLISH)
                 .newTransaction(true)
                 .build();
 

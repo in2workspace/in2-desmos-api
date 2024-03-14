@@ -3,7 +3,7 @@ package es.in2.desmos.api.config.properties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * Configuration of the client which instantiate the solution.
+ * Configuration of the client which instantiates the solution.
  *
  * @param organizationId - Client OrganizationID information
  */

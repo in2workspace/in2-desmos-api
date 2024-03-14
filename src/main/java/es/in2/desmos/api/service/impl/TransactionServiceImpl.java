@@ -10,7 +10,6 @@ import es.in2.desmos.api.repository.FailedEntityTransactionRepository;
 import es.in2.desmos.api.repository.FailedEventTransactionRepository;
 import es.in2.desmos.api.repository.TransactionRepository;
 import es.in2.desmos.api.service.TransactionService;
-import es.in2.desmos.broker.config.properties.BrokerProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,7 +29,6 @@ import static es.in2.desmos.api.util.ApplicationUtils.hasHlParameter;
 public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;
-    private final BrokerProperties brokerProperties;
     private final FailedEventTransactionRepository failedEventTransactionRepository;
     private final FailedEntityTransactionRepository failedEntityTransactionRepository;
 
@@ -39,11 +37,10 @@ public class TransactionServiceImpl implements TransactionService {
         log.debug("ProcessID: {} - Saving transaction...", processId);
         try {
             if (transaction.getTrader() == TransactionTrader.PRODUCER && hasHlParameter(transaction.getDatalocation())) {
-                // In case of a producer transaction, we calculate the intertwined hash and save it
+                // In the case of a producer transaction, we calculate the intertwined hash and save it
                 Mono<String> entityHashMono = getLastProducerTransactionByEntityId(processId, transaction.getEntityId())
                         .flatMap(lastTransaction -> getEntityHashFromLastTransaction(processId, transaction.getEntityId()))
                         .switchIfEmpty(Mono.just(transaction.getEntityHash()));
-
                 return calculateTransactionIntertwinedHash(transaction.getEntityHash(), processId)
                         .flatMap(intertwinedHash -> entityHashMono.flatMap(entityHash -> {
                             transaction.setHash(intertwinedHash);
@@ -53,7 +50,7 @@ public class TransactionServiceImpl implements TransactionService {
                                     .doOnError(error -> log.error("ProcessID: {} - Error saving producer transaction: {}", processId, error.getMessage()));
                         })).then();
             } else {
-                // In case of a consumer transaction, we save it without calculating the intertwined hash
+                // In the case of a consumer transaction, we save it without calculating the intertwined hash
                 return transactionRepository.save(transaction)
                         .doOnSuccess(success -> log.info("ProcessID: {} - Transaction saved successfully", processId))
                         .doOnError(error -> log.error("ProcessID: {} - Error saving consumer transaction: {}", processId, error.getMessage()))
@@ -67,7 +64,6 @@ public class TransactionServiceImpl implements TransactionService {
                     .then();
         }
     }
-
 
     @Override
     public Mono<Void> saveFailedEventTransaction(String processId, FailedEventTransaction transaction) {
@@ -84,7 +80,6 @@ public class TransactionServiceImpl implements TransactionService {
                 .doOnError(error -> log.error("ProcessID: {} - Error saving failed entity transaction: {}", processId, error.getMessage()))
                 .then();
     }
-
 
     @Override
     public Mono<Void> deleteFailedEntityTransaction(String processId, UUID transactionId) {
@@ -113,8 +108,6 @@ public class TransactionServiceImpl implements TransactionService {
         log.debug("ProcessID: {} - Getting all failed entity transactions", processId);
         return failedEntityTransactionRepository.findAll();
     }
-
-
 
     @Override
     public Mono<List<Transaction>> getTransactionsByEntityId(String processId, String entityId) {
@@ -162,6 +155,5 @@ public class TransactionServiceImpl implements TransactionService {
         return getLastProducerTransactionByEntityId(processId, entityId)
                 .map(Transaction::getEntityHash);
     }
-
 
 }

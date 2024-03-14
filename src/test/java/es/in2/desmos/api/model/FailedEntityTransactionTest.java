@@ -25,7 +25,7 @@ class FailedEntityTransactionTest {
                 .previousEntityHash("hash123")
                 .entity("{json: 'value'}")
                 .timestamp(System.currentTimeMillis())
-                .priority(EventQueuePriority.PUBLICATIONPUBLISH)
+                .priority(EventQueuePriority.PUBLICATION_PUBLISH)
                 .newTransaction(true)
                 .build();
 
@@ -50,7 +50,7 @@ class FailedEntityTransactionTest {
                 .previousEntityHash("hash123")
                 .entity("{json: 'value'}")
                 .timestamp(timestamp)
-                .priority(EventQueuePriority.PUBLICATIONPUBLISH)
+                .priority(EventQueuePriority.PUBLICATION_PUBLISH)
                 .newTransaction(false)
                 .build();
 
@@ -64,7 +64,7 @@ class FailedEntityTransactionTest {
         assertEquals("hash123", transaction.getPreviousEntityHash());
         assertEquals("{json: 'value'}", transaction.getEntity());
         assertEquals(timestamp, transaction.getTimestamp());
-        assertEquals(EventQueuePriority.PUBLICATIONPUBLISH, transaction.getPriority());
+        assertEquals(EventQueuePriority.PUBLICATION_PUBLISH, transaction.getPriority());
         assertFalse(transaction.isNew());
     }
 }

@@ -16,7 +16,7 @@ class EventQueueTest {
                 .priority(EventQueuePriority.SYNCHRONIZATION)
                 .build();
         EventQueue lowPriorityEvent = EventQueue.builder()
-                .priority(EventQueuePriority.PUBLICATIONPUBLISH)
+                .priority(EventQueuePriority.PUBLICATION_PUBLISH)
                 .build();
 
         assertTrue(highPriorityEvent.compareTo(lowPriorityEvent) < 0, "High priority should be 'less' than low priority");
@@ -25,7 +25,7 @@ class EventQueueTest {
     @Test
     void compareToShouldReturnPositiveWhenThisHasLowerPriority() {
         EventQueue lowPriorityEvent = EventQueue.builder()
-                .priority(EventQueuePriority.PUBLICATIONPUBLISH)
+                .priority(EventQueuePriority.PUBLICATION_PUBLISH)
                 .build();
         EventQueue highPriorityEvent = EventQueue.builder()
                 .priority(EventQueuePriority.SYNCHRONIZATION)
@@ -37,10 +37,10 @@ class EventQueueTest {
     @Test
     void compareToShouldReturnZeroWhenPrioritiesAreEqual() {
         EventQueue firstMediumPriorityEvent = EventQueue.builder()
-                .priority(EventQueuePriority.PUBLICATIONPUBLISH)
+                .priority(EventQueuePriority.PUBLICATION_PUBLISH)
                 .build();
         EventQueue secondMediumPriorityEvent = EventQueue.builder()
-                .priority(EventQueuePriority.PUBLICATIONPUBLISH)
+                .priority(EventQueuePriority.PUBLICATION_PUBLISH)
                 .build();
 
         assertEquals(0, firstMediumPriorityEvent.compareTo(secondMediumPriorityEvent), "Equal priorities should result in " +

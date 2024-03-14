@@ -18,4 +18,5 @@ public record BlockchainNotification(
         @JsonProperty("entityId") String entityId,
         @JsonProperty("previousEntityHash") String previousEntityHash
 ) {
+
 }

@@ -14,4 +14,5 @@ public record BlockchainEvent(
         @JsonProperty("dataLocation") String dataLocation,
         @JsonProperty("relevantMetadata") List<String> metadata
 ) {
+
 }

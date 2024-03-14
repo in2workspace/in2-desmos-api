@@ -19,7 +19,6 @@ public class QueueServiceImpl implements QueueService {
     private final Sinks.Many<EventQueue> sink = Sinks.many().multicast().onBackpressureBuffer();
     private final PriorityBlockingQueue<EventQueue> queue = new PriorityBlockingQueue<>();
 
-
     @Override
     public Mono<Void> enqueueEvent(EventQueue event) {
         if(queue.offer(event)){
@@ -42,4 +41,5 @@ public class QueueServiceImpl implements QueueService {
     public Flux<EventQueue> getEventStream() {
         return sink.asFlux();
     }
+
 }

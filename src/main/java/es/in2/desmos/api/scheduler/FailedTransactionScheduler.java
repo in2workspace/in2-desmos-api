@@ -1,4 +1,4 @@
-package es.in2.desmos.api.config;
+package es.in2.desmos.api.scheduler;
 
 import es.in2.desmos.api.exception.HashCreationException;
 import es.in2.desmos.api.model.BlockchainEvent;
@@ -30,7 +30,6 @@ public class FailedTransactionScheduler {
     private final QueueService brokerToBlockchainQueueService;
     private final QueueService blockchainToBrokerQueueService;
     private final TransactionService transactionService;
-
 
     @Scheduled(fixedRate = 60000)
     public void processFailedEvents() {
@@ -106,4 +105,5 @@ public class FailedTransactionScheduler {
                         error -> log.debug("Error retrying entity")
                 );
     }
+
 }

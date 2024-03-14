@@ -3,27 +3,27 @@ package es.in2.desmos.broker.model;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-class ErrorMessageTest {
+class BrokerErrorMessageTest {
 
     @Test
     void testBuilderAndAccessors() {
         // Arrange
         String type = "ErrorType";
         String title = "ErrorTitle";
-        ErrorMessage.Detail detail = new ErrorMessage.Detail("ErrorDetailMessage");
+        BrokerErrorMessage.Detail detail = new BrokerErrorMessage.Detail("ErrorDetailMessage");
         String errorCode = "ErrorCode123";
         // Act
-        ErrorMessage errorMessage = ErrorMessage.builder()
+        BrokerErrorMessage brokerErrorMessage = BrokerErrorMessage.builder()
                 .type(type)
                 .title(title)
                 .detail(detail)
                 .errorCode(errorCode)
                 .build();
         // Assert
-        assertEquals(type, errorMessage.type());
-        assertEquals(title, errorMessage.title());
-        assertEquals(detail, errorMessage.detail());
-        assertEquals(errorCode, errorMessage.errorCode());
+        assertEquals(type, brokerErrorMessage.type());
+        assertEquals(title, brokerErrorMessage.title());
+        assertEquals(detail, brokerErrorMessage.detail());
+        assertEquals(errorCode, brokerErrorMessage.errorCode());
     }
 
     @Test
@@ -31,7 +31,7 @@ class ErrorMessageTest {
         // Arrange
         String detailMessage = "Detailed error message";
         // Act
-        ErrorMessage.Detail detail = new ErrorMessage.Detail(detailMessage);
+        BrokerErrorMessage.Detail detail = new BrokerErrorMessage.Detail(detailMessage);
         // Assert
         assertEquals(detailMessage, detail.message());
     }

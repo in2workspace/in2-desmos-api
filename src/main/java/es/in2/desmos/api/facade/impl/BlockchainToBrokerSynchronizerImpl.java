@@ -49,6 +49,7 @@ public class BlockchainToBrokerSynchronizerImpl implements BlockchainToBrokerSyn
                             });
                 });
     }
+
     @Override
     public Mono<Void> retrieveAndPublishEntityToBroker(String processId, BlockchainNotification blockchainNotification) {
         // Process the Blockchain Notification

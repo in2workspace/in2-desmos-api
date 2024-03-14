@@ -1,20 +1,14 @@
 package es.in2.desmos.api.controller;
 
-import es.in2.desmos.api.facade.BlockchainToBrokerSynchronizer;
-import es.in2.desmos.api.facade.BrokerToBlockchainPublisher;
 import es.in2.desmos.api.model.BlockchainNotification;
 import es.in2.desmos.api.model.BrokerNotification;
-import es.in2.desmos.api.model.EventQueue;
-import es.in2.desmos.api.model.EventQueuePriority;
 import es.in2.desmos.api.service.NotificationProcessorService;
-import es.in2.desmos.api.service.QueueService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
-import java.util.Collections;
 import java.util.UUID;
 
 @Slf4j
@@ -22,7 +16,6 @@ import java.util.UUID;
 @RequestMapping("/notifications")
 @RequiredArgsConstructor
 public class NotificationController {
-
 
     private final NotificationProcessorService notificationProcessorService;
 

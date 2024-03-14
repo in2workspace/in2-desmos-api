@@ -6,12 +6,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface GenericDLTAdapterService {
-
     Mono<Void> createSubscription(String processId, DLTAdapterSubscription dltAdapterSubscription);
-
     Mono<Void> publishEvent(String processId, BlockchainEvent blockchainEvent);
-
     Flux<String> getEventsFromRange(String processId, long from, long to);
-
 }
 

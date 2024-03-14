@@ -53,7 +53,7 @@ class BrokerToBlockchainPublisherTest {
     @Test
     void testStartProcessingEventsSuccessfulFlow() {
         // Arrange
-        EventQueue eventQueue = new EventQueue(List.of(brokerNotification), EventQueuePriority.PUBLICATIONPUBLISH);
+        EventQueue eventQueue = new EventQueue(List.of(brokerNotification), EventQueuePriority.PUBLICATION_PUBLISH);
         when(brokerToBlockchainQueueService.getEventStream()).thenReturn(Flux.just(eventQueue));
 
 
@@ -76,7 +76,7 @@ class BrokerToBlockchainPublisherTest {
     @Test
     void testStartProcessingEventsSuccessfulFlow_recover() {
         // Arrange
-        EventQueue eventQueue = new EventQueue(List.of(blockchainEvent), EventQueuePriority.RECOVERPUBLISH);
+        EventQueue eventQueue = new EventQueue(List.of(blockchainEvent), EventQueuePriority.RECOVER_PUBLISH);
 
         when(brokerToBlockchainQueueService.getEventStream()).thenReturn(Flux.just(eventQueue));
 

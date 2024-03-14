@@ -44,7 +44,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class BlockchainConnectorInitializer {
+public class BlockchainConnectorRunner {
 
     private static final String PROCESS_ID = "processId";
     private final TransactionService transactionService;
