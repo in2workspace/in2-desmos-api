@@ -7,8 +7,6 @@ import es.in2.desmos.broker.util.BrokerFactory;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-
 @Service
 public class BrokerSubscriptionServiceImpl implements BrokerSubscriptionService {
 
