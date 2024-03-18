@@ -13,17 +13,29 @@ class FailedEventTransactionTest {
         UUID id = UUID.randomUUID();
         Timestamp now = new Timestamp(System.currentTimeMillis());
 
-        FailedEventTransaction transactionWithId = new FailedEventTransaction(id, "tx123", now, "entity123", "http://example.com", "ExampleType", "org123", "0xhash", EventQueuePriority.PUBLICATION_PUBLISH, false);
+        FailedEventTransaction transactionWithId = FailedEventTransaction.builder()
+                .id(id)
+                .transactionId("tx123")
+                .createdAt(now)
+                .entityId("entity123")
+                .datalocation("http://example.com")
+                .entityType("ExampleType")
+                .organizationId("org123")
+                .previousEntityHash("0xhash")
+                .priority(EventQueuePriority.PUBLICATION_PUBLISH)
+                .newTransaction(false)
+                .build();
         assertFalse(transactionWithId.isNew());
 
-        FailedEventTransaction transactionWithoutId = new FailedEventTransaction();
-        transactionWithoutId.setId(null);
-        transactionWithoutId.setNewTransaction(true);
+        FailedEventTransaction transactionWithoutId = FailedEventTransaction.builder()
+                .newTransaction(true)
+                .build();
         assertTrue(transactionWithoutId.isNew());
 
-        FailedEventTransaction transactionMarkedAsNew = new FailedEventTransaction();
-        transactionMarkedAsNew.setId(id);
-        transactionMarkedAsNew.setNewTransaction(true);
+        FailedEventTransaction transactionMarkedAsNew = FailedEventTransaction.builder()
+                .id(id)
+                .newTransaction(true)
+                .build();
         assertTrue(transactionMarkedAsNew.isNew());
     }
 

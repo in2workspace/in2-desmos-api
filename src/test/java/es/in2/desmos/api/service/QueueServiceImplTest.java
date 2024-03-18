@@ -33,7 +33,7 @@ class QueueServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        event = new EventQueue();
+        event = EventQueue.builder().build();
     }
 
     @Test

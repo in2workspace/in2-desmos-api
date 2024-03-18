@@ -8,7 +8,4 @@ import java.util.List;
 
 public interface BrokerSubscriptionService {
     Mono<Void> createSubscription(String processId, BrokerSubscription brokerSubscription);
-    Mono<List<BrokerSubscription>> getSubscriptions(String processId);
-    Mono<Void> updateSubscription(String processId, BrokerSubscription brokerSubscription);
-    Mono<Void> deleteSubscription(String processId, String subscriptionId);
 }

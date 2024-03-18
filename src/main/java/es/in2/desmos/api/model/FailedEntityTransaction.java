@@ -11,11 +11,7 @@ import java.sql.Timestamp;
 import java.util.UUID;
 
 @Getter
-@Setter
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
-@ToString
 @Table("failed_entity_transactions")
 public class FailedEntityTransaction implements Persistable<UUID> {
 

@@ -183,7 +183,7 @@ class TransactionServiceTest {
     @Test
     void saveFailedEntityTransaction() {
         String processId = "processId";
-        FailedEntityTransaction transaction = new FailedEntityTransaction();
+        FailedEntityTransaction transaction = FailedEntityTransaction.builder().build();
         when(failedEntityTransactionRepository.save(transaction)).thenReturn(Mono.just(transaction));
 
         StepVerifier.create(transactionService.saveFailedEntityTransaction(processId, transaction))
@@ -195,7 +195,7 @@ class TransactionServiceTest {
     @Test
     void saveFailedEntityTransactionWithError() {
         String processId = "processId";
-        FailedEntityTransaction transaction = new FailedEntityTransaction();
+        FailedEntityTransaction transaction = FailedEntityTransaction.builder().build();
         when(failedEntityTransactionRepository.save(transaction)).thenReturn(Mono.error(new RuntimeException("Simulated error")));
 
         StepVerifier.create(transactionService.saveFailedEntityTransaction(processId, transaction))
@@ -251,7 +251,7 @@ class TransactionServiceTest {
     void getLastProducerTransactionByEntityId_ReturnsLastTransaction() {
         String processId = "processId";
         String entityId = "entityId";
-        Transaction transaction = new Transaction();
+        Transaction transaction = Transaction.builder().build();
         when(transactionRepository.findLastProducerTransactionByEntityId(entityId)).thenReturn(Flux.just(transaction));
 
         StepVerifier.create(transactionService.getLastProducerTransactionByEntityId(processId, entityId))

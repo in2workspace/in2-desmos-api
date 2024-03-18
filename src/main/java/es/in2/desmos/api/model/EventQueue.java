@@ -7,10 +7,8 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-@Data
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
+@Data
 public class EventQueue implements Comparable<EventQueue> {
 
     private List<Object> event;

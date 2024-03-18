@@ -71,32 +71,19 @@ class FailedTransactionSchedulerTest {
 
         verify(transactionService).deleteFailedEntityTransaction(anyString(), any());
     }
-
-    private FailedEventTransaction createFailedEventTransaction() {
-        FailedEventTransaction failedEventTransaction = new FailedEventTransaction();
-        failedEventTransaction.setId(UUID.randomUUID());
-        failedEventTransaction.setEntityType("Test Entity");
-        failedEventTransaction.setDatalocation("Test Data Location");
-        failedEventTransaction.setEntityId("Test Entity ID");
-        failedEventTransaction.setPreviousEntityHash("Test Previous Entity Hash");
-        failedEventTransaction.setOrganizationId("Test Organization ID");
-        failedEventTransaction.setPriority(EventQueuePriority.RECOVER_EDIT);
-        return failedEventTransaction;
+    private FailedEntityTransaction createFailedEntityTransaction() {
+        return FailedEntityTransaction.builder()
+                .id(UUID.randomUUID())
+                .notificationId(12345)
+                .datalocation("Test Data Location")
+                .timestamp(542315)
+                .entityType("Test Entity Type")
+                .entityId("Test Entity ID")
+                .previousEntityHash("Test Previous Entity Hash")
+                .entity("Test Entity")
+                .priority(EventQueuePriority.RECOVER_PUBLISH)
+                .build();
     }
-
-private FailedEntityTransaction createFailedEntityTransaction() {
-    FailedEntityTransaction failedEntityTransaction = new FailedEntityTransaction();
-    failedEntityTransaction.setId(UUID.randomUUID());
-    failedEntityTransaction.setNotificationId(12345);
-    failedEntityTransaction.setDatalocation("Test Data Location");
-    failedEntityTransaction.setTimestamp(542315);
-    failedEntityTransaction.setEntityType("Test Entity Type");
-    failedEntityTransaction.setEntityId("Test Entity ID");
-    failedEntityTransaction.setPreviousEntityHash("Test Previous Entity Hash");
-    failedEntityTransaction.setEntity("Test Entity");
-    failedEntityTransaction.setPriority(EventQueuePriority.RECOVER_PUBLISH);
-    return failedEntityTransaction;
-}
 
 
 

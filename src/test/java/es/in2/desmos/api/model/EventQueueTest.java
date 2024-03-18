@@ -72,7 +72,7 @@ class EventQueueTest {
     @Test
     void testSetEvent() {
         // Arrange
-        EventQueue eventQueue = new EventQueue();
+        EventQueue eventQueue = EventQueue.builder().build();
         List<Object> event = Arrays.asList("event1", "event2");
 
         // Act
@@ -85,7 +85,7 @@ class EventQueueTest {
     @Test
     void testSetPriority() {
         // Arrange
-        EventQueue eventQueue = new EventQueue();
+        EventQueue eventQueue = EventQueue.builder().build();
         EventQueuePriority priority = EventQueuePriority.SYNCHRONIZATION;
 
         // Act
@@ -98,8 +98,8 @@ class EventQueueTest {
     @Test
     void testCanEqual() {
         // Arrange
-        EventQueue eventQueue1 = new EventQueue();
-        EventQueue eventQueue2 = new EventQueue();
+        EventQueue eventQueue1 = EventQueue.builder().build();
+        EventQueue eventQueue2 = EventQueue.builder().build();
 
         // Assert
         assertTrue(eventQueue1.canEqual(eventQueue2), "Expected canEqual to return true");

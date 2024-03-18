@@ -12,7 +12,7 @@ class TransactionTest {
     @Test
     void testNoArgsConstructor() {
         // Act
-        Transaction transaction = new Transaction();
+        Transaction transaction = Transaction.builder().build();
 
         // Assert
         assertNull(transaction.getId(), "Expected id to be null");
