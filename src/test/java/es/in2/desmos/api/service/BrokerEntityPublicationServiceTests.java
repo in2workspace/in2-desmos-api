@@ -70,7 +70,7 @@ class BrokerEntityPublicationServiceTests {
         // Arrange
         String retrievedBrokerEntity = "brokerEntity";
         BlockchainNotification mockBlockchainNotification = mock(BlockchainNotification.class);
-        when(mockBlockchainNotification.previousEntityHash()).thenReturn("");
+        when(mockBlockchainNotification.previousEntityHash()).thenReturn("0x0000000000000000000000000000000000000000000000000000000000000000");
         when(mockBlockchainNotification.dataLocation()).thenReturn("http://broker.internal/entities/entity123");
         when(brokerPublicationService.getEntityById(processId, entityId)).thenReturn(Mono.just("{errorCode: 404}"));
         when(brokerPublicationService.postEntity(processId, retrievedBrokerEntity)).thenReturn(Mono.empty());
@@ -98,7 +98,7 @@ class BrokerEntityPublicationServiceTests {
         // Arrange
         String retrievedBrokerEntity = "brokerEntity";
         BlockchainNotification mockBlockchainNotification = mock(BlockchainNotification.class);
-        when(mockBlockchainNotification.previousEntityHash()).thenReturn("");
+        when(mockBlockchainNotification.previousEntityHash()).thenReturn("0x0000000000000000000000000000000000000000000000000000000000000000");
         when(mockBlockchainNotification.dataLocation()).thenReturn("http://broker.internal/entities/entity123");
         when(brokerPublicationService.getEntityById(processId, entityId)).thenReturn(Mono.just("Ok"));
         when(brokerPublicationService.updateEntity(processId, retrievedBrokerEntity)).thenReturn(Mono.empty());
@@ -127,7 +127,7 @@ class BrokerEntityPublicationServiceTests {
         String retrievedBrokerEntity = "brokerEntity";
 
         BlockchainNotification mockBlockchainNotification = mock(BlockchainNotification.class);
-        when(mockBlockchainNotification.previousEntityHash()).thenReturn("");
+        when(mockBlockchainNotification.previousEntityHash()).thenReturn("0x0000000000000000000000000000000000000000000000000000000000000000");
         when(mockBlockchainNotification.dataLocation()).thenReturn("http://broker.internal/entities/entity123");
 
         try (MockedStatic<ApplicationUtils> applicationUtils = Mockito.mockStatic(ApplicationUtils.class)) {
@@ -195,7 +195,7 @@ class BrokerEntityPublicationServiceTests {
         // Arrange
         String retrievedBrokerEntity = "brokerEntity";
         BlockchainNotification mockBlockchainNotification = mock(BlockchainNotification.class);
-        when(mockBlockchainNotification.previousEntityHash()).thenReturn("");
+        when(mockBlockchainNotification.previousEntityHash()).thenReturn("0x0000000000000000000000000000000000000000000000000000000000000000");
         when(mockBlockchainNotification.dataLocation()).thenReturn("http://broker.internal/entities/entity123");
         when(brokerPublicationService.getEntityById(processId, entityId)).thenReturn(Mono.just("Ok"));
         when(brokerPublicationService.updateEntity(processId, retrievedBrokerEntity)).thenReturn(Mono.error(new RuntimeException("Simulated deletion error")));
@@ -228,7 +228,7 @@ class BrokerEntityPublicationServiceTests {
         // Arrange
         String retrievedBrokerEntity = "brokerEntity";
         BlockchainNotification mockBlockchainNotification = mock(BlockchainNotification.class);
-        when(mockBlockchainNotification.previousEntityHash()).thenReturn("");
+        when(mockBlockchainNotification.previousEntityHash()).thenReturn("0x0000000000000000000000000000000000000000000000000000000000000000");
         when(mockBlockchainNotification.dataLocation()).thenReturn("http://broker.internal/entities/entity123");
         when(brokerPublicationService.getEntityById(processId, entityId)).thenReturn(Mono.just("{errorCode: 404}"));
         when(brokerPublicationService.postEntity(processId, retrievedBrokerEntity)).thenReturn(Mono.error(new RuntimeException("Simulated deletion error")));
