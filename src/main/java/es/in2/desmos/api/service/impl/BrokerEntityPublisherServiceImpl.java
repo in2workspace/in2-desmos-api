@@ -3,6 +3,7 @@ package es.in2.desmos.api.service.impl;
 import es.in2.desmos.api.model.*;
 import es.in2.desmos.api.service.BrokerEntityPublisherService;
 import es.in2.desmos.api.service.TransactionService;
+import es.in2.desmos.api.util.ApplicationUtils;
 import es.in2.desmos.broker.service.BrokerPublicationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -66,7 +67,7 @@ public class BrokerEntityPublisherServiceImpl implements BrokerEntityPublisherSe
             try {
                 String entityHash = calculateSHA256Hash(retrievedBrokerEntity);
                 String previousHash = blockchainNotification.previousEntityHash();
-                entityHash = previousHash.isEmpty() ? entityHash : calculateIntertwinedHash(entityHash, previousHash);
+                entityHash = previousHash.equals("0x0000000000000000000000000000000000000000000000000000000000000000") ? entityHash : calculateIntertwinedHash(entityHash, previousHash);
                 String sourceEntityHash = extractEntityHashFromDataLocation(blockchainNotification.dataLocation());
                 if (entityHash.equals(sourceEntityHash)) {
                     log.debug("ProcessID: {} - Entity integrity is valid", processId);
