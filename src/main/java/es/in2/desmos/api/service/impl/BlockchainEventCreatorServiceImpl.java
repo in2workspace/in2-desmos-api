@@ -33,12 +33,11 @@ import static es.in2.desmos.api.util.ApplicationUtils.*;
 @RequiredArgsConstructor
 public class BlockchainEventCreatorServiceImpl implements BlockchainEventCreatorService {
 
+    private static final String ID_KEY_ATTRIBUTE = "id";
     private final BrokerProperties brokerProperties;
     private final TransactionService transactionService;
     private final ApplicationConfig applicationConfig;
     private final ObjectMapper objectMapper;
-
-    private static final String ID_KEY_ATTRIBUTE = "id";
 
     private static String generateEntityIdHashFromDataLocation(String dataLocation) {
         try {
@@ -54,7 +53,7 @@ public class BlockchainEventCreatorServiceImpl implements BlockchainEventCreator
     private Mono<String> getPreviousEntityHashFromTransaction(String processId, String entityId) {
         return transactionService.getLastProducerTransactionByEntityId(processId, entityId)
                 .flatMap(transaction -> transaction != null ? Mono.fromCallable(transaction::getEntityHash) : Mono.empty())
-                .switchIfEmpty(Mono.just(""));
+                .switchIfEmpty(Mono.just("0x0000000000000000000000000000000000000000000000000000000000000000"));
     }
 
     @Override
@@ -68,15 +67,16 @@ public class BlockchainEventCreatorServiceImpl implements BlockchainEventCreator
                         try {
                             String dataMapAsString = objectMapper.writeValueAsString(dataMap);
                             String entityHashed = calculateSHA256Hash(dataMapAsString);
-                            entityHashed = previousHash.isEmpty() ? entityHashed : calculateIntertwinedHash(entityHashed, previousHash);
-                            dataLocation = brokerEntityLocation + "/" + dataMap.get(ID_KEY_ATTRIBUTE).toString() + HASHLINK_PREFIX + entityHashed;
+                            entityHashed = previousHash.equals("0x0000000000000000000000000000000000000000000000000000000000000000") ?
+                                    entityHashed :
+                                    calculateIntertwinedHash(entityHashed, previousHash);
+                            previousHash = previousHash.startsWith(HASH_PREFIX) ? previousHash : HASH_PREFIX + previousHash;
+                            dataLocation =
+                                    brokerEntityLocation + "/" + dataMap.get(ID_KEY_ATTRIBUTE).toString() + HASHLINK_PREFIX + entityHashed;
                         } catch (JsonProcessingException | NoSuchAlgorithmException e) {
                             log.error("ProcessID: {} - Error creating blockchain event: {}", processId, e.getMessage());
                             return Mono.error(new HashLinkException("Error creating blockchain event", e.getCause()));
                         }
-                    }
-                    if(previousHash.isEmpty()) {
-                        previousHash = "0x0000000000000000000000000000000000000000000000000000000000000000";
                     }
                     // Build BlockchainEvent
                     BlockchainEvent blockchainEvent = BlockchainEvent.builder()

@@ -36,7 +36,8 @@ public class NotificationProcessorServiceImpl implements NotificationProcessorSe
                     if (dataMap.containsKey("deletedAt")) {
                         return Mono.just(EventQueuePriority.PUBLICATION_DELETE);
                     } else {
-                        return transactionService.findLatestPublishedOrDeletedTransactionForEntity(processId, dataMap.get("id").toString()).flatMap(transaction -> Mono.just(EventQueuePriority.PUBLICATION_EDIT)).defaultIfEmpty(EventQueuePriority.PUBLICATION_PUBLISH);
+                        return transactionService.findLatestPublishedOrDeletedTransactionForEntity(processId,
+                                dataMap.get("id").toString()).flatMap(transaction -> Mono.just(EventQueuePriority.PUBLICATION_EDIT)).defaultIfEmpty(EventQueuePriority.PUBLICATION_PUBLISH);
                     }
                 }).flatMap(eventQueuePriority -> brokerToBlockchainQueueService.enqueueEvent(EventQueue.builder()
                         .event(Collections.singletonList(brokerNotification))
@@ -50,7 +51,8 @@ public class NotificationProcessorServiceImpl implements NotificationProcessorSe
         EventQueuePriority eventQueuePriority = EventQueuePriority.PUBLICATION_PUBLISH;
         if (!hasHlParameter(blockchainNotification.dataLocation())) {
             eventQueuePriority = EventQueuePriority.PUBLICATION_DELETE;
-        } else if (!Objects.equals(blockchainNotification.previousEntityHash(), "0x0000000000000000000000000000000000000000000000000000000000000000")) {
+        } else if (!Objects.equals(blockchainNotification.previousEntityHash(),
+                "0x0000000000000000000000000000000000000000000000000000000000000000")) {
             eventQueuePriority = EventQueuePriority.PUBLICATION_EDIT;
         }
         return blockchainToBrokerQueueService.enqueueEvent(EventQueue.builder()
@@ -101,6 +103,8 @@ public class NotificationProcessorServiceImpl implements NotificationProcessorSe
                     try {
                         String brokerEntityAsString = objectMapper.writer().writeValueAsString(dataMap);
                         String brokerEntityHash = calculateSHA256Hash(brokerEntityAsString);
+                        log.debug("ProcessID: {} - BrokerNotification entityHash: {}", processId, brokerEntityHash);
+                        log.debug("ProcessID: {} - BrokerNotification previousEntityHash: {}", processId, transactionFound.getEntityHash());
                         if (transactionFound.getEntityHash().equals(brokerEntityHash)) {
                             log.debug("ProcessID: {} - BrokerNotification is self-generated", processId);
                             return Mono.empty();
@@ -120,17 +124,17 @@ public class NotificationProcessorServiceImpl implements NotificationProcessorSe
         checkIfNotificationIsNullOrDataLocationIsEmpty(blockchainNotification);
         // Build and save transaction
         return transactionService.saveTransaction(processId, Transaction.builder()
-                        .id(UUID.randomUUID())
-                        .transactionId(processId)
-                        .createdAt(Timestamp.from(Instant.now()))
-                        .datalocation(blockchainNotification.dataLocation())
-                        .entityId(extractEntityIdFromDataLocation(blockchainNotification.dataLocation()))
-                        .entityType(blockchainNotification.eventType())
-                        .entityHash(extractEntityHashFromDataLocation(blockchainNotification.dataLocation()))
-                        .status(TransactionStatus.RECEIVED)
-                        .trader(TransactionTrader.CONSUMER)
-                        .newTransaction(true)
-                        .build());
+                .id(UUID.randomUUID())
+                .transactionId(processId)
+                .createdAt(Timestamp.from(Instant.now()))
+                .datalocation(blockchainNotification.dataLocation())
+                .entityId(extractEntityIdFromDataLocation(blockchainNotification.dataLocation()))
+                .entityType(blockchainNotification.eventType())
+                .entityHash(extractEntityHashFromDataLocation(blockchainNotification.dataLocation()))
+                .status(TransactionStatus.RECEIVED)
+                .trader(TransactionTrader.CONSUMER)
+                .newTransaction(true)
+                .build());
     }
 
     private void checkIfNotificationIsNullOrDataLocationIsEmpty(BlockchainNotification blockchainNotification) {

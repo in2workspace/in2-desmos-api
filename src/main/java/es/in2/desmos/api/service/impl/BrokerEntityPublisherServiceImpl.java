@@ -3,7 +3,6 @@ package es.in2.desmos.api.service.impl;
 import es.in2.desmos.api.model.*;
 import es.in2.desmos.api.service.BrokerEntityPublisherService;
 import es.in2.desmos.api.service.TransactionService;
-import es.in2.desmos.api.util.ApplicationUtils;
 import es.in2.desmos.broker.service.BrokerPublicationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,20 +34,20 @@ public class BrokerEntityPublisherServiceImpl implements BrokerEntityPublisherSe
             log.debug("ProcessID: {} - Detected deleted entity notification", processId);
             // delete entity from Broker
             return brokerPublicationService.deleteEntityById(processId, entityId).onErrorResume(
-                    error -> {
-                        log.error("ProcessID: {} - Error deleting entity", processId);
-                        return transactionService.saveFailedEntityTransaction(processId, FailedEntityTransaction.builder()
-                                .id(UUID.randomUUID())
-                                .transactionId(processId)
-                                .notificationId(blockchainNotification.id())
-                                .createdAt(Timestamp.from(Instant.now()))
-                                .entityId(entityId)
-                                .entityType(blockchainNotification.eventType()).datalocation(blockchainNotification.dataLocation()).priority(EventQueuePriority.RECOVER_DELETE)
-                                .previousEntityHash(blockchainNotification.previousEntityHash())
-                                .entity(retrievedBrokerEntity)
-                                .newTransaction(true)
-                                .build());
-                    })
+                            error -> {
+                                log.error("ProcessID: {} - Error deleting entity", processId);
+                                return transactionService.saveFailedEntityTransaction(processId, FailedEntityTransaction.builder()
+                                        .id(UUID.randomUUID())
+                                        .transactionId(processId)
+                                        .notificationId(blockchainNotification.id())
+                                        .createdAt(Timestamp.from(Instant.now()))
+                                        .entityId(entityId)
+                                        .entityType(blockchainNotification.eventType()).datalocation(blockchainNotification.dataLocation()).priority(EventQueuePriority.RECOVER_DELETE)
+                                        .previousEntityHash(blockchainNotification.previousEntityHash())
+                                        .entity(retrievedBrokerEntity)
+                                        .newTransaction(true)
+                                        .build());
+                            })
                     .then(transactionService.saveTransaction(processId, Transaction.builder()
                             .id(UUID.randomUUID())
                             .transactionId(processId)
@@ -67,9 +66,11 @@ public class BrokerEntityPublisherServiceImpl implements BrokerEntityPublisherSe
             try {
                 String entityHash = calculateSHA256Hash(retrievedBrokerEntity);
                 String previousHash = blockchainNotification.previousEntityHash();
-                entityHash = previousHash.equals("0x0000000000000000000000000000000000000000000000000000000000000000") ? entityHash : calculateIntertwinedHash(entityHash, previousHash);
+                String intertwinedHash = previousHash.equals("0x0000000000000000000000000000000000000000000000000000000000000000") ?
+                        entityHash :
+                        calculateIntertwinedHash(entityHash, previousHash);
                 String sourceEntityHash = extractEntityHashFromDataLocation(blockchainNotification.dataLocation());
-                if (entityHash.equals(sourceEntityHash)) {
+                if (intertwinedHash.equals(sourceEntityHash)) {
                     log.debug("ProcessID: {} - Entity integrity is valid", processId);
                     // publish or update entity to Broker
                     return brokerPublicationService.getEntityById(processId, entityId)
@@ -79,34 +80,36 @@ public class BrokerEntityPublisherServiceImpl implements BrokerEntityPublisherSe
                                     return brokerPublicationService.postEntity(processId, retrievedBrokerEntity).onErrorResume(
                                             error -> {
                                                 log.error("ProcessID: {} - Error publishing entity", processId);
-                                                return transactionService.saveFailedEntityTransaction(processId, FailedEntityTransaction.builder()
-                                                        .id(UUID.randomUUID())
-                                                        .transactionId(processId)
-                                                        .notificationId(blockchainNotification.id())
-                                                        .createdAt(Timestamp.from(Instant.now()))
-                                                        .entityId(entityId)
-                                                        .entityType(blockchainNotification.eventType()).datalocation(blockchainNotification.dataLocation()).priority(EventQueuePriority.RECOVER_PUBLISH)
-                                                        .previousEntityHash(blockchainNotification.previousEntityHash())
-                                                        .entity(retrievedBrokerEntity)
-                                                        .newTransaction(true)
-                                                        .build());
+                                                return transactionService.saveFailedEntityTransaction(processId,
+                                                        FailedEntityTransaction.builder()
+                                                                .id(UUID.randomUUID())
+                                                                .transactionId(processId)
+                                                                .notificationId(blockchainNotification.id())
+                                                                .createdAt(Timestamp.from(Instant.now()))
+                                                                .entityId(entityId)
+                                                                .entityType(blockchainNotification.eventType()).datalocation(blockchainNotification.dataLocation()).priority(EventQueuePriority.RECOVER_PUBLISH)
+                                                                .previousEntityHash(blockchainNotification.previousEntityHash())
+                                                                .entity(retrievedBrokerEntity)
+                                                                .newTransaction(true)
+                                                                .build());
                                             });
                                 } else {
                                     log.info("ProcessId: {} - Entity exists", processId);
                                     return brokerPublicationService.updateEntity(processId, retrievedBrokerEntity).onErrorResume(
                                             error -> {
                                                 log.error("ProcessID: {} - Error updating entity", processId);
-                                                return transactionService.saveFailedEntityTransaction(processId, FailedEntityTransaction.builder()
-                                                        .id(UUID.randomUUID())
-                                                        .notificationId(blockchainNotification.id())
-                                                        .transactionId(processId)
-                                                        .createdAt(Timestamp.from(Instant.now()))
-                                                        .entityId(entityId)
-                                                        .entityType(blockchainNotification.eventType()).datalocation(blockchainNotification.dataLocation()).priority(EventQueuePriority.RECOVER_EDIT)
-                                                        .previousEntityHash(blockchainNotification.previousEntityHash())
-                                                        .entity(retrievedBrokerEntity)
-                                                        .newTransaction(true)
-                                                        .build());
+                                                return transactionService.saveFailedEntityTransaction(processId,
+                                                        FailedEntityTransaction.builder()
+                                                                .id(UUID.randomUUID())
+                                                                .notificationId(blockchainNotification.id())
+                                                                .transactionId(processId)
+                                                                .createdAt(Timestamp.from(Instant.now()))
+                                                                .entityId(entityId)
+                                                                .entityType(blockchainNotification.eventType()).datalocation(blockchainNotification.dataLocation()).priority(EventQueuePriority.RECOVER_EDIT)
+                                                                .previousEntityHash(blockchainNotification.previousEntityHash())
+                                                                .entity(retrievedBrokerEntity)
+                                                                .newTransaction(true)
+                                                                .build());
                                             }
                                     );
                                 }

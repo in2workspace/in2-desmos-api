@@ -29,7 +29,7 @@ public class BrokerToBlockchainDataSyncPublisherImpl implements BrokerToBlockcha
                 .flatMap(dataMap -> blockchainEventCreatorService.createBlockchainEvent(processId, dataMap))
                 // Publish the Blockchain Event into the Blockchain Node -> BlockchainEventPublisher
                 .flatMap(blockchainEvent -> dltAdapterEventPublisher.publishBlockchainEvent(processId, blockchainEvent))
-                .doOnSuccess(success -> log.info("Blockchain Event created and published successfully."))
+                .doOnSuccess(success -> log.info("Blockchain Event creation and publication completed."))
                 .doOnError(error -> log.error("Error creating or publishing Blockchain Event"));
     }
 
