@@ -1,10 +1,13 @@
 package es.in2.desmos.api.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.api.model.*;
 import es.in2.desmos.api.repository.FailedEntityTransactionRepository;
 import es.in2.desmos.api.repository.FailedEventTransactionRepository;
 import es.in2.desmos.api.repository.TransactionRepository;
 import es.in2.desmos.api.service.impl.TransactionServiceImpl;
+import es.in2.desmos.api.util.ApplicationUtils;
 import es.in2.desmos.broker.config.properties.BrokerPathProperties;
 import es.in2.desmos.broker.config.properties.BrokerProperties;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,11 +21,13 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import static es.in2.desmos.api.util.ApplicationUtils.calculateIntertwinedHash;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -42,6 +47,21 @@ class TransactionServiceTest {
             .trader(TransactionTrader.PRODUCER)
             .hash("0502b524143e41325d7d60b67849f075958346811c866bcf46be4a5da166ac95")
             .build();
+
+    private final Transaction newTransactionSample = Transaction.builder()
+            .id(UUID.randomUUID())
+            .transactionId("sampleTransactionId")
+            .createdAt(Timestamp.from(Instant.now()))
+            .datalocation("http://scorpio:9090/ngsi-ld/v1/entities/urn:ngsi-ld:product-offering:in2-0092?hl" +
+                    "=0502b524143e41325d7d60aa1e5c19ab1597f1af9f2acd4d4101d643a9494d2b")
+            .entityId("sampleEntityId")
+            .entityHash("9520d52c750e7ee0678b67849f075958346811c866bcf46be4a5da166ac95470")
+            .status(TransactionStatus.CREATED)
+            .trader(TransactionTrader.PRODUCER)
+            .newTransaction(true)
+            .entityType("ProductOffering")
+            .build();
+
 
     private final Transaction transactionSample_deleted = Transaction.builder()
             .id(UUID.randomUUID())
@@ -85,6 +105,9 @@ class TransactionServiceTest {
     @Mock
     private FailedEntityTransactionRepository failedEntityTransactionRepository;
 
+    @Mock
+    private ObjectMapper objectMapper;
+
     @InjectMocks
     private TransactionServiceImpl transactionService;
 
@@ -94,7 +117,7 @@ class TransactionServiceTest {
         BrokerPathProperties brokerPathProperties = new BrokerPathProperties("/v2", "/entities", "/subscriptions");
         BrokerProperties brokerProperties = new BrokerProperties("scorpio", "http://localhost:1026",
                 "http://localhost:1026", new BrokerPathProperties("/entities", "/subscriptions", "/v2"));
-        transactionService = new TransactionServiceImpl(transactionRepository, failedTransactionRepository, failedEntityTransactionRepository);
+        transactionService = new TransactionServiceImpl(transactionRepository, failedTransactionRepository, failedEntityTransactionRepository, objectMapper);
     }
 
     @Test
@@ -160,12 +183,13 @@ class TransactionServiceTest {
 
 
     @Test
-    void saveTransaction_Success() {
+    void saveTransaction_Success() throws JsonProcessingException {
         // Arrange
         String processId = "testProcessId";
 
-        when(transactionRepository.findLastProducerTransactionByEntityId("sampleEntityId")).thenReturn(Flux.just(transactionSample));
-        when(transactionRepository.findLastProducerTransaction()).thenReturn(Flux.just(transactionSample));
+        when(transactionService.getPreviousTransaction(processId)).thenReturn(Mono.just(transactionSample));
+        when(objectMapper.writeValueAsString(any())).thenReturn("Hashexample");
+        when(transactionRepository.findLastTransactionByEntityId("sampleEntityId")).thenReturn(Flux.just(transactionSample));
         when(transactionRepository.save(any(Transaction.class))).thenReturn(Mono.empty());
 
         // Act
@@ -177,8 +201,10 @@ class TransactionServiceTest {
         assertNull(resultTransaction);
 
         // Verify that save was called exactly once with any Transaction object as an argument
-        verify(transactionRepository, times(1)).save(any(Transaction.class));
+        verify(transactionRepository, times(3)).save(any(Transaction.class));
+
     }
+
 
     @Test
     void saveFailedEntityTransaction() {
@@ -205,59 +231,17 @@ class TransactionServiceTest {
         verify(failedEntityTransactionRepository).save(transaction);
     }
 
-
-    @Test
-    void saveDeletedTransaction_Success() {
-        // Arrange
-        String processId = "testProcessId";
-        when(transactionRepository.save(any(Transaction.class))).thenReturn(Mono.empty());
-        // Act
-        Mono<Void> resultMono = transactionService.saveTransaction(processId, transactionSample_deleted);
-        // Assert
-        Void resultTransaction = resultMono.block();
-        assertNull(resultTransaction);
-    }
-
-    @Test
-    void saveConsumerTransaction_Success() {
-        // Arrange
-        String processId = "testProcessId";
-        when(transactionRepository.save(any(Transaction.class))).thenReturn(Mono.empty());
-        // Act
-        Mono<Void> resultMono = transactionService.saveTransaction(processId, consumerTransactionSample);
-        // Assert
-        Void resultTransaction = resultMono.block();
-        assertNull(resultTransaction);
-    }
-
-    @Test
-    void saveTransaction_Error() {
-        // Arrange
-        String processId = "testProcessId";
-        RuntimeException testException = new RuntimeException("Test Error");
-        when(transactionRepository.findLastProducerTransactionByEntityId("sampleEntityId")).thenReturn(Flux.just(transactionSample));
-        when(transactionRepository.findLastProducerTransaction()).thenReturn(Flux.empty());
-        when(transactionRepository.save(transactionSample)).thenReturn(Mono.error(testException));
-
-        // Act
-        Mono<Void> resultMono = transactionService.saveTransaction(processId, transactionSample);
-        // Assert
-        StepVerifier.create(resultMono)
-                .expectErrorMatches(throwable -> throwable instanceof RuntimeException && throwable.getMessage().equals("Test Error"))
-                .verify();
-    }
-
     @Test
     void getLastProducerTransactionByEntityId_ReturnsLastTransaction() {
         String processId = "processId";
         String entityId = "entityId";
         Transaction transaction = Transaction.builder().build();
-        when(transactionRepository.findLastProducerTransactionByEntityId(entityId)).thenReturn(Flux.just(transaction));
+        when(transactionRepository.findLastTransactionByEntityId(entityId)).thenReturn(Flux.just(transaction));
 
         StepVerifier.create(transactionService.getLastProducerTransactionByEntityId(processId, entityId))
                 .expectNext(transaction)
                 .verifyComplete();
-        verify(transactionRepository).findLastProducerTransactionByEntityId(entityId);
+        verify(transactionRepository).findLastTransactionByEntityId(entityId);
     }
 
     @Test

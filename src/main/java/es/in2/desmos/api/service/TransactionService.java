@@ -20,6 +20,7 @@ public interface TransactionService {
     Mono<List<Transaction>> getTransactionsByEntityId(String processId, String entityId);
     Flux<Transaction> getAllTransactions(String processId);
     Mono<Transaction> findLatestPublishedOrDeletedTransactionForEntity(String processId, String entityId);
-    Mono<Transaction> getLastProducerTransaction(String processIdd);
     Mono<Transaction> getLastProducerTransactionByEntityId(String processId, String entityId);
+    Mono<Transaction> getPreviousTransaction(String processId);
+    public Mono<String> getEntityHashFromLastTransaction(String processId, String entityId);
 }

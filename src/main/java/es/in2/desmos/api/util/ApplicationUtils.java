@@ -1,6 +1,8 @@
 package es.in2.desmos.api.util;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.api.exception.HashLinkException;
+import es.in2.desmos.api.model.Transaction;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.MalformedURLException;
@@ -21,7 +23,6 @@ public class ApplicationUtils {
     public static final String HASH_PREFIX = "0x";
 
     public static final String HASHLINK_PREFIX = "?hl=";
-
     private ApplicationUtils() {
         throw new IllegalStateException("Utility class");
     }
@@ -44,7 +45,7 @@ public class ApplicationUtils {
         return bytesAHex(result);
     }
 
-    private static String bytesAHex(byte[] bytes) {
+    public static String bytesAHex(byte[] bytes) {
         StringBuilder hexString = new StringBuilder();
         for (byte b : bytes) {
             String hex = Integer.toHexString(0xff & b);

@@ -1,11 +1,10 @@
 package es.in2.desmos.api.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.api.exception.HashCreationException;
-import es.in2.desmos.api.exception.HashLinkException;
 import es.in2.desmos.api.model.FailedEntityTransaction;
 import es.in2.desmos.api.model.FailedEventTransaction;
 import es.in2.desmos.api.model.Transaction;
-import es.in2.desmos.api.model.TransactionTrader;
 import es.in2.desmos.api.repository.FailedEntityTransactionRepository;
 import es.in2.desmos.api.repository.FailedEventTransactionRepository;
 import es.in2.desmos.api.repository.TransactionRepository;
@@ -16,12 +15,13 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.UUID;
 
+import static es.in2.desmos.api.util.ApplicationUtils.bytesAHex;
 import static es.in2.desmos.api.util.ApplicationUtils.calculateIntertwinedHash;
-import static es.in2.desmos.api.util.ApplicationUtils.hasHlParameter;
 
 @Slf4j
 @Service
@@ -31,39 +31,55 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
     private final FailedEventTransactionRepository failedEventTransactionRepository;
     private final FailedEntityTransactionRepository failedEntityTransactionRepository;
+    private final ObjectMapper objectMapper;
 
     @Override
     public Mono<Void> saveTransaction(String processId, Transaction transaction) {
         log.debug("ProcessID: {} - Saving transaction...", processId);
+        return getEntityHashFromLastTransaction(processId, transaction.getEntityId())
+                .flatMap(previousTransactionEntityHash -> {
+                    transaction.setEntityHash(previousTransactionEntityHash);
+                    return getPreviousTransaction(processId).flatMap(
+                            previousTransaction -> {
+                                String currentTransactionHash = calculateTransactionHash(transaction);
+                                String concatenatedHash;
+                                try {
+                                    concatenatedHash = calculateIntertwinedHash(currentTransactionHash, previousTransaction.getHash());
+                                } catch (NoSuchAlgorithmException e) {
+                                    return Mono.error(new HashCreationException("Error calculating intertwined hash"));
+                                }
+                                transaction.setHash(concatenatedHash);
+                                return transactionRepository.save(transaction);
+                            }
+                    ).switchIfEmpty(Mono.defer(() -> {
+                        String currentTransactionHash = calculateTransactionHash(transaction);
+                        transaction.setHash(currentTransactionHash);
+
+                        return transactionRepository.save(transaction);
+                    }));
+                }).switchIfEmpty(Mono.defer(() -> {
+                            String currentTransactionHash = calculateTransactionHash(transaction);
+                            transaction.setHash(currentTransactionHash);
+
+                            return transactionRepository.save(transaction);
+                        })
+                ).then();
+    }
+    public String calculateTransactionHash(Transaction transaction) {
         try {
-            if (transaction.getTrader() == TransactionTrader.PRODUCER && hasHlParameter(transaction.getDatalocation())) {
-                // In the case of a producer transaction, we calculate the intertwined hash and save it
-                Mono<String> entityHashMono = getLastProducerTransactionByEntityId(processId, transaction.getEntityId())
-                        .flatMap(lastTransaction -> getEntityHashFromLastTransaction(processId, transaction.getEntityId()))
-                        .switchIfEmpty(Mono.just(transaction.getEntityHash()));
-                return calculateTransactionIntertwinedHash(transaction.getEntityHash(), processId)
-                        .flatMap(intertwinedHash -> entityHashMono.flatMap(entityHash -> {
-                            transaction.setHash(intertwinedHash);
-                            transaction.setEntityHash(entityHash);
-                            return transactionRepository.save(transaction)
-                                    .doOnSuccess(success -> log.info("ProcessID: {} - Transaction saved successfully", processId))
-                                    .doOnError(error -> log.error("ProcessID: {} - Error saving producer transaction: {}", processId, error.getMessage()));
-                        })).then();
-            } else {
-                // In the case of a consumer transaction, we save it without calculating the intertwined hash
-                return transactionRepository.save(transaction)
-                        .doOnSuccess(success -> log.info("ProcessID: {} - Transaction saved successfully", processId))
-                        .doOnError(error -> log.error("ProcessID: {} - Error saving consumer transaction: {}", processId, error.getMessage()))
-                        .then();
-            }
-        } catch (HashLinkException e) {
-            // In case of an error while calculating the intertwined hash, it means that the transaction is a deleted one
-            return transactionRepository.save(transaction)
-                    .doOnSuccess(success -> log.info("ProcessID: {} - Deletion transaction saved successfully", processId))
-                    .doOnError(error -> log.error("ProcessID: {} - Error saving deleted transaction: {}", processId, error.getMessage()))
-                    .then();
+            String json = objectMapper.writeValueAsString(transaction);
+
+            byte[] bytes = json.getBytes();
+
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(bytes);
+
+            return bytesAHex(hash);
+        } catch (Exception e) {
+            throw new HashCreationException("Error while calculating hash");
         }
     }
+
 
     @Override
     public Mono<Void> saveFailedEventTransaction(String processId, FailedEventTransaction transaction) {
@@ -129,29 +145,19 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Mono<Transaction> getLastProducerTransaction(String processId) {
-        log.debug("ProcessID: {} - Getting last published producer transaction...", processId);
-        return transactionRepository.findLastProducerTransaction().next();
+    public Mono<Transaction> getPreviousTransaction(String processId) {
+        log.debug("ProcessID: {} - Getting previous transaction...", processId);
+        return transactionRepository.findPreviousTransaction();
     }
 
     @Override
     public Mono<Transaction> getLastProducerTransactionByEntityId(String processId, String entityId) {
         log.debug("ProcessID: {} - Getting last published producer transaction with id: {}", processId, entityId);
-        return transactionRepository.findLastProducerTransactionByEntityId(entityId).next();
+        return transactionRepository.findLastTransactionByEntityId(entityId).next();
     }
 
-    private Mono<String> calculateTransactionIntertwinedHash(String entityHash, String processId) {
-        return getLastProducerTransaction(processId)
-                .flatMap(transaction -> Mono.fromCallable(() -> {
-                    try {
-                        return calculateIntertwinedHash(entityHash, transaction.getHash());
-                    } catch (NoSuchAlgorithmException e) {
-                        throw new HashCreationException("Error while calculating intertwined hash", e);
-                    }
-                })).switchIfEmpty(Mono.just(entityHash));
-    }
-
-    private Mono<String> getEntityHashFromLastTransaction(String processId, String entityId) {
+    @Override
+    public Mono<String> getEntityHashFromLastTransaction(String processId, String entityId) {
         return getLastProducerTransactionByEntityId(processId, entityId)
                 .map(Transaction::getEntityHash);
     }
