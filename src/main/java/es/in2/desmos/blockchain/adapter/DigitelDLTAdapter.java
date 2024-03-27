@@ -110,7 +110,7 @@ public class DigitelDLTAdapter implements GenericDLTAdapterService {
 
     @Recover
     public Mono<Void> recover(String processId, BlockchainEvent blockchainEvent) {
-        log.debug("Recovering from WebClientResponseException");
+        log.debug("Recovering after 3 retries");
         EventQueuePriority eventQueuePriority = EventQueuePriority.RECOVER_PUBLISH;
         if (!hasHlParameter(blockchainEvent.dataLocation())) {
             eventQueuePriority = EventQueuePriority.RECOVER_DELETE;
