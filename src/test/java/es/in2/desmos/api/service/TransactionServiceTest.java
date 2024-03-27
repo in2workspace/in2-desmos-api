@@ -7,7 +7,6 @@ import es.in2.desmos.api.repository.FailedEntityTransactionRepository;
 import es.in2.desmos.api.repository.FailedEventTransactionRepository;
 import es.in2.desmos.api.repository.TransactionRepository;
 import es.in2.desmos.api.service.impl.TransactionServiceImpl;
-import es.in2.desmos.api.util.ApplicationUtils;
 import es.in2.desmos.broker.config.properties.BrokerPathProperties;
 import es.in2.desmos.broker.config.properties.BrokerProperties;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,13 +20,11 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-import static es.in2.desmos.api.util.ApplicationUtils.calculateIntertwinedHash;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -189,7 +186,6 @@ class TransactionServiceTest {
 
         when(transactionService.getPreviousTransaction(processId)).thenReturn(Mono.just(transactionSample));
         when(objectMapper.writeValueAsString(any())).thenReturn("Hashexample");
-        when(transactionRepository.findLastTransactionByEntityId("sampleEntityId")).thenReturn(Flux.just(transactionSample));
         when(transactionRepository.save(any(Transaction.class))).thenReturn(Mono.empty());
 
         // Act
@@ -201,7 +197,7 @@ class TransactionServiceTest {
         assertNull(resultTransaction);
 
         // Verify that save was called exactly once with any Transaction object as an argument
-        verify(transactionRepository, times(3)).save(any(Transaction.class));
+        verify(transactionRepository, times(2)).save(any(Transaction.class));
 
     }
 
@@ -236,12 +232,12 @@ class TransactionServiceTest {
         String processId = "processId";
         String entityId = "entityId";
         Transaction transaction = Transaction.builder().build();
-        when(transactionRepository.findLastTransactionByEntityId(entityId)).thenReturn(Flux.just(transaction));
+        when(transactionRepository.findLastPublishedTransactionByEntityId(entityId)).thenReturn(Flux.just(transaction));
 
         StepVerifier.create(transactionService.getLastProducerTransactionByEntityId(processId, entityId))
                 .expectNext(transaction)
                 .verifyComplete();
-        verify(transactionRepository).findLastTransactionByEntityId(entityId);
+        verify(transactionRepository).findLastPublishedTransactionByEntityId(entityId);
     }
 
     @Test

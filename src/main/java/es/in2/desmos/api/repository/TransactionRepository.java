@@ -21,10 +21,15 @@ public interface TransactionRepository extends ReactiveCrudRepository<Transactio
     @Query("SELECT * FROM transactions WHERE status = 'PUBLISHED' AND trader = 'PRODUCER' ORDER BY created_at DESC LIMIT 1")
     Flux<Transaction> findLastProducerTransaction();
 
-    @Query("SELECT * FROM transactions ORDER BY created_at DESC LIMIT 2 OFFSET 1")
+    @Query("SELECT * FROM transactions ORDER BY created_at DESC LIMIT 1 OFFSET 1")
     Mono<Transaction> findPreviousTransaction();
 
-    @Query("SELECT * FROM transactions WHERE entity_id = :entityId AND status = 'PUBLISHED' ORDER BY created_at DESC LIMIT 1")
+    @Query("SELECT * FROM transactions WHERE entity_id = :entityId AND status = 'PUBLISHED' AND trader = 'PRODUCER' ORDER BY created_at DESC LIMIT 1")
+    Flux<Transaction> findLastPublishedTransactionByEntityId(String entityId);
+
+    @Query("SELECT * FROM transactions WHERE entity_id = :entityId ORDER BY created_at DESC LIMIT 1")
     Flux<Transaction> findLastTransactionByEntityId(String entityId);
+
+
 
 }

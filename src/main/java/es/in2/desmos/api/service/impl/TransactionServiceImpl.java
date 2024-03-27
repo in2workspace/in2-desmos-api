@@ -36,35 +36,44 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public Mono<Void> saveTransaction(String processId, Transaction transaction) {
         log.debug("ProcessID: {} - Saving transaction...", processId);
-        return getEntityHashFromLastTransaction(processId, transaction.getEntityId())
-                .flatMap(previousTransactionEntityHash -> {
-                    transaction.setEntityHash(previousTransactionEntityHash);
-                    return getPreviousTransaction(processId).flatMap(
-                            previousTransaction -> {
-                                String currentTransactionHash = calculateTransactionHash(transaction);
-                                String concatenatedHash;
-                                try {
-                                    concatenatedHash = calculateIntertwinedHash(currentTransactionHash, previousTransaction.getHash());
-                                } catch (NoSuchAlgorithmException e) {
-                                    return Mono.error(new HashCreationException("Error calculating intertwined hash"));
-                                }
-                                transaction.setHash(concatenatedHash);
-                                return transactionRepository.save(transaction);
-                            }
-                    ).switchIfEmpty(Mono.defer(() -> {
-                        String currentTransactionHash = calculateTransactionHash(transaction);
-                        transaction.setHash(currentTransactionHash);
-
-                        return transactionRepository.save(transaction);
-                    }));
-                }).switchIfEmpty(Mono.defer(() -> {
-                            String currentTransactionHash = calculateTransactionHash(transaction);
-                            transaction.setHash(currentTransactionHash);
-
-                            return transactionRepository.save(transaction);
+        // Create a Mono that either emits previousTransactionEntityHash or empty
+        Mono<String> entityHashMono = (transaction.getEntityHash() == null || transaction.getEntityHash().isEmpty()) ?
+                getEntityHashFromLastTransaction(processId, transaction.getEntityId())
+                        .doOnNext(entityHash -> {
+                            log.debug("ProcessID: {} - Previous transaction entity hash: {}", processId, entityHash);
+                            transaction.setEntityHash(entityHash);
                         })
-                ).then();
+                        .switchIfEmpty(Mono.fromRunnable(() ->
+                                log.debug("ProcessID: {} - No previous entity hash found", processId))) :
+                Mono.empty(); // If entityHash is already set, emit empty to skip setting
+
+        // Use then to chain saveTransactionWithHashLogic after entityHashMono
+        return entityHashMono
+                .then(saveTransactionWithHashLogic(processId, transaction));
     }
+
+    private Mono<Void> saveTransactionWithHashLogic(String processId, Transaction transaction) {
+        return getPreviousTransaction(processId).flatMap(
+                previousTransaction -> {
+                    log.debug("ProcessID: {} - Previous transaction: {}", processId, previousTransaction);
+                    String currentTransactionHash = calculateTransactionHash(transaction);
+                    log.debug("ProcessID: {} - Calculated hash: {}", processId, currentTransactionHash);
+                    String concatenatedHash;
+                    try {
+                        concatenatedHash = calculateIntertwinedHash(currentTransactionHash, previousTransaction.getHash());
+                    } catch (NoSuchAlgorithmException e) {
+                        return Mono.error(new HashCreationException("Error calculating intertwined hash"));
+                    }
+                    transaction.setHash(concatenatedHash);
+                    return transactionRepository.save(transaction);
+                }
+        ).switchIfEmpty(Mono.defer(() -> {
+            String currentTransactionHash = calculateTransactionHash(transaction);
+            transaction.setHash(currentTransactionHash);
+            return transactionRepository.save(transaction);
+        })).then();
+    }
+
     public String calculateTransactionHash(Transaction transaction) {
         try {
             String json = objectMapper.writeValueAsString(transaction);
@@ -153,12 +162,12 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public Mono<Transaction> getLastProducerTransactionByEntityId(String processId, String entityId) {
         log.debug("ProcessID: {} - Getting last published producer transaction with id: {}", processId, entityId);
-        return transactionRepository.findLastTransactionByEntityId(entityId).next();
+        return transactionRepository.findLastPublishedTransactionByEntityId(entityId).next();
     }
 
     @Override
     public Mono<String> getEntityHashFromLastTransaction(String processId, String entityId) {
-        return getLastProducerTransactionByEntityId(processId, entityId)
+        return transactionRepository.findLastTransactionByEntityId(entityId).next()
                 .map(Transaction::getEntityHash);
     }
 

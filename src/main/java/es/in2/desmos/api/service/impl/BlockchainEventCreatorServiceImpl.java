@@ -88,19 +88,23 @@ public class BlockchainEventCreatorServiceImpl implements BlockchainEventCreator
                             .metadata(List.of())
                             .build();
                     log.debug("ProcessID: {} - BlockchainEvent created: {}", processId, blockchainEvent.toString());
-                    return transactionService.saveTransaction(processId, Transaction.builder()
-                                    .id(UUID.randomUUID())
-                                    .transactionId(processId)
-                                    .createdAt(Timestamp.from(Instant.now()))
-                                    .entityId(extractEntityIdFromDataLocation(blockchainEvent.dataLocation()))
-                                    .entityType(blockchainEvent.eventType())
-                                    .entityHash(extractEntityHashFromDataLocation(blockchainEvent.dataLocation()))
-                                    .status(TransactionStatus.CREATED)
-                                    .trader(TransactionTrader.PRODUCER)
-                                    .datalocation(blockchainEvent.dataLocation())
-                                    .newTransaction(true)
-                                    .build())
-                            .thenReturn(blockchainEvent);
+                    try {
+                        return transactionService.saveTransaction(processId, Transaction.builder()
+                                        .id(UUID.randomUUID())
+                                        .transactionId(processId)
+                                        .createdAt(Timestamp.from(Instant.now()))
+                                        .entityId(extractEntityIdFromDataLocation(blockchainEvent.dataLocation()))
+                                        .entityType(blockchainEvent.eventType())
+                                        .entityHash(calculateSHA256Hash(objectMapper.writeValueAsString(dataMap)))
+                                        .status(TransactionStatus.CREATED)
+                                        .trader(TransactionTrader.PRODUCER)
+                                        .datalocation(blockchainEvent.dataLocation())
+                                        .newTransaction(true)
+                                        .build())
+                                .thenReturn(blockchainEvent);
+                    } catch (NoSuchAlgorithmException | JsonProcessingException e) {
+                        return Mono.error(new HashCreationException("Error creating hash"));
+                    }
                 });
     }
 

@@ -84,7 +84,7 @@ public class DigitelDLTAdapter implements GenericDLTAdapterService {
                                                 .createdAt(Timestamp.from(Instant.now()))
                                                 .entityId(extractEntityIdFromDataLocation(blockchainEvent.dataLocation()))
                                                 .entityType(blockchainEvent.eventType())
-                                                .entityHash(extractEntityHashFromDataLocation(blockchainEvent.dataLocation()))
+                                                .entityHash("")
                                                 .datalocation(blockchainEvent.dataLocation())
                                                 .status(TransactionStatus.PUBLISHED)
                                                 .trader(TransactionTrader.PRODUCER)
