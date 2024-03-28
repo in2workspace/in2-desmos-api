@@ -70,6 +70,10 @@ public class BrokerEntityPublisherServiceImpl implements BrokerEntityPublisherSe
                         entityHash :
                         calculateIntertwinedHash(entityHash, previousHash);
                 String sourceEntityHash = extractEntityHashFromDataLocation(blockchainNotification.dataLocation());
+                log.debug("entityHash: {}", entityHash);
+                log.debug("previousHash: {}", previousHash);
+                log.debug("intertwinedHash: {}", intertwinedHash);
+                log.debug("sourceEntityHash : {}", sourceEntityHash);
                 if (intertwinedHash.equals(sourceEntityHash)) {
                     log.debug("ProcessID: {} - Entity integrity is valid", processId);
                     // publish or update entity to Broker

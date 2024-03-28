@@ -65,14 +65,19 @@ public class BlockchainEventCreatorServiceImpl implements BlockchainEventCreator
                     String dataLocation = brokerEntityLocation + "/" + dataMap.get(ID_KEY_ATTRIBUTE).toString();
                     if (!dataMap.containsKey("deletedAt")) {
                         try {
+                            log.debug("previousEntityHash: {}", previousHash);
                             String dataMapAsString = objectMapper.writeValueAsString(dataMap);
                             String entityHashed = calculateSHA256Hash(dataMapAsString);
+                            log.debug("entityHash: {}", entityHashed);
                             entityHashed = previousHash.equals("0x0000000000000000000000000000000000000000000000000000000000000000") ?
                                     entityHashed :
                                     calculateIntertwinedHash(entityHashed, previousHash);
                             previousHash = previousHash.startsWith(HASH_PREFIX) ? previousHash : HASH_PREFIX + previousHash;
                             dataLocation =
                                     brokerEntityLocation + "/" + dataMap.get(ID_KEY_ATTRIBUTE).toString() + HASHLINK_PREFIX + entityHashed;
+                            log.debug("previousEntityHash with prefix: {}", previousHash);
+                            log.debug("intertwinedHash: {}", entityHashed);
+                            log.debug("dataLocation: {}", dataLocation);
                         } catch (JsonProcessingException | NoSuchAlgorithmException e) {
                             log.error("ProcessID: {} - Error creating blockchain event: {}", processId, e.getMessage());
                             return Mono.error(new HashLinkException("Error creating blockchain event", e.getCause()));
