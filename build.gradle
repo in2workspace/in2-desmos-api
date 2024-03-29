@@ -86,8 +86,6 @@ dependencies {
     implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
 
     // Monitoring
-    // implementation 'io.micrometer:micrometer-tracing-bridge-brave'
-    // implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
     runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 
     // Resilience
@@ -95,8 +93,6 @@ dependencies {
     implementation 'org.aspectj:aspectjrt:1.9.21'
     implementation 'org.springframework:spring-aspects:5.3.18'
     implementation 'org.aspectj:aspectjweaver:1.9.7'
-//	implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-reactor-resilience4j'
-
     // Unit Testing
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'
