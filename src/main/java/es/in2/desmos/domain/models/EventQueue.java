@@ -5,8 +5,8 @@ import lombok.Data;
 
 import java.util.List;
 
-@Builder
 @Data
+@Builder
 public class EventQueue implements Comparable<EventQueue> {
 
     private List<Object> event;

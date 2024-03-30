@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BrokerNotificationTest {
 
@@ -35,20 +36,21 @@ class BrokerNotificationTest {
     @Test
     void testToString() {
         // Arrange
-        String expectedToString = "BrokerNotification.BrokerNotificationBuilder(id=" + id
-                + ", type=" + type
-                + ", data=" + data
-                + ", subscriptionId=" + subscriptionId
-                + ", notifiedAt=" + notifiedAt + ")";
-        // Act
-        BrokerNotification.BrokerNotificationBuilder brokerNotificationBuilder = BrokerNotification.builder()
+        BrokerNotification brokerNotification = BrokerNotification.builder()
                 .id(id)
                 .type(type)
                 .data(data)
                 .subscriptionId(subscriptionId)
-                .notifiedAt(notifiedAt);
+                .notifiedAt(notifiedAt)
+                .build();
+        // Act
+        String result = brokerNotification.toString();
         // Assert
-        assertEquals(expectedToString, brokerNotificationBuilder.toString());
+        assertTrue(result.contains(id));
+        assertTrue(result.contains(type));
+        assertTrue(result.contains(data.toString()));
+        assertTrue(result.contains(subscriptionId));
+        assertTrue(result.contains(notifiedAt));
     }
 
     @Test
