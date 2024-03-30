@@ -1,6 +1,6 @@
 package es.in2.desmos.infrastructure.broker.model;
 
-import es.in2.desmos.infrastructure.broker.model.BrokerErrorMessage;
+import es.in2.desmos.domain.model.BrokerErrorMessage;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 

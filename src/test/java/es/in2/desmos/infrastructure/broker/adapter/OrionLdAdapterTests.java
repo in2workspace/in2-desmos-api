@@ -1,7 +1,7 @@
 package es.in2.desmos.infrastructure.broker.adapter;
 
-import es.in2.desmos.infrastructure.broker.adapter.OrionLdAdapter;
-import es.in2.desmos.infrastructure.broker.model.BrokerSubscription;
+import es.in2.desmos.domain.model.BrokerSubscription;
+import es.in2.desmos.services.broker.adapter.impl.OrionLdAdapter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -4,7 +4,7 @@ import es.in2.desmos.ContainerManager;
 import es.in2.desmos.domain.model.Transaction;
 import es.in2.desmos.domain.model.TransactionStatus;
 import es.in2.desmos.domain.model.TransactionTrader;
-import es.in2.desmos.domain.service.impl.TransactionServiceImpl;
+import es.in2.desmos.z.services.impl.TransactionServiceImpl;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;

@@ -1,7 +1,7 @@
 package es.in2.desmos.application.service;
 
-import es.in2.desmos.application.service.impl.DataRetrievalServiceImpl;
-import es.in2.desmos.domain.model.DLTNotification;
+import es.in2.desmos.z.services.impl.DataRetrievalServiceImpl;
+import es.in2.desmos.domain.model.BlockchainNotification;
 import es.in2.desmos.domain.model.EventQueue;
 import es.in2.desmos.domain.model.EventQueuePriority;
 import es.in2.desmos.domain.service.BrokerEntityPublisherService;
@@ -35,7 +35,7 @@ class DataRetrievalServiceTest {
     private DataRetrievalServiceImpl dataRetrievalService;
 
     // Test data
-    private final DLTNotification dltNotification = DLTNotification.builder()
+    private final BlockchainNotification blockchainNotification = BlockchainNotification.builder()
             .id(5478474)
             .publisherAddress("publisherAddress").eventType("eventType")
             .timestamp(684485648)
@@ -47,12 +47,12 @@ class DataRetrievalServiceTest {
     void testStartProcessingEventsSuccessfulFlow() {
         // Arrange
         EventQueue eventQueue = EventQueue.builder()
-                .event(List.of(dltNotification))
+                .event(List.of(blockchainNotification))
                 .priority(EventQueuePriority.PUBLICATION_PUBLISH)
                 .build();
         when(dataRetrievalQueue.getEventStream()).thenReturn(Flux.just(eventQueue));
-        when(brokerEntityRetrievalService.retrieveEntityFromSourceBroker(anyString(), any(DLTNotification.class))).thenReturn(Mono.just("entityString"));
-        when(brokerEntityPublisherService.publishRetrievedEntityToBroker(anyString(), anyString(), any(DLTNotification.class))).thenReturn(Mono.empty());
+        when(brokerEntityRetrievalService.retrieveEntityFromSourceBroker(anyString(), any(BlockchainNotification.class))).thenReturn(Mono.just("entityString"));
+        when(brokerEntityPublisherService.publishRetrievedEntityToBroker(anyString(), anyString(), any(BlockchainNotification.class))).thenReturn(Mono.empty());
         // Act and Assert
         StepVerifier.create(dataRetrievalService.startRetrievingData())
                 .expectSubscription()
@@ -64,12 +64,12 @@ class DataRetrievalServiceTest {
     void testStartProcessingEventsSuccessfulFlowRecover() {
         // Arrange
         EventQueue eventQueue = EventQueue.builder()
-                .event(List.of(dltNotification, "Entity"))
+                .event(List.of(blockchainNotification, "Entity"))
                 .priority(EventQueuePriority.RECOVER_PUBLISH)
                 .build();
         when(dataRetrievalQueue.getEventStream()).thenReturn(Flux.just(eventQueue));
-        when(brokerEntityRetrievalService.retrieveEntityFromSourceBroker(anyString(), any(DLTNotification.class))).thenReturn(Mono.just("entityString"));
-        when(brokerEntityPublisherService.publishRetrievedEntityToBroker(anyString(), anyString(), any(DLTNotification.class))).thenReturn(Mono.empty());
+        when(brokerEntityRetrievalService.retrieveEntityFromSourceBroker(anyString(), any(BlockchainNotification.class))).thenReturn(Mono.just("entityString"));
+        when(brokerEntityPublisherService.publishRetrievedEntityToBroker(anyString(), anyString(), any(BlockchainNotification.class))).thenReturn(Mono.empty());
         // Act and Assert
         StepVerifier.create(dataRetrievalService.startRetrievingData())
                 .expectSubscription()

@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum EventQueuePriority {
+
     SYNCHRONIZATION(1),
     RECOVER_PUBLISH(2),
     RECOVER_EDIT(3),

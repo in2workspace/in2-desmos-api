@@ -1,7 +1,7 @@
 package es.in2.desmos.domain.config;
 
-import es.in2.desmos.infrastructure.configs.ApiConfig;
-import es.in2.desmos.infrastructure.configs.properties.ClientProperties;
+import es.in2.desmos.configs.ApiConfig;
+import es.in2.desmos.configs.properties.ClientProperties;
 import es.in2.desmos.domain.exception.HashCreationException;
 import es.in2.desmos.domain.util.ApplicationUtils;
 import org.junit.jupiter.api.Test;

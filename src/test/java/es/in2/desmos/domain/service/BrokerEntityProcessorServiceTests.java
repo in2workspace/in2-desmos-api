@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.domain.exception.JsonReadingException;
 import es.in2.desmos.domain.service.impl.BrokerEntityProcessorServiceImpl;
-import es.in2.desmos.infrastructure.broker.service.BrokerPublicationService;
+import es.in2.desmos.z.services.BrokerPublicationService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

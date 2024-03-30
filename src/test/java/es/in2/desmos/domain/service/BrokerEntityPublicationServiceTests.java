@@ -1,10 +1,11 @@
 package es.in2.desmos.domain.service;
 
-import es.in2.desmos.domain.model.DLTNotification;
+import es.in2.desmos.domain.model.BlockchainNotification;
 import es.in2.desmos.domain.model.FailedEntityTransaction;
 import es.in2.desmos.domain.service.impl.BrokerEntityPublisherServiceImpl;
 import es.in2.desmos.domain.util.ApplicationUtils;
-import es.in2.desmos.infrastructure.broker.service.BrokerPublicationService;
+import es.in2.desmos.z.services.BrokerPublicationService;
+import es.in2.desmos.z.services.TransactionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,7 +19,6 @@ import reactor.test.StepVerifier;
 
 import java.security.NoSuchAlgorithmException;
 
-import static es.in2.desmos.domain.util.ApplicationUtils.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -29,7 +29,7 @@ class BrokerEntityPublicationServiceTests {
 
     String processId;
     String entityId;
-    DLTNotification notification;
+    BlockchainNotification notification;
     @Mock
     private TransactionService transactionService;
     @Mock
@@ -41,7 +41,7 @@ class BrokerEntityPublicationServiceTests {
     void setUp() {
         processId = "process123";
         entityId = "entity123";
-        notification = DLTNotification.builder()
+        notification = BlockchainNotification.builder()
                 .dataLocation("http://broker.internal/entities/entity123")
                 .previousEntityHash("previousHash")
                 .build();
@@ -68,9 +68,9 @@ class BrokerEntityPublicationServiceTests {
     void testNotDeletedEntityNotification() {
         // Arrange
         String retrievedBrokerEntity = "brokerEntity";
-        DLTNotification mockDLTNotification = mock(DLTNotification.class);
-        when(mockDLTNotification.previousEntityHash()).thenReturn("0x0000000000000000000000000000000000000000000000000000000000000000");
-        when(mockDLTNotification.dataLocation()).thenReturn("http://broker.internal/entities/entity123");
+        BlockchainNotification mockBlockchainNotification = mock(BlockchainNotification.class);
+        when(mockBlockchainNotification.previousEntityHash()).thenReturn("0x0000000000000000000000000000000000000000000000000000000000000000");
+        when(mockBlockchainNotification.dataLocation()).thenReturn("http://broker.internal/entities/entity123");
         when(brokerPublicationService.getEntityById(processId, entityId)).thenReturn(Mono.just("{errorCode: 404}"));
         when(brokerPublicationService.postEntity(processId, retrievedBrokerEntity)).thenReturn(Mono.empty());
         when(transactionService.saveTransaction(any(), any())).thenReturn(Mono.empty());
@@ -87,7 +87,7 @@ class BrokerEntityPublicationServiceTests {
             // Act & Assert
             StepVerifier.create(
                             brokerEntityPublicationService.publishRetrievedEntityToBroker(processId, retrievedBrokerEntity,
-                                    mockDLTNotification))
+                                    mockBlockchainNotification))
                     .verifyComplete();
         }
     }
@@ -96,9 +96,9 @@ class BrokerEntityPublicationServiceTests {
     void testValidEntityIntegrity() {
         // Arrange
         String retrievedBrokerEntity = "brokerEntity";
-        DLTNotification mockDLTNotification = mock(DLTNotification.class);
-        when(mockDLTNotification.previousEntityHash()).thenReturn("0x0000000000000000000000000000000000000000000000000000000000000000");
-        when(mockDLTNotification.dataLocation()).thenReturn("http://broker.internal/entities/entity123");
+        BlockchainNotification mockBlockchainNotification = mock(BlockchainNotification.class);
+        when(mockBlockchainNotification.previousEntityHash()).thenReturn("0x0000000000000000000000000000000000000000000000000000000000000000");
+        when(mockBlockchainNotification.dataLocation()).thenReturn("http://broker.internal/entities/entity123");
         when(brokerPublicationService.getEntityById(processId, entityId)).thenReturn(Mono.just("Ok"));
         when(brokerPublicationService.updateEntity(processId, retrievedBrokerEntity)).thenReturn(Mono.empty());
         when(transactionService.saveTransaction(any(), any())).thenReturn(Mono.empty());
@@ -115,7 +115,7 @@ class BrokerEntityPublicationServiceTests {
             // Act & Assert
             StepVerifier.create(
                             brokerEntityPublicationService.publishRetrievedEntityToBroker(processId, retrievedBrokerEntity,
-                                    mockDLTNotification))
+                                    mockBlockchainNotification))
                     .verifyComplete();
         }
     }
@@ -125,9 +125,9 @@ class BrokerEntityPublicationServiceTests {
         // Arrange
         String retrievedBrokerEntity = "brokerEntity";
 
-        DLTNotification mockDLTNotification = mock(DLTNotification.class);
-        when(mockDLTNotification.previousEntityHash()).thenReturn("0x0000000000000000000000000000000000000000000000000000000000000000");
-        when(mockDLTNotification.dataLocation()).thenReturn("http://broker.internal/entities/entity123");
+        BlockchainNotification mockBlockchainNotification = mock(BlockchainNotification.class);
+        when(mockBlockchainNotification.previousEntityHash()).thenReturn("0x0000000000000000000000000000000000000000000000000000000000000000");
+        when(mockBlockchainNotification.dataLocation()).thenReturn("http://broker.internal/entities/entity123");
 
         try (MockedStatic<ApplicationUtils> applicationUtils = Mockito.mockStatic(ApplicationUtils.class)) {
             applicationUtils
@@ -142,7 +142,7 @@ class BrokerEntityPublicationServiceTests {
             // Act & Assert
             StepVerifier.create(
                             brokerEntityPublicationService.publishRetrievedEntityToBroker(processId, retrievedBrokerEntity,
-                                    mockDLTNotification))
+                                    mockBlockchainNotification))
                     .verifyError(IllegalArgumentException.class);
         }
     }
@@ -193,9 +193,9 @@ class BrokerEntityPublicationServiceTests {
     void testValidEntityIntegrityRecover() {
         // Arrange
         String retrievedBrokerEntity = "brokerEntity";
-        DLTNotification mockDLTNotification = mock(DLTNotification.class);
-        when(mockDLTNotification.previousEntityHash()).thenReturn("0x0000000000000000000000000000000000000000000000000000000000000000");
-        when(mockDLTNotification.dataLocation()).thenReturn("http://broker.internal/entities/entity123");
+        BlockchainNotification mockBlockchainNotification = mock(BlockchainNotification.class);
+        when(mockBlockchainNotification.previousEntityHash()).thenReturn("0x0000000000000000000000000000000000000000000000000000000000000000");
+        when(mockBlockchainNotification.dataLocation()).thenReturn("http://broker.internal/entities/entity123");
         when(brokerPublicationService.getEntityById(processId, entityId)).thenReturn(Mono.just("Ok"));
         when(brokerPublicationService.updateEntity(processId, retrievedBrokerEntity)).thenReturn(Mono.error(new RuntimeException("Simulated deletion error")));
         when(transactionService.saveFailedEntityTransaction(anyString(), any(FailedEntityTransaction.class)))
@@ -215,7 +215,7 @@ class BrokerEntityPublicationServiceTests {
             // Act & Assert
             StepVerifier.create(
                             brokerEntityPublicationService.publishRetrievedEntityToBroker(processId, retrievedBrokerEntity,
-                                    mockDLTNotification))
+                                    mockBlockchainNotification))
                     .verifyComplete();
 
 
@@ -226,9 +226,9 @@ class BrokerEntityPublicationServiceTests {
     void testNewValidEntityIntegrityRecover() {
         // Arrange
         String retrievedBrokerEntity = "brokerEntity";
-        DLTNotification mockDLTNotification = mock(DLTNotification.class);
-        when(mockDLTNotification.previousEntityHash()).thenReturn("0x0000000000000000000000000000000000000000000000000000000000000000");
-        when(mockDLTNotification.dataLocation()).thenReturn("http://broker.internal/entities/entity123");
+        BlockchainNotification mockBlockchainNotification = mock(BlockchainNotification.class);
+        when(mockBlockchainNotification.previousEntityHash()).thenReturn("0x0000000000000000000000000000000000000000000000000000000000000000");
+        when(mockBlockchainNotification.dataLocation()).thenReturn("http://broker.internal/entities/entity123");
         when(brokerPublicationService.getEntityById(processId, entityId)).thenReturn(Mono.just("{errorCode: 404}"));
         when(brokerPublicationService.postEntity(processId, retrievedBrokerEntity)).thenReturn(Mono.error(new RuntimeException("Simulated deletion error")));
         when(transactionService.saveFailedEntityTransaction(anyString(), any(FailedEntityTransaction.class)))
@@ -248,7 +248,7 @@ class BrokerEntityPublicationServiceTests {
             // Act & Assert
             StepVerifier.create(
                             brokerEntityPublicationService.publishRetrievedEntityToBroker(processId, retrievedBrokerEntity,
-                                    mockDLTNotification))
+                                    mockBlockchainNotification))
                     .verifyComplete();
 
 

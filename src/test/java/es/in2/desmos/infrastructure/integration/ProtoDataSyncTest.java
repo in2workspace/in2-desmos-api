@@ -2,17 +2,17 @@
 //
 //import com.fasterxml.jackson.databind.JsonNode;
 //import com.fasterxml.jackson.databind.ObjectMapper;
-//import es.in2.desmos.application.service.DataPublicationService;
-//import es.in2.desmos.application.service.DataRetrievalService;
+//import es.in2.desmos.services.DataPublicationService;
+//import es.in2.desmos.services.DataRetrievalService;
 //import es.in2.desmos.application.todo.BlockchainToBrokerDataSyncSynchronizer;
 //import es.in2.desmos.application.todo.BrokerToBlockchainDataSyncPublisher;
 //import es.in2.desmos.application.todo.ProtoDataSync;
 //import es.in2.desmos.domain.model.Transaction;
 //import es.in2.desmos.domain.model.TransactionStatus;
 //import es.in2.desmos.domain.model.TransactionTrader;
-//import es.in2.desmos.domain.service.TransactionService;
-//import es.in2.desmos.infrastructure.blockchain.service.DLTAdapterPublisher;
-//import es.in2.desmos.infrastructure.broker.service.BrokerPublicationService;
+//import es.in2.desmos.z.services.TransactionService;
+//import es.in2.desmos.services.DLTAdapterPublisher;
+//import es.in2.desmos.services.BrokerPublicationService;
 //import es.in2.desmos.infrastructure.configs.properties.DLTAdapterProperties;
 //import org.junit.jupiter.api.BeforeEach;
 //import org.junit.jupiter.api.Test;

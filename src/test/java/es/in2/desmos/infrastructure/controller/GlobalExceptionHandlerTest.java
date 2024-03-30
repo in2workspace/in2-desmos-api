@@ -2,7 +2,7 @@ package es.in2.desmos.infrastructure.controller;
 
 import es.in2.desmos.domain.exception.*;
 import es.in2.desmos.domain.model.GlobalErrorMessage;
-import es.in2.desmos.infrastructure.controller.GlobalExceptionHandler;
+import es.in2.desmos.domain.exception.handler.GlobalExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;

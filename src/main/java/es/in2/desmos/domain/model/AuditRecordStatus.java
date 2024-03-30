@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum AuditRecordStatus {
 
-    RECEIVED("notified"),
+    RECEIVED("received"),
     CREATED("created"),
     RETRIEVED("retrieved"),
     PUBLISHED("published"),

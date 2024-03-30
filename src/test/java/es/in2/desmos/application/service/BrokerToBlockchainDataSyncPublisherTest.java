@@ -5,7 +5,7 @@
 //import es.in2.desmos.domain.model.BrokerNotification;
 //import es.in2.desmos.domain.service.DLTEventCreatorService;
 //import es.in2.desmos.domain.service.BrokerEntityProcessorService;
-//import es.in2.desmos.infrastructure.blockchain.service.DLTAdapterPublisher;
+//import es.in2.desmos.services.DLTAdapterPublisher;
 //import org.junit.jupiter.api.Test;
 //import org.junit.jupiter.api.extension.ExtendWith;
 //import org.mockito.InjectMocks;

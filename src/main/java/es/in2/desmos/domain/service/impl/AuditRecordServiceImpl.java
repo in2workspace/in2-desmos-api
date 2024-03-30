@@ -1,31 +1,181 @@
 package es.in2.desmos.domain.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.domain.model.AuditRecord;
 import es.in2.desmos.domain.model.AuditRecordStatus;
 import es.in2.desmos.domain.model.AuditRecordTrader;
+import es.in2.desmos.domain.model.BlockchainNotification;
 import es.in2.desmos.domain.repository.AuditRecordRepository;
 import es.in2.desmos.domain.service.AuditRecordService;
-import es.in2.desmos.domain.util.AuditRecordFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.security.NoSuchAlgorithmException;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.UUID;
+
+import static es.in2.desmos.domain.util.ApplicationUtils.*;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuditRecordServiceImpl implements AuditRecordService {
 
+    private final ObjectMapper objectMapper;
     private final AuditRecordRepository auditRecordRepository;
 
     @Override
-    public Mono<Void> saveAuditRecord(String processId, AuditRecord auditRecord) {
-        log.debug("ProcessID: {} - Saving audit record...", processId);
-        return auditRecordRepository.save(auditRecord).then();
+    public Mono<Map<String,Object>> buildAndSaveAuditRecordFromBrokerNotification(String processId, Map<String, Object> dataMap,
+                                                                                  AuditRecordStatus status, AuditRecordTrader trader) {
+        return createAuditRecord(processId, dataMap, status, trader)
+                .flatMap(auditRecordRepository::save)
+                .thenReturn(dataMap);
+    }
+
+    private Mono<AuditRecord> createAuditRecordFromBrokerNotification(String processId, Map<String, Object> dataMap, AuditRecordStatus status,
+                                                AuditRecordTrader trader) {
+        String entityId = (String) dataMap.get("id");
+        return Mono.zip(findLatestAuditRecordForEntity(processId, entityId), fetchMostRecentAuditRecord())
+                .flatMap(tuple -> {
+                    try {
+                        // Get the most recent audit record for the entity
+                        AuditRecord auditRecordFound = tuple.getT1();
+                        // Get the most recent audit record overall
+                        AuditRecord lastAuditRecordRegistered = tuple.getT2();
+                        // Create the new audit record
+                        String entityHash = calculateSHA256(objectMapper.writeValueAsString(dataMap));
+                        AuditRecord auditRecord = AuditRecord.builder()
+                                .id(UUID.randomUUID())
+                                .processId(processId)
+                                .createdAt(Timestamp.from(Instant.now()))
+                                .entityId(entityId)
+                                .entityType((String) dataMap.get("type"))
+                                .entityHash(entityHash)
+                                .entityHashLink(calculateHashLink(auditRecordFound.getEntityHashLink(), entityHash))
+                                .dataLocation("")
+                                .status(status)
+                                .trader(trader)
+                                .hash("")
+                                .hashLink("")
+                                .newTransaction(true)
+                                .build();
+                        // Set Audit Record hash
+                        String auditRecordHash = calculateSHA256(objectMapper.writeValueAsString(auditRecord));
+                        auditRecord.setHash(auditRecordHash);
+                        String auditRecordHashLink = calculateHashLink(lastAuditRecordRegistered.getHashLink(), auditRecordHash);
+                        auditRecord.setHashLink(auditRecordHashLink);
+                        return Mono.just(auditRecord);
+                    } catch (JsonProcessingException | NoSuchAlgorithmException e) {
+                        return Mono.error(e);
+                    }
+                });
+    }
+
+    @Override
+    public Mono<BlockchainNotification> buildAndSaveAuditRecordFromBlockchainNotification(String processId, BlockchainNotification blockchainNotification,
+                                                                                      AuditRecordStatus status, AuditRecordTrader trader) {
+//        return createAuditRecord(processId, dataMap, status, trader)
+//                .flatMap(auditRecordRepository::save)
+//                .thenReturn(dataMap);
+        return null;
+    }
+
+    private Mono<AuditRecord> createAuditRecordFromBlockchainNotification(String processId, BlockchainNotification blockchainNotification,
+                                                                          AuditRecordStatus status, AuditRecordTrader trader) {
+        String entityId = extractEntityIdFromDataLocation(blockchainNotification.dataLocation());
+        return Mono.zip(findLatestAuditRecordForEntity(processId, entityId), fetchMostRecentAuditRecord())
+                .flatMap(tuple -> {
+                    try {
+                        // Get the most recent audit record for the entity
+                        AuditRecord auditRecordFound = tuple.getT1();
+                        // Get the most recent audit record overall
+                        AuditRecord lastAuditRecordRegistered = tuple.getT2();
+                        // Create the new audit record
+                        String entityHash = calculateSHA256(objectMapper.writeValueAsString(dataMap));
+                        AuditRecord auditRecord = AuditRecord.builder()
+                                .id(UUID.randomUUID())
+                                .processId(processId)
+                                .createdAt(Timestamp.from(Instant.now()))
+                                .entityId(entityId)
+                                .entityType((String) dataMap.get("type"))
+                                .entityHash(entityHash)
+                                .entityHashLink(calculateHashLink(auditRecordFound.getEntityHashLink(), entityHash))
+                                .dataLocation("")
+                                .status(status)
+                                .trader(trader)
+                                .hash("")
+                                .hashLink("")
+                                .newTransaction(true)
+                                .build();
+                        // Set Audit Record hash
+                        String auditRecordHash = calculateSHA256(objectMapper.writeValueAsString(auditRecord));
+                        auditRecord.setHash(auditRecordHash);
+                        String auditRecordHashLink = calculateHashLink(lastAuditRecordRegistered.getHashLink(), auditRecordHash);
+                        auditRecord.setHashLink(auditRecordHashLink);
+                        return Mono.just(auditRecord);
+                    } catch (JsonProcessingException | NoSuchAlgorithmException e) {
+                        return Mono.error(e);
+                    }
+                });
+    }
+
+
+
+
+
+
+
+    @Override
+    public Mono<Map<String, Object>> buildAndSaveAuditRecord(String processId, Map<String, Object> dataMap, AuditRecordStatus status, AuditRecordTrader trader) {
+        return createAuditRecord(processId, dataMap, status, trader)
+                .flatMap(auditRecordRepository::save)
+                .thenReturn(dataMap);
+    }
+
+    private Mono<AuditRecord> createAuditRecord(String processId, Map<String, Object> dataMap, AuditRecordStatus status,
+                                                AuditRecordTrader trader) {
+        String entityId = (String) dataMap.get("id");
+        return Mono.zip(findLatestAuditRecordForEntity(processId, entityId), fetchMostRecentAuditRecord())
+                .flatMap(tuple -> {
+                    try {
+                        // Get the most recent audit record for the entity
+                        AuditRecord auditRecordFound = tuple.getT1();
+                        // Get the most recent audit record overall
+                        AuditRecord lastAuditRecordRegistered = tuple.getT2();
+                        // Create the new audit record
+                        String entityHash = calculateSHA256(objectMapper.writeValueAsString(dataMap));
+                        AuditRecord auditRecord = AuditRecord.builder()
+                                .id(UUID.randomUUID())
+                                .processId(processId)
+                                .createdAt(Timestamp.from(Instant.now()))
+                                .entityId(entityId)
+                                .entityType((String) dataMap.get("type"))
+                                .entityHash(entityHash)
+                                .entityHashLink(calculateHashLink(auditRecordFound.getEntityHashLink(), entityHash))
+                                .dataLocation("")
+                                .status(status)
+                                .trader(trader)
+                                .hash("")
+                                .hashLink("")
+                                .newTransaction(true)
+                                .build();
+                        // Set Audit Record hash
+                        String auditRecordHash = calculateSHA256(objectMapper.writeValueAsString(auditRecord));
+                        auditRecord.setHash(auditRecordHash);
+                        String auditRecordHashLink = calculateHashLink(lastAuditRecordRegistered.getHashLink(), auditRecordHash);
+                        auditRecord.setHashLink(auditRecordHashLink);
+                        return Mono.just(auditRecord);
+                    } catch (JsonProcessingException | NoSuchAlgorithmException e) {
+                        return Mono.error(e);
+                    }
+                });
     }
 
     @Override

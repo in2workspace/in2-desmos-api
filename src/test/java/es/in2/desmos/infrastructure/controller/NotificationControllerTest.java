@@ -1,8 +1,9 @@
 package es.in2.desmos.infrastructure.controller;
 
-import es.in2.desmos.application.service.NotificationProcessorService;
+import es.in2.desmos.z.services.NotificationProcessorService;
 import es.in2.desmos.domain.model.BrokerNotification;
-import es.in2.desmos.domain.model.DLTNotification;
+import es.in2.desmos.domain.model.BlockchainNotification;
+import es.in2.desmos.controllers.NotificationController;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -55,7 +56,7 @@ class NotificationControllerTest {
     @Test
     void testPostDltNotification() {
         // Arrange
-        DLTNotification dltNotification = DLTNotification.builder()
+        BlockchainNotification blockchainNotification = BlockchainNotification.builder()
                 .id(5478474)
                 .publisherAddress("publisherAddress")
                 .eventType("eventType")
@@ -63,14 +64,14 @@ class NotificationControllerTest {
                 .dataLocation("dataLocation")
                 .relevantMetadata(List.of("metadata1", "metadata2"))
                 .build();
-        Mockito.when(notificationProcessorService.processDLTNotification(anyString(), any(DLTNotification.class)))
+        Mockito.when(notificationProcessorService.processDLTNotification(anyString(), any(BlockchainNotification.class)))
                 .thenReturn(Mono.empty());
         // Act
         WebTestClient.bindToController(notificationController)
                 .build()
                 .post()
                 .uri("/api/v1/notifications/dlt")
-                .bodyValue(dltNotification)
+                .bodyValue(blockchainNotification)
                 .exchange()
                 .expectStatus()
                 .isEqualTo(HttpStatus.OK);

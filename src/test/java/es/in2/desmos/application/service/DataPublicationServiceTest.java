@@ -1,32 +1,16 @@
 package es.in2.desmos.application.service;
 
-import es.in2.desmos.application.service.impl.DataPublicationServiceImpl;
-import es.in2.desmos.domain.model.DLTEvent;
-import es.in2.desmos.domain.model.BrokerNotification;
-import es.in2.desmos.domain.model.EventQueue;
-import es.in2.desmos.domain.model.EventQueuePriority;
+import es.in2.desmos.z.services.impl.DataPublicationServiceImpl;
 import es.in2.desmos.domain.service.AuditRecordService;
 import es.in2.desmos.domain.service.DLTEventCreatorService;
 import es.in2.desmos.domain.service.QueueService;
-import es.in2.desmos.infrastructure.blockchain.service.DLTAdapterPublisher;
-import org.junit.jupiter.api.Test;
+import es.in2.desmos.z.services.DLTAdapterPublisher;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DataPublicationServiceTest {
