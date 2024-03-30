@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AuditRecordTest {
 
-    // Test data
+    // Test data set
     private final UUID id = UUID.randomUUID();
     private final String processId = "e531db3a-1931-4ded-8c37-d2e8235106a1";
     private final Timestamp createdAt = new Timestamp(System.currentTimeMillis());
