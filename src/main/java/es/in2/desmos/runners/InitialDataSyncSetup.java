@@ -82,7 +82,7 @@ public class InitialDataSyncSetup {
     }
 
     private void startBrokerEventProcessing() {
-        brokerPublisherSubscriptionQueue = brokerPublisherService.startRetrievingData()
+        brokerPublisherSubscriptionQueue = brokerPublisherService.publishDataToBroker()
                 .subscribe(
                         null,
                         error -> log.error("Error occurred during broker entity event processing"),

@@ -1,10 +1,10 @@
 package es.in2.desmos.configs;
 
 import es.in2.desmos.configs.properties.BrokerProperties;
-import es.in2.desmos.configs.properties.ClientProperties;
+import es.in2.desmos.configs.properties.OrganizationProperties;
 import es.in2.desmos.configs.properties.DLTAdapterProperties;
 import es.in2.desmos.configs.properties.OpenApiProperties;
-import es.in2.desmos.domain.exception.HashCreationException;
+import es.in2.desmos.domain.exceptions.HashCreationException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Configuration;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
-import static es.in2.desmos.domain.util.ApplicationUtils.calculateSHA256;
+import static es.in2.desmos.domain.utils.ApplicationUtils.calculateSHA256;
 
 @Slf4j
 @Configuration
@@ -27,22 +27,12 @@ import static es.in2.desmos.domain.util.ApplicationUtils.calculateSHA256;
 public class ApiConfig {
 
     private final OpenApiProperties openApiProperties;
-    private final ClientProperties clientProperties;
-    private final DLTAdapterProperties dltAdapterProperties;
-    private final BrokerProperties brokerProperties;
-
-    @PostConstruct
-    public void init() {
-        log.debug("OpenApi properties: {}", openApiProperties);
-        log.debug("Operator properties: {}", clientProperties);
-        log.debug("DLT adapter properties: {}", dltAdapterProperties);
-        log.debug("Broker properties: {}", brokerProperties);
-    }
+    private final OrganizationProperties organizationProperties;
 
     @Bean
     public String organizationIdHash() {
         try {
-            return calculateSHA256(clientProperties.organizationId());
+            return calculateSHA256(organizationProperties.organizationId());
         } catch (NoSuchAlgorithmException e) {
             throw new HashCreationException("Error creating organizationId hash: " + e.getMessage());
         }

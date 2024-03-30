@@ -1,9 +1,10 @@
 package es.in2.desmos.services.blockchain.adapter.impl;
 
 import es.in2.desmos.configs.properties.DLTAdapterProperties;
-import es.in2.desmos.domain.model.*;
+import es.in2.desmos.domain.models.BlockchainTxPayload;
+import es.in2.desmos.domain.models.BlockchainSubscription;
+import es.in2.desmos.domain.models.EventQueuePriority;
 import es.in2.desmos.services.blockchain.adapter.BlockchainAdapterService;
-import es.in2.desmos.z.services.TransactionService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,11 +16,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.util.Objects;
-import java.util.UUID;
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -27,7 +23,6 @@ import java.util.UUID;
 public class BlockchainAdapterServiceImpl implements BlockchainAdapterService {
 
     private final DLTAdapterProperties dltAdapterProperties;
-    private final TransactionService transactionService;
 
     private WebClient webClient;
 
@@ -51,50 +46,52 @@ public class BlockchainAdapterServiceImpl implements BlockchainAdapterService {
                 .bodyToMono(Void.class);
     }
 
-    public Mono<Void> publishEvent(String processId, BlockchainData blockchainData) {
+    public Mono<Void> publishEvent(String processId, BlockchainTxPayload blockchainTxPayload) {
         return webClient.post()
                 .uri(dltAdapterProperties.paths()
                         .publication())
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(blockchainData)
+                .bodyValue(blockchainTxPayload)
                 .retrieve()
                 .onStatus(status -> status != null && status.is2xxSuccessful(),
                         response -> {
                             // FIXME: This has business logic, it should be moved to the service layer
-                            if (!checkIfHashLinkExistInDataLocation(blockchainData.dataLocation())) {
-                                return transactionService.saveTransaction(processId, Transaction.builder()
-                                                .id(UUID.randomUUID())
-                                                .transactionId(processId)
-                                                .createdAt(Timestamp.from(Instant.now()))
-                                                .entityId(extractEntityIdFromDataLocation(blockchainData.dataLocation()))
-                                                .entityType(blockchainData.eventType())
-                                                .entityHash(extractHashLinkFromDataLocation(blockchainData.dataLocation()))
-                                                .status(TransactionStatus.DELETED)
-                                                .trader(TransactionTrader.PRODUCER)
-                                                .datalocation(blockchainData.dataLocation())
-                                                .newTransaction(true)
-                                                .build())
-                                        .then(Mono.empty());
-                            } else {
-                                return transactionService.saveTransaction(processId, Transaction.builder()
-                                                .id(UUID.randomUUID())
-                                                .transactionId(processId)
-                                                .createdAt(Timestamp.from(Instant.now()))
-                                                .entityId(extractEntityIdFromDataLocation(blockchainData.dataLocation()))
-                                                .entityType(blockchainData.eventType())
-                                                .entityHash("")
-                                                .datalocation(blockchainData.dataLocation())
-                                                .status(TransactionStatus.PUBLISHED)
-                                                .trader(TransactionTrader.PRODUCER)
-                                                .newTransaction(true)
-                                                .build())
-                                        .then(Mono.empty());
-                            }
+//                            if (!checkIfHashLinkExistInDataLocation(blockchainData.dataLocation())) {
+//                                return transactionService.saveTransaction(processId, Transaction.builder()
+//                                                .id(UUID.randomUUID())
+//                                                .transactionId(processId)
+//                                                .createdAt(Timestamp.from(Instant.now()))
+//                                                .entityId(extractEntityIdFromDataLocation(blockchainData.dataLocation()))
+//                                                .entityType(blockchainData.eventType())
+//                                                .entityHash(extractHashLinkFromDataLocation(blockchainData.dataLocation()))
+//                                                .status(TransactionStatus.DELETED)
+//                                                .trader(TransactionTrader.PRODUCER)
+//                                                .datalocation(blockchainData.dataLocation())
+//                                                .newTransaction(true)
+//                                                .build())
+//                                        .then(Mono.empty());
+//                            } else {
+//                                return transactionService.saveTransaction(processId, Transaction.builder()
+//                                                .id(UUID.randomUUID())
+//                                                .transactionId(processId)
+//                                                .createdAt(Timestamp.from(Instant.now()))
+//                                                .entityId(extractEntityIdFromDataLocation(blockchainData.dataLocation()))
+//                                                .entityType(blockchainData.eventType())
+//                                                .entityHash("")
+//                                                .datalocation(blockchainData.dataLocation())
+//                                                .status(TransactionStatus.PUBLISHED)
+//                                                .trader(TransactionTrader.PRODUCER)
+//                                                .newTransaction(true)
+//                                                .build())
+//                                        .then(Mono.empty())
+//                            }
+                            // todo: standby solution until solve fixme
+                            return Mono.empty();
                         })
                 .bodyToMono(Void.class)
                 .retry(3)
-                .onErrorResume(e -> recover(processId, blockchainData));
+                .onErrorResume(e -> recover(processId, blockchainTxPayload));
     }
 
     @Override
@@ -108,27 +105,30 @@ public class BlockchainAdapterServiceImpl implements BlockchainAdapterService {
     }
 
     @Recover
-    public Mono<Void> recover(String processId, BlockchainData blockchainData) {
+    public Mono<Void> recover(String processId, BlockchainTxPayload blockchainTxPayload) {
         log.debug("Recovering after 3 retries");
         EventQueuePriority eventQueuePriority = EventQueuePriority.RECOVER_PUBLISH;
-        if (!checkIfHashLinkExistInDataLocation(blockchainData.dataLocation())) {
-            eventQueuePriority = EventQueuePriority.RECOVER_DELETE;
-        } else if (!Objects.equals(blockchainData.previousEntityHash(), "0x0000000000000000000000000000000000000000000000000000000000000000")){
-            eventQueuePriority = EventQueuePriority.RECOVER_EDIT;
-        }
-        return transactionService.saveFailedEventTransaction(processId, FailedEventTransaction.builder()
-                        .id(UUID.randomUUID())
-                        .transactionId(processId)
-                        .createdAt(Timestamp.from(Instant.now()))
-                        .entityId(extractEntityIdFromDataLocation(blockchainData.dataLocation()))
-                        .entityType(blockchainData.eventType())
-                        .datalocation(blockchainData.dataLocation())
-                        .organizationId(blockchainData.organizationId())
-                        .previousEntityHash(blockchainData.previousEntityHash())
-                        .priority(eventQueuePriority)
-                        .newTransaction(true)
-                        .build())
-                .then(Mono.empty());
+        // fixme:
+//        if (!checkIfHashLinkExistInDataLocation(blockchainData.dataLocation())) {
+//            eventQueuePriority = EventQueuePriority.RECOVER_DELETE;
+//        } else if (!Objects.equals(blockchainData.previousEntityHash(), "0x0000000000000000000000000000000000000000000000000000000000000000")){
+//            eventQueuePriority = EventQueuePriority.RECOVER_EDIT;
+//        }
+//        return transactionService.saveFailedEventTransaction(processId, FailedEventTransaction.builder()
+//                        .id(UUID.randomUUID())
+//                        .transactionId(processId)
+//                        .createdAt(Timestamp.from(Instant.now()))
+//                        .entityId(extractEntityIdFromDataLocation(blockchainData.dataLocation()))
+//                        .entityType(blockchainData.eventType())
+//                        .datalocation(blockchainData.dataLocation())
+//                        .organizationId(blockchainData.organizationId())
+//                        .previousEntityHash(blockchainData.previousEntityHash())
+//                        .priority(eventQueuePriority)
+//                        .newTransaction(true)
+//                        .build())
+//                .then(Mono.empty());
+        // todo: standby solution until solve fixme
+        return Mono.empty();
     }
 
 }

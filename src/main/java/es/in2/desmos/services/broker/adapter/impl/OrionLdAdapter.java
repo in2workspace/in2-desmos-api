@@ -1,7 +1,7 @@
 package es.in2.desmos.services.broker.adapter.impl;
 
 import es.in2.desmos.services.broker.adapter.BrokerAdapterService;
-import es.in2.desmos.domain.model.BrokerSubscription;
+import es.in2.desmos.domain.models.BrokerSubscription;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

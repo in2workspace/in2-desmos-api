@@ -1,7 +1,7 @@
 package es.in2.desmos.services.broker;
 
-import es.in2.desmos.domain.model.BrokerNotification;
-import es.in2.desmos.domain.model.BrokerSubscription;
+import es.in2.desmos.domain.models.BrokerNotification;
+import es.in2.desmos.domain.models.BrokerSubscription;
 import reactor.core.publisher.Mono;
 
 public interface BrokerListenerService {

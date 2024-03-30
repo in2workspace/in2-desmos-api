@@ -2,10 +2,10 @@ package es.in2.desmos.services.broker.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import es.in2.desmos.domain.exception.BrokerNotificationParserException;
-import es.in2.desmos.domain.model.*;
-import es.in2.desmos.domain.service.AuditRecordService;
-import es.in2.desmos.domain.service.QueueService;
+import es.in2.desmos.domain.exceptions.BrokerNotificationParserException;
+import es.in2.desmos.domain.models.*;
+import es.in2.desmos.domain.services.AuditRecordService;
+import es.in2.desmos.domain.services.QueueService;
 import es.in2.desmos.services.broker.BrokerListenerService;
 import es.in2.desmos.services.broker.adapter.BrokerAdapterService;
 import es.in2.desmos.services.broker.adapter.factory.BrokerAdapterFactory;
@@ -17,7 +17,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.Map;
 
-import static es.in2.desmos.domain.util.ApplicationUtils.calculateSHA256;
+import static es.in2.desmos.domain.utils.ApplicationUtils.calculateSHA256;
 
 @Slf4j
 @Service

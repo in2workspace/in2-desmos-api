@@ -1,23 +1,17 @@
 package es.in2.desmos.services.blockchain.impl;
 
-import es.in2.desmos.domain.model.*;
-import es.in2.desmos.domain.service.AuditRecordService;
-import es.in2.desmos.domain.service.QueueService;
-import es.in2.desmos.domain.util.ApplicationUtils;
-import es.in2.desmos.domain.util.BlockchainDataFactory;
+import es.in2.desmos.domain.models.*;
+import es.in2.desmos.domain.services.AuditRecordService;
+import es.in2.desmos.domain.services.QueueService;
+import es.in2.desmos.domain.utils.BlockchainDataFactory;
 import es.in2.desmos.services.blockchain.BlockchainPublisherService;
 import es.in2.desmos.services.blockchain.adapter.BlockchainAdapterService;
 import es.in2.desmos.services.blockchain.adapter.factory.BlockchainAdapterFactory;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 

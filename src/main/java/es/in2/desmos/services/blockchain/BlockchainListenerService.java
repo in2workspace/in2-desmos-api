@@ -1,7 +1,7 @@
 package es.in2.desmos.services.blockchain;
 
-import es.in2.desmos.domain.model.BlockchainNotification;
-import es.in2.desmos.domain.model.BlockchainSubscription;
+import es.in2.desmos.domain.models.BlockchainNotification;
+import es.in2.desmos.domain.models.BlockchainSubscription;
 import reactor.core.publisher.Mono;
 
 public interface BlockchainListenerService {

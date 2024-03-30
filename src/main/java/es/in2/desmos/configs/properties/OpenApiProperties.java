@@ -13,36 +13,36 @@ import java.util.Optional;
  * @param info   - organization information
  */
 @ConfigurationProperties(prefix = "openapi")
-public record OpenApiProperties(@NestedConfigurationProperty OpenApiServerProperties server,
-                                @NestedConfigurationProperty OpenApiInfoProperties info) {
+public record OpenApiProperties(@NestedConfigurationProperty ServerProperties server,
+                                @NestedConfigurationProperty InfoProperties info) {
 
     @ConstructorBinding
-    public OpenApiProperties(OpenApiServerProperties server, OpenApiInfoProperties info) {
-        this.server = Optional.ofNullable(server).orElse(new OpenApiServerProperties(null, null));
-        this.info = Optional.ofNullable(info).orElse(new OpenApiInfoProperties(null, null, null, null, null, null));
+    public OpenApiProperties(ServerProperties server, InfoProperties info) {
+        this.server = Optional.ofNullable(server).orElse(new ServerProperties(null, null));
+        this.info = Optional.ofNullable(info).orElse(new InfoProperties(null, null, null, null, null, null));
     }
 
-    public record OpenApiServerProperties(String url, String description) {
+    public record ServerProperties(String url, String description) {
     }
 
-    public record OpenApiInfoProperties(String title, String version, String description, String termsOfService,
-                                        @NestedConfigurationProperty OpenApiInfoContactProperties contact,
-                                        @NestedConfigurationProperty OpenApiInfoLicenseProperties license) {
+    public record InfoProperties(String title, String version, String description, String termsOfService,
+                                 @NestedConfigurationProperty ContactProperties contact,
+                                 @NestedConfigurationProperty LicenseProperties license) {
 
         @ConstructorBinding
-        public OpenApiInfoProperties(String title, String version, String description, String termsOfService, OpenApiInfoContactProperties contact, OpenApiInfoLicenseProperties license) {
+        public InfoProperties(String title, String version, String description, String termsOfService, ContactProperties contact, LicenseProperties license) {
             this.title = title;
             this.version = version;
             this.description = description;
             this.termsOfService = termsOfService;
-            this.contact = Optional.ofNullable(contact).orElse(new OpenApiInfoContactProperties(null, null, null));
-            this.license = Optional.ofNullable(license).orElse(new OpenApiInfoLicenseProperties(null, null));
+            this.contact = Optional.ofNullable(contact).orElse(new ContactProperties(null, null, null));
+            this.license = Optional.ofNullable(license).orElse(new LicenseProperties(null, null));
         }
 
-        public record OpenApiInfoContactProperties(String email, String name, String url) {
+        public record ContactProperties(String email, String name, String url) {
         }
 
-        public record OpenApiInfoLicenseProperties(String name, String url) {
+        public record LicenseProperties(String name, String url) {
         }
 
     }

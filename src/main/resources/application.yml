@@ -5,13 +5,13 @@ spring:
   main:
     web-application-type: reactive
   r2dbc:
-    url: "r2dbc:postgresql://localhost:5433/desmos"
-    username: "guest"
-    password: "guest"
+    url: "r2dbc:postgresql://localhost:5433/it_db"
+    username: "postgres"
+    password: "postgres"
     generate-unique-name: true
   flyway:
-    url: "jdbc:postgresql://localhost:5433/desmos"
-    locations: classpath:db/migrations
+    url: "jdbc:postgresql://localhost:5433/it_db"
+    locations: classpath:db/migration
 
 # Spring Logging Configuration
 logging:
@@ -61,8 +61,8 @@ server:
 # Application Configuration
 openapi:
   server:
-    url: "https://localhost:9091"
-    description: "Blockchain Connector Test Server"
+    url: "https://localhost:8080"
+    description: "Server Description"
   info:
     title: "Blockchain Connector"
     version: "2.0.0-SNAPSHOT"
@@ -72,13 +72,13 @@ openapi:
       name: "Apache 2.0"
       url: "https://www.apache.org/licenses/LICENSE-2.0.html"
     contact:
-      email: "info@example.com"
-      name: "john doe"
+      email: "test@example.com"
+      name: "Test Name"
       url: "https://example.com"
 
 # Operator Configuration
-client:
-  organizationId: "VATES-99999999"
+organization:
+  organizationId: "VATES-S9999999E"
 
 # Context Broker Configuration
 broker:
@@ -93,7 +93,7 @@ broker:
 # NGSI Subscription Configuration
 ngsi-subscription:
   notificationEndpoint: "http://localhost:8080/api/v1/notifications/broker"
-  entityTypes: "ProductOffering,ProductOrder"
+  entityTypes: "ProductOffering,Category,Catalogue"
 
 # DLT Adapter Configuration
 dlt-adapter:
@@ -106,6 +106,6 @@ dlt-adapter:
     events: "/api/v1/events"
 
 # Event Subscription Configuration
-event-subscription:
+tx-subscription:
   notificationEndpoint: "http://localhost:8080/api/v1/notifications/dlt"
-  eventTypes: "ProductOffering,ProductOrder"
+  entityTypes: "ProductOffering,Category,Catalogue"

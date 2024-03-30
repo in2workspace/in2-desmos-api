@@ -4,9 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.services.broker.adapter.BrokerAdapterService;
-import es.in2.desmos.domain.exception.JsonReadingException;
-import es.in2.desmos.domain.exception.SubscriptionCreationException;
-import es.in2.desmos.domain.model.BrokerSubscription;
+import es.in2.desmos.domain.exceptions.JsonReadingException;
+import es.in2.desmos.domain.exceptions.SubscriptionCreationException;
+import es.in2.desmos.domain.models.BrokerSubscription;
 import es.in2.desmos.configs.BrokerConfig;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +22,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
+import static es.in2.desmos.domain.utils.MessageUtils.*;
 
 @Slf4j
 @Component

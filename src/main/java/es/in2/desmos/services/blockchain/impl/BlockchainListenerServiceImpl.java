@@ -1,10 +1,10 @@
 package es.in2.desmos.services.blockchain.impl;
 
-import es.in2.desmos.domain.model.BlockchainNotification;
-import es.in2.desmos.domain.model.BlockchainSubscription;
-import es.in2.desmos.domain.model.EventQueuePriority;
-import es.in2.desmos.domain.service.AuditRecordService;
-import es.in2.desmos.domain.service.QueueService;
+import es.in2.desmos.domain.models.BlockchainNotification;
+import es.in2.desmos.domain.models.BlockchainSubscription;
+import es.in2.desmos.domain.models.EventQueuePriority;
+import es.in2.desmos.domain.services.AuditRecordService;
+import es.in2.desmos.domain.services.QueueService;
 import es.in2.desmos.services.blockchain.BlockchainListenerService;
 import es.in2.desmos.services.blockchain.adapter.BlockchainAdapterService;
 import es.in2.desmos.services.blockchain.adapter.factory.BlockchainAdapterFactory;
@@ -14,7 +14,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 
-import static es.in2.desmos.domain.util.ApplicationUtils.checkIfHashLinkExistInDataLocation;
+import static es.in2.desmos.domain.utils.ApplicationUtils.checkIfHashLinkExistInDataLocation;
 
 @Slf4j
 @Service

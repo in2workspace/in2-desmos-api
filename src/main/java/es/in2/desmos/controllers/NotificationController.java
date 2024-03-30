@@ -1,7 +1,7 @@
 package es.in2.desmos.controllers;
 
-import es.in2.desmos.domain.model.BlockchainNotification;
-import es.in2.desmos.domain.model.BrokerNotification;
+import es.in2.desmos.domain.models.BlockchainNotification;
+import es.in2.desmos.domain.models.BrokerNotification;
 import es.in2.desmos.services.blockchain.BlockchainListenerService;
 import es.in2.desmos.services.broker.BrokerListenerService;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ public class NotificationController {
     private final BlockchainListenerService blockchainListenerService;
 
     @PostMapping("/broker")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.ACCEPTED)
     // todo: add @Valid annotation to validate the request body
     public Mono<Void> postBrokerNotification(@RequestBody BrokerNotification brokerNotification) {
         String processId = UUID.randomUUID().toString();
@@ -31,7 +31,7 @@ public class NotificationController {
     }
 
     @PostMapping("/dlt")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.ACCEPTED)
     // todo: add @Valid annotation to validate the request body
     public Mono<Void> postDLTNotification(@RequestBody BlockchainNotification blockchainNotification) {
         String processId = UUID.randomUUID().toString();

@@ -13,18 +13,17 @@ import org.testcontainers.utility.DockerImageName;
 public class ContainerManager {
 
     private static final ContainerManager INSTANCE = new ContainerManager();
-
     private static final Network testNetwork = Network.newNetwork();
-    private static final PostgreSQLContainer<?> postgresContainer;
-    private static final GenericContainer<?> postgisContainer;
     private static final GenericContainer<?> scorpioContainer;
+    private static final GenericContainer<?> postgisContainer;
     private static final GenericContainer<?> blockchainAdapterContainer;
+    private static final PostgreSQLContainer<?> postgresContainer;
 
     static {
         postgresContainer = new PostgreSQLContainer<>("postgres:latest")
-                .withDatabaseName("desmos")
-                .withUsername("guest")
-                .withPassword("guest")
+                .withDatabaseName("it_dbd")
+                .withUsername("postgres")
+                .withPassword("postgres")
                 .withNetwork(testNetwork)
                 .withNetworkAliases("postgres");
         postgresContainer.start();
@@ -48,9 +47,11 @@ public class ContainerManager {
 
         blockchainAdapterContainer = new GenericContainer<>(DockerImageName.parse("quay.io/digitelts/dlt-adapter:1.3"))
                 .withExposedPorts(8080)
-                .withEnv("PRIVATE_KEY", "0xe2afef2c880b138d741995ba56936e389b0b5dd2943e21e4363cc70d81c89346")
-                .withEnv("RPC_ADDRESS", "https://red-t.alastria.io/v0/9461d9f4292b41230527d57ee90652a6")
-                .withEnv("ISS", "0x983c5a1eb59ea6861c3e27b64dd3f1fd50233c3229149b8d139798a17b4cb0ec")
+                .withEnv("PRIVATE_KEY", "0x304d170fb355df65cc17ef7934404fe9baee73a1244380076436dec6fafb1e1f")
+                .withEnv("DOME_EVENTS_CONTRACT_ADDRESS", "")
+                .withEnv("RPC_ADDRESS", "http://blockchain-testnode.infra.svc.cluster.local:8545/")
+                .withEnv("DOME_PRODUCTION_BLOCK_NUMBER", "0")
+                .withEnv("ISS", "0x9eb763b0a6b7e617d56b85f1df943f176018c8eedb2dd9dd37c0bd77496833fe")
                 .withNetwork(testNetwork)
                 .withNetworkAliases("blockchain-adapter")
                 .waitingFor(Wait.forHttp("/health").forStatusCode(200));
@@ -63,7 +64,7 @@ public class ContainerManager {
 
     @DynamicPropertySource
     public static void postgresqlProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.r2dbc.url", () -> String.format("r2dbc:pool:postgresql://%s:%s/desmos",
+        registry.add("spring.r2dbc.url", () -> String.format("r2dbc:pool:postgresql://%s:%s/it_db",
                 postgresContainer.getHost(),
                 postgresContainer.getFirstMappedPort()));
         registry.add("spring.r2dbc.username", postgresContainer::getUsername);

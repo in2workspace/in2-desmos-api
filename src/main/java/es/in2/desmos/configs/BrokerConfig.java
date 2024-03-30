@@ -20,21 +20,11 @@ public class BrokerConfig {
         return ngsiLdSubscriptionProperties.notificationEndpoint();
     }
 
-    public String getSubscriptionType() {
-        return ngsiLdSubscriptionProperties.subscriptionType();
-    }
-
-    public String getIdPrefix() {
-        return ngsiLdSubscriptionProperties.idPrefix();
-    }
-
     public List<String> getEntityTypes() {
         return ngsiLdSubscriptionProperties.entityTypes();
     }
 
-    public String getEntitiesExternalDomain() {
-        return brokerProperties.externalDomain() + brokerProperties.paths().entities();
-    }
+    public String getEntitiesExternalDomain() { return brokerProperties.externalDomain() + brokerProperties.paths().entities();}
 
     public String getExternalDomain() {
         return brokerProperties.externalDomain();

@@ -1,7 +1,7 @@
 package es.in2.desmos.configs;
 
-import es.in2.desmos.domain.service.QueueService;
-import es.in2.desmos.domain.service.impl.QueueServiceImpl;
+import es.in2.desmos.domain.services.QueueService;
+import es.in2.desmos.domain.services.impl.QueueServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

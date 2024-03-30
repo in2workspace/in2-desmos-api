@@ -92,9 +92,11 @@ dependencies {
     implementation 'org.aspectj:aspectjrt:1.9.21'
     implementation 'org.springframework:spring-aspects:5.3.18'
     implementation 'org.aspectj:aspectjweaver:1.9.7'
+
     // Unit Testing
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'
+    testImplementation 'org.testng:testng:7.7.0'
 
     // Integration Test
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
@@ -128,7 +130,10 @@ tasks.jacocoTestReport {
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.collect {
             fileTree(dir: it, exclude: [
-                    '**/DesmosApplication.class'
+                    '**/DesmosApplication.class',
+                    '**/configs/properties/**',
+                    '**/configs/FlywayConfig.class',
+                    '**/configs/QueueConfig.class'
             ])
         }))
     }

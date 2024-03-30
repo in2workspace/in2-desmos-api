@@ -1,7 +1,6 @@
 package es.in2.desmos.configs;
 
-import es.in2.desmos.configs.properties.DLTAdapterProperties;
-import es.in2.desmos.configs.properties.EventSubscriptionProperties;
+import es.in2.desmos.configs.properties.TxSubscriptionProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
@@ -13,15 +12,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BlockchainConfig {
 
-    private final DLTAdapterProperties dltAdapterProperties;
-    private final EventSubscriptionProperties eventSubscriptionProperties;
+    private final TxSubscriptionProperties txSubscriptionProperties;
 
     public String getNotificationEndpoint() {
-        return eventSubscriptionProperties.notificationEndpoint();
+        return txSubscriptionProperties.notificationEndpoint();
     }
 
     public List<String> getEntityTypes() {
-        return eventSubscriptionProperties.eventTypes();
+        return txSubscriptionProperties.entityTypes();
     }
 
 }
