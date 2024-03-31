@@ -6,8 +6,4 @@ public class HashCreationException extends RuntimeException {
         super(message);
     }
 
-    public HashCreationException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
 }

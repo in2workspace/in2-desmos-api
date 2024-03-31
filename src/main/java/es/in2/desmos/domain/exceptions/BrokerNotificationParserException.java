@@ -6,8 +6,4 @@ public class BrokerNotificationParserException extends RuntimeException {
         super(message);
     }
 
-    public BrokerNotificationParserException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
 }

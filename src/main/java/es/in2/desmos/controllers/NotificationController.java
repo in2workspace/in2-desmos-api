@@ -2,8 +2,9 @@ package es.in2.desmos.controllers;
 
 import es.in2.desmos.domain.models.BlockchainNotification;
 import es.in2.desmos.domain.models.BrokerNotification;
-import es.in2.desmos.services.blockchain.BlockchainListenerService;
-import es.in2.desmos.services.broker.BrokerListenerService;
+import es.in2.desmos.domain.services.blockchain.BlockchainListenerService;
+import es.in2.desmos.domain.services.broker.BrokerListenerService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -23,8 +24,7 @@ public class NotificationController {
 
     @PostMapping("/broker")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    // todo: add @Valid annotation to validate the request body
-    public Mono<Void> postBrokerNotification(@RequestBody BrokerNotification brokerNotification) {
+    public Mono<Void> postBrokerNotification(@RequestBody @Valid BrokerNotification brokerNotification) {
         String processId = UUID.randomUUID().toString();
         log.debug("ProcessID: {} - Broker Notification received: {}", processId, brokerNotification.toString());
         return brokerListenerService.processBrokerNotification(processId, brokerNotification);
@@ -32,8 +32,7 @@ public class NotificationController {
 
     @PostMapping("/dlt")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    // todo: add @Valid annotation to validate the request body
-    public Mono<Void> postDLTNotification(@RequestBody BlockchainNotification blockchainNotification) {
+    public Mono<Void> postDLTNotification(@RequestBody @Valid BlockchainNotification blockchainNotification) {
         String processId = UUID.randomUUID().toString();
         log.debug("ProcessID: {}, Blockchain Notification received: {}", processId, blockchainNotification);
         return blockchainListenerService.processBlockchainNotification(processId, blockchainNotification);

@@ -3,7 +3,7 @@
 //import com.fasterxml.jackson.core.type.TypeReference;
 //import com.fasterxml.jackson.databind.ObjectMapper;
 //import es.in2.desmos.domain.exceptions.JsonReadingException;
-//import es.in2.desmos.domain.services.impl.BrokerEntityProcessorServiceImpl;
+//import es.in2.desmos.domain.services.api.impl.BrokerEntityProcessorServiceImpl;
 //import es.in2.desmos.z.services.BrokerPublicationService;
 //import org.junit.jupiter.api.Test;
 //import org.junit.jupiter.api.extension.ExtendWith;

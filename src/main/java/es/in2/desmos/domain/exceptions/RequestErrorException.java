@@ -6,8 +6,4 @@ public class RequestErrorException extends RuntimeException {
         super(message);
     }
 
-    public RequestErrorException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
 }

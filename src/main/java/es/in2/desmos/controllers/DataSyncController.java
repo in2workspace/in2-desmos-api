@@ -1,6 +1,6 @@
 package es.in2.desmos.controllers;
 
-import es.in2.desmos.services.sync.DataSyncService;
+import es.in2.desmos.domain.services.sync.DataSyncService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;

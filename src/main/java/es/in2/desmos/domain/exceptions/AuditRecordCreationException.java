@@ -6,8 +6,4 @@ public class AuditRecordCreationException extends RuntimeException {
         super(message);
     }
 
-    public AuditRecordCreationException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
 }

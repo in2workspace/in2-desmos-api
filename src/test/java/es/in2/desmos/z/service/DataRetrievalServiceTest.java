@@ -6,7 +6,7 @@
 //import es.in2.desmos.domain.models.EventQueuePriority;
 //import es.in2.desmos.domain.services.BrokerEntityPublisherService;
 //import es.in2.desmos.domain.services.BrokerEntityRetrievalService;
-//import es.in2.desmos.domain.services.QueueService;
+//import es.in2.desmos.domain.services.api.QueueService;
 //import org.junit.jupiter.api.Test;
 //import org.junit.jupiter.api.extension.ExtendWith;
 //import org.mockito.InjectMocks;

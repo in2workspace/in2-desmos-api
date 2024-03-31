@@ -1,7 +1,7 @@
 //package es.in2.desmos.todo.domain.service;
 //
 //import es.in2.desmos.domain.models.EventQueue;
-//import es.in2.desmos.domain.services.impl.QueueServiceImpl;
+//import es.in2.desmos.domain.services.api.impl.QueueServiceImpl;
 //import org.junit.jupiter.api.BeforeEach;
 //import org.junit.jupiter.api.Test;
 //import org.junit.jupiter.api.extension.ExtendWith;

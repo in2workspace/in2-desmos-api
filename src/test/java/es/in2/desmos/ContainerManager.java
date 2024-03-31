@@ -9,53 +9,99 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
+@SuppressWarnings("resource")
 @Testcontainers
 public class ContainerManager {
 
     private static final ContainerManager INSTANCE = new ContainerManager();
-    private static final Network testNetwork = Network.newNetwork();
-    private static final GenericContainer<?> scorpioContainer;
-    private static final GenericContainer<?> postgisContainer;
-    private static final GenericContainer<?> blockchainAdapterContainer;
-    private static final PostgreSQLContainer<?> postgresContainer;
+    private static final Network testNetworkA = Network.newNetwork();
+    private static final GenericContainer<?> scorpioContainerA;
+    private static final GenericContainer<?> postgisContainerA;
+    private static final GenericContainer<?> blockchainAdapterContainerA;
+    private static final PostgreSQLContainer<?> postgresContainerA;
+
+//    private static final Network testNetworkB = Network.newNetwork();
+//    private static final GenericContainer<?> scorpioContainerB;
+//    private static final GenericContainer<?> postgisContainerB;
+//    private static final GenericContainer<?> blockchainAdapterContainerB;
+//    private static final PostgreSQLContainer<?> postgresContainerB;
 
     static {
-        postgresContainer = new PostgreSQLContainer<>("postgres:latest")
-                .withDatabaseName("it_dbd")
+        // Node A
+        postgresContainerA = new PostgreSQLContainer<>("postgres:latest")
+                .withDatabaseName("it_db")
                 .withUsername("postgres")
                 .withPassword("postgres")
-                .withNetwork(testNetwork)
+                .withNetwork(testNetworkA)
                 .withNetworkAliases("postgres");
-        postgresContainer.start();
+        postgresContainerA.start();
 
-        postgisContainer = new GenericContainer<>(DockerImageName.parse("postgis/postgis"))
+        postgisContainerA = new GenericContainer<>(DockerImageName.parse("postgis/postgis"))
                 .withExposedPorts(5432)
                 .withEnv("POSTGRES_USER", "ngb")
                 .withEnv("POSTGRES_PASSWORD", "ngb")
                 .withEnv("POSTGRES_DB", "ngb")
-                .withNetwork(testNetwork)
+                .withNetwork(testNetworkA)
                 .withNetworkAliases("postgis");
-        postgisContainer.start();
+        postgisContainerA.start();
 
-        scorpioContainer = new GenericContainer<>(DockerImageName.parse("scorpiobroker/all-in-one-runner:java-latest"))
+        scorpioContainerA = new GenericContainer<>(DockerImageName.parse("scorpiobroker/all-in-one-runner:java-latest"))
                 .withExposedPorts(9090)
                 .withEnv("DBHOST", "postgis")
-                .dependsOn(postgisContainer)
-                .withNetwork(testNetwork)
+                .dependsOn(postgisContainerA)
+                .withNetwork(testNetworkA)
                 .withNetworkAliases("scorpio");
-        scorpioContainer.start();
+        scorpioContainerA.start();
 
-        blockchainAdapterContainer = new GenericContainer<>(DockerImageName.parse("quay.io/digitelts/dlt-adapter:1.3"))
+        blockchainAdapterContainerA = new GenericContainer<>(DockerImageName.parse("quay.io/digitelts/dlt-adapter:1.3"))
                 .withExposedPorts(8080)
                 .withEnv("PRIVATE_KEY", "0x304d170fb355df65cc17ef7934404fe9baee73a1244380076436dec6fafb1e1f")
                 .withEnv("DOME_EVENTS_CONTRACT_ADDRESS", "")
                 .withEnv("RPC_ADDRESS", "http://blockchain-testnode.infra.svc.cluster.local:8545/")
                 .withEnv("DOME_PRODUCTION_BLOCK_NUMBER", "0")
                 .withEnv("ISS", "0x9eb763b0a6b7e617d56b85f1df943f176018c8eedb2dd9dd37c0bd77496833fe")
-                .withNetwork(testNetwork)
+                .withNetwork(testNetworkA)
                 .withNetworkAliases("blockchain-adapter")
                 .waitingFor(Wait.forHttp("/health").forStatusCode(200));
-        blockchainAdapterContainer.start();
+        blockchainAdapterContainerA.start();
+
+        // Node B
+//        postgresContainerB = new PostgreSQLContainer<>("postgres:latest")
+//                .withDatabaseName("it_db")
+//                .withUsername("postgres")
+//                .withPassword("postgres")
+//                .withNetwork(testNetworkB)
+//                .withNetworkAliases("postgres");
+//        postgresContainerB.start();
+//
+//        postgisContainerB = new GenericContainer<>(DockerImageName.parse("postgis/postgis"))
+//                .withExposedPorts(5432)
+//                .withEnv("POSTGRES_USER", "ngb")
+//                .withEnv("POSTGRES_PASSWORD", "ngb")
+//                .withEnv("POSTGRES_DB", "ngb")
+//                .withNetwork(testNetworkB)
+//                .withNetworkAliases("postgis");
+//        postgisContainerB.start();
+//
+//        scorpioContainerB = new GenericContainer<>(DockerImageName.parse("scorpiobroker/all-in-one-runner:java-latest"))
+//                .withExposedPorts(9090)
+//                .withEnv("DBHOST", "postgis")
+//                .dependsOn(postgisContainerB)
+//                .withNetwork(testNetworkB)
+//                .withNetworkAliases("scorpio");
+//        scorpioContainerB.start();
+//
+//        blockchainAdapterContainerB = new GenericContainer<>(DockerImageName.parse("quay.io/digitelts/dlt-adapter:1.3"))
+//                .withExposedPorts(8080)
+//                .withEnv("PRIVATE_KEY", "0x304d170fb355df65cc17ef7934404fe9baee73a1244380076436dec6fafb1e1f")
+//                .withEnv("DOME_EVENTS_CONTRACT_ADDRESS", "")
+//                .withEnv("RPC_ADDRESS", "http://blockchain-testnode.infra.svc.cluster.local:8545/")
+//                .withEnv("DOME_PRODUCTION_BLOCK_NUMBER", "0")
+//                .withEnv("ISS", "0x9eb763b0a6b7e617d56b85f1df943f176018c8eedb2dd9dd37c0bd77496833fe")
+//                .withNetwork(testNetworkB)
+//                .withNetworkAliases("blockchain-adapter")
+//                .waitingFor(Wait.forHttp("/health").forStatusCode(200));
+//        blockchainAdapterContainerB.start();
     }
 
     public static ContainerManager getInstance() {
@@ -64,28 +110,44 @@ public class ContainerManager {
 
     @DynamicPropertySource
     public static void postgresqlProperties(DynamicPropertyRegistry registry) {
+        // Node A
         registry.add("spring.r2dbc.url", () -> String.format("r2dbc:pool:postgresql://%s:%s/it_db",
-                postgresContainer.getHost(),
-                postgresContainer.getFirstMappedPort()));
-        registry.add("spring.r2dbc.username", postgresContainer::getUsername);
-        registry.add("spring.r2dbc.password", postgresContainer::getPassword);
-        registry.add("spring.flyway.url", postgresContainer::getJdbcUrl);
-        registry.add("broker.externalDomain", ContainerManager::getBaseUriForScorpio);
+                postgresContainerA.getHost(),
+                postgresContainerA.getFirstMappedPort()));
+        registry.add("spring.r2dbc.username", postgresContainerA::getUsername);
+        registry.add("spring.r2dbc.password", postgresContainerA::getPassword);
+        registry.add("spring.flyway.url", postgresContainerA::getJdbcUrl);
+        registry.add("broker.externalDomain", ContainerManager::getBaseUriForScorpioA);
         registry.add("evm-adapter.externalDomain", () -> String.format("http://%s:%s",
-                blockchainAdapterContainer.getHost(),
-                blockchainAdapterContainer.getFirstMappedPort()));
+                blockchainAdapterContainerA.getHost(),
+                blockchainAdapterContainerA.getFirstMappedPort()));
+        // Node B
+//        registry.add("spring.r2dbc.url", () -> String.format("r2dbc:pool:postgresql://%s:%s/it_db",
+//                postgresContainerB.getHost(),
+//                postgresContainerB.getFirstMappedPort()));
+//        registry.add("spring.r2dbc.username", postgresContainerB::getUsername);
+//        registry.add("spring.r2dbc.password", postgresContainerB::getPassword);
+//        registry.add("spring.flyway.url", postgresContainerB::getJdbcUrl);
+//        registry.add("broker.externalDomain", ContainerManager::getBaseUriForScorpioA);
+//        registry.add("evm-adapter.externalDomain", () -> String.format("http://%s:%s",
+//                blockchainAdapterContainerB.getHost(),
+//                blockchainAdapterContainerB.getFirstMappedPort()));
     }
 
-    public static String getBaseUriForScorpio() {
-        return "http://" + scorpioContainer.getHost() + ":" + scorpioContainer.getMappedPort(9090);
+    public static String getBaseUriForScorpioA() {
+        return "http://" + scorpioContainerA.getHost() + ":" + scorpioContainerA.getMappedPort(9090);
     }
 
-    protected static String getBaseUriAlastriaAdapter() {
-        return "http://" + blockchainAdapterContainer.getHost() + ":" + blockchainAdapterContainer.getMappedPort(8080);
+    public static String getBaseUriBlockchainAdapterA() {
+        return "http://" + blockchainAdapterContainerA.getHost() + ":" + blockchainAdapterContainerA.getMappedPort(8080);
     }
 
-    public static String getBaseUriBlockchainAdapter() {
-        return "http://" + blockchainAdapterContainer.getHost() + ":" + blockchainAdapterContainer.getMappedPort(8080);
-    }
+//    public static String getBaseUriForScorpioB() {
+//        return "http://" + scorpioContainerB.getHost() + ":" + scorpioContainerB.getMappedPort(9090);
+//    }
+
+//    public static String getBaseUriBlockchainAdapterB() {
+//        return "http://" + blockchainAdapterContainerB.getHost() + ":" + blockchainAdapterContainerB.getMappedPort(8080);
+//    }
 
 }

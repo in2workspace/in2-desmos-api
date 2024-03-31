@@ -2,7 +2,7 @@
 //
 //import es.in2.desmos.domain.models.BlockchainNotification;
 //import es.in2.desmos.domain.models.FailedEntityTransaction;
-//import es.in2.desmos.domain.services.impl.BrokerEntityPublisherServiceImpl;
+//import es.in2.desmos.domain.services.api.impl.BrokerEntityPublisherServiceImpl;
 //import es.in2.desmos.domain.utils.ApplicationUtils;
 //import es.in2.desmos.z.services.BrokerPublicationService;
 //import es.in2.desmos.z.services.TransactionService;

@@ -1,9 +1,9 @@
 //package es.in2.desmos.todo.service;
 //
 //import es.in2.desmos.z.services.impl.DataPublicationServiceImpl;
-//import es.in2.desmos.domain.services.AuditRecordService;
+//import es.in2.desmos.domain.services.api.AuditRecordService;
 //import es.in2.desmos.domain.services.DLTEventCreatorService;
-//import es.in2.desmos.domain.services.QueueService;
+//import es.in2.desmos.domain.services.api.QueueService;
 //import es.in2.desmos.z.services.DLTAdapterPublisher;
 //import org.junit.jupiter.api.extension.ExtendWith;
 //import org.mockito.InjectMocks;

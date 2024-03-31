@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -52,6 +53,11 @@ public class ApiConfig {
                 .servers(List.of(new Server()
                         .url(openApiProperties.server().url())
                         .description(openApiProperties.server().description())));
+    }
+
+    @Bean
+    public WebClient webClient() {
+        return WebClient.builder().build();
     }
 
 }

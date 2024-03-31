@@ -4,7 +4,7 @@
 //import es.in2.desmos.domain.models.EventQueuePriority;
 //import es.in2.desmos.domain.models.FailedEntityTransaction;
 //import es.in2.desmos.schedulers.DataRecoveryScheduler;
-//import es.in2.desmos.domain.services.QueueService;
+//import es.in2.desmos.domain.services.api.QueueService;
 //import es.in2.desmos.z.services.TransactionService;
 //import org.junit.jupiter.api.Test;
 //import org.junit.jupiter.api.extension.ExtendWith;

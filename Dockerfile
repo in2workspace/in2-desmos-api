@@ -15,10 +15,15 @@ RUN if [ "$SKIP_TESTS" = "true" ]; then \
   fi
 
 # build image
-FROM openjdk:17-alpine
+# Windows
+#FROM openjdk:17-alpine
+# MacOs M1
+FROM bellsoft/liberica-openjdk-alpine-musl:17
 RUN addgroup -S nonroot \
     && adduser -S nonroot -G nonroot
 USER nonroot
 WORKDIR /app
 COPY --from=TEMP_BUILD /home/gradle/src/build/libs/*.jar /app/desmos.jar
 ENTRYPOINT ["java", "-jar", "/app/desmos.jar"]
+
+# docker build --build-arg SKIP_TESTS=true -t image-name .

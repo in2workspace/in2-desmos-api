@@ -5,7 +5,7 @@
 //import es.in2.desmos.domain.models.AuditRecord;
 //import es.in2.desmos.configs.ApiConfig;
 //import es.in2.desmos.domain.models.BlockchainData;
-//import es.in2.desmos.domain.services.AuditRecordService;
+//import es.in2.desmos.domain.services.api.AuditRecordService;
 //import es.in2.desmos.domain.utils.BlockchainDataFactory;
 //import es.in2.desmos.domain.utils.ApplicationUtils;
 //import es.in2.desmos.configs.BrokerConfig;

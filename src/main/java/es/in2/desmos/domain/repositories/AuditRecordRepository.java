@@ -1,6 +1,5 @@
 package es.in2.desmos.domain.repositories;
 
-
 import es.in2.desmos.domain.models.AuditRecord;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;

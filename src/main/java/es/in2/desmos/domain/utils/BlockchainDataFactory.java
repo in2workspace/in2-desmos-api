@@ -46,8 +46,8 @@ public class BlockchainDataFactory {
                     .metadata(List.of())
                     .build());
         } catch (JsonProcessingException | NoSuchAlgorithmException e) {
-            log.error("ProcessID: {} - Error creating blockchain data: {}", processId, e.getMessage());
-            return Mono.error(new HashLinkException("Error creating blockchain data", e.getCause()));
+            log.warn("ProcessID: {} - Error creating blockchain transaction payload: {}", processId, e.getMessage());
+            return Mono.error(new HashLinkException("Error creating blockchain transaction payload"));
         }
     }
 

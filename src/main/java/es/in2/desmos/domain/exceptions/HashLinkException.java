@@ -6,8 +6,4 @@ public class HashLinkException extends RuntimeException {
         super(message);
     }
 
-    public HashLinkException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
 }
