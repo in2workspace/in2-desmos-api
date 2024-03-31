@@ -8,7 +8,6 @@ import es.in2.desmos.ContainerManager;
 import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.AuditRecordStatus;
 import es.in2.desmos.domain.models.AuditRecordTrader;
-import es.in2.desmos.domain.repositories.AuditRecordRepository;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -29,6 +28,7 @@ import java.util.UUID;
 import static es.in2.desmos.domain.utils.ApplicationUtils.calculateHashLink;
 import static es.in2.desmos.domain.utils.ApplicationUtils.calculateSHA256;
 import static org.junit.jupiter.api.Assertions.*;
+
 
 @SpringBootTest
 @Testcontainers

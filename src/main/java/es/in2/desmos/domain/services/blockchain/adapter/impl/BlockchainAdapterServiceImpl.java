@@ -29,7 +29,7 @@ public class BlockchainAdapterServiceImpl implements BlockchainAdapterService {
     @PostConstruct
     public void init() {
         this.webClient = WebClient.builder()
-                .baseUrl(dltAdapterProperties.internalDomain())
+                .baseUrl(dltAdapterProperties.externalDomain())
                 .build();
     }
 

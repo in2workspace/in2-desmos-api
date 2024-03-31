@@ -17,7 +17,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class InitialSubscriptionRunnerTests {
+class ApplicationRunnerTests {
 
     @Mock
     private BrokerConfig brokerConfig;
@@ -32,7 +32,7 @@ class InitialSubscriptionRunnerTests {
     private BlockchainListenerService blockchainListenerService;
 
     @InjectMocks
-    private InitialSubscriptionRunner initialSubscriptionRunner;
+    private ApplicationRunner applicationRunner;
 
     @Test
     void whenApplicationIsReady_thenSetBrokerSubscription() {
@@ -40,7 +40,7 @@ class InitialSubscriptionRunnerTests {
         when(brokerListenerService.createSubscription(anyString(), any())).thenReturn(Mono.empty());
         // Act
         ApplicationReadyEvent event = mock(ApplicationReadyEvent.class);
-        initialSubscriptionRunner.setBrokerSubscription().block();
+        applicationRunner.setBrokerSubscription().block();
         // Assert
         verify(brokerListenerService).createSubscription(anyString(), any());
     }
@@ -51,7 +51,7 @@ class InitialSubscriptionRunnerTests {
         when(blockchainListenerService.createSubscription(anyString(), any())).thenReturn(Mono.empty());
         // Act
         ApplicationReadyEvent event = mock(ApplicationReadyEvent.class);
-        initialSubscriptionRunner.setBlockchainSubscription().block();
+        applicationRunner.setBlockchainSubscription().block();
         // Assert
         verify(blockchainListenerService).createSubscription(anyString(), any());
     }

@@ -68,7 +68,6 @@ public class ScorpioAdapter implements BrokerAdapterService {
                 .retry(3);
     }
 
-
     @Override
     public Mono<String> getEntityById(String processId, String entityId) {
         return webClient.get()

@@ -56,12 +56,12 @@ springdoc:
 
 # Server Configuration
 server:
-  port: 8080
+  port: 8081
 
 # Application Configuration
 openapi:
   server:
-    url: "https://localhost:8080"
+    url: "https://localhost:8081"
     description: "Server Description"
   info:
     title: "Blockchain Connector"
@@ -84,7 +84,7 @@ organization:
 broker:
   provider: "scorpio"
   externalDomain: "http://localhost:9090"
-  internalDomain: "http://localhost:9090"
+  internalDomain: "http://scorpio:9090"
   paths:
     entities: "/ngsi-ld/v1/entities"
     subscriptions: "/ngsi-ld/v1/subscriptions"
@@ -92,13 +92,13 @@ broker:
 
 # NGSI Subscription Configuration
 ngsi-subscription:
-  notificationEndpoint: "http://localhost:8080/api/v1/notifications/broker"
+  notificationEndpoint: "http://localhost:8081/api/v1/notifications/broker"
   entityTypes: "ProductOffering,Category,Catalogue"
 
 # DLT Adapter Configuration
 dlt-adapter:
   provider: "digitelts"
-  internalDomain: "http://localhost:8080"
+  internalDomain: "http://dlt-adapter:8080"
   externalDomain: "http://localhost:8080"
   paths:
     publication: "/api/v1/publishEvent"
@@ -107,5 +107,5 @@ dlt-adapter:
 
 # Event Subscription Configuration
 tx-subscription:
-  notificationEndpoint: "http://localhost:8080/api/v1/notifications/dlt"
+  notificationEndpoint: "http://localhost:8081/api/v1/notifications/dlt"
   entityTypes: "ProductOffering,Category,Catalogue"
