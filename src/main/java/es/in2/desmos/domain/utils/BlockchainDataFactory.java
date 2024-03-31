@@ -51,45 +51,4 @@ public class BlockchainDataFactory {
         }
     }
 
-
-//    public Mono<BlockchainData> buildDLTEvent(String processId, Map<String, Object> dataMap, String previousHash) {
-//        // Build DataLocation parameter
-//        try {
-//            String entityId = dataMap.get("id").toString();
-//            String entityIdHash = ApplicationUtils.HASH_PREFIX + ApplicationUtils.calculateSHA256(entityId);
-//            String entityType = (String) dataMap.get("type");
-//            String entityHash = ApplicationUtils.calculateSHA256(objectMapper.writeValueAsString(dataMap));
-//            String entityHashlink = ApplicationUtils.calculateHashLink(previousHash, entityHash);
-//            String dataLocation = brokerConfig.getEntitiesExternalDomain() + "/" + entityId + ApplicationUtils.HASHLINK_PREFIX + entityHashlink;
-//            return Mono.just(BlockchainData.builder()
-//                    .eventType(entityType)
-//                            .organizationId(ApplicationUtils.HASH_PREFIX + apiConfig.organizationIdHash())
-//                    .entityId(entityIdHash)
-//                    .previousEntityHash(previousHash)
-//                    .dataLocation(dataLocation)
-//                    .metadata(List.of())
-//                    .build())
-//                    .flatMap(dltEvent -> auditRecordService.saveAuditRecord(processId, AuditRecord.builder()
-//                                    .id(UUID.randomUUID())
-//                                    .processId(processId)
-//                                    .createdAt(Timestamp.from(Instant.now()))
-//                                    .entityId(entityIdHash)
-//                                    .entityType(entityType)
-//                                    .entityHash(entityHash)
-//                                    .entityHashLink(entityHashlink)
-//                                    .dataLocation(dataLocation)
-//                                    .status(AuditRecordStatus.CREATED)
-//                                    .trader(AuditRecordTrader.PRODUCER)
-//                                    // TODO: How to calculate hash and hashlink?
-//                                    .hash("")
-//                                    .hashLink("")
-//                                    .build())
-//                            .thenReturn(dltEvent)
-//                    );
-//        } catch (JsonProcessingException | NoSuchAlgorithmException e) {
-//            log.error("ProcessID: {} - Error creating blockchain event: {}", processId, e.getMessage());
-//            return Mono.error(new HashLinkException("Error creating blockchain event", e.getCause()));
-//        }
-//    }
-
 }

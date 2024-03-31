@@ -1,16 +1,13 @@
 package es.in2.desmos.configs;
 
-import es.in2.desmos.configs.properties.BrokerProperties;
-import es.in2.desmos.configs.properties.OrganizationProperties;
-import es.in2.desmos.configs.properties.DLTAdapterProperties;
 import es.in2.desmos.configs.properties.OpenApiProperties;
+import es.in2.desmos.configs.properties.OrganizationProperties;
 import es.in2.desmos.domain.exceptions.HashCreationException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.servers.Server;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
