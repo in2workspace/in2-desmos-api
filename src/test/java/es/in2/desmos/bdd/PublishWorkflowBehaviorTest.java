@@ -13,19 +13,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.web.reactive.function.client.WebClient;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 
 @SpringBootTest
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class PublishWorkflowBDD {
+class PublishWorkflowBehaviorTest {
 
     private final ObjectMapper objectMapper =
             JsonMapper.builder()
@@ -45,7 +42,7 @@ class PublishWorkflowBDD {
 
     @Order(1)
     @Test
-    void givenABrokerNotification_whenPublishing_thenBlockchainTxPayloadIsPublishedAndAuditRecordIsCreated() {
+    void publishWorkflowBehaviorTest() {
         /*
             Given a BrokerNotification, we will send a POST request emulating the broker behavior.
             When the POST request is received, the application will create a BlockchainTxPayload,
