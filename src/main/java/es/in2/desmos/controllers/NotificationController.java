@@ -26,6 +26,7 @@ public class NotificationController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Mono<Void> postBrokerNotification(@RequestBody @Valid BrokerNotification brokerNotification) {
         String processId = UUID.randomUUID().toString();
+        log.info("ProcessID: {} - Broker Notification received", processId);
         log.debug("ProcessID: {} - Broker Notification received: {}", processId, brokerNotification.toString());
         return brokerListenerService.processBrokerNotification(processId, brokerNotification);
     }
@@ -34,6 +35,7 @@ public class NotificationController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Mono<Void> postDLTNotification(@RequestBody @Valid BlockchainNotification blockchainNotification) {
         String processId = UUID.randomUUID().toString();
+        log.info("ProcessID: {} - Blockchain Notification received", processId);
         log.debug("ProcessID: {}, Blockchain Notification received: {}", processId, blockchainNotification);
         return blockchainListenerService.processBlockchainNotification(processId, blockchainNotification);
     }

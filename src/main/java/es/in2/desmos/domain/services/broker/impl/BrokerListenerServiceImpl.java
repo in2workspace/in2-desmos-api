@@ -43,20 +43,29 @@ public class BrokerListenerServiceImpl implements BrokerListenerService {
 
     @Override
     public Mono<Void> processBrokerNotification(String processId, BrokerNotification brokerNotification) {
+        log.info("ProcessID: {} - Processing Broker Notification...", processId);
         // Validate BrokerNotification is not null and has data
+        log.info("ProcessID: {} - Validating Broker Notification...", processId);
         return validateBrokerNotification(brokerNotification)
                 // Validate if BrokerNotification is from an external source or self-generated
-                .flatMap(dataMap -> isBrokerNotificationFromExternalSource(processId, dataMap))
-                // Create and AuditRecord with status RECEIVED
-                .flatMap(dataMap -> auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(processId, dataMap,
-                        AuditRecordStatus.RECEIVED, null))
+                .flatMap(dataMap -> {
+                    log.info("ProcessID: {} - Validating if Broker Notification belong to external source...", processId);
+                    return isBrokerNotificationFromExternalSource(processId, dataMap)
+                            // Create and AuditRecord with status RECEIVED
+                            .then(auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(processId, dataMap,
+                                    AuditRecordStatus.RECEIVED, null))
+                            .doOnSuccess(unused -> log.info("ProcessID: {} - Broker Notification validated successfully.", processId))
+                            .doOnError(throwable -> log.error("ProcessID: {} - Error validating Broker Notification: {}", processId, throwable.getMessage()));
+                })
                 // Set priority for the pendingSubscribeEventsQueue event
                 .then(Mono.just(EventQueuePriority.MEDIUM))
                 // Enqueue BrokerNotification to DataPublicationQueue
                 .flatMap(eventQueuePriority -> pendingPublishEventsQueue.enqueueEvent(EventQueue.builder()
                         .event(Collections.singletonList(brokerNotification))
                         .priority(eventQueuePriority)
-                        .build()));
+                        .build()))
+                .doOnSuccess(unused -> log.info("ProcessID: {} - Broker Notification processed successfully.", processId))
+                .doOnError(throwable -> log.error("ProcessID: {} - Error processing Broker Notification: {}", processId, throwable.getMessage()));
     }
 
     private Mono<Map<String, Object>> validateBrokerNotification(BrokerNotification brokerNotification) {

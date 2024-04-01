@@ -36,6 +36,7 @@ public class AuditRecordServiceImpl implements AuditRecordService {
     @Override
     public Mono<Void> buildAndSaveAuditRecordFromBrokerNotification(String processId, Map<String, Object> dataMap,
                                                                     AuditRecordStatus status, BlockchainTxPayload blockchainTxPayload) {
+        log.info("ProcessID: {} - Building and saving audit record from broker notification...", processId);
         // Extract the entity ID from the data location
         String entityId = dataMap.get("id").toString();
         // Get the most recent audit record for the entityId and get the most recent audit record overall
@@ -79,7 +80,9 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                         // with the hash of the current entity
                         String auditRecordHashLink = calculateHashLink(lastAuditRecordRegistered.getHashLink(), auditRecordHash);
                         auditRecord.setHashLink(auditRecordHashLink);
-                        return auditRecordRepository.save(auditRecord).then();
+                        return auditRecordRepository.save(auditRecord)
+                                .doOnSuccess(unused -> log.info("ProcessID: {} - Audit record saved successfully.", processId))
+                                .then();
                     } catch (JsonProcessingException | NoSuchAlgorithmException e) {
                         return Mono.error(e);
                     }

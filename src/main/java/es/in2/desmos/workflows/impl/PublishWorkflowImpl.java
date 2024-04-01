@@ -34,11 +34,8 @@ public class PublishWorkflowImpl implements PublishWorkflow {
     private final BlockchainPublisherService blockchainPublisherService;
 
     @Override
-    public Flux<Void> startPublishWorkflow() {
+    public Flux<Void> startPublishWorkflow(String processId) {
         log.info("Starting the Publish Workflow...");
-        // Generate a processId
-        String processId = UUID.randomUUID().toString();
-        log.debug("Process of publishing data into the DLT started with processID: {}", processId);
         // Get the event stream from the data publication queue
         return pendingPublishEventsQueue.getEventStream()
                 // Get the first event from the event stream,

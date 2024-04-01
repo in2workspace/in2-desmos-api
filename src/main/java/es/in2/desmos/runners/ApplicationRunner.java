@@ -118,27 +118,27 @@ public class ApplicationRunner {
                     log.info("Data Synchronization Workflow has finished.");
                     log.info("Authorizing queues for Pub-Sub Workflows...");
                     isQueueAuthorizedForEmit.set(true);
-                    initializeQueueProcessing();
+                    initializeQueueProcessing(processId);
                     log.info("Queues have been authorized and enabled.");
                 });
     }
 
-    private void initializeQueueProcessing() {
+    private void initializeQueueProcessing(String processId) {
         if (!isQueueProcessingAuthorized()) {
             log.debug("Queue processing is currently paused.");
             return;
         }
         log.debug("Starting queue processing...");
-        restartQueueProcessing();
+        restartQueueProcessing(processId);
     }
 
     private boolean isQueueProcessingAuthorized() {
         return isQueueAuthorizedForEmit.get();
     }
 
-    private void restartQueueProcessing() {
+    private void restartQueueProcessing(String processId) {
         resetActiveSubscriptions();
-        startBlockchainEventProcessing();
+        startBlockchainEventProcessing(processId);
         startBrokerEventProcessing();
     }
 
@@ -153,8 +153,8 @@ public class ApplicationRunner {
         }
     }
 
-    private void startBlockchainEventProcessing() {
-        publishQueueDisposable = publishWorkflow.startPublishWorkflow()
+    private void startBlockchainEventProcessing(String processId) {
+        publishQueueDisposable = publishWorkflow.startPublishWorkflow(processId)
                 .subscribe(
                         null,
                         error -> log.error("Error occurred during Publish Workflow"),
