@@ -8,7 +8,6 @@ import es.in2.desmos.domain.services.api.AuditRecordService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.security.NoSuchAlgorithmException;
@@ -42,51 +41,53 @@ public class AuditRecordServiceImpl implements AuditRecordService {
         // Get the most recent audit record for the entityId and get the most recent audit record overall
         return fetchMostRecentAuditRecord()
                 .flatMap(lastAuditRecordRegistered -> {
+                    // Create the new audit record
+                    AuditRecord auditRecord = AuditRecord.builder()
+                            .id(UUID.randomUUID())
+                            .processId(processId)
+                            .createdAt(Timestamp.from(Instant.now()))
+                            .entityId(entityId)
+                            .entityType(dataMap.get("type").toString())
+                            .status(status)
+                            .trader(AuditRecordTrader.CONSUMER)
+                            .hash("")
+                            .hashLink("")
+                            .newTransaction(true)
+                            .build();
                     try {
-                        String entityHash;
-                        String entityHashLink;
                         String dataLocation;
                         if (blockchainTxPayload == null) {
                             // status cases: RECEIVED
-                            entityHash = "";
-                            entityHashLink = "";
-                            dataLocation = "";
+                            auditRecord.setEntityHash("");
+                            auditRecord.setEntityHashLink("");
+                            auditRecord.setDataLocation("");
                         } else {
                             // status cases: CREATED, PUBLISHED
-                            entityHash = calculateSHA256(objectMapper.writeValueAsString(dataMap));
+                            auditRecord.setEntityHash(calculateSHA256(objectMapper.writeValueAsString(dataMap)));
                             dataLocation = blockchainTxPayload.dataLocation();
-                            entityHashLink = extractHashLinkFromDataLocation(dataLocation);
+                            auditRecord.setEntityHashLink(extractHashLinkFromDataLocation(dataLocation));
                         }
-                        // Create the new audit record
-                        AuditRecord auditRecord = AuditRecord.builder()
-                                .id(UUID.randomUUID())
-                                .processId(processId)
-                                .createdAt(Timestamp.from(Instant.now()))
-                                .entityId(entityId)
-                                .entityType(dataMap.get("type").toString())
-                                .entityHash(entityHash)
-                                .entityHashLink(entityHashLink)
-                                .dataLocation(dataLocation)
-                                .status(status)
-                                .trader(AuditRecordTrader.PRODUCER)
-                                .hash("")
-                                .hashLink("")
-                                .newTransaction(true)
-                                .build();
                         // Firstly, we calculate the hash of the entity without the hash and hashLink fields
                         String auditRecordHash = calculateSHA256(objectMapper.writeValueAsString(auditRecord));
                         auditRecord.setHash(auditRecordHash);
                         // Then, we calculate the hashLink of the entity concatenating the previous hashLink
                         // with the hash of the current entity
-                        String auditRecordHashLink = calculateHashLink(lastAuditRecordRegistered.getHashLink(), auditRecordHash);
+                        String auditRecordHashLink;
+                        if (lastAuditRecordRegistered.getHashLink() != null) {
+                            auditRecordHashLink = calculateHashLink(lastAuditRecordRegistered.getHashLink(), auditRecordHash);
+                        } else {
+                            auditRecordHashLink = auditRecordHash;
+                        }
                         auditRecord.setHashLink(auditRecordHashLink);
-                        return auditRecordRepository.save(auditRecord)
-                                .doOnSuccess(unused -> log.info("ProcessID: {} - Audit record saved successfully.", processId))
-                                .then();
                     } catch (JsonProcessingException | NoSuchAlgorithmException e) {
+                        log.info("ProcessID: {} - Error building and saving audit record: {}", processId, e.getMessage());
                         return Mono.error(e);
                     }
-                });
+                    return auditRecordRepository.save(auditRecord)
+                            .doOnSuccess(unused -> log.info("ProcessID: {} - Audit record saved successfully.", processId))
+                            .then();
+                })
+                .then();
     }
 
     /**
@@ -148,14 +149,21 @@ public class AuditRecordServiceImpl implements AuditRecordService {
     }
 
     /**
-     * Fetches the most recently registered audit record.
+     * Fetches the most recently registered audit record. If no Audit Record exists, then
+     * checks if the AuditRecord table is empty. If it is, then return a Mono.empty() because
+     * understand that there are no Audit Records to fetch. If the table is not empty, then
+     * return a Mono.error() with a NoSuchElementException.
      *
      * @return A Mono containing the most recent AuditRecord, or Mono.empty() if none exists.
      */
     @Override
     public Mono<AuditRecord> fetchMostRecentAuditRecord() {
-        return auditRecordRepository.findMostRecentAuditRecord();
+        return auditRecordRepository.findMostRecentAuditRecord()
+                .switchIfEmpty(Mono.defer(() -> auditRecordRepository.count().flatMap(count ->
+                        count == 0 ? Mono.just(AuditRecord.builder().build())
+                                : Mono.error(new NoSuchElementException()))));
     }
+
 
     /**
      * Retrieves the most recent audit record for the specified entity that is either published or deleted.

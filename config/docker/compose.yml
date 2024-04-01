@@ -6,7 +6,7 @@ services:
       DBHOST: postgis
     ports:
       - "9090:9090"
-    depends_on:
+    links:
       - postgis
 
   postgis:
@@ -27,7 +27,7 @@ services:
       SPRING_R2DBC_USERNAME: postgres
       SPRING_R2DBC_PASSWORD: postgres
       SPRING_FLYWAY_URL: jdbc:postgresql://postgres:5432/dbtest
-      LOGGING_LEVEL_ES_IN2_DESMOS: INFO
+      LOGGING_LEVEL_ES_IN2_DESMOS: DEBUG
       CLIENT_ORGANIZATIONID: VATES-S9999999E
       DLT_ADAPTER_PROVIDER: digitelts
       DLT_ADAPTER_INTERNAL_DOMAIN: http://dlt-adapter:8080
@@ -41,8 +41,9 @@ services:
       NGSI_SUBSCRIPTION_ENTITY_TYPES: ProductOffering,Category,Catalogue
     ports:
       - "9091:8080"
-    depends_on:
+    links:
       - dlt-adapter
+      - scorpio
       - postgres
 
   postgres:
