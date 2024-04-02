@@ -9,10 +9,7 @@ import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.BrokerNotification;
 import es.in2.desmos.domain.repositories.AuditRecordRepository;
 import es.in2.desmos.domain.services.api.QueueService;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +45,11 @@ class PublishWorkflowBehaviorTest {
     @DynamicPropertySource
     static void setDynamicProperties(DynamicPropertyRegistry registry) {
         ContainerManager.postgresqlProperties(registry);
+    }
+
+    @AfterEach
+    void cleanUp() {
+        auditRecordRepository.deleteAll().block();
     }
 
     @Order(1)
