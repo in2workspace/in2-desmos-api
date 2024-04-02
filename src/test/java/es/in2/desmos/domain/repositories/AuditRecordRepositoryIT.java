@@ -98,6 +98,7 @@ class AuditRecordRepositoryIT {
         // Assertion for AuditRecordRoot
         assert auditRecordRootMono != null;
         // The hash of the AuditRecordRoot is the hash expected and calculated previously
+        System.out.println(auditRecordRoot);
         assertEquals(expectedAuditRecordRootHash, auditRecordRootMono.getHash());
         // The hash of the AuditRecordRoot is the same as the hash returned by the database
         assertEquals(auditRecordRoot.getHash(), auditRecordRootMono.getHash());
