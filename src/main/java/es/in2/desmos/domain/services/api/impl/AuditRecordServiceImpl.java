@@ -49,7 +49,7 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                             .entityId(entityId)
                             .entityType(dataMap.get("type").toString())
                             .status(status)
-                            .trader(AuditRecordTrader.CONSUMER)
+                            .trader(AuditRecordTrader.PRODUCER)
                             .hash("")
                             .hashLink("")
                             .newTransaction(true)
