@@ -91,6 +91,7 @@ class AuditRecordRepositoryIT {
         // Calculate the hash of the AuditRecordRoot and set them.
         // The hashLink is the hash of the AuditRecordRoot because it is the first record
         String auditRecordRootHash = calculateSHA256(objectMapper.writeValueAsString(auditRecordRoot));
+        System.out.println("auditRecordRoot:" + objectMapper.writeValueAsString(auditRecordRoot));
         auditRecordRoot.setHash(auditRecordRootHash);
         auditRecordRoot.setHashLink(auditRecordRootHash);
         // Save AuditRecordRoot
