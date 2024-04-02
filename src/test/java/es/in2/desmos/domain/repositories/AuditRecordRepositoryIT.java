@@ -8,10 +8,8 @@ import es.in2.desmos.ContainerManager;
 import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.AuditRecordStatus;
 import es.in2.desmos.domain.models.AuditRecordTrader;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.Before;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -41,6 +39,11 @@ class AuditRecordRepositoryIT {
     @DynamicPropertySource
     static void setDynamicProperties(DynamicPropertyRegistry registry) {
         ContainerManager.postgresqlProperties(registry);
+    }
+
+    @Before
+    public void cleanUp() {
+        auditRecordRepository.deleteAll().block();
     }
 
     private final ObjectMapper objectMapper = JsonMapper.builder()
