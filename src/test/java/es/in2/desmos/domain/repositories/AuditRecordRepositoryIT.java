@@ -130,6 +130,7 @@ class AuditRecordRepositoryIT {
         String expectedAuditRecordHashLink = "f09ba1b7cd0782e43e7f85ba54c81c1e9a27ebee1e51411e14b0790c025c48e0";
         // Get the most recent AuditRecord from the database
         AuditRecord auditRecordFound = auditRecordRepository.findMostRecentAuditRecord().block();
+        System.out.println("auditRecordFound: " + auditRecordFound);
         assert auditRecordFound != null;
         // Calculate the hash and the hashlink of the AuditRecordRoot and set them
         String auditRecordHash = calculateSHA256(objectMapper.writeValueAsString(auditRecord));
