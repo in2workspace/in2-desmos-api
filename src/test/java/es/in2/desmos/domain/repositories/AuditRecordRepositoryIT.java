@@ -87,7 +87,6 @@ class AuditRecordRepositoryIT {
         // Calculate the hash of the AuditRecordRoot and set them.
         // The hashLink is the hash of the AuditRecordRoot because it is the first record
         String auditRecordRootHash = calculateSHA256(objectMapper.writeValueAsString(auditRecordRoot));
-        System.out.println("auditRecordRoot:" + objectMapper.writeValueAsString(auditRecordRoot));
         auditRecordRoot.setHash(auditRecordRootHash);
         auditRecordRoot.setHashLink(auditRecordRootHash);
         // Save AuditRecordRoot
@@ -95,8 +94,6 @@ class AuditRecordRepositoryIT {
         // Assertion for AuditRecordRoot
         assert auditRecordRootMono != null;
         // The hash of the AuditRecordRoot is the hash expected and calculated previously
-        System.out.println("auditRecordRootHash: " + auditRecordRootHash);
-        System.out.println(auditRecordRootMono);
         assertEquals(expectedAuditRecordRootHash, auditRecordRootMono.getHash());
         // The hash of the AuditRecordRoot is the same as the hash returned by the database
         assertEquals(auditRecordRoot.getHash(), auditRecordRootMono.getHash());
@@ -120,7 +117,6 @@ class AuditRecordRepositoryIT {
         String expectedAuditRecordHashLink = "f09ba1b7cd0782e43e7f85ba54c81c1e9a27ebee1e51411e14b0790c025c48e0";
         // Get the most recent AuditRecord from the database
         AuditRecord auditRecordFound = auditRecordRepository.findMostRecentAuditRecord().block();
-        System.out.println("auditRecordFound: " + auditRecordFound);
         assert auditRecordFound != null;
         // Calculate the hash and the hashlink of the AuditRecordRoot and set them
         String auditRecordHash = calculateSHA256(objectMapper.writeValueAsString(auditRecord));
@@ -129,7 +125,6 @@ class AuditRecordRepositoryIT {
         auditRecord.setHashLink(auditRecordHashLink);
         // Save AuditRecord
         AuditRecord auditRecordMono = auditRecordRepository.save(auditRecord).block();
-        System.out.println(auditRecordMono);
         assert auditRecordMono != null;
         // The hash of the AuditRecord is the hash expected and calculated previously
         assertEquals(expectedAuditRecordHash, auditRecordMono.getHash());
@@ -140,7 +135,6 @@ class AuditRecordRepositoryIT {
     @Test
     void shouldRetrieveAllAuditRecords() {
         Flux<AuditRecord> auditRecordFlux = auditRecordRepository.findAll();
-        System.out.println(auditRecordFlux);
         StepVerifier.create(auditRecordFlux)
                 .expectNextCount(2L)
                 .verifyComplete();
