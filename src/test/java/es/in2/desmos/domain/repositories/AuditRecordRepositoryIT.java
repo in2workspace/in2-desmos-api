@@ -8,8 +8,10 @@ import es.in2.desmos.ContainerManager;
 import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.AuditRecordStatus;
 import es.in2.desmos.domain.models.AuditRecordTrader;
-import org.junit.Before;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -21,7 +23,6 @@ import reactor.test.StepVerifier;
 
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
-import java.util.TimeZone;
 import java.util.UUID;
 
 import static es.in2.desmos.domain.utils.ApplicationUtils.calculateHashLink;
@@ -64,7 +65,7 @@ class AuditRecordRepositoryIT {
     private final AuditRecord auditRecord = AuditRecord.builder()
             .id(UUID.fromString("ae277aa0-7677-4038-acf6-52a8e70c4d04"))
             .processId("14f121af-d720-4a53-bc08-fc00bdbbbebe")
-            .createdAt(new Timestamp(0L))
+            .createdAt(new Timestamp(3L))
             .entityId("urn:ngsi-ld:ProductOffering:6e00d349-4c49-4bbe-83a9-65115f144908")
             .entityType("ProductOffering")
             .entityHash("a60394397a82adadb646b4cf20c1caa3a2209cbe68e0a898fc3d6cd2008cb2fa") // 9862
@@ -108,13 +109,13 @@ class AuditRecordRepositoryIT {
     void shouldSaveAuditRecordGuaranteeImmutability() throws JsonProcessingException, NoSuchAlgorithmException {
         /*
          * HashLink set in test 0 = f291c0096b7c3e10a52db72ada76676ed2a928b7fd9e91ab9f1ccb7614d8bd08
-         * Hash calculated for new AuditRecord = 8008569e61c6bea20c3d35c70f742934b8091626f844416baf2855199964dc58
+         * Hash calculated for new AuditRecord = d080b4a51d7687c2a4e3a58f88403380c960a8c3a88f4ddc8d971ada08050644
          * If you concatenated both hashes, using the web https://emn178.github.io/online-tools/sha256.html,
          * you will get the hashLink of the new AuditRecord ;)
          */
         // Arrange
-        String expectedAuditRecordHash = "8008569e61c6bea20c3d35c70f742934b8091626f844416baf2855199964dc58";
-        String expectedAuditRecordHashLink = "f09ba1b7cd0782e43e7f85ba54c81c1e9a27ebee1e51411e14b0790c025c48e0";
+        String expectedAuditRecordHash = "d080b4a51d7687c2a4e3a58f88403380c960a8c3a88f4ddc8d971ada08050644";
+        String expectedAuditRecordHashLink = "bac646d0d6c54e11427c67689c2b3dc2ba0a82163c06e86576212a36e1ce6bce";
         // Get the most recent AuditRecord from the database
         AuditRecord auditRecordFound = auditRecordRepository.findMostRecentAuditRecord().block();
         assert auditRecordFound != null;
