@@ -41,12 +41,7 @@ class AuditRecordRepositoryIT {
     static void setDynamicProperties(DynamicPropertyRegistry registry) {
         ContainerManager.postgresqlProperties(registry);
     }
-
-    @Before
-    public void cleanUp() {
-        auditRecordRepository.deleteAll().block();
-    }
-
+    
     private final ObjectMapper objectMapper = JsonMapper.builder()
             .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES).build();
     private final AuditRecord auditRecordRoot = AuditRecord.builder()
