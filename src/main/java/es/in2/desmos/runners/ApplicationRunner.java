@@ -40,6 +40,7 @@ public class ApplicationRunner {
     private final DataSyncWorkflow dataSyncWorkflow;
     private final PublishWorkflow publishWorkflow;
     private final SubscribeWorkflow subscribeWorkflow;
+
     private final AtomicBoolean isQueueAuthorizedForEmit = new AtomicBoolean(false);
     private Disposable publishQueueDisposable;
     private Disposable subscribeQueueDisposable;
