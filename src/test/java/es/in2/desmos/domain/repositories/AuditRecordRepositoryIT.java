@@ -47,11 +47,6 @@ class AuditRecordRepositoryIT {
         auditRecordRepository.deleteAll().block();
     }
 
-    @BeforeEach
-    void setUp() {
-        objectMapper.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
-
     private final ObjectMapper objectMapper = JsonMapper.builder()
             .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES).build();
     private final AuditRecord auditRecordRoot = AuditRecord.builder()
@@ -93,6 +88,7 @@ class AuditRecordRepositoryIT {
     @Test
     void shouldSaveAuditRecordRoot() throws JsonProcessingException, NoSuchAlgorithmException {
         // Arrange
+        auditRecordRepository.deleteAll().block();
         String expectedAuditRecordRootHash = "f291c0096b7c3e10a52db72ada76676ed2a928b7fd9e91ab9f1ccb7614d8bd08";
         // Calculate the hash of the AuditRecordRoot and set them.
         // The hashLink is the hash of the AuditRecordRoot because it is the first record

@@ -47,7 +47,7 @@ class PublishWorkflowBehaviorTest {
         ContainerManager.postgresqlProperties(registry);
     }
 
-    @Before
+    @AfterEach
     public void cleanUp() {
         auditRecordRepository.deleteAll().block();
     }
