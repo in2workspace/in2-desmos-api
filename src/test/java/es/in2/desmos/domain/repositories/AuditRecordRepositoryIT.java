@@ -48,7 +48,7 @@ class AuditRecordRepositoryIT {
     private final AuditRecord auditRecordRoot = AuditRecord.builder()
             .id(UUID.fromString("5d72b588-5257-46a0-8636-cf9226c8ebc6"))
             .processId("f3a387e5-c862-4b93-b5f8-d80f83b0e400")
-            .createdAt(Timestamp.valueOf("2024-03-29 02:19:59.9446389"))
+            .createdAt(new Timestamp(0L))
             .entityId("urn:ngsi-ld:ProductOffering:8574a163-6a3d-4fa6-94cc-17e877ec0230")
             .entityType("ProductOffering")
             .entityHash("f8638b979b2f4f793ddb6dbd197e0ee25a7a6ea32b0ae22f5e3c5d119d839e75") // 5678
@@ -65,7 +65,7 @@ class AuditRecordRepositoryIT {
     private final AuditRecord auditRecord = AuditRecord.builder()
             .id(UUID.fromString("ae277aa0-7677-4038-acf6-52a8e70c4d04"))
             .processId("14f121af-d720-4a53-bc08-fc00bdbbbebe")
-            .createdAt(Timestamp.valueOf("2024-03-29 02:19:59.9446389"))
+            .createdAt(new Timestamp(3L))
             .entityId("urn:ngsi-ld:ProductOffering:6e00d349-4c49-4bbe-83a9-65115f144908")
             .entityType("ProductOffering")
             .entityHash("a60394397a82adadb646b4cf20c1caa3a2209cbe68e0a898fc3d6cd2008cb2fa") // 9862
@@ -84,7 +84,7 @@ class AuditRecordRepositoryIT {
     @Test
     void shouldSaveAuditRecordRoot() throws JsonProcessingException, NoSuchAlgorithmException {
         // Arrange
-        String expectedAuditRecordRootHash = "bfa2600854f1902943af3094a43bbf28188bf88fa2280c2d8ed1bb4f4524d2dc";
+        String expectedAuditRecordRootHash = "f291c0096b7c3e10a52db72ada76676ed2a928b7fd9e91ab9f1ccb7614d8bd08";
         // Calculate the hash of the AuditRecordRoot and set them.
         // The hashLink is the hash of the AuditRecordRoot because it is the first record
         String auditRecordRootHash = calculateSHA256(objectMapper.writeValueAsString(auditRecordRoot));
@@ -108,14 +108,14 @@ class AuditRecordRepositoryIT {
     @Test
     void shouldSaveAuditRecordGuaranteeImmutability() throws JsonProcessingException, NoSuchAlgorithmException {
         /*
-         * HashLink set in test 0 = bfa2600854f1902943af3094a43bbf28188bf88fa2280c2d8ed1bb4f4524d2dc
-         * Hash calculated for new AuditRecord = c69ecda4a694be164a9be89adff48ab01b281dd88b236ffd35f5369d397bf3bc
+         * HashLink set in test 0 = f291c0096b7c3e10a52db72ada76676ed2a928b7fd9e91ab9f1ccb7614d8bd08
+         * Hash calculated for new AuditRecord = d080b4a51d7687c2a4e3a58f88403380c960a8c3a88f4ddc8d971ada08050644
          * If you concatenated both hashes, using the web https://emn178.github.io/online-tools/sha256.html,
          * you will get the hashLink of the new AuditRecord ;)
          */
         // Arrange
-        String expectedAuditRecordHash = "c69ecda4a694be164a9be89adff48ab01b281dd88b236ffd35f5369d397bf3bc";
-        String expectedAuditRecordHashLink = "8337ddb39415f3b647d1d8756dc7f46a176ca5b35c784ce0fa3e27bafc32ce98";
+        String expectedAuditRecordHash = "d080b4a51d7687c2a4e3a58f88403380c960a8c3a88f4ddc8d971ada08050644";
+        String expectedAuditRecordHashLink = "bac646d0d6c54e11427c67689c2b3dc2ba0a82163c06e86576212a36e1ce6bce";
         // Get the most recent AuditRecord from the database
         AuditRecord auditRecordFound = auditRecordRepository.findMostRecentAuditRecord().block();
         assert auditRecordFound != null;

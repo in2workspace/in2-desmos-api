@@ -9,10 +9,7 @@ import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.BrokerNotification;
 import es.in2.desmos.domain.repositories.AuditRecordRepository;
 import es.in2.desmos.domain.services.api.QueueService;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +19,6 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
-import java.util.Objects;
 
 @SpringBootTest
 @Testcontainers
@@ -48,6 +44,11 @@ class PublishWorkflowBehaviorTest {
     @DynamicPropertySource
     static void setDynamicProperties(DynamicPropertyRegistry registry) {
         ContainerManager.postgresqlProperties(registry);
+    }
+
+    @AfterEach
+    public void cleanUp() {
+        auditRecordRepository.deleteAll().block();
     }
 
     @Order(1)
@@ -168,9 +169,7 @@ class PublishWorkflowBehaviorTest {
             BrokerNotification brokerNotification = objectMapper.readValue(brokerNotificationJSON, BrokerNotification.class);
             notificationController.postBrokerNotification(brokerNotification).block();
             log.info("1.1. Get the event stream from the pendingPublishEventsQueue and subscribe to it.");
-            pendingPublishEventsQueue.getEventStream().subscribe(event -> {
-                log.info("Event: {}", event);
-            });
+            pendingPublishEventsQueue.getEventStream().subscribe(event -> log.info("Event: {}", event));
             // Then
             log.info("2. Check values in the AuditRecord table:");
             List<AuditRecord> auditRecordList = auditRecordRepository.findAll().collectList().block();

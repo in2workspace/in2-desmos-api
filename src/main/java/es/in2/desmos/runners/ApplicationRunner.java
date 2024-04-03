@@ -57,9 +57,8 @@ public class ApplicationRunner {
                 .then();
     }
 
-    // todo: change public to private, but you will need to change the test
     @Retryable(retryFor = RequestErrorException.class, maxAttempts = 4, backoff = @Backoff(delay = 2000))
-    public Mono<Void> setBrokerSubscription() {
+    private Mono<Void> setBrokerSubscription() {
         // Set the processId to a random UUID
         String processId = UUID.randomUUID().toString();
         log.info("ProcessID: {} - Setting Broker Subscription...", processId);
@@ -89,9 +88,8 @@ public class ApplicationRunner {
                 .doOnError(e -> log.error("ProcessID: {} - Error creating Broker Subscription", processId, e));
     }
 
-    // todo: change public to private, but you will need to change the test
     @Retryable(retryFor = RequestErrorException.class, maxAttempts = 4, backoff = @Backoff(delay = 2000))
-    public Mono<Void> setBlockchainSubscription() {
+    private Mono<Void> setBlockchainSubscription() {
         log.info("Setting Blockchain Subscription...");
         String processId = UUID.randomUUID().toString();
         // Create the EVM Subscription object
@@ -105,7 +103,6 @@ public class ApplicationRunner {
                 .doOnError(e -> log.error("Error creating Blockchain Subscription", e));
     }
 
-    // todo: add test to this testclass
     private Flux<Void> initializeDataSync() {
         // Set up the initial data synchronization process
         String processId = UUID.randomUUID().toString();
