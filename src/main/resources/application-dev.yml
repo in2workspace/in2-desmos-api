@@ -108,4 +108,5 @@ dlt-adapter:
 # Event Subscription Configuration
 tx-subscription:
   notificationEndpoint: "http://localhost:8080/api/v1/notifications/dlt"
+  metadataEVM: "sbx"
   entityTypes: "ProductOffering,Category,Catalogue"

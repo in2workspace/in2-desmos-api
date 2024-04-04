@@ -18,6 +18,10 @@ public class BlockchainConfig {
         return txSubscriptionProperties.notificationEndpoint();
     }
 
+    public String getMetadataEVM() {
+        return txSubscriptionProperties.metadataEVM();
+    }
+
     public List<String> getEntityTypes() {
         return txSubscriptionProperties.entityTypes();
     }
