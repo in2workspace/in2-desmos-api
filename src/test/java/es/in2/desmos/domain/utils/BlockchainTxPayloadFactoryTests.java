@@ -91,7 +91,7 @@ class BlockchainTxPayloadFactoryTests {
 
     }
 
-    // This test is in progress
+    // WIP
     @Test
     void testBuildBlockchainTxPayload_invalidData_Failure() throws Exception {
         // Arrange
@@ -139,6 +139,7 @@ class BlockchainTxPayloadFactoryTests {
                 }).verifyComplete();
     }
 
+    // WIP
     @Test
     void testCalculatePreviousHashIfEmpty_invalidData_Failure() throws Exception {
         // Arrange
