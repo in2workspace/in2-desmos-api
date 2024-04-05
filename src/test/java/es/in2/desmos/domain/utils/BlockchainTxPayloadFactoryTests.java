@@ -123,7 +123,6 @@ class BlockchainTxPayloadFactoryTests {
         Mono<String> resultMono = blockchainTxPayloadFactory.calculatePreviousHashIfEmpty(processId, dataMap);
 
         // Assert
-        // Check that the previous hash is the hash of the data
         StepVerifier.create(resultMono)
                 .assertNext(previousHash -> {
                     try {
