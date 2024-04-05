@@ -24,7 +24,7 @@ import static es.in2.desmos.domain.utils.ApplicationUtils.calculateSHA256;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class BlockchainDataFactory {
+public class BlockchainTxPayloadFactory {
 
     private final ObjectMapper objectMapper;
     private final ApiConfig apiConfig;
@@ -51,25 +51,34 @@ public class BlockchainDataFactory {
             String entityIdHash = HASH_PREFIX + calculateSHA256(entityId);
             String entityType = (String) dataMap.get("type");
             String entityHash = calculateSHA256(objectMapper.writeValueAsString(dataMap));
-            String entityHashlink = ApplicationUtils.calculateHashLink(previousHash, entityHash);
-            String dataLocation =
-                    brokerConfig.getEntitiesExternalDomain() + "/" + entityId + ApplicationUtils.HASHLINK_PREFIX + entityHashlink;
+            String entityHashLink = entityHash.equals(previousHash) ? previousHash : ApplicationUtils.calculateHashLink(previousHash, entityHash);
+            String dataLocation = brokerConfig.getEntitiesExternalDomain() + "/" + entityId + ApplicationUtils.HASHLINK_PREFIX + entityHashLink;
             String organizationId = HASH_PREFIX + apiConfig.organizationIdHash();
 
             List<String> metadata = new ArrayList<>();
             metadata.add(getEnvironmentMetadata());
 
+            String previousEntityHash = HASH_PREFIX + previousHash;
             return Mono.just(BlockchainTxPayload.builder()
                     .eventType(entityType)
                     .organizationId(organizationId)
                     .entityId(entityIdHash)
-                    .previousEntityHash(previousHash)
+                    .previousEntityHash(previousEntityHash)
                     .dataLocation(dataLocation)
                     .metadata(metadata)
                     .build());
         } catch (JsonProcessingException | NoSuchAlgorithmException e) {
             log.warn("ProcessID: {} - Error creating blockchain transaction payload: {}", processId, e.getMessage());
             return Mono.error(new HashLinkException("Error creating blockchain transaction payload"));
+        }
+    }
+
+    public Mono<String> calculatePreviousHashIfEmpty(String processId, Map<String, Object> dataMap) {
+        try {
+            return Mono.just(calculateSHA256(objectMapper.writeValueAsString(dataMap)));
+        } catch (JsonProcessingException | NoSuchAlgorithmException e) {
+            log.warn("ProcessID: {} - Error creating previous hash from notification data: {}", processId, e.getMessage());
+            return Mono.error(new HashLinkException("Error creating previous hash value from notification data"));
         }
     }
 

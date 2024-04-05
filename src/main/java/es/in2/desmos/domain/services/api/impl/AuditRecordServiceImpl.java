@@ -66,6 +66,7 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                             auditRecord.setEntityHash(calculateSHA256(objectMapper.writeValueAsString(dataMap)));
                             dataLocation = blockchainTxPayload.dataLocation();
                             auditRecord.setEntityHashLink(extractHashLinkFromDataLocation(dataLocation));
+                            auditRecord.setDataLocation(dataLocation);
                         }
                         // Firstly, we calculate the hash of the entity without the hash and hashLink fields
                         String auditRecordHash = calculateSHA256(objectMapper.writeValueAsString(auditRecord));
