@@ -89,4 +89,13 @@ public class ApplicationUtils {
         return queryPairs;
     }
 
+    public static String getEnvironmentMetadata(String activeProfile) {
+        return switch (activeProfile) {
+            case "dev" -> "sbx";
+            case "test" -> "dev";
+            case "prod" -> "prd";
+            default -> throw new IllegalArgumentException("Unknown profile: " + activeProfile);
+        };
+    }
+
 }

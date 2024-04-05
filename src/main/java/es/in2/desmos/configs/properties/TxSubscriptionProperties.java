@@ -8,9 +8,8 @@ import java.util.List;
  * Event Subscription Properties
  *
  * @param notificationEndpoint - endpoint to notify on events
- * @param metadataEVM          - metadata to include in events
  * @param entityTypes          - type of events to subscribe to
  */
 @ConfigurationProperties(prefix = "tx-subscription")
-public record TxSubscriptionProperties(String notificationEndpoint, String metadataEVM, List<String> entityTypes) {
+public record TxSubscriptionProperties(String notificationEndpoint, List<String> entityTypes) {
 }

@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.security.NoSuchAlgorithmException;
@@ -26,6 +27,8 @@ public class ApiConfig {
 
     private final OpenApiProperties openApiProperties;
     private final OrganizationProperties organizationProperties;
+    private final Environment environment;
+
 
     @Bean
     public String organizationIdHash() {
@@ -55,6 +58,11 @@ public class ApiConfig {
     @Bean
     public WebClient webClient() {
         return WebClient.builder().build();
+    }
+
+    @Bean
+    public String getCurrentEnvironment() {
+        return environment.getActiveProfiles()[0];
     }
 
 }

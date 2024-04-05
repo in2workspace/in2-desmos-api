@@ -7,19 +7,22 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
+import static es.in2.desmos.domain.utils.ApplicationUtils.getEnvironmentMetadata;
+
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class BlockchainConfig {
 
     private final TxSubscriptionProperties txSubscriptionProperties;
+    private final ApiConfig apiConfig;
 
     public String getNotificationEndpoint() {
         return txSubscriptionProperties.notificationEndpoint();
     }
 
-    public String getMetadataEVM() {
-        return txSubscriptionProperties.metadataEVM();
+    public String getMetadata() {
+        return getEnvironmentMetadata(apiConfig.getCurrentEnvironment());
     }
 
     public List<String> getEntityTypes() {

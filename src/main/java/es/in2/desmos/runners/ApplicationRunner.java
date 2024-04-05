@@ -94,7 +94,7 @@ public class ApplicationRunner {
         // Create the EVM Subscription object
         BlockchainSubscription blockchainSubscription = BlockchainSubscription.builder()
                 .eventTypes(blockchainConfig.getEntityTypes())
-                .metadata(blockchainConfig.getMetadataEVM())
+                .metadata(blockchainConfig.getMetadata())
                 .notificationEndpoint(blockchainConfig.getNotificationEndpoint())
                 .build();
         // Create the subscription

@@ -8,18 +8,14 @@ import es.in2.desmos.domain.exceptions.HashLinkException;
 import es.in2.desmos.domain.models.BlockchainTxPayload;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static es.in2.desmos.domain.utils.ApplicationUtils.HASH_PREFIX;
-import static es.in2.desmos.domain.utils.ApplicationUtils.calculateSHA256;
+import static es.in2.desmos.domain.utils.ApplicationUtils.*;
 
 @Slf4j
 @Component
@@ -29,19 +25,6 @@ public class BlockchainTxPayloadFactory {
     private final ObjectMapper objectMapper;
     private final ApiConfig apiConfig;
     private final BrokerConfig brokerConfig;
-
-    @Autowired
-    private Environment env;
-
-    public String getEnvironmentMetadata() {
-        String activeProfile = env.getActiveProfiles()[0];
-        return switch (activeProfile) {
-            case "dev" -> "sbx";
-            case "test" -> "dev";
-            case "prod" -> "prd";
-            default -> throw new IllegalArgumentException("Unknown profile: " + activeProfile);
-        };
-    }
 
 
     public Mono<BlockchainTxPayload> buildBlockchainTxPayload(String processId, Map<String, Object> dataMap, String previousHash) {
@@ -57,8 +40,7 @@ public class BlockchainTxPayloadFactory {
                     brokerConfig.getEntitiesExternalDomain() + "/" + entityId + ApplicationUtils.HASHLINK_PREFIX + entityHashLink;
             String organizationId = HASH_PREFIX + apiConfig.organizationIdHash();
             String previousEntityHash = HASH_PREFIX + previousHash;
-            List<String> metadata = new ArrayList<>();
-            metadata.add(getEnvironmentMetadata());
+            List<String> metadata = List.of(getEnvironmentMetadata(apiConfig.getCurrentEnvironment()));
 
 
             return Mono.just(BlockchainTxPayload.builder()
@@ -75,6 +57,7 @@ public class BlockchainTxPayloadFactory {
         }
     }
 
+
     public Mono<String> calculatePreviousHashIfEmpty(String processId, Map<String, Object> dataMap) {
         try {
             return Mono.just(calculateSHA256(objectMapper.writeValueAsString(dataMap)));
@@ -83,5 +66,6 @@ public class BlockchainTxPayloadFactory {
             return Mono.error(new HashLinkException("Error creating previous hash value from notification data"));
         }
     }
+
 
 }
