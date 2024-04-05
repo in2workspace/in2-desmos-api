@@ -1,5 +1,6 @@
 package es.in2.desmos.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.objectmothers.SyncDiscoveryRequestMother;
 import es.in2.desmos.objectmothers.SyncDiscoveryResponseMother;
@@ -18,7 +19,7 @@ class SyncDiscoveryControllerTests {
     private ObjectMapper objectMapper;
 
     @Test
-    void itShouldReturnExternalEntityIdsWithIssuer() {
+    void itShouldReturnExternalEntityIdsWithIssuer() throws JsonProcessingException {
 
         var syncDiscoveryRequest = SyncDiscoveryRequestMother.simpleSyncDiscoveryRequest();
         var syncDiscoveryRequestJson = objectMapper.writeValueAsString(syncDiscoveryRequest);
@@ -28,11 +29,12 @@ class SyncDiscoveryControllerTests {
 
         webTestClient.post()
                 .uri("/sync/discovery")
-                .accept(MediaType.APPLICATION_JSON)
-                .body(syncDiscoveryRequestJson)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(syncDiscoveryRequestJson)
                 .exchange()
                 .expectStatus().isAccepted()
-                .getResponseBody()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
                 .json(syncDiscoveryResponseJson);
     }
 
