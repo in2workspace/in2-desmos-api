@@ -44,21 +44,23 @@ public class BlockchainTxPayloadFactory {
     }
 
 
-    public Mono<BlockchainTxPayload> buildBlockchainData(String processId, Map<String, Object> dataMap, String previousHash) {
+    public Mono<BlockchainTxPayload> buildBlockchainTxPayload(String processId, Map<String, Object> dataMap, String previousHash) {
         log.debug("ProcessID: {} - Building blockchain data...", processId);
         try {
             String entityId = dataMap.get("id").toString();
             String entityIdHash = HASH_PREFIX + calculateSHA256(entityId);
             String entityType = (String) dataMap.get("type");
             String entityHash = calculateSHA256(objectMapper.writeValueAsString(dataMap));
-            String entityHashLink = entityHash.equals(previousHash) ? previousHash : ApplicationUtils.calculateHashLink(previousHash, entityHash);
-            String dataLocation = brokerConfig.getEntitiesExternalDomain() + "/" + entityId + ApplicationUtils.HASHLINK_PREFIX + entityHashLink;
+            String entityHashLink = entityHash.equals(previousHash) ? previousHash : ApplicationUtils.calculateHashLink(previousHash,
+                    entityHash);
+            String dataLocation =
+                    brokerConfig.getEntitiesExternalDomain() + "/" + entityId + ApplicationUtils.HASHLINK_PREFIX + entityHashLink;
             String organizationId = HASH_PREFIX + apiConfig.organizationIdHash();
-
+            String previousEntityHash = HASH_PREFIX + previousHash;
             List<String> metadata = new ArrayList<>();
             metadata.add(getEnvironmentMetadata());
 
-            String previousEntityHash = HASH_PREFIX + previousHash;
+
             return Mono.just(BlockchainTxPayload.builder()
                     .eventType(entityType)
                     .organizationId(organizationId)
