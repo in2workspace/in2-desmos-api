@@ -14,7 +14,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @WebFluxTest(DiscoverySyncController.class)
 class DiscoverySyncControllerTests {
@@ -48,6 +48,9 @@ class DiscoverySyncControllerTests {
                 .expectBody()
                 .json(discoverySyncResponseJson)
                 .consumeWith(System.out::println);
+
+        verify(discoverySyncWorkflow, times(1)).discoverySync(anyString(), eq(discoverySyncRequest.issuer()), eq(discoverySyncRequest.externalEntityIds()));
+        verifyNoMoreInteractions(discoverySyncWorkflow);
     }
 
 
