@@ -2,7 +2,7 @@ package es.in2.desmos.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import es.in2.desmos.domain.services.sync.DiscoverySyncService;
+import es.in2.desmos.workflows.DiscoverySyncWorkflow;
 import es.in2.desmos.objectmothers.DiscoverySyncRequestMother;
 import es.in2.desmos.objectmothers.DiscoverySyncResponseMother;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ class DiscoverySyncControllerTests {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private DiscoverySyncService service;
+    private DiscoverySyncWorkflow discoverySyncWorkflow;
 
     @Test
     void itShouldReturnExternalEntityIdsWithIssuer() throws JsonProcessingException {
@@ -36,7 +36,7 @@ class DiscoverySyncControllerTests {
         var discoverySyncResponse = DiscoverySyncResponseMother.simpleDiscoverySyncResponse();
         var discoverySyncResponseJson = objectMapper.writeValueAsString(discoverySyncResponse);
 
-        when(service.discoverySync(anyString(), eq(discoverySyncRequest.issuer()), eq(discoverySyncRequest.externalEntityIds()))).thenReturn(discoverySyncResponse.localEntitiesIds());
+        when(discoverySyncWorkflow.discoverySync(anyString(), eq(discoverySyncRequest.issuer()), eq(discoverySyncRequest.externalEntityIds()))).thenReturn(discoverySyncResponse.localEntitiesIds());
 
         webTestClient.post()
                 .uri("/api/v1/sync/discovery")
