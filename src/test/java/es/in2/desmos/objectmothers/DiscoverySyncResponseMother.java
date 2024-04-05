@@ -13,9 +13,15 @@ public final class DiscoverySyncResponseMother {
 
     public static @NotNull DiscoverySyncResponse simpleDiscoverySyncResponse() {
         String issuer = "https://my-domain.org";
-        List<ProductOffering> productOfferingList = new ArrayList<ProductOffering>();
-        productOfferingList.add(new ProductOffering("urn:productOffering:d86735a6-0faa-463d-a872-00b97affa1cb", "1.2", "2024-04-01T12:00:00Z"));
-        productOfferingList.add(new ProductOffering("urn:productOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87", "1.5", "2024-09-01T12:00:00Z"));
+        List<ProductOffering> productOfferingList = new ArrayList<>();
+        productOfferingList.add(ProductOfferingMother.sample3());
+        productOfferingList.add(ProductOfferingMother.sample4());
+        return new DiscoverySyncResponse(issuer, productOfferingList);
+    }
+
+    public static @NotNull DiscoverySyncResponse fullDiscoverySyncResponse() {
+        String issuer = "https://my-domain.org";
+        List<ProductOffering> productOfferingList = ProductOfferingMother.fullList();
         return new DiscoverySyncResponse(issuer, productOfferingList);
     }
 }
