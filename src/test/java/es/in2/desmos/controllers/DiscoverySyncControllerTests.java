@@ -46,7 +46,8 @@ class DiscoverySyncControllerTests {
                 .expectStatus().isAccepted()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .json(discoverySyncResponseJson);
+                .json(discoverySyncResponseJson)
+                .consumeWith(System.out::println);
     }
 
 
