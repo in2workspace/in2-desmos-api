@@ -72,7 +72,6 @@ class BlockchainTxPayloadFactoryTests {
     void testBuildBlockchainTxPayload_validData_differentHashes_Success() throws Exception {
         // Arrange
         String processId = "processId";
-        dataMap.put("description", "Example of a Product offering for cloud services suite");
         String previousHash = "22d0ef4e87a39c52191998f4fbf32ff672f82ed5a2b4c9902371a161402a0faf";
         when(objectMapper.writeValueAsString(dataMap)).thenReturn("dataMapString");
         when(apiConfig.organizationIdHash()).thenReturn("381d18e478b9ae6e67b1bf48c9f3bcaf246d53c4311bfe81f46e63aa18167c89");
