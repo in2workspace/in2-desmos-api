@@ -1,4 +1,10 @@
 package es.in2.desmos.domain.models;
 
-public record ProductOffering(String id, String version, String lastUpdate) {
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotNull;
+
+public record ProductOffering(
+        @JsonProperty("id") @NotNull String id,
+        @JsonProperty("version") @NotNull String version,
+        @JsonProperty("last_update") @NotNull String lastUpdate) {
 }
