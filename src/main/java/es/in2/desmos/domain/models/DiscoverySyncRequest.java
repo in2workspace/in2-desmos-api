@@ -7,5 +7,5 @@ import java.util.List;
 
 public record DiscoverySyncRequest(
         @JsonProperty("issuer") @NotNull String issuer,
-        @JsonProperty("external_entity_ids") @NotNull List<ProductOffering> externalEntityIds) {
+        @JsonProperty("external_entity_ids") @NotNull List<String> externalEntityIds) {
 }

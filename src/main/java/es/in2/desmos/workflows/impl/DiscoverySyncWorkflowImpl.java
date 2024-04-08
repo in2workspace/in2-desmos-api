@@ -16,9 +16,9 @@ public class DiscoverySyncWorkflowImpl implements DiscoverySyncWorkflow {
     private final NewEntitiesCreatorService newEntitiesCreatorService;
 
     @Override
-    public List<ProductOffering> discoverySync(String processId, String issuer, List<ProductOffering> productOfferings) {
-        newEntitiesCreatorService.addNewEntities(productOfferings, issuer);
-        return getInternalProductOfferingsIds(productOfferings);
+    public List<ProductOffering> discoverySync(String processId, String issuer, List<String> externalEntityIds) {
+        newEntitiesCreatorService.addNewEntities(externalEntityIds, issuer);
+        return getInternalEntityIds();
     }
 
 

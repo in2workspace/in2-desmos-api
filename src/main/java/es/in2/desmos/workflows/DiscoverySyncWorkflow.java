@@ -5,5 +5,5 @@ import es.in2.desmos.domain.models.ProductOffering;
 import java.util.List;
 
 public interface DiscoverySyncWorkflow {
-    List<ProductOffering> discoverySync(String processId, String issuer, List<ProductOffering> productOfferings);
+    List<ProductOffering> discoverySync(String processId, String issuer, List<String> externalEntityIds);
 }
