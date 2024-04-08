@@ -7,7 +7,6 @@ import es.in2.desmos.configs.BrokerConfig;
 import es.in2.desmos.domain.exceptions.HashLinkException;
 import es.in2.desmos.domain.models.BlockchainTxPayload;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,7 +16,6 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
 import java.util.Map;
 
 import static org.mockito.Mockito.when;
@@ -37,21 +35,26 @@ class BlockchainTxPayloadFactoryTests {
     @InjectMocks
     private BlockchainTxPayloadFactory blockchainTxPayloadFactory;
 
-    Map<String, Object> dataMap = new HashMap<>();
+    Map<String, Object> dataMap = Map.of(
+            "id", "entity123",
+            "type", "productOffering",
+            "name", "Cloud Services Suite",
+            "description", "Example of a Product offering for cloud services suite"
+    );
+    String processId = "processId";
 
-    @BeforeEach
-    void setUp() {
-        dataMap = new HashMap<>();
+
+    private Map<String, Object> createDataMap() {
         dataMap.put("id", "entity123");
         dataMap.put("type", "productOffering");
         dataMap.put("name", "Cloud Services Suite");
         dataMap.put("description", "Example of a Product offering for cloud services suite");
+        return dataMap;
     }
 
     @Test
     void testBuildBlockchainTxPayload_validData_firstHash_Success() throws Exception {
         //Arrange
-        String processId = "processId";
         String previousHash = "5077272d496c8afd1af9d3740f9e5f11837089b5952d577eff4c20509e6e199e";
         when(objectMapper.writeValueAsString(dataMap)).thenReturn("dataMapString");
         when(apiConfig.organizationIdHash()).thenReturn("381d18e478b9ae6e67b1bf48c9f3bcaf246d53c4311bfe81f46e63aa18167c89");
@@ -71,7 +74,6 @@ class BlockchainTxPayloadFactoryTests {
     @Test
     void testBuildBlockchainTxPayload_validData_differentHashes_Success() throws Exception {
         // Arrange
-        String processId = "processId";
         String previousHash = "22d0ef4e87a39c52191998f4fbf32ff672f82ed5a2b4c9902371a161402a0faf";
         when(objectMapper.writeValueAsString(dataMap)).thenReturn("dataMapString");
         when(apiConfig.organizationIdHash()).thenReturn("381d18e478b9ae6e67b1bf48c9f3bcaf246d53c4311bfe81f46e63aa18167c89");
@@ -96,7 +98,6 @@ class BlockchainTxPayloadFactoryTests {
     @Test
     void testBuildBlockchainTxPayload_invalidData_Failure() throws Exception {
         // Arrange
-        String processId = "processId";
         String previousHash = "22d0ef4e87a39c52191998f4fbf32ff672f82ed5a2b4c9902371a161402a0faf";
         when(objectMapper.writeValueAsString(dataMap)).thenThrow(new JsonProcessingException("Error") {
         });
@@ -115,7 +116,6 @@ class BlockchainTxPayloadFactoryTests {
     @Test
     void testCalculatePreviousHashIfEmpty_validData_Success() throws Exception {
         // Arrange
-        String processId = "processId";
         when(objectMapper.writeValueAsString(dataMap)).thenReturn("dataMapString");
 
         // Act
@@ -135,7 +135,7 @@ class BlockchainTxPayloadFactoryTests {
     @Test
     void testCalculatePreviousHashIfEmpty_invalidData_Failure() throws JsonProcessingException {
         // Arrange
-        String processId = "processId";
+
         when(objectMapper.writeValueAsString(dataMap)).thenThrow(new JsonProcessingException("Error") {
         });
 
