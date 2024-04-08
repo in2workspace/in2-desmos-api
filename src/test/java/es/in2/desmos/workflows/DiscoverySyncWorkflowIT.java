@@ -7,6 +7,7 @@ import es.in2.desmos.domain.models.ProductOffering;
 import es.in2.desmos.objectmothers.DiscoverySyncRequestMother;
 import es.in2.desmos.objectmothers.DiscoverySyncResponseMother;
 import es.in2.desmos.objectmothers.ProductOfferingMother;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -51,7 +52,7 @@ class DiscoverySyncWorkflowIT {
         var discoverySyncResponseJson = objectMapper.writeValueAsString(discoverySyncResponse);
 
         var brokerUrl = ContainerManager.getBaseUriForScorpioA();
-        AddInitialEntitiesToContextBroker(brokerUrl);
+        addInitialEntitiesToContextBroker(brokerUrl);
 
         webTestClient.post()
                 .uri("/api/v1/sync/discovery")
@@ -65,10 +66,26 @@ class DiscoverySyncWorkflowIT {
                 .consumeWith(System.out::println);
     }
 
-    private void AddInitialEntitiesToContextBroker(String brokerUrl) throws JsonProcessingException, JSONException {
+    private void addInitialEntitiesToContextBroker(String brokerUrl) throws JsonProcessingException, JSONException {
+        String requestBody = createInitialEntitiesRequestBody();
+
+        WebClient.builder()
+                .baseUrl(brokerUrl)
+                .build()
+                .post()
+                .uri("ngsi-ld/v1/entityOperations/create")
+                .contentType(APPLICATION_LD_JSON)
+                .bodyValue(requestBody)
+                .retrieve()
+                .bodyToMono(Void.class)
+                .retry(3).block();
+    }
+
+    @NotNull
+    private String createInitialEntitiesRequestBody() throws JsonProcessingException, JSONException {
         JSONArray productOfferingsJsonArray = new JSONArray();
 
-        for (var productOffering : CreateInitialEntities()) {
+        for (var productOffering : createInitialEntities()) {
             var productOfferingJsonText = objectMapper.writeValueAsString(productOffering);
             var productOfferingJson = new JSONObject(productOfferingJsonText);
 
@@ -83,20 +100,10 @@ class DiscoverySyncWorkflowIT {
 
         String requestBody = productOfferingsJsonArray.toString();
         requestBody = requestBody.replace("\\/", "/");
-
-        WebClient.builder()
-                .baseUrl(brokerUrl)
-                .build()
-                .post()
-                .uri("ngsi-ld/v1/entityOperations/create")
-                .contentType(APPLICATION_LD_JSON)
-                .bodyValue(requestBody)
-                .retrieve()
-                .bodyToMono(Void.class)
-                .retry(3).block();
+        return requestBody;
     }
 
-    private List<ProductOffering> CreateInitialEntities() {
+    private @NotNull List<ProductOffering> createInitialEntities() {
         List<ProductOffering> initialEntities = new ArrayList<>();
         initialEntities.add(ProductOfferingMother.sample3());
         initialEntities.add(ProductOfferingMother.sample4());
