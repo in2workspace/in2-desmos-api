@@ -11,12 +11,11 @@ public final class DiscoverySyncResponseMother {
     private DiscoverySyncResponseMother() {
     }
 
-    public static @NotNull DiscoverySyncResponse simpleDiscoverySyncResponse() {
-        String issuer = "https://my-domain.org";
+    public static @NotNull DiscoverySyncResponse simpleDiscoverySyncResponse(String contextBrokerExternalDomain) {
         List<ProductOffering> productOfferingList = new ArrayList<>();
         productOfferingList.add(ProductOfferingMother.sample3());
         productOfferingList.add(ProductOfferingMother.sample4());
-        return new DiscoverySyncResponse(issuer, productOfferingList);
+        return new DiscoverySyncResponse(contextBrokerExternalDomain, productOfferingList);
     }
 
     public static @NotNull DiscoverySyncResponse fullDiscoverySyncResponse() {
