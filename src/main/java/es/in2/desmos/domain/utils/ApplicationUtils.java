@@ -16,9 +16,6 @@ import java.util.regex.Pattern;
 @Slf4j
 public class ApplicationUtils {
 
-    public static final String HASH_PREFIX = "0x";
-    public static final String HASHLINK_PREFIX = "?hl=";
-
     private ApplicationUtils() {
         throw new IllegalStateException("Utility class");
     }

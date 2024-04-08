@@ -15,7 +15,10 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
 
-import static es.in2.desmos.domain.utils.ApplicationUtils.*;
+import static es.in2.desmos.domain.utils.ApplicationConstants.HASH_LINK_PREFIX;
+import static es.in2.desmos.domain.utils.ApplicationConstants.HASH_PREFIX;
+import static es.in2.desmos.domain.utils.ApplicationUtils.calculateSHA256;
+import static es.in2.desmos.domain.utils.ApplicationUtils.getEnvironmentMetadata;
 
 @Slf4j
 @Component
@@ -26,7 +29,6 @@ public class BlockchainTxPayloadFactory {
     private final ApiConfig apiConfig;
     private final BrokerConfig brokerConfig;
 
-
     public Mono<BlockchainTxPayload> buildBlockchainTxPayload(String processId, Map<String, Object> dataMap, String previousHash) {
         log.debug("ProcessID: {} - Building blockchain data...", processId);
         try {
@@ -34,15 +36,11 @@ public class BlockchainTxPayloadFactory {
             String entityIdHash = HASH_PREFIX + calculateSHA256(entityId);
             String entityType = (String) dataMap.get("type");
             String entityHash = calculateSHA256(objectMapper.writeValueAsString(dataMap));
-            String entityHashLink = entityHash.equals(previousHash) ? previousHash : ApplicationUtils.calculateHashLink(previousHash,
-                    entityHash);
-            String dataLocation =
-                    brokerConfig.getEntitiesExternalDomain() + "/" + entityId + ApplicationUtils.HASHLINK_PREFIX + entityHashLink;
+            String entityHashLink = entityHash.equals(previousHash) ? previousHash : ApplicationUtils.calculateHashLink(previousHash, entityHash);
+            String dataLocation = brokerConfig.getEntitiesExternalDomain() + "/" + entityId + HASH_LINK_PREFIX + entityHashLink;
             String organizationId = HASH_PREFIX + apiConfig.organizationIdHash();
             String previousEntityHash = HASH_PREFIX + previousHash;
             List<String> metadata = List.of(getEnvironmentMetadata(apiConfig.getCurrentEnvironment()));
-
-
             return Mono.just(BlockchainTxPayload.builder()
                     .eventType(entityType)
                     .organizationId(organizationId)
@@ -57,7 +55,6 @@ public class BlockchainTxPayloadFactory {
         }
     }
 
-
     public Mono<String> calculatePreviousHashIfEmpty(String processId, Map<String, Object> dataMap) {
         try {
             return Mono.just(calculateSHA256(objectMapper.writeValueAsString(dataMap)));
@@ -66,6 +63,5 @@ public class BlockchainTxPayloadFactory {
             return Mono.error(new HashLinkException("Error creating previous hash value from notification data"));
         }
     }
-
 
 }

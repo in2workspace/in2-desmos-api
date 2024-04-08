@@ -63,15 +63,11 @@ public class ApplicationRunner {
     @Retryable(retryFor = RequestErrorException.class, maxAttempts = 4, backoff = @Backoff(delay = 2000))
     private Mono<Void> setBrokerSubscription() {
         // Set the processId to a random UUID
-        String processId = UUID.randomUUID()
-                .toString();
+        String processId = UUID.randomUUID().toString();
         log.info("ProcessID: {} - Setting Broker Subscription...", processId);
         // Build Entity Type List to subscribe to
         List<BrokerSubscription.Entity> entities = new ArrayList<>();
-        brokerConfig.getEntityTypes()
-                .forEach(entityType -> entities.add(BrokerSubscription.Entity.builder()
-                        .type(entityType)
-                        .build()));
+        brokerConfig.getEntityTypes().forEach(entityType -> entities.add(BrokerSubscription.Entity.builder().type(entityType).build()));
         // Create the Broker Subscription object
         BrokerSubscription brokerSubscription = BrokerSubscription.builder()
                 .id(SUBSCRIPTION_ID_PREFIX + UUID.randomUUID())
@@ -81,10 +77,9 @@ public class ApplicationRunner {
                         .subscriptionEndpoint(BrokerSubscription.SubscriptionNotification.SubscriptionEndpoint.builder()
                                 .uri(brokerConfig.getNotificationEndpoint())
                                 .accept(MediaType.APPLICATION_JSON_VALUE)
-                                .receiverInfo(
-                                        List.of(BrokerSubscription.SubscriptionNotification.SubscriptionEndpoint.RetrievalInfoContentType.builder()
-                                                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                                                .build()))
+                                .receiverInfo(List.of(BrokerSubscription.SubscriptionNotification.SubscriptionEndpoint.RetrievalInfoContentType.builder()
+                                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                                        .build()))
                                 .build())
                         .build())
                 .build();
@@ -99,12 +94,11 @@ public class ApplicationRunner {
     @Retryable(retryFor = RequestErrorException.class, maxAttempts = 4, backoff = @Backoff(delay = 2000))
     private Mono<Void> setBlockchainSubscription() {
         log.info("Setting Blockchain Subscription...");
-        String processId = UUID.randomUUID()
-                .toString();
+        String processId = UUID.randomUUID().toString();
         // Create the EVM Subscription object
         BlockchainSubscription blockchainSubscription = BlockchainSubscription.builder()
                 .eventTypes(blockchainConfig.getEntityTypes())
-                .metadata(getEnvironmentMetadata(apiConfig.getCurrentEnvironment()))
+                .metadata(List.of(getEnvironmentMetadata(apiConfig.getCurrentEnvironment())))
                 .notificationEndpoint(blockchainConfig.getNotificationEndpoint())
                 .build();
         // Create the subscription
@@ -115,8 +109,7 @@ public class ApplicationRunner {
 
     private Flux<Void> initializeDataSync() {
         // Set up the initial data synchronization process
-        String processId = UUID.randomUUID()
-                .toString();
+        String processId = UUID.randomUUID().toString();
         log.info("ProcessID: {} - Initializing Data Synchronization Workflow...", processId);
         // Start data synchronization process
         return dataSyncWorkflow.startDataSyncWorkflow(processId)
@@ -184,5 +177,5 @@ public class ApplicationRunner {
     public void recover(RequestErrorException e) {
         log.error("After retries, subscription failed", e);
     }
-
+    
 }

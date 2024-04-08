@@ -61,25 +61,19 @@ class ApplicationRunnerTests {
     void whenApplicationIsReady_thenSetBrokerSubscriptionAndBlockchainSubscription() {
         // Arrange
         when(brokerListenerService.createSubscription(anyString(), any())).thenReturn(Mono.empty());
-        when(blockchainListenerService.createSubscription(Mockito.anyString(), Mockito.any(BlockchainSubscription.class)))
-                .thenReturn(Mono.empty());
-        when(dataSyncWorkflow.startDataSyncWorkflow(Mockito.anyString()))
-                .thenReturn(Flux.empty());
-        when(publishWorkflow.startPublishWorkflow(Mockito.anyString()))
-                .thenReturn(Flux.empty());
-        when(subscribeWorkflow.startSubscribeWorkflow())
-                .thenReturn(Flux.empty());
+        when(blockchainListenerService.createSubscription(Mockito.anyString(), Mockito.any(BlockchainSubscription.class))).thenReturn(Mono.empty());
+        when(dataSyncWorkflow.startDataSyncWorkflow(Mockito.anyString())).thenReturn(Flux.empty());
+        when(publishWorkflow.startPublishWorkflow(Mockito.anyString())).thenReturn(Flux.empty());
+        when(subscribeWorkflow.startSubscribeWorkflow()).thenReturn(Flux.empty());
         when(apiConfig.getCurrentEnvironment()).thenReturn("dev");
 
         try (MockedStatic<ApplicationUtils> utilities = Mockito.mockStatic(ApplicationUtils.class)) {
-            utilities.when(() -> ApplicationUtils.getEnvironmentMetadata(Mockito.anyString()))
-                    .thenReturn("dev");
+            utilities.when(() -> ApplicationUtils.getEnvironmentMetadata(Mockito.anyString())).thenReturn("dev");
         }
 
         // Act
         ApplicationReadyEvent event = mock(ApplicationReadyEvent.class);
-        StepVerifier.create(applicationRunner.onApplicationReady())
-                .verifyComplete();
+        StepVerifier.create(applicationRunner.onApplicationReady()).verifyComplete();
     }
 
     // Fixme: Retry and recover does not work with MockitoExtension
