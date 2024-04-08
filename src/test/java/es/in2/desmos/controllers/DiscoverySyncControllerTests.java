@@ -13,6 +13,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
+import java.util.List;
+
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -40,7 +42,8 @@ class DiscoverySyncControllerTests {
         var discoverySyncResponse = DiscoverySyncResponseMother.simpleDiscoverySyncResponse(contextBrokerExternalDomain);
         var discoverySyncResponseJson = objectMapper.writeValueAsString(discoverySyncResponse);
 
-        when(discoverySyncWorkflow.discoverySync(anyString(), eq(discoverySyncRequest.issuer()), eq(discoverySyncRequest.externalEntityIds()))).thenReturn(discoverySyncResponse.localEntitiesIds());
+        List<String> externalEntityIds = discoverySyncRequest.createExternalEntityIdsStringList();
+        when(discoverySyncWorkflow.discoverySync(anyString(), eq(discoverySyncRequest.issuer()), eq(externalEntityIds))).thenReturn(discoverySyncResponse.localEntitiesIds());
 
         webTestClient.post()
                 .uri("/api/v1/sync/discovery")
@@ -53,7 +56,7 @@ class DiscoverySyncControllerTests {
                 .json(discoverySyncResponseJson)
                 .consumeWith(System.out::println);
 
-        verify(discoverySyncWorkflow, times(1)).discoverySync(anyString(), eq(discoverySyncRequest.issuer()), eq(discoverySyncRequest.externalEntityIds()));
+        verify(discoverySyncWorkflow, times(1)).discoverySync(anyString(), eq(discoverySyncRequest.issuer()), eq(externalEntityIds));
         verifyNoMoreInteractions(discoverySyncWorkflow);
     }
 

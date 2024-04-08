@@ -4,6 +4,7 @@ import es.in2.desmos.domain.models.DiscoverySyncRequest;
 import es.in2.desmos.domain.models.DiscoverySyncResponse;
 import es.in2.desmos.domain.models.ProductOffering;
 import es.in2.desmos.workflows.DiscoverySyncWorkflow;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,11 +27,12 @@ public class DiscoverySyncController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Mono<DiscoverySyncResponse> discoverySync(@RequestBody DiscoverySyncRequest discoverySyncRequest) {
+    public Mono<DiscoverySyncResponse> discoverySync(@RequestBody @Valid DiscoverySyncRequest discoverySyncRequest) {
         String processId = UUID.randomUUID().toString();
         log.info("ProcessID: {} - Starting Synchronization Discovery...", processId);
 
-        List<ProductOffering> localEntitiesIds = discoverySyncWorkflow.discoverySync(processId, discoverySyncRequest.issuer(), discoverySyncRequest.externalEntityIds());
+        List<String> externalEntityIds = discoverySyncRequest.createExternalEntityIdsStringList();
+        List<ProductOffering> localEntitiesIds = discoverySyncWorkflow.discoverySync(processId, discoverySyncRequest.issuer(), externalEntityIds);
 
         return Mono.just(new DiscoverySyncResponse(contextBrokerExternalDomain, localEntitiesIds));
     }
