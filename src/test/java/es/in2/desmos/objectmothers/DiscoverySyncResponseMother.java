@@ -18,9 +18,8 @@ public final class DiscoverySyncResponseMother {
         return new DiscoverySyncResponse(contextBrokerExternalDomain, productOfferingList);
     }
 
-    public static @NotNull DiscoverySyncResponse fullDiscoverySyncResponse() {
-        String issuer = "https://my-domain.org";
+    public static @NotNull DiscoverySyncResponse fullDiscoverySyncResponse(String contextBrokerExternalDomain) {
         List<ProductOffering> productOfferingList = ProductOfferingMother.fullList();
-        return new DiscoverySyncResponse(issuer, productOfferingList);
+        return new DiscoverySyncResponse(contextBrokerExternalDomain, productOfferingList);
     }
 }
