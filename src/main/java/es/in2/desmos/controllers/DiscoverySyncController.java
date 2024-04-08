@@ -32,7 +32,6 @@ public class DiscoverySyncController {
 
         List<ProductOffering> localEntitiesIds = discoverySyncWorkflow.discoverySync(processId, discoverySyncRequest.issuer(), discoverySyncRequest.externalEntityIds());
 
-
         return Mono.just(new DiscoverySyncResponse(contextBrokerExternalDomain, localEntitiesIds));
     }
 }
