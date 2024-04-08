@@ -17,6 +17,7 @@ import reactor.test.StepVerifier;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.mockito.Mockito.when;
 
@@ -41,7 +42,7 @@ class BlockchainTxPayloadFactoryTests {
             "name", "Cloud Services Suite",
             "description", "Example of a Product offering for cloud services suite"
     );
-    String processId = "processId";
+    String processId = UUID.randomUUID().toString();
 
     @Test
     void testBuildBlockchainTxPayload_validData_firstHash_Success() throws Exception {
