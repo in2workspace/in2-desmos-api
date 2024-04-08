@@ -6,6 +6,7 @@ import es.in2.desmos.domain.models.ProductOffering;
 import es.in2.desmos.workflows.DiscoverySyncWorkflow;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
@@ -20,6 +21,9 @@ import java.util.UUID;
 public class DiscoverySyncController {
     private final DiscoverySyncWorkflow discoverySyncWorkflow;
 
+    @Value("${broker.externalDomain}")
+    private String contextBrokerExternalDomain;
+
     @PostMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Mono<DiscoverySyncResponse> discoverySync(@RequestBody DiscoverySyncRequest discoverySyncRequest) {
@@ -29,6 +33,6 @@ public class DiscoverySyncController {
         List<ProductOffering> localEntitiesIds = discoverySyncWorkflow.discoverySync(processId, discoverySyncRequest.issuer(), discoverySyncRequest.externalEntityIds());
 
 
-        return Mono.just(new DiscoverySyncResponse(discoverySyncRequest.issuer(), localEntitiesIds));
+        return Mono.just(new DiscoverySyncResponse(contextBrokerExternalDomain, localEntitiesIds));
     }
 }
