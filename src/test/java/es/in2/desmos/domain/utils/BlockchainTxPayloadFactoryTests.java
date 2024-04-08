@@ -43,15 +43,6 @@ class BlockchainTxPayloadFactoryTests {
     );
     String processId = "processId";
 
-
-    private Map<String, Object> createDataMap() {
-        dataMap.put("id", "entity123");
-        dataMap.put("type", "productOffering");
-        dataMap.put("name", "Cloud Services Suite");
-        dataMap.put("description", "Example of a Product offering for cloud services suite");
-        return dataMap;
-    }
-
     @Test
     void testBuildBlockchainTxPayload_validData_firstHash_Success() throws Exception {
         //Arrange
