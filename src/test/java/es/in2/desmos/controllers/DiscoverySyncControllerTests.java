@@ -7,6 +7,7 @@ import es.in2.desmos.objectmothers.DiscoverySyncRequestMother;
 import es.in2.desmos.objectmothers.DiscoverySyncResponseMother;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -27,13 +28,16 @@ class DiscoverySyncControllerTests {
     @MockBean
     private DiscoverySyncWorkflow discoverySyncWorkflow;
 
+    @Value("${broker.externalDomain}")
+    private String contextBrokerExternalDomain;
+
     @Test
     void itShouldReturnExternalEntityIdsWithIssuer() throws JsonProcessingException {
 
         var discoverySyncRequest = DiscoverySyncRequestMother.simpleDiscoverySyncRequest();
         var discoverySyncRequestJson = objectMapper.writeValueAsString(discoverySyncRequest);
 
-        var discoverySyncResponse = DiscoverySyncResponseMother.simpleDiscoverySyncResponse();
+        var discoverySyncResponse = DiscoverySyncResponseMother.simpleDiscoverySyncResponse(contextBrokerExternalDomain);
         var discoverySyncResponseJson = objectMapper.writeValueAsString(discoverySyncResponse);
 
         when(discoverySyncWorkflow.discoverySync(anyString(), eq(discoverySyncRequest.issuer()), eq(discoverySyncRequest.externalEntityIds()))).thenReturn(discoverySyncResponse.localEntitiesIds());
