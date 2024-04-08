@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class BlockchainSubscriptionTests {
 
     private final List<String> eventTypes = List.of("ProductOffering", "Catalogue", "Category");
-    private final String metadata = "metadata";
+    private final String metadata = "dev";
     private final String notificationEndpoint = "https://localhost:8080/api/v1/notifications/dlt";
 
     @Test
@@ -54,7 +54,7 @@ class BlockchainSubscriptionTests {
         // Arrange
         String expectedToString = "BlockchainSubscription.BlockchainSubscriptionBuilder(" +
                 "eventTypes=[ProductOffering, Catalogue, Category], " +
-                "metadata=metadata, " +
+                "metadata=dev, " +
                 "notificationEndpoint=https://localhost:8080/api/v1/notifications/dlt)";
         // Act
         BlockchainSubscription.BlockchainSubscriptionBuilder blockchainSubscriptionBuilder = BlockchainSubscription.builder()

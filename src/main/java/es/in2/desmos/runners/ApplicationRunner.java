@@ -1,5 +1,6 @@
 package es.in2.desmos.runners;
 
+import es.in2.desmos.configs.ApiConfig;
 import es.in2.desmos.configs.BlockchainConfig;
 import es.in2.desmos.configs.BrokerConfig;
 import es.in2.desmos.domain.exceptions.RequestErrorException;
@@ -28,6 +29,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static es.in2.desmos.domain.utils.ApplicationUtils.getEnvironmentMetadata;
+
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
@@ -43,6 +46,7 @@ public class ApplicationRunner {
     private final PublishWorkflow publishWorkflow;
     private final SubscribeWorkflow subscribeWorkflow;
     private final AtomicBoolean isQueueAuthorizedForEmit = new AtomicBoolean(false);
+    private final ApiConfig apiConfig;
     private Disposable publishQueueDisposable;
     private Disposable subscribeQueueDisposable;
 
@@ -59,11 +63,15 @@ public class ApplicationRunner {
     @Retryable(retryFor = RequestErrorException.class, maxAttempts = 4, backoff = @Backoff(delay = 2000))
     private Mono<Void> setBrokerSubscription() {
         // Set the processId to a random UUID
-        String processId = UUID.randomUUID().toString();
+        String processId = UUID.randomUUID()
+                .toString();
         log.info("ProcessID: {} - Setting Broker Subscription...", processId);
         // Build Entity Type List to subscribe to
         List<BrokerSubscription.Entity> entities = new ArrayList<>();
-        brokerConfig.getEntityTypes().forEach(entityType -> entities.add(BrokerSubscription.Entity.builder().type(entityType).build()));
+        brokerConfig.getEntityTypes()
+                .forEach(entityType -> entities.add(BrokerSubscription.Entity.builder()
+                        .type(entityType)
+                        .build()));
         // Create the Broker Subscription object
         BrokerSubscription brokerSubscription = BrokerSubscription.builder()
                 .id(SUBSCRIPTION_ID_PREFIX + UUID.randomUUID())
@@ -73,9 +81,10 @@ public class ApplicationRunner {
                         .subscriptionEndpoint(BrokerSubscription.SubscriptionNotification.SubscriptionEndpoint.builder()
                                 .uri(brokerConfig.getNotificationEndpoint())
                                 .accept(MediaType.APPLICATION_JSON_VALUE)
-                                .receiverInfo(List.of(BrokerSubscription.SubscriptionNotification.SubscriptionEndpoint.RetrievalInfoContentType.builder()
-                                        .contentType(MediaType.APPLICATION_JSON_VALUE)
-                                        .build()))
+                                .receiverInfo(
+                                        List.of(BrokerSubscription.SubscriptionNotification.SubscriptionEndpoint.RetrievalInfoContentType.builder()
+                                                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                                                .build()))
                                 .build())
                         .build())
                 .build();
@@ -90,11 +99,12 @@ public class ApplicationRunner {
     @Retryable(retryFor = RequestErrorException.class, maxAttempts = 4, backoff = @Backoff(delay = 2000))
     private Mono<Void> setBlockchainSubscription() {
         log.info("Setting Blockchain Subscription...");
-        String processId = UUID.randomUUID().toString();
+        String processId = UUID.randomUUID()
+                .toString();
         // Create the EVM Subscription object
         BlockchainSubscription blockchainSubscription = BlockchainSubscription.builder()
                 .eventTypes(blockchainConfig.getEntityTypes())
-                .metadata(blockchainConfig.getMetadata())
+                .metadata(getEnvironmentMetadata(apiConfig.getCurrentEnvironment()))
                 .notificationEndpoint(blockchainConfig.getNotificationEndpoint())
                 .build();
         // Create the subscription
@@ -105,7 +115,8 @@ public class ApplicationRunner {
 
     private Flux<Void> initializeDataSync() {
         // Set up the initial data synchronization process
-        String processId = UUID.randomUUID().toString();
+        String processId = UUID.randomUUID()
+                .toString();
         log.info("ProcessID: {} - Initializing Data Synchronization Workflow...", processId);
         // Start data synchronization process
         return dataSyncWorkflow.startDataSyncWorkflow(processId)

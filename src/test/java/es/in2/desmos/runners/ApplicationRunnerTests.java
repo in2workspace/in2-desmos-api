@@ -1,10 +1,12 @@
 package es.in2.desmos.runners;
 
+import es.in2.desmos.configs.ApiConfig;
 import es.in2.desmos.configs.BlockchainConfig;
 import es.in2.desmos.configs.BrokerConfig;
 import es.in2.desmos.domain.models.BlockchainSubscription;
 import es.in2.desmos.domain.services.blockchain.BlockchainListenerService;
 import es.in2.desmos.domain.services.broker.BrokerListenerService;
+import es.in2.desmos.domain.utils.ApplicationUtils;
 import es.in2.desmos.workflows.DataSyncWorkflow;
 import es.in2.desmos.workflows.PublishWorkflow;
 import es.in2.desmos.workflows.SubscribeWorkflow;
@@ -12,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -21,7 +24,8 @@ import reactor.test.StepVerifier;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ApplicationRunnerTests {
@@ -47,6 +51,9 @@ class ApplicationRunnerTests {
     @Mock
     private BlockchainListenerService blockchainListenerService;
 
+    @Mock
+    private ApiConfig apiConfig;
+
     @InjectMocks
     private ApplicationRunner applicationRunner;
 
@@ -54,14 +61,25 @@ class ApplicationRunnerTests {
     void whenApplicationIsReady_thenSetBrokerSubscriptionAndBlockchainSubscription() {
         // Arrange
         when(brokerListenerService.createSubscription(anyString(), any())).thenReturn(Mono.empty());
-        Mockito.when(blockchainListenerService.createSubscription(Mockito.anyString(), Mockito.any(BlockchainSubscription.class)))
+        when(blockchainListenerService.createSubscription(Mockito.anyString(), Mockito.any(BlockchainSubscription.class)))
                 .thenReturn(Mono.empty());
-        Mockito.when(dataSyncWorkflow.startDataSyncWorkflow(Mockito.anyString())).thenReturn(Flux.empty());
-        Mockito.when(publishWorkflow.startPublishWorkflow(Mockito.anyString())).thenReturn(Flux.empty());
-        Mockito.when(subscribeWorkflow.startSubscribeWorkflow()).thenReturn(Flux.empty());
+        when(dataSyncWorkflow.startDataSyncWorkflow(Mockito.anyString()))
+                .thenReturn(Flux.empty());
+        when(publishWorkflow.startPublishWorkflow(Mockito.anyString()))
+                .thenReturn(Flux.empty());
+        when(subscribeWorkflow.startSubscribeWorkflow())
+                .thenReturn(Flux.empty());
+        when(apiConfig.getCurrentEnvironment()).thenReturn("dev");
+
+        try (MockedStatic<ApplicationUtils> utilities = Mockito.mockStatic(ApplicationUtils.class)) {
+            utilities.when(() -> ApplicationUtils.getEnvironmentMetadata(Mockito.anyString()))
+                    .thenReturn("dev");
+        }
+
         // Act
         ApplicationReadyEvent event = mock(ApplicationReadyEvent.class);
-        StepVerifier.create(applicationRunner.onApplicationReady()).verifyComplete();
+        StepVerifier.create(applicationRunner.onApplicationReady())
+                .verifyComplete();
     }
 
     // Fixme: Retry and recover does not work with MockitoExtension
