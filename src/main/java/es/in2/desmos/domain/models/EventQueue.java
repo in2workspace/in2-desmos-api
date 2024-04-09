@@ -1,5 +1,6 @@
 package es.in2.desmos.domain.models;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 
@@ -9,8 +10,8 @@ import java.util.List;
 @Builder
 public class EventQueue implements Comparable<EventQueue> {
 
-    private List<Object> event;
-    private EventQueuePriority priority;
+    private @NotNull List<Object> event;
+    private @NotNull EventQueuePriority priority;
 
     @Override
     public int compareTo(EventQueue o) {

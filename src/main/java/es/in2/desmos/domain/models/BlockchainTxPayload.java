@@ -1,17 +1,20 @@
 package es.in2.desmos.domain.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
+import org.hibernate.validator.constraints.URL;
 
 import java.util.List;
 
 @Builder
 public record BlockchainTxPayload(
-        @JsonProperty("eventType") String eventType,
-        @JsonProperty("iss") String organizationId,
-        @JsonProperty("entityId") String entityId,
-        @JsonProperty("previousEntityHash") String previousEntityHash,
-        @JsonProperty("dataLocation") String dataLocation,
-        @JsonProperty("relevantMetadata") List<String> metadata
+        @JsonProperty("eventType") @NotBlank String eventType,
+        @JsonProperty("iss") @NotBlank String organizationId,
+        @JsonProperty("entityId") @NotBlank String entityId,
+        @JsonProperty("previousEntityHash") @NotBlank String previousEntityHash,
+        @JsonProperty("dataLocation") @NotBlank @URL String dataLocation,
+        @JsonProperty("relevantMetadata") @NotNull List<@NotBlank String> metadata
 ) {
 }
