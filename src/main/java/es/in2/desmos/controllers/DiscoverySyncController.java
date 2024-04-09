@@ -1,8 +1,8 @@
 package es.in2.desmos.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import es.in2.desmos.domain.models.DiscoverySyncRequest;
 import es.in2.desmos.domain.models.DiscoverySyncResponse;
-import es.in2.desmos.domain.models.ProductOffering;
 import es.in2.desmos.workflows.DiscoverySyncWorkflow;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -27,13 +26,13 @@ public class DiscoverySyncController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Mono<DiscoverySyncResponse> discoverySync(@RequestBody @Valid DiscoverySyncRequest discoverySyncRequest) {
+    public Mono<DiscoverySyncResponse> discoverySync(@RequestBody @Valid DiscoverySyncRequest discoverySyncRequest) throws JsonProcessingException {
         String processId = UUID.randomUUID().toString();
         log.info("ProcessID: {} - Starting Synchronization Discovery...", processId);
 
-        List<String> externalEntityIds = discoverySyncRequest.createExternalEntityIdsStringList();
-        List<ProductOffering> localEntitiesIds = discoverySyncWorkflow.discoverySync(processId, discoverySyncRequest.issuer(), externalEntityIds);
+        var externalEntityIds = discoverySyncRequest.createExternalEntityIdsStringList();
+        var localEntitiesIds = discoverySyncWorkflow.discoverySync(processId, discoverySyncRequest.issuer(), externalEntityIds);
 
-        return Mono.just(new DiscoverySyncResponse(contextBrokerExternalDomain, localEntitiesIds));
+        return localEntitiesIds.map(x -> new DiscoverySyncResponse(contextBrokerExternalDomain, x));
     }
 }
