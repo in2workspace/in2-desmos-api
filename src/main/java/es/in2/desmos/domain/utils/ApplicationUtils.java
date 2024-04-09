@@ -88,10 +88,13 @@ public class ApplicationUtils {
 
     public static String getEnvironmentMetadata(String activeProfile) {
         return switch (activeProfile) {
+            case "default" -> "local";
             case "dev" -> "sbx";
             case "test" -> "dev";
             case "prod" -> "prd";
-            default -> throw new IllegalArgumentException("Unknown profile: " + activeProfile);
+            default ->
+                    throw new IllegalArgumentException("Unsupported profile: " + activeProfile + ". Expected one of: default, dev, test, prod");
+
         };
     }
 

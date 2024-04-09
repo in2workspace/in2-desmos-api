@@ -17,12 +17,13 @@ services:
       POSTGRES_USER: ngb
       POSTGRES_PASSWORD: ngb
       POSTGRES_DB: ngb
-#    volumes:
-#      - postgis:/var/lib/postgresql/data
+  #    volumes:
+  #      - postgis:/var/lib/postgresql/data
 
   desmos:
     image: desmos:latest
     environment:
+      SPRING_PROFILE_ACTIVE: dev
       SPRING_R2DBC_URL: r2dbc:postgresql://postgres:5432/dbtest
       SPRING_R2DBC_USERNAME: postgres
       SPRING_R2DBC_PASSWORD: postgres
@@ -54,17 +55,17 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_USER: postgres
       POSTGRES_DB: dbtest
-#    volumes:
-#      - postgres:/var/lib/postgresql/data
+  #    volumes:
+  #      - postgres:/var/lib/postgresql/data
 
   dlt-adapter:
     image: quay.io/digitelts/dlt-adapter:1.3
     environment:
-        PRIVATE_KEY: 0x304d170fb355df65cc17ef7934404fe9baee73a1244380076436dec6fafb1e1f
-        DOME_EVENTS_CONTRACT_ADDRESS:
-        RPC_ADDRESS: http://blockchain-testnode.infra.svc.cluster.local:8545/
-        DOME_PRODUCTION_BLOCK_NUMBER: 0
-        ISS: 0x9eb763b0a6b7e617d56b85f1df943f176018c8eedb2dd9dd37c0bd77496833fe
+      PRIVATE_KEY: 0x304d170fb355df65cc17ef7934404fe9baee73a1244380076436dec6fafb1e1f
+      DOME_EVENTS_CONTRACT_ADDRESS:
+      RPC_ADDRESS: http://blockchain-testnode.infra.svc.cluster.local:8545/
+      DOME_PRODUCTION_BLOCK_NUMBER: 0
+      ISS: 0x9eb763b0a6b7e617d56b85f1df943f176018c8eedb2dd9dd37c0bd77496833fe
     ports:
       - "9092:8080"
 

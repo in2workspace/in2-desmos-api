@@ -62,7 +62,14 @@ public class ApiConfig {
 
     @Bean
     public String getCurrentEnvironment() {
-        return environment.getActiveProfiles()[0];
+        List<String> profiles = List.of(environment.getActiveProfiles());
+        if (profiles.isEmpty()) {
+            log.info(environment.getDefaultProfiles()[0]);
+            return environment.getDefaultProfiles()[0];
+        } else {
+            log.info(environment.getActiveProfiles()[0]);
+            return profiles.get(0);
+        }
     }
 
 }
