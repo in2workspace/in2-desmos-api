@@ -2,9 +2,9 @@ package es.in2.desmos.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import es.in2.desmos.workflows.DiscoverySyncWorkflow;
 import es.in2.desmos.objectmothers.DiscoverySyncRequestMother;
 import es.in2.desmos.objectmothers.DiscoverySyncResponseMother;
+import es.in2.desmos.workflows.DiscoverySyncWorkflow;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -43,7 +44,7 @@ class DiscoverySyncControllerTests {
         var discoverySyncResponseJson = objectMapper.writeValueAsString(discoverySyncResponse);
 
         List<String> externalEntityIds = discoverySyncRequest.createExternalEntityIdsStringList();
-        when(discoverySyncWorkflow.discoverySync(anyString(), eq(discoverySyncRequest.issuer()), eq(externalEntityIds))).thenReturn(discoverySyncResponse.localEntitiesIds());
+        when(discoverySyncWorkflow.discoverySync(anyString(), eq(discoverySyncRequest.issuer()), eq(externalEntityIds))).thenReturn(Mono.just(discoverySyncResponse.localEntitiesIds()));
 
         webTestClient.post()
                 .uri("/api/v1/sync/discovery")
