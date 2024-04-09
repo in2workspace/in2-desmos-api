@@ -62,9 +62,9 @@ services:
     environment:
         PRIVATE_KEY: 0x304d170fb355df65cc17ef7934404fe9baee73a1244380076436dec6fafb1e1f
         DOME_EVENTS_CONTRACT_ADDRESS:
-        RPC_ADDRESS: http://blockchain-testnode.infra.svc.cluster.local:8545/
+        RPC_ADDRESS: https://red-t.alastria.io/v0/9461d9f4292b41230527d57ee90652a6
         DOME_PRODUCTION_BLOCK_NUMBER: 0
-        ISS: 0x9eb763b0a6b7e617d56b85f1df943f176018c8eedb2dd9dd37c0bd77496833fe
+        ISS: 0xe2afef2c880b138d741995ba56936e389b0b5dd2943e21e4363cc70d81c89346
     ports:
       - "9092:8080"
 

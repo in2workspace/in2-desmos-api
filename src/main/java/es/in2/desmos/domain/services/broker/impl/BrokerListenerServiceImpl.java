@@ -16,6 +16,7 @@ import reactor.core.publisher.Mono;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 
 import static es.in2.desmos.domain.utils.ApplicationUtils.calculateSHA256;
 
@@ -90,7 +91,7 @@ public class BrokerListenerServiceImpl implements BrokerListenerService {
                         String newEntityHash = calculateSHA256(objectMapper.writer().writeValueAsString(dataMap));
                         if (auditRecordFound.getEntityHash().equals(newEntityHash)) {
                             log.debug("ProcessID: {} - BrokerNotification is self-generated", processId);
-                            return Mono.empty();
+                            return Mono.error(new BrokerNotificationParserException("BrokerNotification is self-generated")); // WIP: Check if this is the correct way to interrupt the flow
                         }
                     } catch (JsonProcessingException | NoSuchAlgorithmException e) {
                         log.warn("ProcessID: {} - Error processing JSON: {}", processId, e.getMessage());
@@ -99,7 +100,10 @@ public class BrokerListenerServiceImpl implements BrokerListenerService {
                     log.debug("ProcessID: {} - BrokerNotification is from external source", processId);
                     return Mono.just(dataMap);
                 })
-                .doOnNext(map -> log.debug("ProcessID: {} - No transaction found; assuming BrokerNotification is from external source", processId));
+                .switchIfEmpty(Mono.defer(() -> {
+                    log.debug("ProcessID: {} - No audit record found; assuming BrokerNotification is from external source", processId);
+                    return Mono.just(dataMap);
+                }));
     }
 
 }
