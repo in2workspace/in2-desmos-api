@@ -5,7 +5,7 @@ import es.in2.desmos.domain.models.BrokerNotification;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.api.QueueService;
 import es.in2.desmos.domain.services.blockchain.BlockchainPublisherService;
-import es.in2.desmos.domain.utils.BlockchainDataFactory;
+import es.in2.desmos.domain.utils.BlockchainTxPayloadFactory;
 import es.in2.desmos.workflows.PublishWorkflow;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +14,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -30,7 +29,7 @@ public class PublishWorkflowImpl implements PublishWorkflow {
 
     private final QueueService pendingPublishEventsQueue;
     private final AuditRecordService auditRecordService;
-    private final BlockchainDataFactory blockchainDataFactory;
+    private final BlockchainTxPayloadFactory blockchainTxPayloadFactory;
     private final BlockchainPublisherService blockchainPublisherService;
 
     @Override
@@ -47,9 +46,10 @@ public class PublishWorkflowImpl implements PublishWorkflow {
                                 .flatMap(brokerNotification ->
                                         // Get the last AuditRecord stored for the same entityId; it is used to calculate the hashLink
                                         auditRecordService.fetchLatestProducerEntityHashByEntityId(processId, brokerNotification.data().get(0).get("id").toString())
+                                                .switchIfEmpty(blockchainTxPayloadFactory.calculatePreviousHashIfEmpty(processId, brokerNotification.data().get(0)))
                                                 // Build the BlockchainTxPayload object
                                                 .flatMap(previousHash ->
-                                                        blockchainDataFactory.buildBlockchainData(processId, brokerNotification.data().get(0), previousHash))
+                                                        blockchainTxPayloadFactory.buildBlockchainTxPayload(processId, brokerNotification.data().get(0), previousHash))
                                                 // Save a new Audit Record with status CREATED
                                                 .flatMap(blockchainTxPayload ->
                                                         auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(processId, brokerNotification.data().get(0), AuditRecordStatus.CREATED, blockchainTxPayload)

@@ -20,7 +20,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.util.List;
 
 import static es.in2.desmos.ContainerManager.getBaseUriForScorpioA;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 @Testcontainers
