@@ -1,0 +1,24 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+title Add new entities event
+
+autonumber
+
+ExternalAccessNode -> ExternalAccessNode: Start with origin_entities_ids
+
+ExternalAccessNode -> EAN_ContextBroker: GET /ngsi-ld/v1/entities/?type=ProductOffering
+
+EAN_ContextBroker -> ExternalAccessNode: 200 payload: entities_ids_list
+
+ExternalAccessNode -> ExternalAccessNode: Compare entities
+
+ExternalAccessNode -> Origin: POST /sync/entities payload: non_owned_entities_id_list
+
+Origin -> ExternalAccessNode: 202 Accepted payload: entities_list
+
+ExternalAccessNode -> EAN_ContextBroker: POST /ngsi-ld/v1/entityOperations/create payload: entities_list
+
+EAN_ContextBroker -> ExternalAccessNode: 201 Created
+
+@enduml

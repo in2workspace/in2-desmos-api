@@ -1,0 +1,18 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+title Discovery sync with events
+
+autonumber
+
+Origin -> ExternalAccessNode: POST /sync/discovery payload: origin_entities_id_list
+
+ExternalAccessNode -> ExternalAccessNode: EVENT add_new_entities
+
+ExternalAccessNode -> EAN_ContextBroker: GET /ngsi-ld/v1/entities/?type=ProductOffering
+
+EAN_ContextBroker -> ExternalAccessNode: 200 payload: entities_id_list
+
+ExternalAccessNode -> Origin: 200 payload: entities_id_list
+
+@enduml
