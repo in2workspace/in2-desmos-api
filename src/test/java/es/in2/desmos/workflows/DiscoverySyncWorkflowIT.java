@@ -43,8 +43,6 @@ class DiscoverySyncWorkflowIT {
 
     @Test
     void itShouldCreateLocalEntitiesBasedOnExternalEntitiesAndReturnMissingExternalEntities() throws JsonProcessingException, JSONException {
-        ObjectMapper objectMapper = new ObjectMapper();
-
         var discoverySyncRequest = DiscoverySyncRequestMother.simpleDiscoverySyncRequest();
         String discoverySyncRequestJson = objectMapper.writeValueAsString(discoverySyncRequest);
 
