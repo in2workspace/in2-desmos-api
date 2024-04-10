@@ -3,12 +3,12 @@ package es.in2.desmos.domain.services.broker.adapter.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import es.in2.desmos.domain.exceptions.RequestErrorException;
-import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
+import es.in2.desmos.configs.BrokerConfig;
 import es.in2.desmos.domain.exceptions.JsonReadingException;
+import es.in2.desmos.domain.exceptions.RequestErrorException;
 import es.in2.desmos.domain.exceptions.SubscriptionCreationException;
 import es.in2.desmos.domain.models.BrokerSubscription;
-import es.in2.desmos.configs.BrokerConfig;
+import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -77,7 +77,10 @@ public class ScorpioAdapter implements BrokerAdapterService {
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .onStatus(status -> status.isSameCodeAs(HttpStatusCode.valueOf(404)),
-                        response -> Mono.empty()
+                        response -> {
+                            log.debug("ProcessId: {}, Entity not found", processId);
+                            return response.bodyToMono(String.class).flatMap(body -> Mono.empty());
+                        }
                 )
                 .onStatus(HttpStatusCode::is5xxServerError,
                         response -> Mono.error(new RequestErrorException("Internal Server Error"))
