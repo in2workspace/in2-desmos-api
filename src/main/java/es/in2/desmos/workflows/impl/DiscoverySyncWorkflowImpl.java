@@ -20,7 +20,7 @@ public class DiscoverySyncWorkflowImpl implements DiscoverySyncWorkflow {
 
     @Override
     public Mono<List<ProductOffering>> discoverySync(String processId, Mono<String> issuer, Mono<List<String>> externalEntityIds) {
-        Mono<List<ProductOffering>> internalProductOfferings = internalEntitiesGetterService.getInternalEntities();
+        Mono<List<ProductOffering>> internalProductOfferings = internalEntitiesGetterService.getInternalEntityIds();
 
         Mono<List<String>> internalEntityIds = internalProductOfferings.map(x -> x.stream().map(ProductOffering::id).toList());
         entitiesCreatorEventPublisher.publishEvent(issuer, externalEntityIds, internalEntityIds);

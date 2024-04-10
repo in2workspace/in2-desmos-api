@@ -6,5 +6,5 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 public interface InternalEntitiesGetterService {
-    Mono<List<ProductOffering>> getInternalEntities();
+    Mono<List<ProductOffering>> getInternalEntityIds();
 }
