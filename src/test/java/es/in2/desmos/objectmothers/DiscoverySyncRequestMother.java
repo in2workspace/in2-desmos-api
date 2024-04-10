@@ -1,6 +1,7 @@
 package es.in2.desmos.objectmothers;
 
 import es.in2.desmos.domain.models.DiscoverySyncRequest;
+import es.in2.desmos.domain.models.IdRecord;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -12,10 +13,10 @@ public final class DiscoverySyncRequestMother {
 
     public static @NotNull DiscoverySyncRequest simpleDiscoverySyncRequest() {
         String issuer = "https://my-domain.org";
-        List<String> entityIds = new ArrayList<>();
-        entityIds.add(ProductOfferingMother.sample1().id());
-        entityIds.add(ProductOfferingMother.sample2().id());
-        var externalEntityIds = DiscoverySyncRequest.createExternalEntityIdsListFromString(entityIds);
-        return new DiscoverySyncRequest(issuer, externalEntityIds);
+        List<IdRecord> entityIds = new ArrayList<>();
+        entityIds.add(new IdRecord(ProductOfferingMother.sample1().id()));
+        entityIds.add(new IdRecord(ProductOfferingMother.sample2().id()));
+
+        return new DiscoverySyncRequest(issuer, entityIds);
     }
 }
