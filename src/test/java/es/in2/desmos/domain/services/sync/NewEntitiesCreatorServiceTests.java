@@ -24,9 +24,6 @@ class NewEntitiesCreatorServiceTests {
     private NewEntitiesCreatorServiceImpl newEntitiesCreatorService;
 
     @Mock
-    private InternalEntitiesGetterService internalEntitiesGetterService;
-
-    @Mock
     private EntitySyncWebClient entitySyncWebClient;
 
     @Test
@@ -35,20 +32,16 @@ class NewEntitiesCreatorServiceTests {
 
         Mono<String> issuer = Mono.just("http://example.org");
 
-        Mono<List<String>> internalEntitiesIdsMono = getInternalEntitiesIdsMono();
-        when(internalEntitiesGetterService.getInternalEntities()).thenReturn(internalEntitiesIdsMono);
+        Mono<List<String>> internalEntitiesIds = getInternalEntitiesIdsMono();
 
         Mono<EntitySyncResponse> entitySyncResponse = Mono.just(EntitySyncResponseMother.sample());
         when(entitySyncWebClient.makeRequest(any(), any())).thenReturn(entitySyncResponse);
 
-        Mono<Void> result = newEntitiesCreatorService.addNewEntities(externalEntitiesIdList, issuer);
+        Mono<Void> result = newEntitiesCreatorService.addNewEntities(issuer, externalEntitiesIdList, internalEntitiesIds);
 
         StepVerifier.create(result)
                 .expectComplete()
                 .verify();
-
-        verify(internalEntitiesGetterService, times(1)).getInternalEntities();
-        verifyNoMoreInteractions(internalEntitiesGetterService);
 
         verify(entitySyncWebClient, times(1)).makeRequest(any(), any());
         verifyNoMoreInteractions(entitySyncWebClient);
