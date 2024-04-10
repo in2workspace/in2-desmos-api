@@ -73,13 +73,7 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                         auditRecord.setHash(auditRecordHash);
                         // Then, we calculate the hashLink of the entity concatenating the previous hashLink
                         // with the hash of the current entity
-                        String auditRecordHashLink;
-                        if (lastAuditRecordRegistered.getHashLink() != null) {
-                            auditRecordHashLink = calculateHashLink(lastAuditRecordRegistered.getHashLink(), auditRecordHash);
-                        } else {
-                            auditRecordHashLink = auditRecordHash;
-                        }
-                        auditRecord.setHashLink(auditRecordHashLink);
+                        auditRecord.setHashLink(setAuditRecordHashLink(lastAuditRecordRegistered, auditRecordHash));
                     } catch (JsonProcessingException | NoSuchAlgorithmException e) {
                         log.info("ProcessID: {} - Error building and saving audit record: {}", processId, e.getMessage());
                         return Mono.error(e);
@@ -117,7 +111,7 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                             // because these have already been sorted in the
                             // SubscribeWorkflowImpl.sortAttributesAlphabetically()
                             entityHash = calculateSHA256(retrievedBrokerEntity);
-                            entityHashLink = calculateHashLink(lastAuditRecordRegistered.getEntityHashLink(), entityHash);
+                            entityHashLink = extractHashLinkFromDataLocation(blockchainNotification.dataLocation());
                         }
                         // Create the new audit record
                         AuditRecord auditRecord = AuditRecord.builder()
@@ -137,11 +131,11 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                                 .build();
                         // Firstly, we calculate the hash of the entity without the hash and hashLink fields
                         String auditRecordHash = calculateSHA256(objectMapper.writeValueAsString(auditRecord));
+                        log.debug("ProcessID: {} - Audit Record Hash: {}", processId, auditRecordHash);
                         auditRecord.setHash(auditRecordHash);
                         // Then, we calculate the hashLink of the entity concatenating the previous hashLink
                         // with the hash of the current entity
-                        String auditRecordHashLink = calculateHashLink(lastAuditRecordRegistered.getHashLink(), auditRecordHash);
-                        auditRecord.setHashLink(auditRecordHashLink);
+                        auditRecord.setHashLink(setAuditRecordHashLink(lastAuditRecordRegistered, auditRecordHash));
                         return auditRecordRepository.save(auditRecord).then();
                     } catch (JsonProcessingException | NoSuchAlgorithmException e) {
                         return Mono.error(e);
@@ -164,7 +158,6 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                         count == 0 ? Mono.just(AuditRecord.builder().build())
                                 : Mono.error(new NoSuchElementException()))));
     }
-
 
     /**
      * Retrieves the most recent audit record for the specified entity that is either published or deleted.
@@ -191,6 +184,12 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                 .flatMap(auditRecord -> auditRecord != null
                         ? Mono.just(auditRecord.getEntityHash())
                         : Mono.error(new NoSuchElementException()));
+    }
+
+    private String setAuditRecordHashLink(AuditRecord lastAuditRecordRegistered, String auditRecordHash)
+            throws NoSuchAlgorithmException {
+        return lastAuditRecordRegistered.getHashLink() == null ? auditRecordHash
+                : calculateHashLink(lastAuditRecordRegistered.getHashLink(), auditRecordHash);
     }
 
 }

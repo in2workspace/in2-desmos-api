@@ -3,6 +3,7 @@ package es.in2.desmos.domain.services.broker.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.domain.exceptions.BrokerNotificationParserException;
+import es.in2.desmos.domain.exceptions.BrokerNotificationSelfGeneratedException;
 import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.api.QueueService;
@@ -48,9 +49,9 @@ public class BrokerListenerServiceImpl implements BrokerListenerService {
         return validateBrokerNotification(brokerNotification)
                 // Validate if BrokerNotification is from an external source or self-generated
                 .flatMap(dataMap -> isBrokerNotificationFromExternalSource(processId, dataMap)
-                            // Create and AuditRecord with status RECEIVED
-                            .then(auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(processId, dataMap,
-                                    AuditRecordStatus.RECEIVED, null)))
+                        // Create and AuditRecord with status RECEIVED
+                        .then(auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(processId, dataMap,
+                                AuditRecordStatus.RECEIVED, null)))
                 // Set priority for the pendingSubscribeEventsQueue event
                 .then(Mono.just(EventQueuePriority.MEDIUM))
                 // Enqueue BrokerNotification to DataPublicationQueue
@@ -90,7 +91,7 @@ public class BrokerListenerServiceImpl implements BrokerListenerService {
                         String newEntityHash = calculateSHA256(objectMapper.writer().writeValueAsString(dataMap));
                         if (auditRecordFound.getEntityHash().equals(newEntityHash)) {
                             log.debug("ProcessID: {} - BrokerNotification is self-generated", processId);
-                            return Mono.empty();
+                            return Mono.error(new BrokerNotificationSelfGeneratedException("BrokerNotification is self-generated"));
                         }
                     } catch (JsonProcessingException | NoSuchAlgorithmException e) {
                         log.warn("ProcessID: {} - Error processing JSON: {}", processId, e.getMessage());
@@ -99,7 +100,10 @@ public class BrokerListenerServiceImpl implements BrokerListenerService {
                     log.debug("ProcessID: {} - BrokerNotification is from external source", processId);
                     return Mono.just(dataMap);
                 })
-                .doOnNext(map -> log.debug("ProcessID: {} - No transaction found; assuming BrokerNotification is from external source", processId));
+                .switchIfEmpty(Mono.defer(() -> {
+                    log.debug("ProcessID: {} - No audit record found; assuming BrokerNotification is from external source", processId);
+                    return Mono.just(dataMap);
+                }));
     }
 
 }

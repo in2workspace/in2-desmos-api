@@ -1,6 +1,5 @@
 package es.in2.desmos.domain.models;
 
-import es.in2.desmos.domain.models.BlockchainSubscription;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 

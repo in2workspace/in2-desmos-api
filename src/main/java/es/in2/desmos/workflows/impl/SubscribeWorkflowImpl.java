@@ -72,7 +72,7 @@ public class SubscribeWorkflowImpl implements SubscribeWorkflow {
                                                 )
                                 )
                                 .doOnSuccess(success -> log.info("ProcessID: {} - Subscribe Workflow completed successfully.", processId))
-                                .doOnError(error -> log.error("ProcessID: {} - Error occurred while processing the Publish Workflow: {}", processId, error.getMessage())));
+                                .doOnError(error -> log.error("ProcessID: {} - Error occurred while processing the Subscribe Workflow: {}", processId, error.getMessage())));
     }
 
     /*
@@ -84,6 +84,8 @@ public class SubscribeWorkflowImpl implements SubscribeWorkflow {
         log.debug("ProcessID: {} - Retrieving entity from the external broker...", processId);
         // Get the External Broker URL from the dataLocation
         String externalBrokerURL = extractContextBrokerUrlFromDataLocation(blockchainNotification.dataLocation());
+        // WIP: If i change the local broker domain it tries to extract the entity from the local domain and not from the one specified on datalocation
+        log.debug("ProcessID: {} - External Broker URL: {}", processId, externalBrokerURL);
         // Retrieve entity from the External Broker
         return apiConfig.webClient()
                 .get()
@@ -117,9 +119,16 @@ public class SubscribeWorkflowImpl implements SubscribeWorkflow {
             // This hashLink is expected to match with the new calculated hashLink, that is,
             // the hash resulting from the concatenation of the BlockchainNotification.previousHash field
             // and the calculated hash of the retrieved broker entity.
+            // The previousHash field starts with "0x" and the hashLink in the dataLocation field does not.
+            String previousEntityHash = blockchainNotification.previousEntityHash().substring(2);
             String expectedEntityHasLink = extractHashLinkFromDataLocation(blockchainNotification.dataLocation());
-            String calculatedEntityHasLink = calculateHashLink(blockchainNotification.previousEntityHash(), retrievedEntityHash);
+            // WIP: Calculates the hashlink of the retrieved entity hash and the previous entity hash if the previous entity hash is different from the hashlink in the dataLocation
+            String calculatedEntityHasLink = previousEntityHash.equals(extractHashLinkFromDataLocation(blockchainNotification.dataLocation()))
+                    ? previousEntityHash : calculateHashLink(previousEntityHash, retrievedEntityHash);
             // If the calculated hashLink does not match the expected hashLink, an exception is thrown.
+            log.debug("ProcessID: {} - Retrieved Entity Hash: {}", processId, retrievedEntityHash);
+            log.debug("ProcessID: {} - Calculated HashLink: {}", processId, calculatedEntityHasLink);
+            log.debug("ProcessID: {} - Expected HashLink: {}", processId, expectedEntityHasLink);
             if (!calculatedEntityHasLink.equals(expectedEntityHasLink)) {
                 log.error("ProcessID: {} - Error occurred while verifying the data integrity of the retrieved entity: HashLink verification failed", processId);
                 return Mono.error(new HashLinkException("HashLink verification failed"));
