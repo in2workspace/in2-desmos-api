@@ -1,8 +1,8 @@
 package es.in2.desmos.workflows.impl;
 
+import es.in2.desmos.domain.events.EntitiesCreatorEventPublisher;
 import es.in2.desmos.domain.models.ProductOffering;
 import es.in2.desmos.domain.services.sync.InternalEntitiesGetterService;
-import es.in2.desmos.domain.services.sync.NewEntitiesCreatorService;
 import es.in2.desmos.workflows.DiscoverySyncWorkflow;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,15 +16,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DiscoverySyncWorkflowImpl implements DiscoverySyncWorkflow {
     private final InternalEntitiesGetterService internalEntitiesGetterService;
-    private final NewEntitiesCreatorService newEntitiesCreatorService;
+    private final EntitiesCreatorEventPublisher entitiesCreatorEventPublisher;
 
     @Override
     public Mono<List<ProductOffering>> discoverySync(String processId, Mono<String> issuer, Mono<List<String>> externalEntityIds) {
-        Mono<List<String>> internalEntityIds = internalEntitiesGetterService.getInternalEntities();
-        var newEntitiesAdder = newEntitiesCreatorService.addNewEntities(issuer, externalEntityIds, internalEntityIds);
+        Mono<List<ProductOffering>> internalProductOfferings = internalEntitiesGetterService.getInternalEntities();
 
-        // TODO
-        // return getInternalEntityIds();
-        return null;
+        Mono<List<String>> internalEntityIds = internalProductOfferings.map(x -> x.stream().map(ProductOffering::id).toList());
+        entitiesCreatorEventPublisher.publishEvent(issuer, externalEntityIds, internalEntityIds);
+
+        return internalProductOfferings;
     }
 }
