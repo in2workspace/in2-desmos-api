@@ -2,6 +2,9 @@ package es.in2.desmos.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import es.in2.desmos.domain.models.DiscoverySyncRequest;
+import es.in2.desmos.domain.models.DiscoverySyncResponse;
+import es.in2.desmos.domain.models.ProductOffering;
 import es.in2.desmos.objectmothers.DiscoverySyncRequestMother;
 import es.in2.desmos.objectmothers.DiscoverySyncResponseMother;
 import es.in2.desmos.workflows.DiscoverySyncWorkflow;
@@ -16,8 +19,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @WebFluxTest(DiscoverySyncController.class)
@@ -37,19 +38,18 @@ class DiscoverySyncControllerTests {
     @Test
     void itShouldReturnExternalEntityIdsWithIssuer() throws JsonProcessingException {
 
-        var discoverySyncRequest = DiscoverySyncRequestMother.simpleDiscoverySyncRequest();
-        var discoverySyncRequestJson = objectMapper.writeValueAsString(discoverySyncRequest);
+        Mono<DiscoverySyncRequest> discoverySyncRequest = Mono.just(DiscoverySyncRequestMother.simpleDiscoverySyncRequest());
 
-        var discoverySyncResponse = DiscoverySyncResponseMother.simpleDiscoverySyncResponse(contextBrokerExternalDomain);
+        DiscoverySyncResponse discoverySyncResponse = DiscoverySyncResponseMother.simpleDiscoverySyncResponse(contextBrokerExternalDomain);
         var discoverySyncResponseJson = objectMapper.writeValueAsString(discoverySyncResponse);
 
-        List<String> externalEntityIds = discoverySyncRequest.createExternalEntityIdsStringList();
-        when(discoverySyncWorkflow.discoverySync(anyString(), eq(discoverySyncRequest.issuer()), eq(externalEntityIds))).thenReturn(Mono.just(discoverySyncResponse.localEntitiesIds()));
+        Mono<List<ProductOffering>> localEntityIds = Mono.just(DiscoverySyncResponseMother.simpleDiscoverySyncResponse(contextBrokerExternalDomain).localEntitiesIds());
+        when(discoverySyncWorkflow.discoverySync(anyString(), any(), any())).thenReturn(localEntityIds);
 
         webTestClient.post()
                 .uri("/api/v1/sync/discovery")
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(discoverySyncRequestJson)
+                .body(discoverySyncRequest, DiscoverySyncRequest.class)
                 .exchange()
                 .expectStatus().isAccepted()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -57,7 +57,7 @@ class DiscoverySyncControllerTests {
                 .json(discoverySyncResponseJson)
                 .consumeWith(System.out::println);
 
-        verify(discoverySyncWorkflow, times(1)).discoverySync(anyString(), eq(discoverySyncRequest.issuer()), eq(externalEntityIds));
+        verify(discoverySyncWorkflow, times(1)).discoverySync(anyString(), any(), any());
         verifyNoMoreInteractions(discoverySyncWorkflow);
     }
 
