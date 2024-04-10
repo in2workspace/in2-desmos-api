@@ -47,14 +47,14 @@ class NewEntitiesCreatorServiceTests {
         verifyNoMoreInteractions(entitySyncWebClient);
     }
 
-    private static @NotNull Mono<List<String>> getInternalEntitiesIdsMono() {
+    private @NotNull Mono<List<String>> getInternalEntitiesIdsMono() {
         List<String> internalEntitiesIds = new ArrayList<>();
         internalEntitiesIds.add(ProductOfferingMother.sample3().id());
         internalEntitiesIds.add(ProductOfferingMother.sample4().id());
         return Mono.just(internalEntitiesIds);
     }
 
-    private static @NotNull List<String> createExternalEntitiesIdList() {
+    private @NotNull List<String> createExternalEntitiesIdList() {
         List<String> externalEntitiesIdList = new ArrayList<>();
         externalEntitiesIdList.add(ProductOfferingMother.sample1().id());
         externalEntitiesIdList.add(ProductOfferingMother.sample2().id());
