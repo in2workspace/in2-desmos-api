@@ -46,12 +46,12 @@ class DiscoverySyncWorkflowIT {
         ObjectMapper objectMapper = new ObjectMapper();
 
         var discoverySyncRequest = DiscoverySyncRequestMother.simpleDiscoverySyncRequest();
-        var discoverySyncRequestJson = objectMapper.writeValueAsString(discoverySyncRequest);
+        String discoverySyncRequestJson = objectMapper.writeValueAsString(discoverySyncRequest);
 
         var discoverySyncResponse = DiscoverySyncResponseMother.fullDiscoverySyncResponse(contextBrokerExternalDomain);
-        var discoverySyncResponseJson = objectMapper.writeValueAsString(discoverySyncResponse);
+        String discoverySyncResponseJson = objectMapper.writeValueAsString(discoverySyncResponse);
 
-        var brokerUrl = ContainerManager.getBaseUriForScorpioA();
+        String brokerUrl = ContainerManager.getBaseUriForScorpioA();
         addInitialEntitiesToContextBroker(brokerUrl);
 
         webTestClient.post()
