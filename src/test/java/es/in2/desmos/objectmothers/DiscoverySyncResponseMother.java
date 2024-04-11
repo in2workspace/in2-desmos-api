@@ -17,4 +17,8 @@ public final class DiscoverySyncResponseMother {
         productOfferingList.add(ProductOfferingMother.sample4());
         return new DiscoverySyncResponse(contextBrokerExternalDomain, productOfferingList);
     }
+
+    public static @NotNull DiscoverySyncResponse fromList(String contextBrokerExternalDomain, List<ProductOffering> productOfferings) {
+        return new DiscoverySyncResponse(contextBrokerExternalDomain, productOfferings);
+    }
 }

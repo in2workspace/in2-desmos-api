@@ -5,6 +5,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 
 public final class ProductOfferingMother {
     private ProductOfferingMother() {
@@ -26,6 +28,15 @@ public final class ProductOfferingMother {
         return new ProductOffering("urn:productOffering:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c", "1.9", "2024-06-02T12:00:00Z");
     }
 
+    public static @NotNull ProductOffering randomIdAndVersion() {
+        String id = "urn:productOffering:" + UUID.randomUUID();
+        Random random = new Random();
+        double randomVersion = random.nextDouble() + 1;
+        randomVersion = Math.round(randomVersion * 10.0) / 10.0;
+
+        return new ProductOffering(id, String.valueOf(randomVersion), "2024-04-01T12:00:00Z");
+    }
+
     public static @NotNull List<ProductOffering> list3And4() {
         List<ProductOffering> productOfferingList = new ArrayList<>();
         productOfferingList.add(sample3());
@@ -33,12 +44,11 @@ public final class ProductOfferingMother {
         return productOfferingList;
     }
 
-    public static @NotNull List<ProductOffering> fullList() {
-        List<ProductOffering> productOfferingList = new ArrayList<>();
-        productOfferingList.add(sample1());
-        productOfferingList.add(sample2());
-        productOfferingList.add(sample3());
-        productOfferingList.add(sample4());
-        return productOfferingList;
+    public static @NotNull List<ProductOffering> randomList(int size) {
+        List<ProductOffering> initialEntities = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            initialEntities.add(ProductOfferingMother.randomIdAndVersion());
+        }
+        return initialEntities;
     }
 }
