@@ -11,7 +11,7 @@ public final class DiscoverySyncRequestMother {
     private DiscoverySyncRequestMother() {
     }
 
-    public static @NotNull DiscoverySyncRequest simpleDiscoverySyncRequest() {
+    public static @NotNull DiscoverySyncRequest list1And2() {
         String issuer = "https://my-domain.org";
         List<IdRecord> entityIds = new ArrayList<>();
         entityIds.add(new IdRecord(ProductOfferingMother.sample1().id()));

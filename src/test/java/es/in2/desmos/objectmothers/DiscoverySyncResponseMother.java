@@ -11,15 +11,10 @@ public final class DiscoverySyncResponseMother {
     private DiscoverySyncResponseMother() {
     }
 
-    public static @NotNull DiscoverySyncResponse simpleDiscoverySyncResponse(String contextBrokerExternalDomain) {
+    public static @NotNull DiscoverySyncResponse list3And4(String contextBrokerExternalDomain) {
         List<ProductOffering> productOfferingList = new ArrayList<>();
         productOfferingList.add(ProductOfferingMother.sample3());
         productOfferingList.add(ProductOfferingMother.sample4());
-        return new DiscoverySyncResponse(contextBrokerExternalDomain, productOfferingList);
-    }
-
-    public static @NotNull DiscoverySyncResponse fullDiscoverySyncResponse(String contextBrokerExternalDomain) {
-        List<ProductOffering> productOfferingList = ProductOfferingMother.fullList();
         return new DiscoverySyncResponse(contextBrokerExternalDomain, productOfferingList);
     }
 }

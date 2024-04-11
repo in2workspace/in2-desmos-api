@@ -38,12 +38,12 @@ class DiscoverySyncControllerTests {
     @Test
     void itShouldReturnExternalEntityIdsWithIssuer() throws JsonProcessingException {
 
-        Mono<DiscoverySyncRequest> discoverySyncRequest = Mono.just(DiscoverySyncRequestMother.simpleDiscoverySyncRequest());
+        Mono<DiscoverySyncRequest> discoverySyncRequest = Mono.just(DiscoverySyncRequestMother.list1And2());
 
-        DiscoverySyncResponse discoverySyncResponse = DiscoverySyncResponseMother.simpleDiscoverySyncResponse(contextBrokerExternalDomain);
+        DiscoverySyncResponse discoverySyncResponse = DiscoverySyncResponseMother.list3And4(contextBrokerExternalDomain);
         var discoverySyncResponseJson = objectMapper.writeValueAsString(discoverySyncResponse);
 
-        Mono<List<ProductOffering>> localEntityIds = Mono.just(DiscoverySyncResponseMother.simpleDiscoverySyncResponse(contextBrokerExternalDomain).localEntitiesIds());
+        Mono<List<ProductOffering>> localEntityIds = Mono.just(DiscoverySyncResponseMother.list3And4(contextBrokerExternalDomain).localEntitiesIds());
         when(discoverySyncWorkflow.discoverySync(anyString(), any(), any())).thenReturn(localEntityIds);
 
         webTestClient.post()

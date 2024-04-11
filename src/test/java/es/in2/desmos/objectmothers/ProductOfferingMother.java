@@ -26,6 +26,13 @@ public final class ProductOfferingMother {
         return new ProductOffering("urn:productOffering:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c", "1.9", "2024-06-02T12:00:00Z");
     }
 
+    public static @NotNull List<ProductOffering> list3And4() {
+        List<ProductOffering> productOfferingList = new ArrayList<>();
+        productOfferingList.add(sample3());
+        productOfferingList.add(sample4());
+        return productOfferingList;
+    }
+
     public static @NotNull List<ProductOffering> fullList() {
         List<ProductOffering> productOfferingList = new ArrayList<>();
         productOfferingList.add(sample1());
@@ -34,6 +41,4 @@ public final class ProductOfferingMother {
         productOfferingList.add(sample4());
         return productOfferingList;
     }
-
-
 }
