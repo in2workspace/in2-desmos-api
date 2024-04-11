@@ -21,7 +21,7 @@ public class EntitySyncWebClientImpl implements EntitySyncWebClient {
                 .post()
                 .uri(issuer + "/api/v1/sync/entities")
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(entitySyncRequest)
+                .body(entitySyncRequest,EntitySyncRequest.class)
                 .retrieve()
                 .bodyToMono(String.class)
                 .map(EntitySyncResponse::new);
