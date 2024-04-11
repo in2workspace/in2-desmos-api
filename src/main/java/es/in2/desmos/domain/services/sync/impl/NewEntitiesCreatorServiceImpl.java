@@ -41,8 +41,8 @@ public class NewEntitiesCreatorServiceImpl implements NewEntitiesCreatorService 
         );
     }
 
-    private Mono<EntitySyncResponse> requestNewEntities(Mono<List<String>> differentEntityIds, Mono<String> issuer) {
-        Mono<List<IdRecord>> idRecordsToRequest = differentEntityIds.map(DiscoverySyncRequest::createExternalEntityIdsListFromString);
+    private Mono<EntitySyncResponse> requestNewEntities(Mono<List<String>> entityIdsToAdd, Mono<String> issuer) {
+        Mono<List<IdRecord>> idRecordsToRequest = entityIdsToAdd.map(DiscoverySyncRequest::createExternalEntityIdsListFromString);
 
         Mono<EntitySyncRequest> entitySyncRequest = idRecordsToRequest.map(EntitySyncRequest::new);
 
