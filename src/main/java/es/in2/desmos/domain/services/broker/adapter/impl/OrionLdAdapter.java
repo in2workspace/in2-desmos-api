@@ -1,5 +1,6 @@
 package es.in2.desmos.domain.services.broker.adapter.impl;
 
+import es.in2.desmos.domain.models.ProductOffering;
 import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import es.in2.desmos.domain.models.BrokerSubscription;
 import org.springframework.stereotype.Component;
@@ -54,5 +55,8 @@ public class OrionLdAdapter implements BrokerAdapterService {
     public Mono<Void> deleteSubscription(String processId, String subscriptionId) {
         return null;
     }
+
+    @Override
+    public Mono<List<ProductOffering>> getEntityIds() { return null; }
 
 }
