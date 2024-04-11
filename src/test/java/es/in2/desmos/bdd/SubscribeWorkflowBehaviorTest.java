@@ -18,12 +18,10 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.UUID;
-
 @SpringBootTest
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class SubscribeWorkflowBehaviorTest {
+class SubscribeWorkflowBehaviorTest {
 
     private final Logger log = LoggerFactory.getLogger(PublishWorkflowBehaviorTest.class);
 
