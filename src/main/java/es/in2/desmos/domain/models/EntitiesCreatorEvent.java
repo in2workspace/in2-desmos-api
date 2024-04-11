@@ -1,4 +1,4 @@
-package es.in2.desmos.domain.events;
+package es.in2.desmos.domain.models;
 
 import reactor.core.publisher.Mono;
 
