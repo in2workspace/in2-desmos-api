@@ -6,6 +6,7 @@ import es.in2.desmos.domain.models.EntitySyncResponse;
 import es.in2.desmos.domain.models.IdRecord;
 import es.in2.desmos.domain.services.sync.EntitySyncWebClient;
 import es.in2.desmos.domain.services.sync.NewEntitiesCreatorService;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,20 +21,15 @@ public class NewEntitiesCreatorServiceImpl implements NewEntitiesCreatorService 
     private final EntitySyncWebClient entitySyncWebClient;
 
     @Override
-    public Mono<Void> addNewEntities(Mono<String> issuer, Mono<List<String>> externalEntityIds, Mono<List<String>> internalEntityIds) {
+    public Mono<Void> addNewEntities(Mono<String> issuer, Mono<List<String>> externalEntityIds, @NotNull Mono<List<String>> internalEntityIds) {
 
-        if (internalEntityIds != null && externalEntityIds != null) {
-            Mono<List<String>> entityIdsToAdd = getEntitiesToAdd(externalEntityIds, internalEntityIds);
-            Mono<EntitySyncResponse> entitiesToAdd = requestNewEntities(entityIdsToAdd, issuer);
+        Mono<List<String>> entityIdsToAdd = getEntitiesToAdd(externalEntityIds, internalEntityIds);
+        Mono<EntitySyncResponse> entitiesToAdd = requestNewEntities(entityIdsToAdd, issuer);
 
-            return publishNewEntities(entitiesToAdd);
-        }
-
-        return Mono.empty();
+        return publishNewEntities(entitiesToAdd);
     }
 
     private Mono<List<String>> getEntitiesToAdd(Mono<List<String>> externalEntityIds, Mono<List<String>> internalEntityIds) {
-
         return internalEntityIds.flatMap(
                 internalList -> externalEntityIds.flatMap(
                         externalList ->
@@ -55,7 +51,7 @@ public class NewEntitiesCreatorServiceImpl implements NewEntitiesCreatorService 
 
     private Mono<Void> publishNewEntities(Mono<EntitySyncResponse> newEntities) {
         // TODO
-        log.info("New entities: {}" , newEntities);
+        log.info("New entities: {}", newEntities);
         return Mono.empty();
     }
 }
