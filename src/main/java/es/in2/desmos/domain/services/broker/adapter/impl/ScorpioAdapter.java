@@ -8,6 +8,8 @@ import es.in2.desmos.domain.exceptions.JsonReadingException;
 import es.in2.desmos.domain.exceptions.RequestErrorException;
 import es.in2.desmos.domain.exceptions.SubscriptionCreationException;
 import es.in2.desmos.domain.models.BrokerSubscription;
+import es.in2.desmos.domain.models.ProductOffering;
+import es.in2.desmos.domain.models.adapters.scorpio.ScorpioProductOffering;
 import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -20,10 +22,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static es.in2.desmos.domain.utils.MessageUtils.*;
 
@@ -34,6 +33,8 @@ public class ScorpioAdapter implements BrokerAdapterService {
 
     private final ObjectMapper objectMapper;
     private final BrokerConfig brokerConfig;
+
+    private static final MediaType APPLICATION_LD_JSON = new MediaType("application", "ld+json");
 
     private WebClient webClient;
 
@@ -264,4 +265,28 @@ public class ScorpioAdapter implements BrokerAdapterService {
         }
     }
 
+    @Override
+    public Mono<List<ProductOffering>> getEntityIds() {
+        String uri = brokerConfig.getEntitiesPath() + "/" + "?type=ProductOffering&attrs=last_update,version\"";
+
+        Mono<ScorpioProductOffering[]> scorpioProductOfferingList = webClient
+                .get()
+                .uri(uri)
+                .accept(APPLICATION_LD_JSON)
+                .retrieve()
+                .bodyToMono(ScorpioProductOffering[].class)
+                .retry(3);
+
+        return scorpioProductOfferingList.map(x -> {
+            List<ProductOffering> productOfferingList = new ArrayList<>();
+            for (var scorpioProductOffering : x) {
+                productOfferingList.add(
+                        new ProductOffering(
+                                scorpioProductOffering.id(),
+                                scorpioProductOffering.version().value(),
+                                scorpioProductOffering.lastUpdate().value()));
+            }
+            return productOfferingList;
+        });
+    }
 }
