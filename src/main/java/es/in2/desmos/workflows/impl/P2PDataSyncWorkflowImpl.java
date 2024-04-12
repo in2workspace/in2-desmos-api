@@ -3,7 +3,7 @@ package es.in2.desmos.workflows.impl;
 import es.in2.desmos.domain.events.DataNegotiationEventPublisher;
 import es.in2.desmos.domain.models.DataNegotiationEvent;
 import es.in2.desmos.domain.models.Entity;
-import es.in2.desmos.domain.services.broker.BrokerEntityIdGetterService;
+import es.in2.desmos.domain.services.broker.BrokerEntityGetterService;
 import es.in2.desmos.workflows.P2PDataSyncWorkflow;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,12 +16,12 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class P2PDataSyncWorkflowImpl implements P2PDataSyncWorkflow {
-    private final BrokerEntityIdGetterService brokerEntityIdGetterService;
+    private final BrokerEntityGetterService brokerEntityGetterService;
     private final DataNegotiationEventPublisher dataNegotiationEventPublisher;
 
     @Override
     public Mono<List<Entity>> dataDiscovery(String processId, Mono<String> issuer, Mono<List<Entity>> externalEntities) {
-        Mono<List<Entity>> internalEntities = brokerEntityIdGetterService.getData();
+        Mono<List<Entity>> internalEntities = brokerEntityGetterService.getBasicData();
 
         DataNegotiationEvent dataNegotiationEvent = new DataNegotiationEvent(issuer, externalEntities, internalEntities);
         dataNegotiationEventPublisher.publishEvent(dataNegotiationEvent);

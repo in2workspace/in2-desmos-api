@@ -5,6 +5,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-public interface BrokerEntityIdGetterService {
-    Mono<List<Entity>> getData();
+public interface BrokerEntityGetterService {
+    Mono<List<Entity>> getBasicData();
 }

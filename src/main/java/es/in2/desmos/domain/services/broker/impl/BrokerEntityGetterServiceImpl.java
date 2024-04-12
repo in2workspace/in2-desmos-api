@@ -1,7 +1,7 @@
 package es.in2.desmos.domain.services.broker.impl;
 
 import es.in2.desmos.domain.models.Entity;
-import es.in2.desmos.domain.services.broker.BrokerEntityIdGetterService;
+import es.in2.desmos.domain.services.broker.BrokerEntityGetterService;
 import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import es.in2.desmos.domain.services.broker.adapter.factory.BrokerAdapterFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -12,15 +12,15 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class BrokerEntityIdGetterServiceImpl implements BrokerEntityIdGetterService {
+public class BrokerEntityGetterServiceImpl implements BrokerEntityGetterService {
     private final BrokerAdapterService brokerAdapterService;
 
-    public BrokerEntityIdGetterServiceImpl(BrokerAdapterFactory brokerAdapterFactory) {
+    public BrokerEntityGetterServiceImpl(BrokerAdapterFactory brokerAdapterFactory) {
         this.brokerAdapterService = brokerAdapterFactory.getBrokerAdapter();
     }
 
     @Override
-    public Mono<List<Entity>> getData() {
+    public Mono<List<Entity>> getBasicData() {
         return brokerAdapterService.getEntityIds();
     }
 }

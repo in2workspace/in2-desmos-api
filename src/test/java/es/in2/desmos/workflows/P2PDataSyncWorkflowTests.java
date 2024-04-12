@@ -2,7 +2,7 @@ package es.in2.desmos.workflows;
 
 import es.in2.desmos.domain.events.DataNegotiationEventPublisher;
 import es.in2.desmos.domain.models.Entity;
-import es.in2.desmos.domain.services.broker.impl.BrokerEntityIdGetterServiceImpl;
+import es.in2.desmos.domain.services.broker.impl.BrokerEntityGetterServiceImpl;
 import es.in2.desmos.objectmothers.EntityMother;
 import es.in2.desmos.workflows.impl.P2PDataSyncWorkflowImpl;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ class P2PDataSyncWorkflowTests {
     private P2PDataSyncWorkflowImpl p2PDataSyncWorkflow;
 
     @Mock
-    private BrokerEntityIdGetterServiceImpl brokerEntityIdGetterService;
+    private BrokerEntityGetterServiceImpl brokerEntityIdGetterService;
 
     @Mock
     private DataNegotiationEventPublisher dataNegotiationEventPublisher;
@@ -33,7 +33,7 @@ class P2PDataSyncWorkflowTests {
 
         List<Entity> expectedInternalEntities = EntityMother.list3And4();
 
-        when(brokerEntityIdGetterService.getData()).thenReturn(Mono.just(expectedInternalEntities));
+        when(brokerEntityIdGetterService.getBasicData()).thenReturn(Mono.just(expectedInternalEntities));
 
         Mono<List<Entity>> result = p2PDataSyncWorkflow.dataDiscovery("0", Mono.just("https://example.org"), Mono.just(EntityMother.list1And2()));
 
@@ -41,7 +41,7 @@ class P2PDataSyncWorkflowTests {
                 .expectNext(expectedInternalEntities)
                 .verifyComplete();
 
-        verify(brokerEntityIdGetterService, times(1)).getData();
+        verify(brokerEntityIdGetterService, times(1)).getBasicData();
         verifyNoMoreInteractions(brokerEntityIdGetterService);
 
     }

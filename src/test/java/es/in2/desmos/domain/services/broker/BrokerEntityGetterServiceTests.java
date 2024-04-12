@@ -23,13 +23,13 @@ import java.util.List;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class BrokerEntityIdGetterServiceTests {
+class BrokerEntityGetterServiceTests {
 
     @Autowired
     private ObjectMapper objectMapper;
 
     @Autowired
-    BrokerEntityIdGetterService brokerEntityIdGetterService;
+    BrokerEntityGetterService brokerEntityGetterService;
 
     @LocalServerPort
     private int localServerPort;
@@ -63,7 +63,7 @@ class BrokerEntityIdGetterServiceTests {
 
     @Test
     void itShouldReturnEntityIds() throws JSONException, JsonProcessingException {
-        var result = brokerEntityIdGetterService.getData();
+        var result = brokerEntityGetterService.getBasicData();
 
         StepVerifier.create(result)
                 .expectNext(initialEntities)
