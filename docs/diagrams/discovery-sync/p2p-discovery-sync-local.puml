@@ -20,7 +20,7 @@ end box
 
 '---------- Diagram ----------------
 
-ean -> p2pController++: POST /syc/p2p/discovery \nPayload: DiscoveryRequest
+ean -> p2pController++: POST /sync/p2p/discovery \nPayload: DiscoveryRequest
 
 note right of ean
     DiscoveryRequest:
