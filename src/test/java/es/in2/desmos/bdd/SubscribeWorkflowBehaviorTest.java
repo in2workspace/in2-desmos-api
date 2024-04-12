@@ -5,7 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import es.in2.desmos.ContainerManager;
 import es.in2.desmos.controllers.NotificationController;
+import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.BlockchainNotification;
+import es.in2.desmos.domain.repositories.AuditRecordRepository;
 import es.in2.desmos.domain.services.api.QueueService;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
@@ -19,14 +21,15 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
+
+import java.util.List;
 
 @SpringBootTest
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class SubscribeWorkflowBehaviorTest {
 
-    private final Logger log = LoggerFactory.getLogger(PublishWorkflowBehaviorTest.class);
+    private final Logger log = LoggerFactory.getLogger(SubscribeWorkflowBehaviorTest.class);
 
     private final ObjectMapper objectMapper =
             JsonMapper.builder()
@@ -37,24 +40,14 @@ class SubscribeWorkflowBehaviorTest {
     private NotificationController notificationController;
 
     @Autowired
+    private AuditRecordRepository auditRecordRepository;
+
+    @Autowired
     private QueueService pendingSubscribeEventsQueue;
 
     @DynamicPropertySource
     static void setDynamicProperties(DynamicPropertyRegistry registry) {
         ContainerManager.postgresqlProperties(registry);
-    }
-
-    @BeforeEach
-    public void setUp() {
-        log.info("1. Send a POST request to the external broker in order to retrieve the entity later");
-        WebClient.create().post()
-                .uri(ContainerManager.getBaseUriForScorpioA() + "/ngsi-ld/v1/entities")
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(request)
-                .retrieve()
-                .onStatus(status -> status.isSameCodeAs(HttpStatusCode.valueOf(409)), response -> Mono.empty())
-                .bodyToMono(String.class).block();
     }
 
     String request = """
@@ -71,10 +64,19 @@ class SubscribeWorkflowBehaviorTest {
                 }
             }""";
 
-    @Order(1)
+    @Order(0)
     @Test
     void subscribeWorkflowBehaviorTest() {
         log.info("Starting Subscribe Workflow Behavior Test...");
+        log.info("1. Send a POST request to the external broker in order to retrieve the entity later");
+        WebClient.create().post()
+                .uri(ContainerManager.getBaseUriForScorpioA() + "/ngsi-ld/v1/entities")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .retrieve()
+                .onStatus(status -> status.isSameCodeAs(HttpStatusCode.valueOf(409)), response -> Mono.empty())
+                .bodyToMono(String.class).block();
         /*
             Given a BlockchainNotification, we will send a POST request emulating the broker behavior.
             When the POST request is received, the application will retrieve a BrokerEntity from the external broker,
@@ -101,10 +103,12 @@ class SubscribeWorkflowBehaviorTest {
         try {
             log.info("1. Create a BlockchainNotification and send a POST request to the application");
             BlockchainNotification blockchainNotification = objectMapper.readValue(blockchainNotificationJson, BlockchainNotification.class);
-            StepVerifier.create(notificationController.postDLTNotification(blockchainNotification))
-                    .verifyComplete();
+            notificationController.postDLTNotification(blockchainNotification).block();
             log.info("1.1. Get the event stream from the pendingSubscribeQueue and subscribe to it.");
             pendingSubscribeEventsQueue.getEventStream().subscribe(event -> log.info("Event: {}", event));
+            log.info("2. Check values in the AuditRecord table:");
+            List<AuditRecord> auditRecordList = auditRecordRepository.findAll().collectList().block();
+            log.info("Result: {}", auditRecordList);
         } catch (Exception e) {
             log.error("Error while sending the BlockchainNotification: {}", e.getMessage());
         }
