@@ -1,13 +1,10 @@
 package es.in2.desmos.domain.events;
 
-import es.in2.desmos.domain.models.EntitiesCreatorEvent;
+import es.in2.desmos.domain.models.DataNegotiationEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Mono;
-
-import java.util.List;
 
 @Slf4j
 @Component
@@ -15,10 +12,8 @@ import java.util.List;
 public class EntitiesCreatorEventPublisher {
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    public void publishEvent(Mono<String> issuer, Mono<List<String>> externalEntityIds,
-                             Mono<List<String>> internalEntityIds) {
+    public void publishEvent(DataNegotiationEvent dataNegotiationEvent) {
         log.info("Publishing entities creator event.");
-        EntitiesCreatorEvent entitiesCreatorEvent = new EntitiesCreatorEvent(issuer, externalEntityIds, internalEntityIds);
-        applicationEventPublisher.publishEvent(entitiesCreatorEvent);
+        applicationEventPublisher.publishEvent(dataNegotiationEvent);
     }
 }

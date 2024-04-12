@@ -7,7 +7,7 @@ import es.in2.desmos.domain.models.DiscoverySyncResponse;
 import es.in2.desmos.domain.models.Entity;
 import es.in2.desmos.objectmothers.DiscoverySyncRequestMother;
 import es.in2.desmos.objectmothers.DiscoverySyncResponseMother;
-import es.in2.desmos.workflows.DiscoverySyncWorkflow;
+import es.in2.desmos.workflows.P2PDataSyncWorkflow;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,7 +30,7 @@ class P2PDataSyncControllerTests {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private DiscoverySyncWorkflow discoverySyncWorkflow;
+    private P2PDataSyncWorkflow p2PDataSyncWorkflow;
 
     @Value("${broker.externalDomain}")
     private String contextBrokerExternalDomain;
@@ -44,7 +44,7 @@ class P2PDataSyncControllerTests {
         var discoverySyncResponseJson = objectMapper.writeValueAsString(discoverySyncResponse);
 
         Mono<List<Entity>> localEntityIds = Mono.just(DiscoverySyncResponseMother.list3And4(contextBrokerExternalDomain).entities());
-        when(discoverySyncWorkflow.discoverySync(anyString(), any(), any())).thenReturn(localEntityIds);
+        when(p2PDataSyncWorkflow.dataDiscovery(anyString(), any(), any())).thenReturn(localEntityIds);
 
         webTestClient.post()
                 .uri("/api/v1/sync/p2p/discovery")
@@ -57,7 +57,7 @@ class P2PDataSyncControllerTests {
                 .json(discoverySyncResponseJson)
                 .consumeWith(System.out::println);
 
-        verify(discoverySyncWorkflow, times(1)).discoverySync(anyString(), any(), any());
-        verifyNoMoreInteractions(discoverySyncWorkflow);
+        verify(p2PDataSyncWorkflow, times(1)).dataDiscovery(anyString(), any(), any());
+        verifyNoMoreInteractions(p2PDataSyncWorkflow);
     }
 }

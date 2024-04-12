@@ -38,6 +38,13 @@ public final class EntityMother {
         return new Entity(id, "ProductOffering", String.valueOf(randomVersion), "2024-04-01T12:00:00Z", generateRandomSha256(), generateRandomSha256());
     }
 
+    public static @NotNull List<Entity> list1And2() {
+        List<Entity> entityList = new ArrayList<>();
+        entityList.add(sample1());
+        entityList.add(sample2());
+        return entityList;
+    }
+
     public static @NotNull List<Entity> list3And4() {
         List<Entity> entityList = new ArrayList<>();
         entityList.add(sample3());
