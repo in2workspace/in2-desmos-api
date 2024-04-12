@@ -20,10 +20,10 @@ end box
 
 '---------- Diagram ----------------
 
-ean -> p2pController++: POST /sync/p2p/discovery \nPayload: DiscoveryRequest
+ean -> p2pController++: POST /sync/p2p/discovery \nPayload: DiscoverySyncRequest
 
 note right of ean
-    DiscoveryRequest:
+    DiscoverySyncRequest:
 
     {
         List<EntityDTO> entities ->
@@ -35,7 +35,7 @@ note right of ean
 
     Hash is a SHA256 of the entity that is
     created by the External Access Node
-    when the DiscoveryRequest is created.
+    when the DiscoverySyncRequest is created.
 end note
 
     p2pController -> p2pWorkflow++: dataDiscovery()
