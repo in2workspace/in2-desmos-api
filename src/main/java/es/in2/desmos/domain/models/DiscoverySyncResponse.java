@@ -9,5 +9,5 @@ import java.util.List;
 
 public record DiscoverySyncResponse(
         @JsonProperty("issuer") @NotBlank @URL String issuer,
-        @JsonProperty("external_entity_ids") @NotNull List<ProductOffering> localEntitiesIds) {
+        @JsonProperty("external_entity_ids") @NotNull List<Entity> entities) {
 }

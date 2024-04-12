@@ -1,24 +1,14 @@
 package es.in2.desmos.domain.services.sync.impl;
 
-import es.in2.desmos.domain.models.DiscoverySyncRequest;
-import es.in2.desmos.domain.models.EntitySyncRequest;
-import es.in2.desmos.domain.models.EntitySyncResponse;
-import es.in2.desmos.domain.models.IdRecord;
-import es.in2.desmos.domain.services.sync.EntitySyncWebClient;
-import es.in2.desmos.domain.services.sync.NewEntitiesCreatorService;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
-
-import java.util.List;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class NewEntitiesCreatorServiceImpl implements NewEntitiesCreatorService {
-    private final EntitySyncWebClient entitySyncWebClient;
+public class NewEntitiesCreatorServiceImpl /*implements NewEntitiesCreatorService*/ {
+    /*private final EntitySyncWebClient entitySyncWebClient;
 
     @Override
     public Mono<Void> addNewEntities(Mono<String> issuer, Mono<List<String>> externalEntityIds, @NotNull Mono<List<String>> internalEntityIds) {
@@ -42,7 +32,7 @@ public class NewEntitiesCreatorServiceImpl implements NewEntitiesCreatorService 
     }
 
     private Mono<EntitySyncResponse> requestNewEntities(Mono<List<String>> entityIdsToAdd, Mono<String> issuer) {
-        Mono<List<IdRecord>> idRecordsToRequest = entityIdsToAdd.map(DiscoverySyncRequest::createExternalEntityIdsListFromString);
+        Mono<List<Entity>> idRecordsToRequest = entityIdsToAdd.map(DiscoverySyncRequest::createExternalEntityIdsListFromString);
 
         Mono<EntitySyncRequest> entitySyncRequest = idRecordsToRequest.map(EntitySyncRequest::new);
 
@@ -53,5 +43,5 @@ public class NewEntitiesCreatorServiceImpl implements NewEntitiesCreatorService 
         // TODO
         log.info("New entities: {}", newEntities);
         return Mono.empty();
-    }
+    }*/
 }

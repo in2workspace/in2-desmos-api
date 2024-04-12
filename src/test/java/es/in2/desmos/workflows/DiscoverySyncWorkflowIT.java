@@ -5,11 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.ContainerManager;
 import es.in2.desmos.domain.models.DiscoverySyncRequest;
 import es.in2.desmos.domain.models.DiscoverySyncResponse;
-import es.in2.desmos.domain.models.ProductOffering;
+import es.in2.desmos.domain.models.Entity;
 import es.in2.desmos.inflators.ScorpioInflator;
 import es.in2.desmos.objectmothers.DiscoverySyncRequestMother;
 import es.in2.desmos.objectmothers.DiscoverySyncResponseMother;
-import es.in2.desmos.objectmothers.ProductOfferingMother;
+import es.in2.desmos.objectmothers.EntityMother;
 import org.apache.commons.lang3.NotImplementedException;
 import org.json.JSONException;
 import org.junit.jupiter.api.*;
@@ -47,19 +47,19 @@ class DiscoverySyncWorkflowIT {
         ContainerManager.postgresqlProperties(registry);
     }
 
-    private static List<ProductOffering> initialEntities;
+    private static List<Entity> initialEntities;
 
     @BeforeAll
     static void setup() throws JSONException, org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException {
         String brokerUrl = ContainerManager.getBaseUriForScorpioA();
-        initialEntities = ProductOfferingMother.randomList(2);
+        initialEntities = EntityMother.randomList(2);
         ScorpioInflator.addInitialEntitiesToContextBroker(brokerUrl, initialEntities);
     }
 
     @AfterAll
     static void tearDown() {
         String brokerUrl = ContainerManager.getBaseUriForScorpioA();
-        List<String> ids = initialEntities.stream().map(ProductOffering::id).toList();
+        List<String> ids = initialEntities.stream().map(Entity::id).toList();
         ScorpioInflator.deleteInitialEntitiesFromContextBroker(brokerUrl, ids);
     }
 

@@ -9,19 +9,12 @@ import java.util.List;
 
 public record DiscoverySyncRequest(
         @JsonProperty("issuer") @NotBlank @URL String issuer,
-        @JsonProperty("external_entity_ids") @NotNull List<IdRecord> externalEntityIds) {
+        @JsonProperty("external_entity_ids") @NotNull List<Entity> entities) {
 
     public List<String> createExternalEntityIdsStringList() {
-        return externalEntityIds
+        return entities
                 .stream()
-                .map(IdRecord::id)
-                .toList();
-    }
-
-    public static List<IdRecord> createExternalEntityIdsListFromString(List<String> idsList) {
-        return idsList
-                .stream()
-                .map(IdRecord::new)
+                .map(Entity::id)
                 .toList();
     }
 }

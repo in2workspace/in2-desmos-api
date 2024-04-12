@@ -1,6 +1,6 @@
 package es.in2.desmos.domain.services.broker.adapter;
 
-import es.in2.desmos.domain.models.ProductOffering;
+import es.in2.desmos.domain.models.Entity;
 import es.in2.desmos.domain.services.broker.adapter.impl.OrionLdAdapter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,7 +19,7 @@ class OrionLdAdapterTests {
 
     @Test
     void itShouldReturnNull(){
-        Mono<List<ProductOffering>> result = orionLdAdapter.getEntityIds();
+        Mono<List<Entity>> result = orionLdAdapter.getEntityIds();
         assertNull(result);
     }
 }

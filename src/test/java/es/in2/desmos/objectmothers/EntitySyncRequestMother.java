@@ -1,7 +1,7 @@
 package es.in2.desmos.objectmothers;
 
+import es.in2.desmos.domain.models.Entity;
 import es.in2.desmos.domain.models.EntitySyncRequest;
-import es.in2.desmos.domain.models.IdRecord;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -12,9 +12,9 @@ public final class EntitySyncRequestMother {
     }
 
     public static @NotNull EntitySyncRequest simpleEntitySyncRequest() {
-        List<IdRecord> idRecords = new ArrayList<>();
-        idRecords.add(new IdRecord(ProductOfferingMother.sample1().id()));
-        idRecords.add(new IdRecord(ProductOfferingMother.sample2().id()));
-        return new EntitySyncRequest(idRecords);
+        List<Entity> entities = new ArrayList<>();
+        entities.add(EntityMother.sample1());
+        entities.add(EntityMother.sample2());
+        return new EntitySyncRequest(entities);
     }
 }

@@ -2,7 +2,7 @@ package es.in2.desmos.controllers;
 
 import es.in2.desmos.domain.models.DiscoverySyncRequest;
 import es.in2.desmos.domain.models.DiscoverySyncResponse;
-import es.in2.desmos.domain.models.ProductOffering;
+import es.in2.desmos.domain.models.Entity;
 import es.in2.desmos.workflows.DiscoverySyncWorkflow;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +34,7 @@ public class DiscoverySyncController {
         Mono<String> issuer = discoverySyncRequest.map(DiscoverySyncRequest::issuer);
         Mono<List<String>> externalEntityIds = discoverySyncRequest.map(DiscoverySyncRequest::createExternalEntityIdsStringList);
 
-        Mono<List<ProductOffering>> localEntityIds = discoverySyncWorkflow.discoverySync(processId, issuer, externalEntityIds);
+        Mono<List<Entity>> localEntityIds = discoverySyncWorkflow.discoverySync(processId, issuer, externalEntityIds);
 
         return localEntityIds.map(productOfferings -> new DiscoverySyncResponse(contextBrokerExternalDomain, productOfferings));
     }

@@ -1,6 +1,6 @@
 package es.in2.desmos.domain.services.broker.impl;
 
-import es.in2.desmos.domain.models.ProductOffering;
+import es.in2.desmos.domain.models.Entity;
 import es.in2.desmos.domain.services.broker.BrokerEntityIdGetterService;
 import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import es.in2.desmos.domain.services.broker.adapter.factory.BrokerAdapterFactory;
@@ -20,7 +20,7 @@ public class BrokerEntityIdGetterServiceImpl implements BrokerEntityIdGetterServ
     }
 
     @Override
-    public Mono<List<ProductOffering>> getData() {
+    public Mono<List<Entity>> getData() {
         return brokerAdapterService.getEntityIds();
     }
 }

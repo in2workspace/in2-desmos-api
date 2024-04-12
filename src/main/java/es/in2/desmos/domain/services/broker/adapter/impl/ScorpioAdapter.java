@@ -8,7 +8,7 @@ import es.in2.desmos.domain.exceptions.JsonReadingException;
 import es.in2.desmos.domain.exceptions.RequestErrorException;
 import es.in2.desmos.domain.exceptions.SubscriptionCreationException;
 import es.in2.desmos.domain.models.BrokerSubscription;
-import es.in2.desmos.domain.models.ProductOffering;
+import es.in2.desmos.domain.models.Entity;
 import es.in2.desmos.domain.models.adapters.scorpio.ScorpioProductOffering;
 import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import jakarta.annotation.PostConstruct;
@@ -266,8 +266,8 @@ public class ScorpioAdapter implements BrokerAdapterService {
     }
 
     @Override
-    public Mono<List<ProductOffering>> getEntityIds() {
-        String uri = brokerConfig.getEntitiesPath() + "/" + "?type=ProductOffering&attrs=last_update,version\"";
+    public Mono<List<Entity>> getEntityIds() {
+        String uri = brokerConfig.getEntitiesPath() + "/" + "?type=ProductOffering&attrs=last_update,version,hash,hashlink\"";
 
         Mono<ScorpioProductOffering[]> scorpioProductOfferingList = webClient
                 .get()
@@ -278,15 +278,18 @@ public class ScorpioAdapter implements BrokerAdapterService {
                 .retry(3);
 
         return scorpioProductOfferingList.map(x -> {
-            List<ProductOffering> productOfferingList = new ArrayList<>();
+            List<Entity> entityList = new ArrayList<>();
             for (var scorpioProductOffering : x) {
-                productOfferingList.add(
-                        new ProductOffering(
+                entityList.add(
+                        new Entity(
                                 scorpioProductOffering.id(),
+                                scorpioProductOffering.type(),
                                 scorpioProductOffering.version().value(),
-                                scorpioProductOffering.lastUpdate().value()));
+                                scorpioProductOffering.lastUpdate().value(),
+                                scorpioProductOffering.hash().value(),
+                                scorpioProductOffering.hashlink().value()));
             }
-            return productOfferingList;
+            return entityList;
         });
     }
 }

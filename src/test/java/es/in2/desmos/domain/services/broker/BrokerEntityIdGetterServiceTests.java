@@ -3,9 +3,9 @@ package es.in2.desmos.domain.services.broker;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.ContainerManager;
-import es.in2.desmos.domain.models.ProductOffering;
+import es.in2.desmos.domain.models.Entity;
 import es.in2.desmos.inflators.ScorpioInflator;
-import es.in2.desmos.objectmothers.ProductOfferingMother;
+import es.in2.desmos.objectmothers.EntityMother;
 import org.json.JSONException;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +37,7 @@ class BrokerEntityIdGetterServiceTests {
     @Value("${broker.externalDomain}")
     private String contextBrokerExternalDomain;
 
-    private static List<ProductOffering> initialEntities;
+    private static List<Entity> initialEntities;
 
     private final MediaType APPLICATION_LD_JSON = new MediaType("application", "ld+json");
 
@@ -49,14 +49,14 @@ class BrokerEntityIdGetterServiceTests {
     @BeforeAll
     static void setup() throws JSONException, JsonProcessingException, org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException {
         String brokerUrl = ContainerManager.getBaseUriForScorpioA();
-        initialEntities = ProductOfferingMother.randomList(2);
+        initialEntities = EntityMother.randomList(2);
         ScorpioInflator.addInitialEntitiesToContextBroker(brokerUrl, initialEntities);
     }
 
     @AfterAll
     static void tearDown(){
         String brokerUrl = ContainerManager.getBaseUriForScorpioA();
-        List<String> ids = initialEntities.stream().map(ProductOffering::id).toList();
+        List<String> ids = initialEntities.stream().map(Entity::id).toList();
         ScorpioInflator.deleteInitialEntitiesFromContextBroker(brokerUrl, ids);
     }
 

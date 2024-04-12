@@ -20,6 +20,12 @@ public record ScorpioProductOffering(
         @JsonProperty("version") ScorpioAttribute version,
 
         @NotNull
+        @JsonProperty("hash") ScorpioAttribute hash,
+
+        @NotNull
+        @JsonProperty("hashlink") ScorpioAttribute hashlink,
+
+        @NotNull
         @JsonProperty("@context") List<@NotBlank String> context
 ) {
 }

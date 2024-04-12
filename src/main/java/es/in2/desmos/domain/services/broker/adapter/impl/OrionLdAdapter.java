@@ -1,6 +1,6 @@
 package es.in2.desmos.domain.services.broker.adapter.impl;
 
-import es.in2.desmos.domain.models.ProductOffering;
+import es.in2.desmos.domain.models.Entity;
 import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import es.in2.desmos.domain.models.BrokerSubscription;
 import org.springframework.stereotype.Component;
@@ -57,6 +57,6 @@ public class OrionLdAdapter implements BrokerAdapterService {
     }
 
     @Override
-    public Mono<List<ProductOffering>> getEntityIds() { return null; }
+    public Mono<List<Entity>> getEntityIds() { return null; }
 
 }

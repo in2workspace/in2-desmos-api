@@ -1,6 +1,6 @@
 package es.in2.desmos.objectmothers;
 
-import es.in2.desmos.domain.models.ProductOffering;
+import es.in2.desmos.domain.models.Entity;
 import es.in2.desmos.domain.models.DiscoverySyncResponse;
 import org.jetbrains.annotations.NotNull;
 
@@ -12,13 +12,13 @@ public final class DiscoverySyncResponseMother {
     }
 
     public static @NotNull DiscoverySyncResponse list3And4(String contextBrokerExternalDomain) {
-        List<ProductOffering> productOfferingList = new ArrayList<>();
-        productOfferingList.add(ProductOfferingMother.sample3());
-        productOfferingList.add(ProductOfferingMother.sample4());
-        return new DiscoverySyncResponse(contextBrokerExternalDomain, productOfferingList);
+        List<Entity> entityList = new ArrayList<>();
+        entityList.add(EntityMother.sample3());
+        entityList.add(EntityMother.sample4());
+        return new DiscoverySyncResponse(contextBrokerExternalDomain, entityList);
     }
 
-    public static @NotNull DiscoverySyncResponse fromList(String contextBrokerExternalDomain, List<ProductOffering> productOfferings) {
-        return new DiscoverySyncResponse(contextBrokerExternalDomain, productOfferings);
+    public static @NotNull DiscoverySyncResponse fromList(String contextBrokerExternalDomain, List<Entity> entities) {
+        return new DiscoverySyncResponse(contextBrokerExternalDomain, entities);
     }
 }

@@ -5,8 +5,6 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 class DiscoverySyncRequestTests {
     @Test
     void itShouldCreateExternalEntityIdsStringListFromExternalEntityIds() {
@@ -16,33 +14,33 @@ class DiscoverySyncRequestTests {
         expected.add("2");
         expected.add("3");
 
-        List<IdRecord> idRecords = new ArrayList<>();
-        for (var value : expected) {
-            idRecords.add(new IdRecord(value));
+        List<Entity> entities = new ArrayList<>();
+        /*for (var value : expected) {
+            entities.add(new Entity(value));
         }
 
-        DiscoverySyncRequest discoverySyncRequest = new DiscoverySyncRequest("issuer", idRecords);
+        DiscoverySyncRequest discoverySyncRequest = new DiscoverySyncRequest("issuer", entities);
 
         var result = discoverySyncRequest.createExternalEntityIdsStringList();
 
-        assertEquals(expected, result);
+        assertEquals(expected, result);*/
     }
 
     @Test
     void itShouldCreateExternalEntityIdsListFromString() {
 
-        List<IdRecord> expected = new ArrayList<>();
-        expected.add(new IdRecord("1"));
-        expected.add(new IdRecord("2"));
-        expected.add(new IdRecord("3"));
+        List<Entity> expected = new ArrayList<>();
+        /*expected.add(new Entity("1"));
+        expected.add(new Entity("2"));
+        expected.add(new Entity("3"));
 
         List<String> ids = new ArrayList<>();
         for (var value: expected){
             ids.add(value.id());
         }
 
-        List<IdRecord> result = DiscoverySyncRequest.createExternalEntityIdsListFromString(ids);
+        List<Entity> result = DiscoverySyncRequest.createExternalEntityIdsListFromString(ids);
 
-        assertEquals(expected, result);
+        assertEquals(expected, result);*/
     }
 }

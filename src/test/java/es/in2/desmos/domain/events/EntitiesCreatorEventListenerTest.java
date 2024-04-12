@@ -2,7 +2,7 @@ package es.in2.desmos.domain.events;
 
 import es.in2.desmos.domain.models.EntitiesCreatorEvent;
 import es.in2.desmos.domain.services.sync.NewEntitiesCreatorService;
-import es.in2.desmos.objectmothers.ProductOfferingMother;
+import es.in2.desmos.objectmothers.EntityMother;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,15 +40,15 @@ class EntitiesCreatorEventListenerTest {
 
     private static @NotNull Mono<List<String>> createInternalEntityIds() {
         List<String> internalEntitiesIds = new ArrayList<>();
-        internalEntitiesIds.add(ProductOfferingMother.sample3().id());
-        internalEntitiesIds.add(ProductOfferingMother.sample4().id());
+        internalEntitiesIds.add(EntityMother.sample3().id());
+        internalEntitiesIds.add(EntityMother.sample4().id());
         return Mono.just(internalEntitiesIds);
     }
 
     private static @NotNull Mono<List<String>> createExternalEntityIdList() {
         List<String> externalEntitiesIdList = new ArrayList<>();
-        externalEntitiesIdList.add(ProductOfferingMother.sample1().id());
-        externalEntitiesIdList.add(ProductOfferingMother.sample2().id());
+        externalEntitiesIdList.add(EntityMother.sample1().id());
+        externalEntitiesIdList.add(EntityMother.sample2().id());
         return Mono.just(externalEntitiesIdList);
     }
 }
