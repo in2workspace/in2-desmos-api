@@ -84,19 +84,21 @@ class SubscribeWorkflowBehaviorTest {
             Finally, the application will create an AuditRecord with the status of the operation.
         */
 
+        String url = ContainerManager.getBaseUriForScorpioA();
+
 
         //todo: change the BlockchainNotificationJson to match the expected format
-        String blockchainNotificationJson = """
-                {
-                    "id": 2240,
-                    "publisherAddress": "0x40b0ab9dfd960064fb7e9fdf77f889c71569e349055ff563e8d699d8fa97fa90",
-                    "eventType": "ProductOffering",
-                    "timestamp": 1712753824,
-                    "dataLocation": "http://localhost:9090/ngsi-ld/v1/entities/urn:ngsi-ld:ProductOffering:122355255?hl=abbc168236d38354add74d65698f37941947127290cd40a90b4dbe7eb68d25c0",
-                    "relevantMetadata": [],
-                    "entityId": "0x4eb401aa1248b6a95c298d0747eb470b6ba6fc3f54ea630dc6c77f23ad1abe3e",
-                    "previousEntityHash": "0xabbc168236d38354add74d65698f37941947127290cd40a90b4dbe7eb68d25c0"
-                }""";
+        String blockchainNotificationJson = String.format("""
+        {
+            "id": 2240,
+            "publisherAddress": "0x40b0ab9dfd960064fb7e9fdf77f889c71569e349055ff563e8d699d8fa97fa90",
+            "eventType": "ProductOffering",
+            "timestamp": 1712753824,
+            "dataLocation": "%s/ngsi-ld/v1/entities/urn:ngsi-ld:ProductOffering:122355255?hl=abbc168236d38354add74d65698f37941947127290cd40a90b4dbe7eb68d25c0",
+            "relevantMetadata": [],
+            "entityId": "0x4eb401aa1248b6a95c298d0747eb470b6ba6fc3f54ea630dc6c77f23ad1abe3e",
+            "previousEntityHash": "0xabbc168236d38354add74d65698f37941947127290cd40a90b4dbe7eb68d25c0"
+        }""", url);
 
 
         // When
