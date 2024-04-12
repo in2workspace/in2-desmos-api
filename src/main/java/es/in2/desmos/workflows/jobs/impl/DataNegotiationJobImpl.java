@@ -1,13 +1,21 @@
-package es.in2.desmos.domain.services.sync.impl;
+package es.in2.desmos.workflows.jobs.impl;
 
+import es.in2.desmos.workflows.jobs.DataNegotiationJob;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class NewEntitiesCreatorServiceImpl /*implements NewEntitiesCreatorService*/ {
+public class DataNegotiationJobImpl implements DataNegotiationJob {
+    @Override
+    public Mono<Void> negotiateDataSync(Mono<String> issuer, Mono<List<String>> externalEntityIds, Mono<List<String>> internalEntityIds) {
+        return null;
+    }
     /*private final EntitySyncWebClient entitySyncWebClient;
 
     @Override

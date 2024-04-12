@@ -1,7 +1,7 @@
 package es.in2.desmos.domain.events;
 
 import es.in2.desmos.domain.models.EntitiesCreatorEvent;
-import es.in2.desmos.domain.services.sync.NewEntitiesCreatorService;
+import es.in2.desmos.workflows.jobs.DataNegotiationJob;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -12,11 +12,11 @@ import reactor.core.publisher.Mono;
 @Component
 @RequiredArgsConstructor
 public class EntitiesCreatorEventListener {
-    private final NewEntitiesCreatorService newEntitiesCreatorService;
+    private final DataNegotiationJob dataNegotiationJob;
 
     @EventListener
     public Mono<Void> onApplicationEvent(EntitiesCreatorEvent event) {
         log.info("Received entities creator event.");
-        return newEntitiesCreatorService.addNewEntities(event.issuer(), event.externalEntityIds(), event.internalEntityIds());
+        return dataNegotiationJob.negotiateDataSync(event.issuer(), event.externalEntityIds(), event.internalEntityIds());
     }
 }
