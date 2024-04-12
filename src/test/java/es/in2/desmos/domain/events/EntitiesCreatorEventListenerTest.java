@@ -1,7 +1,7 @@
 package es.in2.desmos.domain.events;
 
 import es.in2.desmos.domain.models.EntitiesCreatorEvent;
-import es.in2.desmos.domain.services.sync.NewEntitiesCreatorService;
+import es.in2.desmos.workflows.jobs.DataNegotiationJob;
 import es.in2.desmos.objectmothers.EntityMother;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ class EntitiesCreatorEventListenerTest {
     private EntitiesCreatorEventListener entitiesCreatorEventListener;
 
     @Mock
-    private NewEntitiesCreatorService newEntitiesCreatorService;
+    private DataNegotiationJob dataNegotiationJob;
 
     @Test
     void itShouldCallNewEntitiesService() {
@@ -33,8 +33,8 @@ class EntitiesCreatorEventListenerTest {
         EntitiesCreatorEvent entitiesCreatorEvent = new EntitiesCreatorEvent(issuer, externalEntityIds, internalEntityIds);
         entitiesCreatorEventListener.onApplicationEvent(entitiesCreatorEvent);
 
-        verify(newEntitiesCreatorService, times(1)).addNewEntities(any(), any(), any());
-        verifyNoMoreInteractions(newEntitiesCreatorService);
+        verify(dataNegotiationJob, times(1)).negotiateDataSync(any(), any(), any());
+        verifyNoMoreInteractions(dataNegotiationJob);
 
     }
 

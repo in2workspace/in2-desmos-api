@@ -1,6 +1,7 @@
-package es.in2.desmos.domain.services.sync;
+package es.in2.desmos.workflows.jobs;
 
-import es.in2.desmos.domain.services.sync.impl.NewEntitiesCreatorServiceImpl;
+import es.in2.desmos.domain.services.sync.EntitySyncWebClient;
+import es.in2.desmos.workflows.jobs.impl.DataNegotiationJobImpl;
 import es.in2.desmos.objectmothers.EntityMother;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -14,9 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
-class NewEntitiesCreatorServiceTests {
+class DataNegotiationJobTests {
     @InjectMocks
-    private NewEntitiesCreatorServiceImpl newEntitiesCreatorService;
+    private DataNegotiationJobImpl dataNegotiationJob;
 
     @Mock
     private EntitySyncWebClient entitySyncWebClient;
