@@ -7,7 +7,6 @@ import es.in2.desmos.ContainerManager;
 import es.in2.desmos.controllers.NotificationController;
 import es.in2.desmos.domain.models.BlockchainNotification;
 import es.in2.desmos.domain.services.api.QueueService;
-import es.in2.desmos.domain.services.broker.BrokerPublisherService;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +19,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 @SpringBootTest
 @Testcontainers
@@ -38,9 +38,6 @@ class SubscribeWorkflowBehaviorTest {
 
     @Autowired
     private QueueService pendingSubscribeEventsQueue;
-
-    @Autowired
-    private BrokerPublisherService brokerPublisherService;
 
     @DynamicPropertySource
     static void setDynamicProperties(DynamicPropertyRegistry registry) {
@@ -104,7 +101,8 @@ class SubscribeWorkflowBehaviorTest {
         try {
             log.info("1. Create a BlockchainNotification and send a POST request to the application");
             BlockchainNotification blockchainNotification = objectMapper.readValue(blockchainNotificationJson, BlockchainNotification.class);
-            notificationController.postDLTNotification(blockchainNotification).block();
+            StepVerifier.create(notificationController.postDLTNotification(blockchainNotification))
+                    .verifyComplete();
             log.info("1.1. Get the event stream from the pendingSubscribeQueue and subscribe to it.");
             pendingSubscribeEventsQueue.getEventStream().subscribe(event -> log.info("Event: {}", event));
         } catch (Exception e) {
