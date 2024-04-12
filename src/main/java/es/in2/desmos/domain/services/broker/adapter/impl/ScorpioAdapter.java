@@ -9,7 +9,7 @@ import es.in2.desmos.domain.exceptions.RequestErrorException;
 import es.in2.desmos.domain.exceptions.SubscriptionCreationException;
 import es.in2.desmos.domain.models.BrokerSubscription;
 import es.in2.desmos.domain.models.Entity;
-import es.in2.desmos.domain.models.adapters.scorpio.ScorpioProductOffering;
+import es.in2.desmos.domain.models.adapters.scorpio.ScorpioEntity;
 import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -267,14 +267,14 @@ public class ScorpioAdapter implements BrokerAdapterService {
 
     @Override
     public Mono<List<Entity>> getEntityIds() {
-        String uri = brokerConfig.getEntitiesPath() + "/" + "?type=ProductOffering&attrs=last_update,version,hash,hashlink\"";
+        String uri = brokerConfig.getEntitiesPath() + "/" + "?type=ProductOffering&attrs=lastUpdate,version,hash,hashlink\"";
 
-        Mono<ScorpioProductOffering[]> scorpioProductOfferingList = webClient
+        Mono<ScorpioEntity[]> scorpioProductOfferingList = webClient
                 .get()
                 .uri(uri)
                 .accept(APPLICATION_LD_JSON)
                 .retrieve()
-                .bodyToMono(ScorpioProductOffering[].class)
+                .bodyToMono(ScorpioEntity[].class)
                 .retry(3);
 
         return scorpioProductOfferingList.map(x -> {

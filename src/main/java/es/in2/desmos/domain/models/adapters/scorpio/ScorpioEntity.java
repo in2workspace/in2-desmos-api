@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
-public record ScorpioProductOffering(
+public record ScorpioEntity(
         @NotBlank
         @JsonProperty("id") String id,
 
@@ -14,7 +14,7 @@ public record ScorpioProductOffering(
         @JsonProperty("type") String type,
 
         @NotNull
-        @JsonProperty("last_update") ScorpioAttribute lastUpdate,
+        @JsonProperty("lastUpdate") ScorpioAttribute lastUpdate,
 
         @NotNull
         @JsonProperty("version") ScorpioAttribute version,
