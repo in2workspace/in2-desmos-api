@@ -9,5 +9,5 @@ import java.util.List;
 public record DataNegotiationEvent(
         @NotNull Mono<@NotEmpty String> issuer,
         @NotNull Mono<@NotNull List<@NotNull Entity>> externalEntityIds,
-        @NotNull Mono<@NotNull List<@NotEmpty String>> internalEntityIds) {
+        @NotNull Mono<@NotNull List<@NotEmpty Entity>> internalEntityIds) {
 }

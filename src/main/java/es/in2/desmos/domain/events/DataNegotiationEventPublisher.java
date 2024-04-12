@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class EntitiesCreatorEventPublisher {
+public class DataNegotiationEventPublisher {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     public void publishEvent(DataNegotiationEvent dataNegotiationEvent) {
