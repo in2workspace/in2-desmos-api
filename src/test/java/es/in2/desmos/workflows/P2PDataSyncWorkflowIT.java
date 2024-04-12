@@ -76,7 +76,7 @@ class P2PDataSyncWorkflowIT {
                 .baseUrl("http://localhost:" + localServerPort)
                 .build()
                 .post()
-                .uri("/api/v1/sync/discovery")
+                .uri("/api/v1/sync/p2p/discovery")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(discoverySyncRequestMono, DiscoverySyncRequest.class)
                 .retrieve()
