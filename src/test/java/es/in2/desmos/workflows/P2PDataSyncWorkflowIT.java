@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class DiscoverySyncWorkflowIT {
+class P2PDataSyncWorkflowIT {
 
     @Autowired
     private ObjectMapper objectMapper;
