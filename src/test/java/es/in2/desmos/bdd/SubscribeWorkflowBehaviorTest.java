@@ -9,7 +9,10 @@ import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.BlockchainNotification;
 import es.in2.desmos.domain.repositories.AuditRecordRepository;
 import es.in2.desmos.domain.services.api.QueueService;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +24,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.util.List;
 
@@ -89,23 +93,24 @@ class SubscribeWorkflowBehaviorTest {
 
         //todo: change the BlockchainNotificationJson to match the expected format
         String blockchainNotificationJson = String.format("""
-        {
-            "id": 2240,
-            "publisherAddress": "0x40b0ab9dfd960064fb7e9fdf77f889c71569e349055ff563e8d699d8fa97fa90",
-            "eventType": "ProductOffering",
-            "timestamp": 1712753824,
-            "dataLocation": "%s/ngsi-ld/v1/entities/urn:ngsi-ld:ProductOffering:122355255?hl=abbc168236d38354add74d65698f37941947127290cd40a90b4dbe7eb68d25c0",
-            "relevantMetadata": [],
-            "entityId": "0x4eb401aa1248b6a95c298d0747eb470b6ba6fc3f54ea630dc6c77f23ad1abe3e",
-            "previousEntityHash": "0xabbc168236d38354add74d65698f37941947127290cd40a90b4dbe7eb68d25c0"
-        }""", url);
+                {
+                    "id": 2240,
+                    "publisherAddress": "0x40b0ab9dfd960064fb7e9fdf77f889c71569e349055ff563e8d699d8fa97fa90",
+                    "eventType": "ProductOffering",
+                    "timestamp": 1712753824,
+                    "dataLocation": "%s/ngsi-ld/v1/entities/urn:ngsi-ld:ProductOffering:122355255?hl=abbc168236d38354add74d65698f37941947127290cd40a90b4dbe7eb68d25c0",
+                    "relevantMetadata": [],
+                    "entityId": "0x4eb401aa1248b6a95c298d0747eb470b6ba6fc3f54ea630dc6c77f23ad1abe3e",
+                    "previousEntityHash": "0xabbc168236d38354add74d65698f37941947127290cd40a90b4dbe7eb68d25c0"
+                }""", url);
 
 
         // When
         try {
             log.info("1. Create a BlockchainNotification and send a POST request to the application");
             BlockchainNotification blockchainNotification = objectMapper.readValue(blockchainNotificationJson, BlockchainNotification.class);
-            notificationController.postDLTNotification(blockchainNotification).block();
+            StepVerifier.create(notificationController.postDLTNotification(blockchainNotification))
+                    .verifyComplete();
             log.info("1.1. Get the event stream from the pendingSubscribeQueue and subscribe to it.");
             pendingSubscribeEventsQueue.getEventStream().subscribe(event -> log.info("Event: {}", event));
             log.info("2. Check values in the AuditRecord table:");
