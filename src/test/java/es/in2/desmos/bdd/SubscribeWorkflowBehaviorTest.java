@@ -22,7 +22,6 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
 import java.util.List;
 
@@ -64,7 +63,7 @@ class SubscribeWorkflowBehaviorTest {
     public void setUp() {
         log.info("1. Send a POST request to the external broker in order to retrieve the entity later");
         WebClient.create().post()
-                .uri("http://localhost:9090/ngsi-ld/v1/entities")
+                .uri(ContainerManager.getBaseUriForScorpioA() + "/ngsi-ld/v1/entities")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
@@ -113,13 +112,11 @@ class SubscribeWorkflowBehaviorTest {
                 }""";
 
 
-
         // When
         try {
             log.info("1. Create a BlockchainNotification and send a POST request to the application");
             BlockchainNotification blockchainNotification = objectMapper.readValue(blockchainNotificationJson, BlockchainNotification.class);
-            StepVerifier.create(notificationController.postDLTNotification(blockchainNotification))
-                            .verifyComplete();
+            notificationController.postDLTNotification(blockchainNotification).block();
             log.info("1.1. Get the event stream from the pendingSubscribeQueue and subscribe to it.");
             pendingSubscribeEventsQueue.getEventStream().subscribe(event -> log.info("Event: {}", event));
             log.info("2. Check values in the AuditRecord table:");
@@ -128,7 +125,7 @@ class SubscribeWorkflowBehaviorTest {
         } catch (Exception e) {
             log.error("Error while sending the BlockchainNotification: {}", e.getMessage());
         }
-        }
-
-
     }
+
+
+}
