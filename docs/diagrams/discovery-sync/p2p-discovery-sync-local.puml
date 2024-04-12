@@ -1,0 +1,48 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+'---------- Config ----------------
+
+autonumber
+
+'---------- Header ----------------
+
+boundary "External Access Node" as ean
+
+box "Access Node"
+
+  control "P2PDataSyncController" as p2pController
+  participant "P2PDataSyncWorkflow" as p2pWorkflow
+  queue "ApplicationContext" as ac
+  participant "Context Broker" as cb
+
+end box
+
+'---------- Diagram ----------------
+
+ean -> p2pController++: POST /syc/p2p/discovery \nPayload: DiscoveryRequest
+
+note right of ean
+    DiscoveryRequest:
+
+    {
+        List<EntityDTO> entities ->
+            id, type,
+            version, lastUpdate
+            hash, and hashlink(as previousHash)
+        issuer
+    }
+
+    Hash is a SHA256 of the entity that is
+    created by the External Access Node
+    when the DiscoveryRequest is created.
+end note
+
+    p2pController -> p2pWorkflow++: dataDiscovery()
+        p2pWorkflow -> cb++: GET /ngsi-ld/v1/entities\n  ?type=ProductOffering\n  &Attrs=version,lastUpdate
+        return 200 OK - Payload: List<EntityDTO>
+        p2pWorkflow -> ac: PublishDataNegotiationEvent
+    return List<EntityDTO>
+return 200 OK - Payload: List<EntityDTO>
+
+@enduml
