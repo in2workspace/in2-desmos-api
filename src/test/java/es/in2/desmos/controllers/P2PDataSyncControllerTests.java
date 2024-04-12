@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.domain.models.DiscoverySyncRequest;
 import es.in2.desmos.domain.models.DiscoverySyncResponse;
-import es.in2.desmos.domain.models.ProductOffering;
+import es.in2.desmos.domain.models.Entity;
 import es.in2.desmos.objectmothers.DiscoverySyncRequestMother;
 import es.in2.desmos.objectmothers.DiscoverySyncResponseMother;
 import es.in2.desmos.workflows.DiscoverySyncWorkflow;
@@ -21,8 +21,8 @@ import java.util.List;
 
 import static org.mockito.Mockito.*;
 
-@WebFluxTest(DiscoverySyncController.class)
-class DiscoverySyncControllerTests {
+@WebFluxTest(P2PDataSyncController.class)
+class P2PDataSyncControllerTests {
     @Autowired
     private WebTestClient webTestClient;
 
@@ -36,22 +36,22 @@ class DiscoverySyncControllerTests {
     private String contextBrokerExternalDomain;
 
     @Test
-    void itShouldReturnExternalEntityIdsWithIssuer() throws JsonProcessingException {
+    void itShouldReturnEntityWithIssuer() throws JsonProcessingException {
 
         Mono<DiscoverySyncRequest> discoverySyncRequest = Mono.just(DiscoverySyncRequestMother.list1And2());
 
         DiscoverySyncResponse discoverySyncResponse = DiscoverySyncResponseMother.list3And4(contextBrokerExternalDomain);
         var discoverySyncResponseJson = objectMapper.writeValueAsString(discoverySyncResponse);
 
-        Mono<List<ProductOffering>> localEntityIds = Mono.just(DiscoverySyncResponseMother.list3And4(contextBrokerExternalDomain).localEntitiesIds());
+        Mono<List<Entity>> localEntityIds = Mono.just(DiscoverySyncResponseMother.list3And4(contextBrokerExternalDomain).entities());
         when(discoverySyncWorkflow.discoverySync(anyString(), any(), any())).thenReturn(localEntityIds);
 
         webTestClient.post()
-                .uri("/api/v1/sync/discovery")
+                .uri("/api/v1/sync/p2p/discovery")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(discoverySyncRequest, DiscoverySyncRequest.class)
                 .exchange()
-                .expectStatus().isAccepted()
+                .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .json(discoverySyncResponseJson)
@@ -60,6 +60,4 @@ class DiscoverySyncControllerTests {
         verify(discoverySyncWorkflow, times(1)).discoverySync(anyString(), any(), any());
         verifyNoMoreInteractions(discoverySyncWorkflow);
     }
-
-
 }
