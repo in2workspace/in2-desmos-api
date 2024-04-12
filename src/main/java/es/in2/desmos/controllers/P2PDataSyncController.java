@@ -17,16 +17,16 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/sync/discovery")
+@RequestMapping("/api/v1/sync/p2p")
 @RequiredArgsConstructor
-public class DiscoverySyncController {
+public class P2PDataSyncController {
     private final DiscoverySyncWorkflow discoverySyncWorkflow;
 
     @Value("${broker.externalDomain}")
     private String contextBrokerExternalDomain;
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.ACCEPTED)
+    @PostMapping("/discovery")
+    @ResponseStatus(HttpStatus.OK)
     public Mono<DiscoverySyncResponse> discoverySync(@RequestBody @Valid Mono<DiscoverySyncRequest> discoverySyncRequest) {
         String processId = UUID.randomUUID().toString();
         log.info("ProcessID: {} - Starting Synchronization Discovery...", processId);
