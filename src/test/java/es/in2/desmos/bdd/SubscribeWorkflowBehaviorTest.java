@@ -5,9 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import es.in2.desmos.ContainerManager;
 import es.in2.desmos.controllers.NotificationController;
-import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.BlockchainNotification;
-import es.in2.desmos.domain.repositories.AuditRecordRepository;
 import es.in2.desmos.domain.services.api.QueueService;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
 import org.junit.jupiter.api.*;
@@ -22,8 +20,6 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import reactor.core.publisher.Mono;
-
-import java.util.List;
 
 @SpringBootTest
 @Testcontainers
@@ -41,9 +37,6 @@ class SubscribeWorkflowBehaviorTest {
     private NotificationController notificationController;
 
     @Autowired
-    private AuditRecordRepository auditRecordRepository;
-
-    @Autowired
     private QueueService pendingSubscribeEventsQueue;
 
     @Autowired
@@ -52,11 +45,6 @@ class SubscribeWorkflowBehaviorTest {
     @DynamicPropertySource
     static void setDynamicProperties(DynamicPropertyRegistry registry) {
         ContainerManager.postgresqlProperties(registry);
-    }
-
-    @AfterEach
-    public void cleanUp() {
-        auditRecordRepository.deleteAll().block();
     }
 
     @BeforeEach
@@ -119,9 +107,6 @@ class SubscribeWorkflowBehaviorTest {
             notificationController.postDLTNotification(blockchainNotification).block();
             log.info("1.1. Get the event stream from the pendingSubscribeQueue and subscribe to it.");
             pendingSubscribeEventsQueue.getEventStream().subscribe(event -> log.info("Event: {}", event));
-            log.info("2. Check values in the AuditRecord table:");
-            List<AuditRecord> auditRecordList = auditRecordRepository.findAll().collectList().block();
-            log.info("Result: {}", auditRecordList);
         } catch (Exception e) {
             log.error("Error while sending the BlockchainNotification: {}", e.getMessage());
         }
