@@ -1,8 +1,8 @@
 package es.in2.desmos.domain.events;
 
 import es.in2.desmos.domain.models.DataNegotiationEvent;
-import es.in2.desmos.domain.models.Entity;
-import es.in2.desmos.objectmothers.EntityMother;
+import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
+import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,8 +27,8 @@ class DataNegotiationEventPublisherTests {
     void itShouldPublicateEvent(){
 
         Mono<String> issuer = Mono.just("https://example.org");
-        Mono<List<Entity>> externalEntityIds = Mono.just(EntityMother.list1And2());
-        Mono<List<Entity>> internalEntityIds = Mono.just(EntityMother.list3And4());
+        Mono<List<MVEntity4DataNegotiation>> externalEntityIds = Mono.just(MVEntity4DataNegotiationMother.list1And2());
+        Mono<List<MVEntity4DataNegotiation>> internalEntityIds = Mono.just(MVEntity4DataNegotiationMother.list3And4());
 
         DataNegotiationEvent dataNegotiationEvent = new DataNegotiationEvent(issuer, externalEntityIds, internalEntityIds);
         dataNegotiationEventPublisher.publishEvent(dataNegotiationEvent);

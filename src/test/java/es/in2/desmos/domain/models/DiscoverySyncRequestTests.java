@@ -14,12 +14,12 @@ class DiscoverySyncRequestTests {
         expected.add("2");
         expected.add("3");
 
-        List<Entity> entities = new ArrayList<>();
+        List<MVEntity4DataNegotiation> entities = new ArrayList<>();
         /*for (var value : expected) {
-            entities.add(new Entity(value));
+            mvEntities4DataNegotiation.add(new Entity(value));
         }
 
-        DiscoverySyncRequest discoverySyncRequest = new DiscoverySyncRequest("issuer", entities);
+        DiscoverySyncRequest discoverySyncRequest = new DiscoverySyncRequest("issuer", mvEntities4DataNegotiation);
 
         var result = discoverySyncRequest.createExternalEntityIdsStringList();
 
@@ -29,7 +29,7 @@ class DiscoverySyncRequestTests {
     @Test
     void itShouldCreateExternalEntityIdsListFromString() {
 
-        List<Entity> expected = new ArrayList<>();
+        List<MVEntity4DataNegotiation> expected = new ArrayList<>();
         /*expected.add(new Entity("1"));
         expected.add(new Entity("2"));
         expected.add(new Entity("3"));

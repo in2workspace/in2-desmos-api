@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.domain.models.DiscoverySyncRequest;
 import es.in2.desmos.domain.models.DiscoverySyncResponse;
-import es.in2.desmos.domain.models.Entity;
+import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.objectmothers.DiscoverySyncRequestMother;
 import es.in2.desmos.objectmothers.DiscoverySyncResponseMother;
 import es.in2.desmos.workflows.P2PDataSyncWorkflow;
@@ -43,7 +43,7 @@ class P2PDataSyncControllerTests {
         DiscoverySyncResponse discoverySyncResponse = DiscoverySyncResponseMother.list3And4(contextBrokerExternalDomain);
         var discoverySyncResponseJson = objectMapper.writeValueAsString(discoverySyncResponse);
 
-        Mono<List<Entity>> localEntityIds = Mono.just(DiscoverySyncResponseMother.list3And4(contextBrokerExternalDomain).entities());
+        Mono<List<MVEntity4DataNegotiation>> localEntityIds = Mono.just(DiscoverySyncResponseMother.list3And4(contextBrokerExternalDomain).entities());
         when(p2PDataSyncWorkflow.dataDiscovery(anyString(), any(), any())).thenReturn(localEntityIds);
 
         webTestClient.post()

@@ -5,11 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.ContainerManager;
 import es.in2.desmos.domain.models.DiscoverySyncRequest;
 import es.in2.desmos.domain.models.DiscoverySyncResponse;
-import es.in2.desmos.domain.models.Entity;
+import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.inflators.ScorpioInflator;
 import es.in2.desmos.objectmothers.DiscoverySyncRequestMother;
 import es.in2.desmos.objectmothers.DiscoverySyncResponseMother;
-import es.in2.desmos.objectmothers.EntityMother;
+import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
 import org.apache.commons.lang3.NotImplementedException;
 import org.json.JSONException;
 import org.junit.jupiter.api.*;
@@ -47,19 +47,19 @@ class P2PDataSyncWorkflowIT {
         ContainerManager.postgresqlProperties(registry);
     }
 
-    private static List<Entity> initialEntities;
+    private static List<MVEntity4DataNegotiation> initialEntities;
 
     @BeforeAll
     static void setup() throws JSONException, org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException {
         String brokerUrl = ContainerManager.getBaseUriForScorpioA();
-        initialEntities = EntityMother.randomList(2);
+        initialEntities = MVEntity4DataNegotiationMother.randomList(2);
         ScorpioInflator.addInitialEntitiesToContextBroker(brokerUrl, initialEntities);
     }
 
     @AfterAll
     static void tearDown() {
         String brokerUrl = ContainerManager.getBaseUriForScorpioA();
-        List<String> ids = initialEntities.stream().map(Entity::id).toList();
+        List<String> ids = initialEntities.stream().map(MVEntity4DataNegotiation::id).toList();
         ScorpioInflator.deleteInitialEntitiesFromContextBroker(brokerUrl, ids);
     }
 

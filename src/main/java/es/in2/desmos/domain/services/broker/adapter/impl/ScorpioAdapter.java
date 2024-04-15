@@ -8,7 +8,7 @@ import es.in2.desmos.domain.exceptions.JsonReadingException;
 import es.in2.desmos.domain.exceptions.RequestErrorException;
 import es.in2.desmos.domain.exceptions.SubscriptionCreationException;
 import es.in2.desmos.domain.models.BrokerSubscription;
-import es.in2.desmos.domain.models.Entity;
+import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.domain.models.adapters.scorpio.ScorpioEntity;
 import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import jakarta.annotation.PostConstruct;
@@ -266,7 +266,7 @@ public class ScorpioAdapter implements BrokerAdapterService {
     }
 
     @Override
-    public Mono<List<Entity>> getEntityIds() {
+    public Mono<List<MVEntity4DataNegotiation>> getMvEntities4DataNegotiation() {
         String uri = brokerConfig.getEntitiesPath() + "/" + "?type=ProductOffering&attrs=lastUpdate,version,hash,hashlink\"";
 
         Mono<ScorpioEntity[]> scorpioProductOfferingList = webClient
@@ -278,10 +278,10 @@ public class ScorpioAdapter implements BrokerAdapterService {
                 .retry(3);
 
         return scorpioProductOfferingList.map(x -> {
-            List<Entity> entityList = new ArrayList<>();
+            List<MVEntity4DataNegotiation> mvEntity4DataNegotiations = new ArrayList<>();
             for (var scorpioProductOffering : x) {
-                entityList.add(
-                        new Entity(
+                mvEntity4DataNegotiations.add(
+                        new MVEntity4DataNegotiation(
                                 scorpioProductOffering.id(),
                                 scorpioProductOffering.type(),
                                 scorpioProductOffering.version().value(),
@@ -289,7 +289,7 @@ public class ScorpioAdapter implements BrokerAdapterService {
                                 scorpioProductOffering.hash().value(),
                                 scorpioProductOffering.hashlink().value()));
             }
-            return entityList;
+            return mvEntity4DataNegotiations;
         });
     }
 }

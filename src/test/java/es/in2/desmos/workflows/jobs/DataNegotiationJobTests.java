@@ -2,7 +2,7 @@ package es.in2.desmos.workflows.jobs;
 
 import es.in2.desmos.domain.services.sync.EntitySyncWebClient;
 import es.in2.desmos.workflows.jobs.impl.DataNegotiationJobImpl;
-import es.in2.desmos.objectmothers.EntityMother;
+import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,15 +45,15 @@ class DataNegotiationJobTests {
 
     private @NotNull Mono<List<String>> getInternalEntitiesIdsMono() {
         List<String> internalEntitiesIds = new ArrayList<>();
-        internalEntitiesIds.add(EntityMother.sample3().id());
-        internalEntitiesIds.add(EntityMother.sample4().id());
+        internalEntitiesIds.add(MVEntity4DataNegotiationMother.sample3().id());
+        internalEntitiesIds.add(MVEntity4DataNegotiationMother.sample4().id());
         return Mono.just(internalEntitiesIds);
     }
 
     private @NotNull List<String> createExternalEntitiesIdList() {
         List<String> externalEntitiesIdList = new ArrayList<>();
-        externalEntitiesIdList.add(EntityMother.sample1().id());
-        externalEntitiesIdList.add(EntityMother.sample2().id());
+        externalEntitiesIdList.add(MVEntity4DataNegotiationMother.sample1().id());
+        externalEntitiesIdList.add(MVEntity4DataNegotiationMother.sample2().id());
         return externalEntitiesIdList;
     }
 }

@@ -1,7 +1,7 @@
 package es.in2.desmos.objectmothers;
 
 import es.in2.desmos.domain.models.DiscoverySyncRequest;
-import es.in2.desmos.domain.models.Entity;
+import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -13,10 +13,10 @@ public final class DiscoverySyncRequestMother {
 
     public static @NotNull DiscoverySyncRequest list1And2() {
         String issuer = "https://my-domain.org";
-        List<Entity> entityIds = new ArrayList<>();
-        entityIds.add(EntityMother.sample1());
-        entityIds.add(EntityMother.sample2());
+        List<MVEntity4DataNegotiation> MVEntity4DataNegotiationIds = new ArrayList<>();
+        MVEntity4DataNegotiationIds.add(MVEntity4DataNegotiationMother.sample1());
+        MVEntity4DataNegotiationIds.add(MVEntity4DataNegotiationMother.sample2());
 
-        return new DiscoverySyncRequest(issuer, entityIds);
+        return new DiscoverySyncRequest(issuer, MVEntity4DataNegotiationIds);
     }
 }

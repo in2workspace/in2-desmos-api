@@ -2,7 +2,7 @@ package es.in2.desmos.controllers;
 
 import es.in2.desmos.domain.models.DiscoverySyncRequest;
 import es.in2.desmos.domain.models.DiscoverySyncResponse;
-import es.in2.desmos.domain.models.Entity;
+import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.workflows.P2PDataSyncWorkflow;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,10 +32,10 @@ public class P2PDataSyncController {
         log.info("ProcessID: {} - Starting Synchronization Discovery...", processId);
 
         Mono<String> issuer = discoverySyncRequest.map(DiscoverySyncRequest::issuer);
-        Mono<List<Entity>> externalEntityIds = discoverySyncRequest.map(DiscoverySyncRequest::entities);
+        Mono<List<MVEntity4DataNegotiation>> externalMvEntities4DataNegotiation = discoverySyncRequest.map(DiscoverySyncRequest::mvEntities4DataNegotiation);
 
-        Mono<List<Entity>> localEntityIds = p2PDataSyncWorkflow.dataDiscovery(processId, issuer, externalEntityIds);
+        Mono<List<MVEntity4DataNegotiation>> localMvEntities4DataNegotiation = p2PDataSyncWorkflow.dataDiscovery(processId, issuer, externalMvEntities4DataNegotiation);
 
-        return localEntityIds.map(productOfferings -> new DiscoverySyncResponse(contextBrokerExternalDomain, productOfferings));
+        return localMvEntities4DataNegotiation.map(mvEntities4DataNegotiation -> new DiscoverySyncResponse(contextBrokerExternalDomain, mvEntities4DataNegotiation));
     }
 }

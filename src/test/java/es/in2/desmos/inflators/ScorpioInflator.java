@@ -1,6 +1,6 @@
 package es.in2.desmos.inflators;
 
-import es.in2.desmos.domain.models.Entity;
+import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,7 +19,7 @@ public final class ScorpioInflator {
 
     private final static MediaType APPLICATION_LD_JSON = new MediaType("application", "ld+json");
 
-    public static void addInitialEntitiesToContextBroker(String brokerUrl, List<Entity> initialEntities) throws JSONException, JsonProcessingException {
+    public static void addInitialEntitiesToContextBroker(String brokerUrl, List<MVEntity4DataNegotiation> initialEntities) throws JSONException, JsonProcessingException {
         String requestBody = createInitialEntitiesRequestBody(initialEntities);
 
         WebClient.builder()
@@ -52,7 +52,7 @@ public final class ScorpioInflator {
     }
 
     @NotNull
-    private static String createInitialEntitiesRequestBody(List<Entity> initialEntities) throws JsonProcessingException, JSONException {
+    private static String createInitialEntitiesRequestBody(List<MVEntity4DataNegotiation> initialEntities) throws JsonProcessingException, JSONException {
         ObjectMapper objectMapper = new ObjectMapper();
         JSONArray productOfferingsJsonArray = new JSONArray();
 

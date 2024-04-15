@@ -2,10 +2,10 @@ package es.in2.desmos.domain.services.broker.adapter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.ContainerManager;
-import es.in2.desmos.domain.models.Entity;
+import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.domain.services.broker.adapter.impl.ScorpioAdapter;
 import es.in2.desmos.inflators.ScorpioInflator;
-import es.in2.desmos.objectmothers.EntityMother;
+import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
 import org.json.JSONException;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,25 +37,25 @@ class ScorpioAdapterIT {
         ContainerManager.postgresqlProperties(registry);
     }
 
-    private static List<Entity> initialEntities;
+    private static List<MVEntity4DataNegotiation> initialEntities;
 
     @BeforeAll
     static void setup() throws JSONException, org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException {
         String brokerUrl = ContainerManager.getBaseUriForScorpioA();
-        initialEntities = EntityMother.randomList(2);
+        initialEntities = MVEntity4DataNegotiationMother.randomList(2);
         ScorpioInflator.addInitialEntitiesToContextBroker(brokerUrl, initialEntities);
     }
 
     @AfterAll
     static void tearDown(){
         String brokerUrl = ContainerManager.getBaseUriForScorpioA();
-        List<String> ids = initialEntities.stream().map(Entity::id).toList();
+        List<String> ids = initialEntities.stream().map(MVEntity4DataNegotiation::id).toList();
         ScorpioInflator.deleteInitialEntitiesFromContextBroker(brokerUrl, ids);
     }
 
     @Test
     void itShouldReturnEntityIds() {
-        Mono<List<Entity>> result = scorpioAdapter.getEntityIds();
+        Mono<List<MVEntity4DataNegotiation>> result = scorpioAdapter.getMvEntities4DataNegotiation();
 
         StepVerifier.create(result)
                 .expectNext(initialEntities)

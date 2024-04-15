@@ -3,7 +3,7 @@ package es.in2.desmos.domain.models;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 
-public record Entity(
+public record MVEntity4DataNegotiation(
         @JsonProperty("id") @NotBlank String id,
         @JsonProperty("type") @NotBlank String type,
         @JsonProperty("version") @NotBlank String version,

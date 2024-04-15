@@ -1,6 +1,6 @@
 package es.in2.desmos.objectmothers;
 
-import es.in2.desmos.domain.models.Entity;
+import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.domain.models.EntitySyncRequest;
 import org.jetbrains.annotations.NotNull;
 
@@ -12,9 +12,9 @@ public final class EntitySyncRequestMother {
     }
 
     public static @NotNull EntitySyncRequest simpleEntitySyncRequest() {
-        List<Entity> entities = new ArrayList<>();
-        entities.add(EntityMother.sample1());
-        entities.add(EntityMother.sample2());
+        List<MVEntity4DataNegotiation> entities = new ArrayList<>();
+        entities.add(MVEntity4DataNegotiationMother.sample1());
+        entities.add(MVEntity4DataNegotiationMother.sample2());
         return new EntitySyncRequest(entities);
     }
 }
