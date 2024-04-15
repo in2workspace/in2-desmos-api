@@ -1,9 +1,10 @@
 package es.in2.desmos.workflows.jobs;
 
+import es.in2.desmos.domain.models.DataNegotiationEvent;
+import org.springframework.context.event.EventListener;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-
 public interface DataNegotiationJob {
-    Mono<Void> negotiateDataSync(Mono<String> issuer, Mono<List<String>> externalEntityIds, Mono<List<String>> internalEntityIds);
+    @EventListener
+    Mono<Void> negotiateDataSync(DataNegotiationEvent dataNegotiationEvent);
 }

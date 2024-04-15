@@ -1,55 +1,89 @@
 package es.in2.desmos.workflows.jobs.impl;
 
+import es.in2.desmos.domain.models.DataNegotiationEvent;
+import es.in2.desmos.domain.models.DataNegotiationResult;
+import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.workflows.jobs.DataNegotiationJob;
+import es.in2.desmos.workflows.jobs.DataTransferJob;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.time.Instant;
 import java.util.List;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class DataNegotiationJobImpl implements DataNegotiationJob {
-    @Override
-    public Mono<Void> negotiateDataSync(Mono<String> issuer, Mono<List<String>> externalEntityIds, Mono<List<String>> internalEntityIds) {
-        return null;
-    }
-    /*private final EntitySyncWebClient entitySyncWebClient;
+    private final DataTransferJob dataTransferJob;
 
     @Override
-    public Mono<Void> addNewEntities(Mono<String> issuer, Mono<List<String>> externalEntityIds, @NotNull Mono<List<String>> internalEntityIds) {
+    public Mono<Void> negotiateDataSync(DataNegotiationEvent dataNegotiationEvent) {
+        log.info("Listening data negotiation event.");
+        Mono<List<MVEntity4DataNegotiation>> newEntitiesToSync =
+                checkWithExternalDataIsMissing(
+                        dataNegotiationEvent.externalEntityIds(),
+                        dataNegotiationEvent.localEntityIds());
 
-        Mono<List<String>> entityIdsToAdd = getEntitiesToAdd(externalEntityIds, internalEntityIds);
-        Mono<EntitySyncResponse> entitiesToAdd = requestNewEntities(entityIdsToAdd, issuer);
+        Mono<List<MVEntity4DataNegotiation>> existingEntitiesToSync =
+                checkVersionsAndTimestampsFromEntityIdMatched(
+                        dataNegotiationEvent.externalEntityIds(),
+                        dataNegotiationEvent.localEntityIds());
 
-        return publishNewEntities(entitiesToAdd);
+        Mono<DataNegotiationResult> dataNegotiationResult =
+                createDataNegotiationResult(
+                        dataNegotiationEvent.issuer(),
+                        newEntitiesToSync,
+                        existingEntitiesToSync);
+
+        return dataTransferJob.syncData(dataNegotiationResult);
     }
 
-    private Mono<List<String>> getEntitiesToAdd(Mono<List<String>> externalEntityIds, Mono<List<String>> internalEntityIds) {
-        return internalEntityIds.flatMap(
-                internalList -> externalEntityIds.flatMap(
-                        externalList ->
-                                externalEntityIds.flatMapIterable(list -> list)
-                                        .filter(externalId -> !internalList.contains(externalId))
-                                        .distinct()
-                                        .collectList()
-                )
-        );
+    private Mono<List<MVEntity4DataNegotiation>> checkWithExternalDataIsMissing(
+            Mono<List<MVEntity4DataNegotiation>> externalEntityIds,
+            Mono<List<MVEntity4DataNegotiation>> localEntityIds) {
+        return Mono.zip(externalEntityIds, localEntityIds)
+                .map(tuple -> {
+                    List<MVEntity4DataNegotiation> externalList = tuple.getT1();
+                    List<MVEntity4DataNegotiation> localList = tuple.getT2();
+
+                    return externalList.stream()
+                            .filter(externalEntity -> localList.stream()
+                                    .noneMatch(entity -> entity.id().equals(externalEntity.id())))
+                            .toList();
+                });
     }
 
-    private Mono<EntitySyncResponse> requestNewEntities(Mono<List<String>> entityIdsToAdd, Mono<String> issuer) {
-        Mono<List<Entity>> idRecordsToRequest = entityIdsToAdd.map(DiscoverySyncRequest::createExternalEntityIdsListFromString);
+    private Mono<List<MVEntity4DataNegotiation>> checkVersionsAndTimestampsFromEntityIdMatched(
+            Mono<List<MVEntity4DataNegotiation>> externalEntityIds,
+            Mono<List<MVEntity4DataNegotiation>> localEntityIds) {
+        return Mono.zip(externalEntityIds, localEntityIds)
+                .map(tuple -> {
+                    List<MVEntity4DataNegotiation> externalList = tuple.getT1();
+                    List<MVEntity4DataNegotiation> localList = tuple.getT2();
 
-        Mono<EntitySyncRequest> entitySyncRequest = idRecordsToRequest.map(EntitySyncRequest::new);
-
-        return entitySyncWebClient.makeRequest(issuer, entitySyncRequest);
+                    return externalList
+                            .stream()
+                            .filter(externalEntity ->
+                                    localList
+                                            .stream()
+                                            .filter(localEntity -> localEntity.id().equals(externalEntity.id()))
+                                            .findFirst()
+                                            .map(sameLocalEntity ->
+                                                    Float.parseFloat(externalEntity.version().substring(1)) >
+                                                            Float.parseFloat(sameLocalEntity.version().substring(1)) ||
+                                                            (Float.parseFloat(externalEntity.version().substring(1)) ==
+                                                                    Float.parseFloat(sameLocalEntity.version().substring(1)) &&
+                                                                    Instant.parse(externalEntity.lastUpdate()).isAfter(Instant.parse(sameLocalEntity.lastUpdate())))
+                                            )
+                                            .orElse(false))
+                            .toList();
+                });
     }
 
-    private Mono<Void> publishNewEntities(Mono<EntitySyncResponse> newEntities) {
-        // TODO
-        log.info("New entities: {}", newEntities);
-        return Mono.empty();
-    }*/
+    private Mono<DataNegotiationResult> createDataNegotiationResult(Mono<String> issuer, Mono<List<MVEntity4DataNegotiation>> newEntitiesToSync, Mono<List<MVEntity4DataNegotiation>> existingEntitiesToSync) {
+        return Mono.just(new DataNegotiationResult(issuer, newEntitiesToSync, existingEntitiesToSync));
+    }
 }
