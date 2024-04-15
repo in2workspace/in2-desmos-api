@@ -13,7 +13,7 @@ public class DataNegotiationEventPublisher {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     public void publishEvent(DataNegotiationEvent dataNegotiationEvent) {
-        log.info("Publishing entities creator event.");
+        log.info("Publishing data negotiation event.");
         applicationEventPublisher.publishEvent(dataNegotiationEvent);
     }
 }
