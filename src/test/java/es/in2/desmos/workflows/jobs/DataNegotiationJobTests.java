@@ -1,18 +1,25 @@
 package es.in2.desmos.workflows.jobs;
 
-import es.in2.desmos.domain.services.sync.EntitySyncWebClient;
-import es.in2.desmos.workflows.jobs.impl.DataNegotiationJobImpl;
+import es.in2.desmos.domain.models.DataNegotiationEvent;
+import es.in2.desmos.domain.models.DataNegotiationResult;
+import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
-import org.jetbrains.annotations.NotNull;
+import es.in2.desmos.workflows.jobs.impl.DataNegotiationJobImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DataNegotiationJobTests {
@@ -20,40 +27,155 @@ class DataNegotiationJobTests {
     private DataNegotiationJobImpl dataNegotiationJob;
 
     @Mock
-    private EntitySyncWebClient entitySyncWebClient;
+    private DataTransferJob dataTransferJob;
+
+    @Captor
+    private ArgumentCaptor<Mono<DataNegotiationResult>> dataNegotiationResultCaptor;
 
     @Test
-    void itShouldCreateNewEntitiesIfNotExists() {
-       /* Mono<List<String>> externalEntitiesIdList = Mono.just(createExternalEntitiesIdList());
+    void itShouldSyncDataWithNewEntitiesToAdd() {
+        String issuer = "http://example.org";
+        Mono<String> issuerMono = Mono.just(issuer);
 
-        Mono<String> issuer = Mono.just("http://example.org");
+        List<MVEntity4DataNegotiation> externalEntityIds = MVEntity4DataNegotiationMother.fullList();
+        Mono<List<MVEntity4DataNegotiation>> externalEntityIdsMono = Mono.just(externalEntityIds);
 
-        Mono<List<String>> internalEntitiesIds = getInternalEntitiesIdsMono();
+        Mono<List<MVEntity4DataNegotiation>> localEntityIdsMono = Mono.just(MVEntity4DataNegotiationMother.list3And4());
 
-        Mono<EntitySyncResponse> entitySyncResponse = Mono.just(EntitySyncResponseMother.sample());
-        when(entitySyncWebClient.makeRequest(any(), any())).thenReturn(entitySyncResponse);
+        DataNegotiationEvent dataNegotiationEvent = new DataNegotiationEvent(issuerMono, externalEntityIdsMono, localEntityIdsMono);
 
-        Mono<Void> result = newEntitiesCreatorService.addNewEntities(issuer, externalEntitiesIdList, internalEntitiesIds);
+        List<MVEntity4DataNegotiation> expectedNewEntitiesToSync = MVEntity4DataNegotiationMother.list1And2();
 
-        StepVerifier.create(result)
-                .expectComplete()
-                .verify();
+        List<MVEntity4DataNegotiation> expectedExistingEntitiesToSync = new ArrayList<>();
 
-        verify(entitySyncWebClient, times(1)).makeRequest(any(), any());
-        verifyNoMoreInteractions(entitySyncWebClient);*/
+        when(dataTransferJob.syncData(any())).thenReturn(Mono.empty());
+
+        var result = dataNegotiationJob.negotiateDataSync(dataNegotiationEvent);
+
+        StepVerifier
+                .create(result)
+                .verifyComplete();
+
+        verify(dataTransferJob, times(1)).syncData(dataNegotiationResultCaptor.capture());
+        verifyNoMoreInteractions(dataTransferJob);
+
+        Mono<DataNegotiationResult> dataNegotiationResultCaptured = dataNegotiationResultCaptor.getValue();
+
+        StepVerifier.create(dataNegotiationResultCaptured)
+                .consumeNextWith(dataNegotiationResult -> {
+                    StepVerifier
+                            .create(dataNegotiationResult.issuer())
+                            .expectNext(issuer)
+                            .verifyComplete();
+
+                    StepVerifier
+                            .create(dataNegotiationResult.newEntitiesToSync())
+                            .expectNext(expectedNewEntitiesToSync)
+                            .verifyComplete();
+
+                    StepVerifier
+                            .create(dataNegotiationResult.existingEntitiesToSync())
+                            .expectNext(expectedExistingEntitiesToSync)
+                            .verifyComplete();
+                })
+                .verifyComplete();
     }
 
-    private @NotNull Mono<List<String>> getInternalEntitiesIdsMono() {
-        List<String> internalEntitiesIds = new ArrayList<>();
-        internalEntitiesIds.add(MVEntity4DataNegotiationMother.sample3().id());
-        internalEntitiesIds.add(MVEntity4DataNegotiationMother.sample4().id());
-        return Mono.just(internalEntitiesIds);
+    @Test
+    void itShouldSyncDataWithExistingEntitiesToAddWhenExternalVersionIsAfter() {
+        String issuer = "http://example.org";
+        Mono<String> issuerMono = Mono.just(issuer);
+
+        List<MVEntity4DataNegotiation> externalEntityIds = MVEntity4DataNegotiationMother.list2And3();
+        Mono<List<MVEntity4DataNegotiation>> externalEntityIdsMono = Mono.just(externalEntityIds);
+
+        Mono<List<MVEntity4DataNegotiation>> localEntityIdsMono = Mono.just(List.of(MVEntity4DataNegotiationMother.sample2VersionOld()));
+
+        DataNegotiationEvent dataNegotiationEvent = new DataNegotiationEvent(issuerMono, externalEntityIdsMono, localEntityIdsMono);
+
+        List<MVEntity4DataNegotiation> expectedNewEntitiesToSync = List.of(MVEntity4DataNegotiationMother.sample3());
+
+        List<MVEntity4DataNegotiation> expectedExistingEntitiesToSync = List.of(MVEntity4DataNegotiationMother.sample2());
+
+        when(dataTransferJob.syncData(any())).thenReturn(Mono.empty());
+
+        var result = dataNegotiationJob.negotiateDataSync(dataNegotiationEvent);
+
+        StepVerifier
+                .create(result)
+                .verifyComplete();
+
+        verify(dataTransferJob, times(1)).syncData(dataNegotiationResultCaptor.capture());
+        verifyNoMoreInteractions(dataTransferJob);
+
+        Mono<DataNegotiationResult> dataNegotiationResultCaptured = dataNegotiationResultCaptor.getValue();
+
+        StepVerifier.create(dataNegotiationResultCaptured)
+                .consumeNextWith(dataNegotiationResult -> {
+                    StepVerifier
+                            .create(dataNegotiationResult.issuer())
+                            .expectNext(issuer)
+                            .verifyComplete();
+
+                    StepVerifier
+                            .create(dataNegotiationResult.newEntitiesToSync())
+                            .expectNext(expectedNewEntitiesToSync)
+                            .verifyComplete();
+
+                    StepVerifier
+                            .create(dataNegotiationResult.existingEntitiesToSync())
+                            .expectNext(expectedExistingEntitiesToSync)
+                            .verifyComplete();
+                })
+                .verifyComplete();
     }
 
-    private @NotNull List<String> createExternalEntitiesIdList() {
-        List<String> externalEntitiesIdList = new ArrayList<>();
-        externalEntitiesIdList.add(MVEntity4DataNegotiationMother.sample1().id());
-        externalEntitiesIdList.add(MVEntity4DataNegotiationMother.sample2().id());
-        return externalEntitiesIdList;
+    @Test
+    void itShouldSyncDataWithExistingEntitiesToAddWhenVersionIsEqualAndExternalTimestampIsAfter() {
+        String issuer = "http://example.org";
+        Mono<String> issuerMono = Mono.just(issuer);
+
+        List<MVEntity4DataNegotiation> externalEntityIds = MVEntity4DataNegotiationMother.list2And3();
+        Mono<List<MVEntity4DataNegotiation>> externalEntityIdsMono = Mono.just(externalEntityIds);
+
+        Mono<List<MVEntity4DataNegotiation>> localEntityIdsMono = Mono.just(List.of(MVEntity4DataNegotiationMother.sample3TimestampOld()));
+
+        DataNegotiationEvent dataNegotiationEvent = new DataNegotiationEvent(issuerMono, externalEntityIdsMono, localEntityIdsMono);
+
+        List<MVEntity4DataNegotiation> expectedNewEntitiesToSync = List.of(MVEntity4DataNegotiationMother.sample2());
+
+        List<MVEntity4DataNegotiation> expectedExistingEntitiesToSync = List.of(MVEntity4DataNegotiationMother.sample3());
+
+        when(dataTransferJob.syncData(any())).thenReturn(Mono.empty());
+
+        var result = dataNegotiationJob.negotiateDataSync(dataNegotiationEvent);
+
+        StepVerifier
+                .create(result)
+                .verifyComplete();
+
+        verify(dataTransferJob, times(1)).syncData(dataNegotiationResultCaptor.capture());
+        verifyNoMoreInteractions(dataTransferJob);
+
+        Mono<DataNegotiationResult> dataNegotiationResultCaptured = dataNegotiationResultCaptor.getValue();
+
+        StepVerifier.create(dataNegotiationResultCaptured)
+                .consumeNextWith(dataNegotiationResult -> {
+                    StepVerifier
+                            .create(dataNegotiationResult.issuer())
+                            .expectNext(issuer)
+                            .verifyComplete();
+
+                    StepVerifier
+                            .create(dataNegotiationResult.newEntitiesToSync())
+                            .expectNext(expectedNewEntitiesToSync)
+                            .verifyComplete();
+
+                    StepVerifier
+                            .create(dataNegotiationResult.existingEntitiesToSync())
+                            .expectNext(expectedExistingEntitiesToSync)
+                            .verifyComplete();
+                })
+                .verifyComplete();
     }
 }
