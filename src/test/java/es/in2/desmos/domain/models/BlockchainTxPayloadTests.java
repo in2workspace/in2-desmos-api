@@ -1,13 +1,18 @@
 package es.in2.desmos.domain.models;
 
-import es.in2.desmos.domain.models.BlockchainTxPayload;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
 
 class BlockchainTxPayloadTests {
 
@@ -96,4 +101,27 @@ class BlockchainTxPayloadTests {
         assertEquals(expectedToString, blockchainTxPayloadBuilder.toString());
     }
 
+    @Test
+    public void testInvalidDataLocation() {
+        // We provide an invalid URL for dataLocation
+        ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
+
+        BlockchainTxPayload payload = BlockchainTxPayload.builder()
+                .eventType("someEventType")
+                .organizationId("someOrganizationId")
+                .entityId("someEntityId")
+                .previousEntityHash("somePreviousEntityHash")
+                .dataLocation("not_a_valid_url")
+                .metadata(List.of("metadata1", "metadata2"))
+                .build();
+
+        Validator validator = validatorFactory.getValidator();
+        Set<ConstraintViolation<BlockchainTxPayload>> violations = validator.validate(payload);
+
+        // We verify that there is exactly one violation of the @URL constraint.
+        assertEquals(1, violations.size());
+
+        ConstraintViolation<BlockchainTxPayload> violation = violations.iterator().next();
+        assertEquals("dataLocation must be a valid URL", violation.getMessage());
+    }
 }

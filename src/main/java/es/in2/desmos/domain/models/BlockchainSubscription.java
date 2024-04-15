@@ -9,7 +9,12 @@ import java.util.List;
 
 @Builder
 public record BlockchainSubscription(
-        @JsonProperty("eventTypes") @NotNull List<@NotBlank String> eventTypes,
-        @JsonProperty("notificationEndpoint") @NotBlank String notificationEndpoint
+        @JsonProperty("eventTypes")
+        @NotNull(message = "eventTypes must not be null")
+        List<@NotBlank(message = "eventTypes must not be blank") String> eventTypes,
+
+        @JsonProperty("notificationEndpoint")
+        @NotBlank(message = "notificationEndpoint must not be blank")
+        String notificationEndpoint
 ) {
 }

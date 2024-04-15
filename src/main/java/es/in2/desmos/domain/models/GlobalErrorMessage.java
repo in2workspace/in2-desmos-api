@@ -5,7 +5,12 @@ import lombok.Builder;
 
 @Builder
 public record GlobalErrorMessage(
-        @NotBlank String title,
-        @NotBlank String message,
-        @NotBlank String path) {
+        @NotBlank(message = "title must not be blank")
+        String title,
+
+        @NotBlank(message = "message must not be blank")
+        String message,
+
+        @NotBlank(message = "path must not be blank")
+        String path) {
 }

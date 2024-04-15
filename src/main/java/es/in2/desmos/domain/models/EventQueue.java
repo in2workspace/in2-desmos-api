@@ -10,8 +10,8 @@ import java.util.List;
 @Builder
 public class EventQueue implements Comparable<EventQueue> {
 
-    private @NotNull List<Object> event;
-    private @NotNull EventQueuePriority priority;
+    private @NotNull(message = "event must not be null") List<Object> event;
+    private @NotNull(message = "priority must not be null") EventQueuePriority priority;
 
     @Override
     public int compareTo(EventQueue o) {

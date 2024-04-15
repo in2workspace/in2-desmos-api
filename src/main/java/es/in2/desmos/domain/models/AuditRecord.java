@@ -24,36 +24,36 @@ public class AuditRecord implements Persistable<UUID> {
 
     @Id
     @Column("id")
-    @NotNull
+    @NotNull(message = "id cannot be null")
     private UUID id;
 
     @Column("process_id")
-    @NotBlank
+    @NotBlank(message = "processId cannot be blank")
     private String processId;
 
     @Column("created_at")
-    @NotNull
+    @NotNull(message = "createdAt cannot be null")
     private Timestamp createdAt;
 
     @Column("entity_id")
-    @NotBlank
+    @NotBlank(message = "entityId cannot be blank")
     private String entityId;
 
     @Column("entity_type")
-    @NotBlank
+    @NotBlank(message = "entityType cannot be blank")
     private String entityType;
 
     @Column("entity_hash")
-    @NotBlank
+    @NotBlank(message = "entityHash cannot be blank")
     private String entityHash;
 
     @Column("entity_hashlink")
-    @NotBlank
+    @NotBlank(message = "entityHashLink cannot be blank")
     private String entityHashLink;
 
     @Column("data_location")
-    @NotBlank
-    @URL
+    @NotBlank(message = "dataLocation cannot be blank")
+    @URL(message = "dataLocation must be a valid URL")
     private String dataLocation;
 
     @Column("status")
@@ -63,11 +63,11 @@ public class AuditRecord implements Persistable<UUID> {
     private AuditRecordTrader trader;
 
     @Column("hash")
-    @NotBlank
+    @NotBlank(message = "hash cannot be blank")
     private String hash;
 
     @Column("hashlink")
-    @NotBlank
+    @NotBlank(message = "hashLink cannot be blank")
     private String hashLink;
 
     @Transient

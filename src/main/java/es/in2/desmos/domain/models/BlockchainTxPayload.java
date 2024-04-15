@@ -10,11 +10,29 @@ import java.util.List;
 
 @Builder
 public record BlockchainTxPayload(
-        @JsonProperty("eventType") @NotBlank String eventType,
-        @JsonProperty("iss") @NotBlank String organizationId,
-        @JsonProperty("entityId") @NotBlank String entityId,
-        @JsonProperty("previousEntityHash") @NotBlank String previousEntityHash,
-        @JsonProperty("dataLocation") @NotBlank @URL String dataLocation,
-        @JsonProperty("relevantMetadata") @NotNull List<@NotBlank String> metadata
+        @JsonProperty("eventType")
+        @NotBlank(message = "eventType must not be blank")
+        String eventType,
+
+        @JsonProperty("iss")
+        @NotBlank(message = "iss must not be blank")
+        String organizationId,
+
+        @JsonProperty("entityId")
+        @NotBlank(message = "entityId must not be blank")
+        String entityId,
+
+        @JsonProperty("previousEntityHash")
+        @NotBlank(message = "previousEntityHash must not be blank")
+        String previousEntityHash,
+
+        @JsonProperty("dataLocation")
+        @NotBlank(message = "dataLocation must not be blank")
+        @URL(message = "dataLocation must be a valid URL")
+        String dataLocation,
+
+        @JsonProperty("relevantMetadata")
+        @NotNull(message = "relevantMetadata must not be null")
+        List<@NotBlank String> metadata
 ) {
 }

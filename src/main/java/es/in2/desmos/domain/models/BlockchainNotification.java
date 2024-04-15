@@ -2,6 +2,7 @@ package es.in2.desmos.domain.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import es.in2.desmos.domain.validation.ValidTimestamp;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -13,13 +14,38 @@ import java.util.List;
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record BlockchainNotification(
-        @JsonProperty("id") @PositiveOrZero long id,
-        @JsonProperty("publisherAddress") @NotBlank String publisherAddress,
-        @JsonProperty("eventType") @NotBlank String eventType,
-        @JsonProperty("timestamp") @PositiveOrZero long timestamp,
-        @JsonProperty("dataLocation") @NotBlank @URL String dataLocation,
-        @JsonProperty("relevantMetadata") @NotNull List<@NotBlank String> relevantMetadata,
-        @JsonProperty("entityIDHash") @NotBlank String entityId,
-        @JsonProperty("previousEntityHash") @NotBlank String previousEntityHash
+        @JsonProperty("id")
+        @PositiveOrZero(message = "id must be positive or zero")
+        long id,
+
+        @JsonProperty("publisherAddress")
+        @NotBlank(message = "publisherAddress must not be blank")
+        String publisherAddress,
+
+        @JsonProperty("eventType")
+        @NotBlank(message = "eventType must not be blank")
+        String eventType,
+
+        @JsonProperty("timestamp")
+        @NotNull(message = "timestamp must not be null")
+        @ValidTimestamp
+        long timestamp,
+
+        @JsonProperty("dataLocation")
+        @NotBlank(message = "dataLocation must not be blank")
+        @URL(message = "dataLocation must be a valid URL")
+        String dataLocation,
+
+        @JsonProperty("relevantMetadata")
+        @NotNull(message = "relevantMetadata must not be null")
+        List<@NotBlank(message = "relevantMetadata must not be blank") String> relevantMetadata,
+
+        @JsonProperty("entityIDHash")
+        @NotBlank(message = "entityIDHash must not be blank")
+        String entityId,
+
+        @JsonProperty("previousEntityHash")
+        @NotBlank(message = "previousEntityHash must not be blank")
+        String previousEntityHash
 ) {
 }
