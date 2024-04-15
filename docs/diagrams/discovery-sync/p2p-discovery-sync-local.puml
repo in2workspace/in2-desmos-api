@@ -26,7 +26,7 @@ note right of ean
     DiscoverySyncRequest:
 
     {
-        List<EntityDTO> entities ->
+        List<MvEntity4DataNegotiation> external_entity_ids ->
             id, type,
             version, lastUpdate
             hash, and hashlink(as previousHash)
@@ -39,7 +39,7 @@ note right of ean
 end note
 
     p2pController -> p2pWorkflow++: dataDiscovery()
-        p2pWorkflow -> cb++: GET /ngsi-ld/v1/entities\n  ?type=ProductOffering\n  &Attrs=version,lastUpdate
+        p2pWorkflow -> cb++: GET /ngsi-ld/v1/entities\n  ?type=ProductOffering\n  &attrs=lastUpdate,version,hash,hashlink
         return 200 OK - Payload: List<EntityDTO>
         p2pWorkflow -> ac: PublishDataNegotiationEvent
     return List<EntityDTO>
