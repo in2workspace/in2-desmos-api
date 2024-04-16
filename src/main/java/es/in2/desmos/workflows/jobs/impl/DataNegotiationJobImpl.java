@@ -13,6 +13,8 @@ import reactor.core.publisher.Mono;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -41,26 +43,24 @@ public class DataNegotiationJobImpl implements DataNegotiationJob {
     private Mono<List<MVEntity4DataNegotiation>> checkWithExternalDataIsMissing(
             Mono<List<MVEntity4DataNegotiation>> externalEntityIds,
             Mono<List<MVEntity4DataNegotiation>> localEntityIds) {
-        return Mono.zip(externalEntityIds, localEntityIds)
-                .map(tuple -> {
-                    List<MVEntity4DataNegotiation> externalList = tuple.getT1();
-                    List<MVEntity4DataNegotiation> localList = tuple.getT2();
-
-                    return getNotExistentItems(externalList, localList);
-                });
+        return externalEntityIds.zipWith(localEntityIds)
+                .map(tuple -> getNotExistentItems(tuple.getT1(), tuple.getT2()));
     }
 
     private List<MVEntity4DataNegotiation> getNotExistentItems(List<MVEntity4DataNegotiation> originalList, List<MVEntity4DataNegotiation> itemsToCheck) {
+        Set<String> idsToCheck = itemsToCheck.stream()
+                .map(MVEntity4DataNegotiation::id)
+                .collect(Collectors.toSet());
+
         return originalList.stream()
-                .filter(externalEntity -> itemsToCheck.stream()
-                        .noneMatch(entity -> entity.id().equals(externalEntity.id())))
+                .filter(entity -> !idsToCheck.contains(entity.id()))
                 .toList();
     }
 
     private Mono<List<MVEntity4DataNegotiation>> checkVersionsAndLastUpdateFromEntityIdMatched(
             Mono<List<MVEntity4DataNegotiation>> externalEntityIds,
             Mono<List<MVEntity4DataNegotiation>> localEntityIds) {
-        return Mono.zip(externalEntityIds, localEntityIds)
+        return externalEntityIds.zipWith(localEntityIds)
                 .map(tuple -> {
                     List<MVEntity4DataNegotiation> externalList = tuple.getT1();
                     List<MVEntity4DataNegotiation> localList = tuple.getT2();
