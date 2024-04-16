@@ -8,6 +8,7 @@ import es.in2.desmos.domain.services.api.AuditRecordService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.security.NoSuchAlgorithmException;
@@ -184,6 +185,12 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                 .flatMap(auditRecord -> auditRecord != null
                         ? Mono.just(auditRecord.getEntityHash())
                         : Mono.error(new NoSuchElementException()));
+    }
+
+    @Override
+    public Flux<AuditRecord> findAllAuditRecords(String processId) {
+        log.debug("ProcessID: {} - Fetching all audit records...", processId);
+        return auditRecordRepository.findAll();
     }
 
     private String setAuditRecordHashLink(AuditRecord lastAuditRecordRegistered, String auditRecordHash)

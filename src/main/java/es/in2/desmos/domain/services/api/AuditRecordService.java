@@ -13,10 +13,13 @@ public interface AuditRecordService {
     Mono<Void> buildAndSaveAuditRecordFromBlockchainNotification(String processId, BlockchainNotification blockchainNotification, String retrievedBrokerEntity, AuditRecordStatus status);
 
     Mono<AuditRecord> fetchMostRecentAuditRecord();
+
     Mono<AuditRecord> findLatestAuditRecordForEntity(String processId, String entityId);
 
     Mono<AuditRecord> getLastPublishedAuditRecordForProducerByEntityId(String processId, String entityId);
 
     Mono<String> fetchLatestProducerEntityHashByEntityId(String processId, String entityId);
+
+    Flux<AuditRecord> findAllAuditRecords(String processId);
 
 }
