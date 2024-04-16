@@ -42,8 +42,8 @@ public interface AuditRecordRepository extends ReactiveCrudRepository<AuditRecor
 
     Flux<AuditRecord> findByEntityId(final String entityId);
 
-    @Query("SELECT * FROM audit_records WHERE status = 'PUBLISHED' AND trader = 'PRODUCER' ORDER BY created_at DESC LIMIT 1")
-    Flux<AuditRecord> findLastProducerTransaction();
+    @Query("SELECT * FROM audit_records WHERE status = 'PUBLISHED' AND trader = 'CONSUMER' ORDER BY created_at DESC LIMIT 1")
+    Flux<AuditRecord> findLastPublishedConsumerAuditRecord();
 
     @Query("SELECT * FROM audit_records ORDER BY created_at DESC LIMIT 1 OFFSET 1")
     Mono<AuditRecord> findPreviousTransaction();

@@ -188,9 +188,9 @@ public class AuditRecordServiceImpl implements AuditRecordService {
     }
 
     @Override
-    public Flux<AuditRecord> findAllAuditRecords(String processId) {
+    public Flux<AuditRecord> findLatestConsumerPublishedAuditRecord(String processId) {
         log.debug("ProcessID: {} - Fetching all audit records...", processId);
-        return auditRecordRepository.findAll();
+        return auditRecordRepository.findLastPublishedConsumerAuditRecord();
     }
 
     private String setAuditRecordHashLink(AuditRecord lastAuditRecordRegistered, String auditRecordHash)

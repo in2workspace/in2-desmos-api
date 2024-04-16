@@ -20,6 +20,6 @@ public interface AuditRecordService {
 
     Mono<String> fetchLatestProducerEntityHashByEntityId(String processId, String entityId);
 
-    Flux<AuditRecord> findAllAuditRecords(String processId);
+    Flux<AuditRecord> findLatestConsumerPublishedAuditRecord(String processId);
 
 }
