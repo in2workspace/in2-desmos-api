@@ -33,11 +33,7 @@ public class DataNegotiationJobImpl implements DataNegotiationJob {
                         dataNegotiationEvent.externalEntityIds(),
                         dataNegotiationEvent.localEntityIds());
 
-        Mono<DataNegotiationResult> dataNegotiationResult =
-                createDataNegotiationResult(
-                        dataNegotiationEvent.issuer(),
-                        newEntitiesToSync,
-                        existingEntitiesToSync);
+        Mono<DataNegotiationResult> dataNegotiationResult = createDataNegotiationResult(dataNegotiationEvent, newEntitiesToSync, existingEntitiesToSync);
 
         return dataTransferJob.syncData(dataNegotiationResult);
     }
@@ -98,7 +94,15 @@ public class DataNegotiationJobImpl implements DataNegotiationJob {
         return externalEntityLastUpdate.isAfter(sameLocalEntityLastUpdate);
     }
 
-    private Mono<DataNegotiationResult> createDataNegotiationResult(Mono<String> issuer, Mono<List<MVEntity4DataNegotiation>> newEntitiesToSync, Mono<List<MVEntity4DataNegotiation>> existingEntitiesToSync) {
-        return Mono.just(new DataNegotiationResult(issuer, newEntitiesToSync, existingEntitiesToSync));
+    private Mono<DataNegotiationResult> createDataNegotiationResult(DataNegotiationEvent dataNegotiationEvent, Mono<List<MVEntity4DataNegotiation>> newEntitiesToSync, Mono<List<MVEntity4DataNegotiation>> existingEntitiesToSync) {
+        return Mono.zip(dataNegotiationEvent.issuer(), newEntitiesToSync, existingEntitiesToSync).map(
+                tuple -> {
+                    String issuer = tuple.getT1();
+                    List<MVEntity4DataNegotiation> newEntitiesToSyncValue = tuple.getT2();
+                    List<MVEntity4DataNegotiation> existingEntitiesToSyncValue = tuple.getT3();
+
+                    return new DataNegotiationResult(issuer, newEntitiesToSyncValue, existingEntitiesToSyncValue);
+                }
+        );
     }
 }

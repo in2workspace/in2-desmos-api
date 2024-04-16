@@ -1,5 +1,6 @@
 package es.in2.desmos.domain.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 
@@ -13,10 +14,12 @@ public record MVEntity4DataNegotiation(
         @JsonProperty("hash") @NotBlank String hash,
         @JsonProperty("hashlink") @NotBlank String hashlink) {
 
+    @JsonIgnore
     public Float getFloatVersion(){
         return Float.parseFloat(version.substring(1));
     }
 
+    @JsonIgnore
     public Instant getInstantLastUpdate(){
         return Instant.parse(lastUpdate);
     }

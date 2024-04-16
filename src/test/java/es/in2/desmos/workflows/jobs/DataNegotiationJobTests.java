@@ -48,6 +48,8 @@ class DataNegotiationJobTests {
 
         List<MVEntity4DataNegotiation> expectedExistingEntitiesToSync = new ArrayList<>();
 
+        DataNegotiationResult expectedDataNegotiationResult = new DataNegotiationResult(issuer, expectedNewEntitiesToSync, expectedExistingEntitiesToSync);
+
         when(dataTransferJob.syncData(any())).thenReturn(Mono.empty());
 
         var result = dataNegotiationJob.negotiateDataSync(dataNegotiationEvent);
@@ -61,23 +63,9 @@ class DataNegotiationJobTests {
 
         Mono<DataNegotiationResult> dataNegotiationResultCaptured = dataNegotiationResultCaptor.getValue();
 
-        StepVerifier.create(dataNegotiationResultCaptured)
-                .consumeNextWith(dataNegotiationResult -> {
-                    StepVerifier
-                            .create(dataNegotiationResult.issuer())
-                            .expectNext(issuer)
-                            .verifyComplete();
-
-                    StepVerifier
-                            .create(dataNegotiationResult.newEntitiesToSync())
-                            .expectNext(expectedNewEntitiesToSync)
-                            .verifyComplete();
-
-                    StepVerifier
-                            .create(dataNegotiationResult.existingEntitiesToSync())
-                            .expectNext(expectedExistingEntitiesToSync)
-                            .verifyComplete();
-                })
+        StepVerifier
+                .create(dataNegotiationResultCaptured)
+                .expectNext(expectedDataNegotiationResult)
                 .verifyComplete();
     }
 
@@ -97,6 +85,8 @@ class DataNegotiationJobTests {
 
         List<MVEntity4DataNegotiation> expectedExistingEntitiesToSync = List.of(MVEntity4DataNegotiationMother.sample2());
 
+        DataNegotiationResult expectedDataNegotiationResult = new DataNegotiationResult(issuer, expectedNewEntitiesToSync, expectedExistingEntitiesToSync);
+
         when(dataTransferJob.syncData(any())).thenReturn(Mono.empty());
 
         var result = dataNegotiationJob.negotiateDataSync(dataNegotiationEvent);
@@ -110,23 +100,9 @@ class DataNegotiationJobTests {
 
         Mono<DataNegotiationResult> dataNegotiationResultCaptured = dataNegotiationResultCaptor.getValue();
 
-        StepVerifier.create(dataNegotiationResultCaptured)
-                .consumeNextWith(dataNegotiationResult -> {
-                    StepVerifier
-                            .create(dataNegotiationResult.issuer())
-                            .expectNext(issuer)
-                            .verifyComplete();
-
-                    StepVerifier
-                            .create(dataNegotiationResult.newEntitiesToSync())
-                            .expectNext(expectedNewEntitiesToSync)
-                            .verifyComplete();
-
-                    StepVerifier
-                            .create(dataNegotiationResult.existingEntitiesToSync())
-                            .expectNext(expectedExistingEntitiesToSync)
-                            .verifyComplete();
-                })
+        StepVerifier
+                .create(dataNegotiationResultCaptured)
+                .expectNext(expectedDataNegotiationResult)
                 .verifyComplete();
     }
 
@@ -146,6 +122,8 @@ class DataNegotiationJobTests {
 
         List<MVEntity4DataNegotiation> expectedExistingEntitiesToSync = List.of(MVEntity4DataNegotiationMother.sample3());
 
+        DataNegotiationResult expectedDataNegotiationResult = new DataNegotiationResult(issuer, expectedNewEntitiesToSync, expectedExistingEntitiesToSync);
+
         when(dataTransferJob.syncData(any())).thenReturn(Mono.empty());
 
         var result = dataNegotiationJob.negotiateDataSync(dataNegotiationEvent);
@@ -159,23 +137,9 @@ class DataNegotiationJobTests {
 
         Mono<DataNegotiationResult> dataNegotiationResultCaptured = dataNegotiationResultCaptor.getValue();
 
-        StepVerifier.create(dataNegotiationResultCaptured)
-                .consumeNextWith(dataNegotiationResult -> {
-                    StepVerifier
-                            .create(dataNegotiationResult.issuer())
-                            .expectNext(issuer)
-                            .verifyComplete();
-
-                    StepVerifier
-                            .create(dataNegotiationResult.newEntitiesToSync())
-                            .expectNext(expectedNewEntitiesToSync)
-                            .verifyComplete();
-
-                    StepVerifier
-                            .create(dataNegotiationResult.existingEntitiesToSync())
-                            .expectNext(expectedExistingEntitiesToSync)
-                            .verifyComplete();
-                })
+        StepVerifier
+                .create(dataNegotiationResultCaptured)
+                .expectNext(expectedDataNegotiationResult)
                 .verifyComplete();
     }
 
@@ -195,6 +159,8 @@ class DataNegotiationJobTests {
 
         List<MVEntity4DataNegotiation> expectedExistingEntitiesToSync = new ArrayList<>();
 
+        DataNegotiationResult expectedDataNegotiationResult = new DataNegotiationResult(issuer, expectedNewEntitiesToSync, expectedExistingEntitiesToSync);
+
         when(dataTransferJob.syncData(any())).thenReturn(Mono.empty());
 
         var result = dataNegotiationJob.negotiateDataSync(dataNegotiationEvent);
@@ -208,23 +174,9 @@ class DataNegotiationJobTests {
 
         Mono<DataNegotiationResult> dataNegotiationResultCaptured = dataNegotiationResultCaptor.getValue();
 
-        StepVerifier.create(dataNegotiationResultCaptured)
-                .consumeNextWith(dataNegotiationResult -> {
-                    StepVerifier
-                            .create(dataNegotiationResult.issuer())
-                            .expectNext(issuer)
-                            .verifyComplete();
-
-                    StepVerifier
-                            .create(dataNegotiationResult.newEntitiesToSync())
-                            .expectNext(expectedNewEntitiesToSync)
-                            .verifyComplete();
-
-                    StepVerifier
-                            .create(dataNegotiationResult.existingEntitiesToSync())
-                            .expectNext(expectedExistingEntitiesToSync)
-                            .verifyComplete();
-                })
+        StepVerifier
+                .create(dataNegotiationResultCaptured)
+                .expectNext(expectedDataNegotiationResult)
                 .verifyComplete();
     }
 }
