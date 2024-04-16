@@ -10,7 +10,6 @@ import es.in2.desmos.domain.models.BlockchainNotification;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.api.BrokerEntityRetrievalService;
 import es.in2.desmos.domain.services.api.BrokerEntityVerifyService;
-import es.in2.desmos.domain.services.blockchain.BlockchainListenerService;
 import es.in2.desmos.domain.services.blockchain.adapter.BlockchainAdapterService;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
 import es.in2.desmos.workflows.BlockchainDataSyncWorkflow;
@@ -33,7 +32,6 @@ public class BlockchainDataSyncWorkflowImpl implements BlockchainDataSyncWorkflo
     private final BrokerEntityRetrievalService brokerEntityRetrievalService;
     private final BrokerEntityVerifyService brokerEntityVerifyService;
     private final BrokerPublisherService brokerPublisherService;
-    private final BlockchainListenerService blockchainListenerService;
 
     @Override
     //todo: Add the case where the PUBLISHED auditRecords exist
