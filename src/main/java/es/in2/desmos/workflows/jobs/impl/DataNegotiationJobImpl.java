@@ -12,6 +12,7 @@ import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -28,7 +29,7 @@ public class DataNegotiationJobImpl implements DataNegotiationJob {
                         dataNegotiationEvent.localEntityIds());
 
         Mono<List<MVEntity4DataNegotiation>> existingEntitiesToSync =
-                checkVersionsAndTimestampsFromEntityIdMatched(
+                checkVersionsAndLastUpdateFromEntityIdMatched(
                         dataNegotiationEvent.externalEntityIds(),
                         dataNegotiationEvent.localEntityIds());
 
@@ -49,14 +50,18 @@ public class DataNegotiationJobImpl implements DataNegotiationJob {
                     List<MVEntity4DataNegotiation> externalList = tuple.getT1();
                     List<MVEntity4DataNegotiation> localList = tuple.getT2();
 
-                    return externalList.stream()
-                            .filter(externalEntity -> localList.stream()
-                                    .noneMatch(entity -> entity.id().equals(externalEntity.id())))
-                            .toList();
+                    return getNotExistentItems(externalList, localList);
                 });
     }
 
-    private Mono<List<MVEntity4DataNegotiation>> checkVersionsAndTimestampsFromEntityIdMatched(
+    private List<MVEntity4DataNegotiation> getNotExistentItems(List<MVEntity4DataNegotiation> originalList, List<MVEntity4DataNegotiation> itemsToCheck) {
+        return originalList.stream()
+                .filter(externalEntity -> itemsToCheck.stream()
+                        .noneMatch(entity -> entity.id().equals(externalEntity.id())))
+                .toList();
+    }
+
+    private Mono<List<MVEntity4DataNegotiation>> checkVersionsAndLastUpdateFromEntityIdMatched(
             Mono<List<MVEntity4DataNegotiation>> externalEntityIds,
             Mono<List<MVEntity4DataNegotiation>> localEntityIds) {
         return Mono.zip(externalEntityIds, localEntityIds)
@@ -72,15 +77,25 @@ public class DataNegotiationJobImpl implements DataNegotiationJob {
                                             .filter(localEntity -> localEntity.id().equals(externalEntity.id()))
                                             .findFirst()
                                             .map(sameLocalEntity ->
-                                                    Float.parseFloat(externalEntity.version().substring(1)) >
-                                                            Float.parseFloat(sameLocalEntity.version().substring(1)) ||
-                                                            (Float.parseFloat(externalEntity.version().substring(1)) ==
-                                                                    Float.parseFloat(sameLocalEntity.version().substring(1)) &&
-                                                                    Instant.parse(externalEntity.lastUpdate()).isAfter(Instant.parse(sameLocalEntity.lastUpdate())))
+                                                    isExternalEntityVersionNewer(externalEntity.getFloatVersion(), sameLocalEntity.getFloatVersion()) ||
+                                                            (isVersionEqual(externalEntity.getFloatVersion(), sameLocalEntity.getFloatVersion()) &&
+                                                                    isExternalEntityLastUpdateNewer(externalEntity.getInstantLastUpdate(), sameLocalEntity.getInstantLastUpdate()))
                                             )
                                             .orElse(false))
                             .toList();
                 });
+    }
+
+    private boolean isExternalEntityVersionNewer(Float externalEntityVersion, Float sameLocalEntityVersion) {
+        return externalEntityVersion > sameLocalEntityVersion;
+    }
+
+    private boolean isVersionEqual(Float externalEntityVersion, Float sameLocalEntityVersion) {
+        return Objects.equals(externalEntityVersion, sameLocalEntityVersion);
+    }
+
+    private boolean isExternalEntityLastUpdateNewer(Instant externalEntityLastUpdate, Instant sameLocalEntityLastUpdate) {
+        return externalEntityLastUpdate.isAfter(sameLocalEntityLastUpdate);
     }
 
     private Mono<DataNegotiationResult> createDataNegotiationResult(Mono<String> issuer, Mono<List<MVEntity4DataNegotiation>> newEntitiesToSync, Mono<List<MVEntity4DataNegotiation>> existingEntitiesToSync) {

@@ -131,7 +131,7 @@ class DataNegotiationJobTests {
     }
 
     @Test
-    void itShouldSyncDataWithExistingEntitiesToAddWhenVersionIsEqualAndExternalTimestampIsAfter() {
+    void itShouldSyncDataWithExistingEntitiesToAddWhenVersionIsEqualAndExternalLastUpdateIsAfter() {
         String issuer = "http://example.org";
         Mono<String> issuerMono = Mono.just(issuer);
 
