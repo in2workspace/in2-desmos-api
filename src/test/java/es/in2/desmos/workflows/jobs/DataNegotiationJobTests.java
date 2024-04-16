@@ -178,4 +178,53 @@ class DataNegotiationJobTests {
                 })
                 .verifyComplete();
     }
+
+    @Test
+    void itShouldNotSyncWhenVersionIsNewer() {
+        String issuer = "http://example.org";
+        Mono<String> issuerMono = Mono.just(issuer);
+
+        List<MVEntity4DataNegotiation> externalEntityIds = List.of(MVEntity4DataNegotiationMother.sample2VersionOld());
+        Mono<List<MVEntity4DataNegotiation>> externalEntityIdsMono = Mono.just(externalEntityIds);
+
+        Mono<List<MVEntity4DataNegotiation>> localEntityIdsMono = Mono.just(List.of(MVEntity4DataNegotiationMother.sample2()));
+
+        DataNegotiationEvent dataNegotiationEvent = new DataNegotiationEvent(issuerMono, externalEntityIdsMono, localEntityIdsMono);
+
+        List<MVEntity4DataNegotiation> expectedNewEntitiesToSync = new ArrayList<>();
+
+        List<MVEntity4DataNegotiation> expectedExistingEntitiesToSync = new ArrayList<>();
+
+        when(dataTransferJob.syncData(any())).thenReturn(Mono.empty());
+
+        var result = dataNegotiationJob.negotiateDataSync(dataNegotiationEvent);
+
+        StepVerifier
+                .create(result)
+                .verifyComplete();
+
+        verify(dataTransferJob, times(1)).syncData(dataNegotiationResultCaptor.capture());
+        verifyNoMoreInteractions(dataTransferJob);
+
+        Mono<DataNegotiationResult> dataNegotiationResultCaptured = dataNegotiationResultCaptor.getValue();
+
+        StepVerifier.create(dataNegotiationResultCaptured)
+                .consumeNextWith(dataNegotiationResult -> {
+                    StepVerifier
+                            .create(dataNegotiationResult.issuer())
+                            .expectNext(issuer)
+                            .verifyComplete();
+
+                    StepVerifier
+                            .create(dataNegotiationResult.newEntitiesToSync())
+                            .expectNext(expectedNewEntitiesToSync)
+                            .verifyComplete();
+
+                    StepVerifier
+                            .create(dataNegotiationResult.existingEntitiesToSync())
+                            .expectNext(expectedExistingEntitiesToSync)
+                            .verifyComplete();
+                })
+                .verifyComplete();
+    }
 }
