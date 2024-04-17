@@ -25,19 +25,14 @@ public class DataNegotiationJobImpl implements DataNegotiationJob {
     @Override
     public Mono<Void> negotiateDataSync(DataNegotiationEvent dataNegotiationEvent) {
         log.info("Listening data negotiation event.");
-        Mono<List<MVEntity4DataNegotiation>> newEntitiesToSync =
-                checkWithExternalDataIsMissing(
-                        dataNegotiationEvent.externalEntityIds(),
-                        dataNegotiationEvent.localEntityIds());
 
-        Mono<List<MVEntity4DataNegotiation>> existingEntitiesToSync =
-                checkVersionsAndLastUpdateFromEntityIdMatched(
-                        dataNegotiationEvent.externalEntityIds(),
-                        dataNegotiationEvent.localEntityIds());
+        var externalEntityIds = dataNegotiationEvent.externalEntityIds();
+        var localEntityIds = dataNegotiationEvent.localEntityIds();
 
-        Mono<DataNegotiationResult> dataNegotiationResult = createDataNegotiationResult(dataNegotiationEvent, newEntitiesToSync, existingEntitiesToSync);
-
-        return dataTransferJob.syncData(dataNegotiationResult);
+        return checkWithExternalDataIsMissing(externalEntityIds, localEntityIds)
+                .zipWith(checkVersionsAndLastUpdateFromEntityIdMatched(externalEntityIds, localEntityIds))
+                .flatMap(tuple -> createDataNegotiationResult(dataNegotiationEvent, Mono.just(tuple.getT1()), Mono.just(tuple.getT2())))
+                .flatMap(dataNegotiationResult -> dataTransferJob.syncData(Mono.just(dataNegotiationResult)));
     }
 
     private Mono<List<MVEntity4DataNegotiation>> checkWithExternalDataIsMissing(
