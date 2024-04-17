@@ -68,9 +68,19 @@ public class DataNegotiationJobImpl implements DataNegotiationJob {
                                             .filter(localEntity -> localEntity.id().equals(externalEntity.id()))
                                             .findFirst()
                                             .map(sameLocalEntity ->
-                                                    isExternalEntityVersionNewer(externalEntity.getFloatVersion(), sameLocalEntity.getFloatVersion()) ||
-                                                            (isVersionEqual(externalEntity.getFloatVersion(), sameLocalEntity.getFloatVersion()) &&
-                                                                    isExternalEntityLastUpdateNewer(externalEntity.getInstantLastUpdate(), sameLocalEntity.getInstantLastUpdate()))
+                                                    {
+                                                        Float externalEntityVersion = externalEntity.getFloatVersion();
+                                                        Float sameLocalEntityVersion = sameLocalEntity.getFloatVersion();
+                                                        return isExternalEntityVersionNewer(
+                                                                externalEntityVersion,
+                                                                sameLocalEntityVersion) ||
+                                                                (isVersionEqual(
+                                                                        externalEntityVersion,
+                                                                        sameLocalEntityVersion) &&
+                                                                        isExternalEntityLastUpdateNewer(
+                                                                                externalEntity.getInstantLastUpdate(),
+                                                                                sameLocalEntity.getInstantLastUpdate()));
+                                                    }
                                             )
                                             .orElse(false))
                             .toList();
