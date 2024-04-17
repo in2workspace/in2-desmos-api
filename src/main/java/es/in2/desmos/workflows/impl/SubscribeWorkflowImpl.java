@@ -84,7 +84,6 @@ public class SubscribeWorkflowImpl implements SubscribeWorkflow {
         log.debug("ProcessID: {} - Retrieving entity from the external broker...", processId);
         // Get the External Broker URL from the dataLocation
         String externalBrokerURL = extractContextBrokerUrlFromDataLocation(blockchainNotification.dataLocation());
-        // WIP: If i change the local broker domain it tries to extract the entity from the local domain and not from the one specified on datalocation
         log.debug("ProcessID: {} - External Broker URL: {}", processId, externalBrokerURL);
         // Retrieve entity from the External Broker
         return apiConfig.webClient()
