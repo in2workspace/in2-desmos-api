@@ -1,6 +1,5 @@
 <div align="center">
-
-<h1>Blockchain Connector</h1>
+<h1>Desmos Web Service</h1>
 <span>by </span><a href="https://in2.es">in2.es</a>
 <p><p>
 
@@ -21,7 +20,9 @@
 </div>
 
 # Introduction
-Desmos is a Blockchain Connector solution developed by IN2. As a Blockchain Connector, it is a crucial component within the Access Node architecture facilitating interaction between the Off-Chain Storage and the On-Chain Storage. 
+Desmos Web Service is a Blockchain Connector solution developed by IN2.
+As a Blockchain Connector, it is a crucial part within the Access Node architecture
+facilitating interaction between the Off-Chain Storage and the On-Chain Storage. 
 This RESTFul API exposes a set of endpoints designed for seamless communication between a Context Broker and a Blockchain Adapter.
 
 # Architecture
