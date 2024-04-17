@@ -1,0 +1,15 @@
+@startuml
+'https://plantuml.com/activity-diagram-beta
+
+start
+:Received
+Notification is received by the system;
+
+:Created
+The event is created successfully with the received data;
+
+:Published
+The event is published to the blockchain node;
+stop
+
+@enduml
