@@ -27,10 +27,9 @@ class PublishWorkflowBehaviorTest {
 
     private final Logger log = LoggerFactory.getLogger(PublishWorkflowBehaviorTest.class);
 
-    private final ObjectMapper objectMapper =
-            JsonMapper.builder()
-                    .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true)
-                    .build();
+    private final ObjectMapper objectMapper = JsonMapper.builder()
+            .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true)
+            .build();
 
     @Autowired
     private NotificationController notificationController;
