@@ -33,7 +33,7 @@ checkstyleTest {
 
 sonar {
     properties {
-        property "sonar.projectName", "Desmos Web Service"
+        property "sonar.projectName", "Desmos API"
         property "sonar.projectKey", "in2workspace_desmos"
         property "sonar.organization", "in2workspace"
         property "sonar.host.url", "https://sonarcloud.io"
