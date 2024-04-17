@@ -5,6 +5,7 @@ import es.in2.desmos.configs.BrokerConfig;
 import es.in2.desmos.domain.models.BlockchainSubscription;
 import es.in2.desmos.domain.services.blockchain.BlockchainListenerService;
 import es.in2.desmos.domain.services.broker.BrokerListenerService;
+import es.in2.desmos.workflows.BlockchainDataSyncWorkflow;
 import es.in2.desmos.workflows.DataSyncWorkflow;
 import es.in2.desmos.workflows.PublishWorkflow;
 import es.in2.desmos.workflows.SubscribeWorkflow;
@@ -39,6 +40,9 @@ class ApplicationRunnerTests {
     private PublishWorkflow publishWorkflow;
 
     @Mock
+    private BlockchainDataSyncWorkflow blockchainDataSyncWorkflow;
+
+    @Mock
     private SubscribeWorkflow subscribeWorkflow;
 
     @Mock
@@ -56,7 +60,7 @@ class ApplicationRunnerTests {
         when(brokerListenerService.createSubscription(anyString(), any())).thenReturn(Mono.empty());
         Mockito.when(blockchainListenerService.createSubscription(Mockito.anyString(), Mockito.any(BlockchainSubscription.class)))
                 .thenReturn(Mono.empty());
-        Mockito.when(dataSyncWorkflow.startDataSyncWorkflow(Mockito.anyString())).thenReturn(Flux.empty());
+        Mockito.when(blockchainDataSyncWorkflow.startBlockchainDataSyncWorkflow(Mockito.anyString())).thenReturn(Flux.empty());
         Mockito.when(publishWorkflow.startPublishWorkflow(Mockito.anyString())).thenReturn(Flux.empty());
         Mockito.when(subscribeWorkflow.startSubscribeWorkflow()).thenReturn(Flux.empty());
         // Act
