@@ -69,4 +69,20 @@ public final class EntitySyncResponseMother {
                 """;
     }
 
+     public static String GetId1(){
+        return "urn:productOffering:d86735a6-0faa-463d-a872-00b97affa1cb";
+    }
+
+    public static String GetId2(){
+        return "urn:productOfferingPrice:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87";
+    }
+
+    public static String GetId3(){
+        return "urn:productOfferingPrice:537e1ee3-0556-4fff-875f-e55bb97e7ab0";
+    }
+
+    public static String GetId4(){
+        return "urn:productOfferingPrice:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c";
+    }
+
 }
