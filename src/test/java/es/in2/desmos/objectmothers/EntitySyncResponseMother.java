@@ -2,7 +2,7 @@ package es.in2.desmos.objectmothers;
 
 import org.jetbrains.annotations.NotNull;
 
-public class EntitySyncResponseMother {
+public final class EntitySyncResponseMother {
     private EntitySyncResponseMother() {
     }
 
