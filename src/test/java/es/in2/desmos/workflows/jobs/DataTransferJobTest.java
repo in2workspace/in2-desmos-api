@@ -1,6 +1,8 @@
 package es.in2.desmos.workflows.jobs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import es.in2.desmos.domain.exceptions.InvalidSyncResponseException;
+import es.in2.desmos.domain.exceptions.InvalidConsistencyException;
 import es.in2.desmos.domain.exceptions.InvalidIntegrityException;
 import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.DataNegotiationResult;
@@ -91,50 +93,6 @@ class DataTransferJobTest {
         verify(auditRecordService, times(1)).findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sample3().id());
         verify(auditRecordService, times(1)).findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sample4().id());
         verifyNoMoreInteractions(auditRecordService);
-
-    }
-
-    @Test
-    void itShouldReturnInvalidIntegrityExceptionWhenHashIsIncorrect() {
-        DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.badHash();
-        Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
-
-        MVEntity4DataNegotiation[] entitySyncRequest =
-                Stream.concat(
-                                dataNegotiationResult.newEntitiesToSync().stream(),
-                                dataNegotiationResult.existingEntitiesToSync().stream())
-                        .toArray(MVEntity4DataNegotiation[]::new);
-
-        Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.sample());
-
-        when(entitySyncWebClient.makeRequest(any(), any())).thenReturn(entitySyncResponseMono);
-
-        String processId = "0";
-        Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
-
-        StepVerifier.
-                create(result)
-                .expectErrorMatches(throwable -> throwable instanceof InvalidIntegrityException &&
-                        throwable.getMessage().equals("The hash received at the origin is different from the actual hash of the entity.")
-                )
-                .verify();
-
-        verify(entitySyncWebClient, times(1)).makeRequest(monoIssuerCaptor.capture(), entitySyncRequestCaptor.capture());
-        verifyNoMoreInteractions(entitySyncWebClient);
-
-        Mono<String> issuerCaptured = monoIssuerCaptor.getValue();
-
-        StepVerifier
-                .create(issuerCaptured)
-                .expectNext(dataNegotiationResult.issuer())
-                .verifyComplete();
-
-        Mono<MVEntity4DataNegotiation[]> entitySyncRequestCaptured = entitySyncRequestCaptor.getValue();
-
-        StepVerifier
-                .create(entitySyncRequestCaptured)
-                .expectNextMatches(array -> Arrays.equals(entitySyncRequest, array))
-                .verifyComplete();
     }
 
     @Test
@@ -183,5 +141,88 @@ class DataTransferJobTest {
 
         verify(auditRecordService, times(4)).buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any(), any());
         verifyNoMoreInteractions(auditRecordService);
+    }
+
+    @Test
+    void itShouldReturnInvalidIntegrityExceptionWhenHashIsIncorrect() {
+        DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.badHash();
+        Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
+
+        Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.sample());
+
+        when(entitySyncWebClient.makeRequest(any(), any())).thenReturn(entitySyncResponseMono);
+
+        String processId = "0";
+        Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
+
+        StepVerifier.
+                create(result)
+                .expectErrorMatches(throwable -> throwable instanceof InvalidIntegrityException &&
+                        throwable.getMessage().equals("The hash received at the origin is different from the actual hash of the entity.")
+                )
+                .verify();
+    }
+
+    @Test
+    void itShouldReturnInvalidConsistencyException() {
+        DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
+        Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
+
+        Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.sample());
+
+        when(entitySyncWebClient.makeRequest(any(), any())).thenReturn(entitySyncResponseMono);
+
+        String processId = "0";
+        when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sample3().id())).thenReturn(Mono.just(AuditRecord.builder().entityHashLink("jfdlkisajlfdsafjdsafldskisjdfalsda").build()));
+        when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sample4().id())).thenReturn(Mono.just(AuditRecord.builder().entityHashLink("fa54").build()));
+
+        Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
+
+        StepVerifier.
+                create(result)
+                .expectErrorMatches(throwable -> throwable instanceof InvalidConsistencyException &&
+                        throwable.getMessage().equals("The hashlink received does not correspond to that of the entity.")
+                )
+                .verify();
+    }
+
+    @Test
+    void itShouldReturnBadEntitySyncResponseExceptionWhenSyncResponseJsonHasNotArray() {
+        DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
+        Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
+
+        Mono<String> entitySyncResponseMono = Mono.just("{}");
+
+        when(entitySyncWebClient.makeRequest(any(), any())).thenReturn(entitySyncResponseMono);
+
+        String processId = "0";
+        Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
+
+        StepVerifier.
+                create(result)
+                .expectErrorMatches(throwable -> throwable instanceof InvalidSyncResponseException &&
+                        throwable.getMessage().equals("Invalid EntitySync response.")
+                )
+                .verify();
+    }
+
+    @Test
+    void itShouldReturnInvalidSyncResponseExceptionWhenJsonArrayHasNotIdField() {
+        DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
+        Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
+
+        Mono<String> entitySyncResponseMono = Mono.just("{[]}");
+
+        when(entitySyncWebClient.makeRequest(any(), any())).thenReturn(entitySyncResponseMono);
+
+        String processId = "0";
+        Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
+
+        StepVerifier.
+                create(result)
+                .expectErrorMatches(throwable -> throwable instanceof InvalidSyncResponseException &&
+                        throwable.getMessage().equals("Invalid EntitySync response.")
+                )
+                .verify();
     }
 }
