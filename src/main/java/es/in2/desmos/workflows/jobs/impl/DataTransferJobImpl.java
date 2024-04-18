@@ -44,22 +44,24 @@ public class DataTransferJobImpl implements DataTransferJob {
 
                 return entitySyncWebClient.makeRequest(issuer, allEntitiesToRequest)
                         .flatMap(entitySyncResponse -> {
-                            Mono<Map<Id, Entity>> entitiesById = getEntitiesById(Mono.just(entitySyncResponse));
+                            Mono<String> entitySyncResponseMono = Mono.just(entitySyncResponse);
+                            Mono<Map<Id, Entity>> entitiesById = getEntitiesById(entitySyncResponseMono);
+
                             Mono<Map<Id, EntityValidationData>> newEntitiesOriginalValidationDataById = getEntitiesOriginalValidationDataById(Mono.just(result.newEntitiesToSync()));
                             Mono<Map<Id, EntityValidationData>> existingEntitiesOriginalValidationDataById = getEntitiesOriginalValidationDataById(Mono.just(result.existingEntitiesToSync()));
+
                             Mono<List<MVEntity4DataNegotiation>> allEntitiesToRequestList = Mono.just(Arrays.asList(entities));
 
                             return validateEntities(processId, entitiesById, newEntitiesOriginalValidationDataById, existingEntitiesOriginalValidationDataById)
                                     .then(buildAndSaveAuditRecordFromDataSync(processId, issuer, entitiesById, allEntitiesToRequestList))
-                                    .then(publishNewBatchDataToBroker(processId, allEntitiesToRequestList, entitiesById));
+                                    .then(publishNewBatchDataToBroker(processId, entitySyncResponseMono));
                         });
             });
         });
     }
 
-    private Mono<Void> publishNewBatchDataToBroker(String processId, Mono<List<MVEntity4DataNegotiation>> mvEntity4DataNegotiationList, Mono<Map<Id, Entity>> retrievedBrokerEntitiesList) {
-        return mvEntity4DataNegotiationList.zipWith(retrievedBrokerEntitiesList)
-                .flatMap(tuple -> brokerPublisherService.publishNewBatchDataToBroker(processId, tuple.getT1(), tuple.getT2()));
+    private Mono<Void> publishNewBatchDataToBroker(String processId, Mono<String> retrievedBrokerEntitiesMono) {
+        return retrievedBrokerEntitiesMono.flatMap(retrievedBrokerEntities -> brokerPublisherService.publishNewBatchDataToBroker(processId, retrievedBrokerEntities));
     }
 
 
