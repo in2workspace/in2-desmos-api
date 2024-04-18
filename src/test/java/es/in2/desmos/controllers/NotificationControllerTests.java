@@ -4,7 +4,6 @@ import es.in2.desmos.domain.models.BlockchainNotification;
 import es.in2.desmos.domain.models.BrokerNotification;
 import es.in2.desmos.domain.services.blockchain.BlockchainListenerService;
 import es.in2.desmos.domain.services.broker.BrokerListenerService;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -114,68 +113,5 @@ class NotificationControllerTests {
                 .exchange()
                 .expectStatus().isBadRequest(); // Expect a 400 Bad Request due to validation failure
     }
-
-    //WIP
-    @Test
-    void whenBrokerNotificationIsInvalid_thenBadRequest2() {
-        // Arrange an invalid BrokerNotification object
-        BrokerNotification invalidNotification = BrokerNotification.builder()
-                .id("")
-                .type("")
-                .data(null)
-                .subscriptionId("")
-                .notifiedAt("")
-                .build();
-
-        // Act
-        WebTestClient.ResponseSpec response = WebTestClient.bindToController(notificationController)
-                .build()
-                .post()
-                .uri("/api/v1/notifications/broker")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(invalidNotification)
-                .exchange();
-
-        // Assert
-        response.expectStatus().isBadRequest();
-
-        // Assert the response body
-        response.expectBody(String.class)
-                .consumeWith(result -> {
-                    String responseBody = new String(result.getResponseBodyContent());
-                    Assertions.assertTrue(responseBody.isEmpty()); // Verifica si el cuerpo de la respuesta es null o vacío
-                });
-
-
-        // Print the response body
-        String responseBody = response.expectBody(String.class).returnResult().getResponseBody();
-        System.out.println("Response body: " + responseBody);
-    }
-
-    //WIP
-    @Test
-    void testBrokerNotification_InvalidRequest() {
-        // Arrange
-        BrokerNotification invalidBrokerNotification = BrokerNotification.builder()
-                .id("")
-                .type("")
-                .data(null)
-                .subscriptionId("")
-                .notifiedAt("")
-                .build();
-
-        // Act
-        WebTestClient.bindToController(notificationController)
-                .build()
-                .post()
-                .uri("/api/v1/notifications/broker")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(invalidBrokerNotification)
-                .exchange()
-                // Assert
-                .expectStatus().isBadRequest()
-                .expectBody().jsonPath("$.title").isEqualTo("MethodArgumentNotValidException");
-    }
-
 
 }

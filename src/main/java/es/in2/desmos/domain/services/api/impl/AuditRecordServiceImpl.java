@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.repositories.AuditRecordRepository;
 import es.in2.desmos.domain.services.api.AuditRecordService;
+import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -80,6 +81,10 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                             auditRecordHashLink = auditRecordHash;
                         }
                         auditRecord.setHashLink(auditRecordHashLink);
+                        validate(auditRecord);
+                    } catch (ConstraintViolationException e) {
+                        log.warn("ProcessID: {} - Error validating AuditRecord from BrokerNotification: {}", processId, e.getMessage());
+                        return Mono.error(e);
                     } catch (JsonProcessingException | NoSuchAlgorithmException e) {
                         log.info("ProcessID: {} - Error building and saving audit record: {}", processId, e.getMessage());
                         return Mono.error(e);
@@ -142,7 +147,11 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                         // with the hash of the current entity
                         String auditRecordHashLink = calculateHashLink(lastAuditRecordRegistered.getHashLink(), auditRecordHash);
                         auditRecord.setHashLink(auditRecordHashLink);
+                        validate(auditRecord);
                         return auditRecordRepository.save(auditRecord).then();
+                    } catch (ConstraintViolationException e) {
+                        log.warn("ProcessID: {} - Error validating AuditRecord from BlockchainNotification : {}", processId, e.getMessage());
+                        return Mono.error(e);
                     } catch (JsonProcessingException | NoSuchAlgorithmException e) {
                         return Mono.error(e);
                     }

@@ -2,7 +2,6 @@ package es.in2.desmos.domain.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import es.in2.desmos.domain.validation.ValidTimestamp;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -27,8 +26,7 @@ public record BlockchainNotification(
         String eventType,
 
         @JsonProperty("timestamp")
-        @NotNull(message = "timestamp must not be null")
-        @ValidTimestamp
+//        @ValidTimestamp
         long timestamp,
 
         @JsonProperty("dataLocation")

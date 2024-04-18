@@ -38,7 +38,7 @@ public class BlockchainTxPayloadFactory {
             String dataLocation = brokerConfig.getEntitiesExternalDomain() + "/" + entityId + ApplicationUtils.HASHLINK_PREFIX + entityHashLink;
             String organizationId = HASH_PREFIX + apiConfig.organizationIdHash();
             String previousEntityHash = HASH_PREFIX + previousHash;
-            return Mono.just(BlockchainTxPayload.builder()
+            BlockchainTxPayload payload = BlockchainTxPayload.builder()
                     .eventType(entityType)
                     .organizationId(organizationId)
                     .entityId(entityIdHash)
@@ -47,9 +47,9 @@ public class BlockchainTxPayloadFactory {
                     .metadata(List.of())
                     .build();
 
-            validate(blockchainTxPayload);
+            validate(payload);
 
-            return Mono.just(blockchainTxPayload);
+            return Mono.just(payload);
         } catch (ConstraintViolationException e) {
             log.warn("ProcessID: {} - Error validating blockchain transaction payload: {}", processId, e.getMessage());
             return Mono.error(e);
