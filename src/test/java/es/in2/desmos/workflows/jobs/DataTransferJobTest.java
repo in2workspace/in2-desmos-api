@@ -1,30 +1,28 @@
 package es.in2.desmos.workflows.jobs;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import es.in2.desmos.domain.exceptions.InvalidIntegrityException;
+import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.DataNegotiationResult;
-import es.in2.desmos.domain.models.EntitySyncRequest;
-import es.in2.desmos.domain.models.EntitySyncResponse;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.sync.EntitySyncWebClient;
+import es.in2.desmos.objectmothers.DataNegotiationResultMother;
+import es.in2.desmos.objectmothers.EntitySyncResponseMother;
 import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
 import es.in2.desmos.workflows.jobs.impl.DataTransferJobImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.util.List;
+import java.util.Arrays;
 import java.util.stream.Stream;
 
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DataTransferJobTest {
@@ -37,101 +35,153 @@ class DataTransferJobTest {
     @Mock
     private AuditRecordService auditRecordService;
 
-    @Captor
-    private ArgumentCaptor<Mono<String>> issuerCaptor;
+    @Spy
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @Captor
-    private ArgumentCaptor<Mono<EntitySyncRequest>> entitySyncRequestCaptor;
+    private ArgumentCaptor<Mono<String>> monoIssuerCaptor;
 
-    /*@Test
-    void itShouldRequestEntitiesToExternalAccessNodeAndSaveToAuditRecord() throws JsonProcessingException {
-        Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(DataNegotiationResultMother.sample());
+    @Captor
+    private ArgumentCaptor<Mono<MVEntity4DataNegotiation[]>> entitySyncRequestCaptor;
 
-        List<MVEntity4DataNegotiation> allEntitiesToSync = MVEntity4DataNegotiationMother.fullList();
-        Mono<EntitySyncRequest> entitySyncRequestMono = Mono.just(new EntitySyncRequest(allEntitiesToSync));
-        ObjectMapper objectMapper = new ObjectMapper();
-        String entitiesResponse = objectMapper.writeValueAsString(entitySyncRequestMono);
-        Mono<EntitySyncResponse> entitySyncResponse = Mono.just(new EntitySyncResponse(entitiesResponse));
+    @Test
+    void itShouldRequestEntitiesToExternalAccessNode() {
+        DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
+        Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
 
-        when(entitySyncWebClient.makeRequest(any(), any())).thenReturn(entitySyncResponse);
+        MVEntity4DataNegotiation[] entitySyncRequest =
+                Stream.concat(
+                                dataNegotiationResult.newEntitiesToSync().stream(),
+                                dataNegotiationResult.existingEntitiesToSync().stream())
+                        .toArray(MVEntity4DataNegotiation[]::new);
 
-        when(auditRecordService.findLatestAuditRecordForEntity(any(), any())).thenReturn();
+        Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.sample());
 
-        Mono<Void> result = dataTransferJob.syncData(dataNegotiationResultMono);
+        when(entitySyncWebClient.makeRequest(any(), any())).thenReturn(entitySyncResponseMono);
+
+        String processId = "0";
+        when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sample3().id())).thenReturn(Mono.just(AuditRecord.builder().entityHashLink("fa54").build()));
+        when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sample4().id())).thenReturn(Mono.just(AuditRecord.builder().entityHashLink("fa54").build()));
+
+        when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any(), any())).thenReturn(Mono.empty());
+
+        Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
 
         StepVerifier.
                 create(result)
                 .verifyComplete();
 
-        verify(entitySyncWebClient, times(1)).makeRequest(issuerCaptor.capture(), entitySyncRequestCaptor.capture());
+        verify(entitySyncWebClient, times(1)).makeRequest(monoIssuerCaptor.capture(), entitySyncRequestCaptor.capture());
         verifyNoMoreInteractions(entitySyncWebClient);
 
-        Mono<String> issuerCaptured = issuerCaptor.getValue();
+        Mono<String> monoIssuerCaptured = monoIssuerCaptor.getValue();
 
         StepVerifier
-                .create(issuerCaptured)
-                .expectNext(issuer)
+                .create(monoIssuerCaptured)
+                .expectNext(dataNegotiationResult.issuer())
                 .verifyComplete();
 
-        Mono<EntitySyncRequest> entitySyncRequestCaptured = entitySyncRequestCaptor.getValue();
+        Mono<MVEntity4DataNegotiation[]> entitySyncRequestCaptured = entitySyncRequestCaptor.getValue();
 
         StepVerifier
                 .create(entitySyncRequestCaptured)
-                .expectNext(entitySyncRequest)
+                .expectNextMatches(array -> Arrays.equals(entitySyncRequest, array))
                 .verifyComplete();
 
+        verify(auditRecordService, times(1)).findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sample3().id());
+        verify(auditRecordService, times(1)).findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sample4().id());
+        verifyNoMoreInteractions(auditRecordService);
 
-    }*/
+    }
 
     @Test
-    void itShouldValidateEntities() throws JsonProcessingException {
-        String issuer = "http://example.org";
-        List<MVEntity4DataNegotiation> newEntitiesToSync = MVEntity4DataNegotiationMother.list1And2();
-        List<MVEntity4DataNegotiation> existingEntitiesToSync = MVEntity4DataNegotiationMother.list3And4();
-        Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(new DataNegotiationResult(issuer, newEntitiesToSync, existingEntitiesToSync));
+    void itShouldReturnInvalidIntegrityExceptionWhenHashIsIncorrect() {
+        DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.badHash();
+        Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
 
-        List<MVEntity4DataNegotiation> entities =
+        MVEntity4DataNegotiation[] entitySyncRequest =
                 Stream.concat(
-                                newEntitiesToSync
-                                        .stream(),
-                                existingEntitiesToSync
-                                        .stream())
-                        .toList();
+                                dataNegotiationResult.newEntitiesToSync().stream(),
+                                dataNegotiationResult.existingEntitiesToSync().stream())
+                        .toArray(MVEntity4DataNegotiation[]::new);
 
-        EntitySyncRequest entitySyncRequest = new EntitySyncRequest(entities);
-        Mono<EntitySyncRequest> entitySyncRequestMono = Mono.just(entitySyncRequest);
+        Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.sample());
 
-        ObjectMapper objectMapper = new ObjectMapper();
+        when(entitySyncWebClient.makeRequest(any(), any())).thenReturn(entitySyncResponseMono);
 
-        String entitiesResponse = objectMapper.writeValueAsString(entitySyncRequestMono);
+        String processId = "0";
+        Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
 
-        Mono<EntitySyncResponse> entitySyncResponse = Mono.just(new EntitySyncResponse(entitiesResponse));
-        when(entitySyncWebClient.makeRequest(any(), any())).thenReturn(entitySyncResponse);
+        StepVerifier.
+                create(result)
+                .expectErrorMatches(throwable -> throwable instanceof InvalidIntegrityException &&
+                        throwable.getMessage().equals("The hash received at the origin is different from the actual hash of the entity.")
+                )
+                .verify();
 
-        Mono<Void> result = dataTransferJob.syncData(dataNegotiationResultMono);
+        verify(entitySyncWebClient, times(1)).makeRequest(monoIssuerCaptor.capture(), entitySyncRequestCaptor.capture());
+        verifyNoMoreInteractions(entitySyncWebClient);
+
+        Mono<String> issuerCaptured = monoIssuerCaptor.getValue();
+
+        StepVerifier
+                .create(issuerCaptured)
+                .expectNext(dataNegotiationResult.issuer())
+                .verifyComplete();
+
+        Mono<MVEntity4DataNegotiation[]> entitySyncRequestCaptured = entitySyncRequestCaptor.getValue();
+
+        StepVerifier
+                .create(entitySyncRequestCaptured)
+                .expectNextMatches(array -> Arrays.equals(entitySyncRequest, array))
+                .verifyComplete();
+    }
+
+    @Test
+    void itShouldBuildAnSaveAuditRecordFromDataSync() {
+        DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
+        Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
+
+        MVEntity4DataNegotiation[] entitySyncRequest =
+                Stream.concat(
+                                dataNegotiationResult.newEntitiesToSync().stream(),
+                                dataNegotiationResult.existingEntitiesToSync().stream())
+                        .toArray(MVEntity4DataNegotiation[]::new);
+
+        Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.sample());
+
+        when(entitySyncWebClient.makeRequest(any(), any())).thenReturn(entitySyncResponseMono);
+
+        String processId = "0";
+        when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sample3().id())).thenReturn(Mono.just(AuditRecord.builder().entityHashLink("fa54").build()));
+        when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sample4().id())).thenReturn(Mono.just(AuditRecord.builder().entityHashLink("fa54").build()));
+
+        when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any(), any())).thenReturn(Mono.empty());
+
+        Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
 
         StepVerifier.
                 create(result)
                 .verifyComplete();
 
+        verify(entitySyncWebClient, times(1)).makeRequest(monoIssuerCaptor.capture(), entitySyncRequestCaptor.capture());
+        verifyNoMoreInteractions(entitySyncWebClient);
 
-//        verify(entitySyncWebClient, times(1)).makeRequest(issuerCaptor.capture(), entitySyncRequestCaptor.capture());
-//        verifyNoMoreInteractions(entitySyncWebClient);
-//
-//        Mono<String> issuerCaptured = issuerCaptor.getValue();
-//
-//        StepVerifier
-//                .create(issuerCaptured)
-//                .expectNext(issuer)
-//                .verifyComplete();
-//
-//        Mono<EntitySyncRequest> entitySyncRequestCaptured = entitySyncRequestCaptor.getValue();
-//
-//        StepVerifier
-//                .create(entitySyncRequestCaptured)
-//                .expectNext(entitySyncRequest)
-//                .verifyComplete();
+        Mono<String> monoIssuerCaptured = monoIssuerCaptor.getValue();
 
+        StepVerifier
+                .create(monoIssuerCaptured)
+                .expectNext(dataNegotiationResult.issuer())
+                .verifyComplete();
 
+        Mono<MVEntity4DataNegotiation[]> entitySyncRequestCaptured = entitySyncRequestCaptor.getValue();
+
+        StepVerifier
+                .create(entitySyncRequestCaptured)
+                .expectNextMatches(array -> Arrays.equals(entitySyncRequest, array))
+                .verifyComplete();
+
+        verify(auditRecordService, times(4)).buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any(), any());
+        verifyNoMoreInteractions(auditRecordService);
     }
 }
