@@ -32,7 +32,7 @@ public class DataNegotiationJobImpl implements DataNegotiationJob {
         return checkWithExternalDataIsMissing(externalEntityIds, localEntityIds)
                 .zipWith(checkVersionsAndLastUpdateFromEntityIdMatched(externalEntityIds, localEntityIds))
                 .flatMap(tuple -> createDataNegotiationResult(dataNegotiationEvent, Mono.just(tuple.getT1()), Mono.just(tuple.getT2())))
-                .flatMap(dataNegotiationResult -> dataTransferJob.syncData(Mono.just(dataNegotiationResult)));
+                .flatMap(dataNegotiationResult -> dataTransferJob.syncData(dataNegotiationEvent.processId(), Mono.just(dataNegotiationResult)));
     }
 
     private Mono<List<MVEntity4DataNegotiation>> checkWithExternalDataIsMissing(

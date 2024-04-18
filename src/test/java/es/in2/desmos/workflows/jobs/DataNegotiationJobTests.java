@@ -42,7 +42,8 @@ class DataNegotiationJobTests {
 
         Mono<List<MVEntity4DataNegotiation>> localEntityIdsMono = Mono.just(MVEntity4DataNegotiationMother.list3And4());
 
-        DataNegotiationEvent dataNegotiationEvent = new DataNegotiationEvent(issuerMono, externalEntityIdsMono, localEntityIdsMono);
+        String processId = "0";
+        DataNegotiationEvent dataNegotiationEvent = new DataNegotiationEvent(processId, issuerMono, externalEntityIdsMono, localEntityIdsMono);
 
         List<MVEntity4DataNegotiation> expectedNewEntitiesToSync = MVEntity4DataNegotiationMother.list1And2();
 
@@ -50,7 +51,7 @@ class DataNegotiationJobTests {
 
         DataNegotiationResult expectedDataNegotiationResult = new DataNegotiationResult(issuer, expectedNewEntitiesToSync, expectedExistingEntitiesToSync);
 
-        when(dataTransferJob.syncData(any())).thenReturn(Mono.empty());
+        when(dataTransferJob.syncData(any(), any())).thenReturn(Mono.empty());
 
         var result = dataNegotiationJob.negotiateDataSync(dataNegotiationEvent);
 
@@ -58,7 +59,7 @@ class DataNegotiationJobTests {
                 .create(result)
                 .verifyComplete();
 
-        verify(dataTransferJob, times(1)).syncData(dataNegotiationResultCaptor.capture());
+        verify(dataTransferJob, times(1)).syncData(eq(processId), dataNegotiationResultCaptor.capture());
         verifyNoMoreInteractions(dataTransferJob);
 
         Mono<DataNegotiationResult> dataNegotiationResultCaptured = dataNegotiationResultCaptor.getValue();
@@ -79,7 +80,8 @@ class DataNegotiationJobTests {
 
         Mono<List<MVEntity4DataNegotiation>> localEntityIdsMono = Mono.just(List.of(MVEntity4DataNegotiationMother.sample2VersionOld()));
 
-        DataNegotiationEvent dataNegotiationEvent = new DataNegotiationEvent(issuerMono, externalEntityIdsMono, localEntityIdsMono);
+        String processId = "0";
+        DataNegotiationEvent dataNegotiationEvent = new DataNegotiationEvent(processId, issuerMono, externalEntityIdsMono, localEntityIdsMono);
 
         List<MVEntity4DataNegotiation> expectedNewEntitiesToSync = List.of(MVEntity4DataNegotiationMother.sample3());
 
@@ -87,7 +89,7 @@ class DataNegotiationJobTests {
 
         DataNegotiationResult expectedDataNegotiationResult = new DataNegotiationResult(issuer, expectedNewEntitiesToSync, expectedExistingEntitiesToSync);
 
-        when(dataTransferJob.syncData(any())).thenReturn(Mono.empty());
+        when(dataTransferJob.syncData(any(), any())).thenReturn(Mono.empty());
 
         var result = dataNegotiationJob.negotiateDataSync(dataNegotiationEvent);
 
@@ -95,7 +97,7 @@ class DataNegotiationJobTests {
                 .create(result)
                 .verifyComplete();
 
-        verify(dataTransferJob, times(1)).syncData(dataNegotiationResultCaptor.capture());
+        verify(dataTransferJob, times(1)).syncData(eq(processId), dataNegotiationResultCaptor.capture());
         verifyNoMoreInteractions(dataTransferJob);
 
         Mono<DataNegotiationResult> dataNegotiationResultCaptured = dataNegotiationResultCaptor.getValue();
@@ -116,7 +118,8 @@ class DataNegotiationJobTests {
 
         Mono<List<MVEntity4DataNegotiation>> localEntityIdsMono = Mono.just(List.of(MVEntity4DataNegotiationMother.sample3TimestampOld()));
 
-        DataNegotiationEvent dataNegotiationEvent = new DataNegotiationEvent(issuerMono, externalEntityIdsMono, localEntityIdsMono);
+        String processId = "0";
+        DataNegotiationEvent dataNegotiationEvent = new DataNegotiationEvent(processId, issuerMono, externalEntityIdsMono, localEntityIdsMono);
 
         List<MVEntity4DataNegotiation> expectedNewEntitiesToSync = List.of(MVEntity4DataNegotiationMother.sample2());
 
@@ -124,7 +127,7 @@ class DataNegotiationJobTests {
 
         DataNegotiationResult expectedDataNegotiationResult = new DataNegotiationResult(issuer, expectedNewEntitiesToSync, expectedExistingEntitiesToSync);
 
-        when(dataTransferJob.syncData(any())).thenReturn(Mono.empty());
+        when(dataTransferJob.syncData(any(), any())).thenReturn(Mono.empty());
 
         var result = dataNegotiationJob.negotiateDataSync(dataNegotiationEvent);
 
@@ -132,7 +135,7 @@ class DataNegotiationJobTests {
                 .create(result)
                 .verifyComplete();
 
-        verify(dataTransferJob, times(1)).syncData(dataNegotiationResultCaptor.capture());
+        verify(dataTransferJob, times(1)).syncData(eq(processId), dataNegotiationResultCaptor.capture());
         verifyNoMoreInteractions(dataTransferJob);
 
         Mono<DataNegotiationResult> dataNegotiationResultCaptured = dataNegotiationResultCaptor.getValue();
@@ -153,7 +156,8 @@ class DataNegotiationJobTests {
 
         Mono<List<MVEntity4DataNegotiation>> localEntityIdsMono = Mono.just(List.of(MVEntity4DataNegotiationMother.sample2()));
 
-        DataNegotiationEvent dataNegotiationEvent = new DataNegotiationEvent(issuerMono, externalEntityIdsMono, localEntityIdsMono);
+        String processId = "0";
+        DataNegotiationEvent dataNegotiationEvent = new DataNegotiationEvent(processId, issuerMono, externalEntityIdsMono, localEntityIdsMono);
 
         List<MVEntity4DataNegotiation> expectedNewEntitiesToSync = new ArrayList<>();
 
@@ -161,7 +165,7 @@ class DataNegotiationJobTests {
 
         DataNegotiationResult expectedDataNegotiationResult = new DataNegotiationResult(issuer, expectedNewEntitiesToSync, expectedExistingEntitiesToSync);
 
-        when(dataTransferJob.syncData(any())).thenReturn(Mono.empty());
+        when(dataTransferJob.syncData(any(), any())).thenReturn(Mono.empty());
 
         var result = dataNegotiationJob.negotiateDataSync(dataNegotiationEvent);
 
@@ -169,7 +173,7 @@ class DataNegotiationJobTests {
                 .create(result)
                 .verifyComplete();
 
-        verify(dataTransferJob, times(1)).syncData(dataNegotiationResultCaptor.capture());
+        verify(dataTransferJob, times(1)).syncData(eq(processId), dataNegotiationResultCaptor.capture());
         verifyNoMoreInteractions(dataTransferJob);
 
         Mono<DataNegotiationResult> dataNegotiationResultCaptured = dataNegotiationResultCaptor.getValue();
