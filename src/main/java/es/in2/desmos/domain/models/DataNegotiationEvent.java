@@ -7,6 +7,7 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 public record DataNegotiationEvent(
+        @NotNull String processId,
         @NotNull Mono<@NotEmpty String> issuer,
         @NotNull Mono<@NotNull List<@NotNull MVEntity4DataNegotiation>> externalEntityIds,
         @NotNull Mono<@NotNull List<@NotNull MVEntity4DataNegotiation>> localEntityIds) {

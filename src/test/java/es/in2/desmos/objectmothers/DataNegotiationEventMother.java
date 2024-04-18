@@ -8,6 +8,6 @@ public final class DataNegotiationEventMother {
     }
 
     public static DataNegotiationEvent empty() {
-        return new DataNegotiationEvent(Mono.empty(), Mono.empty(), Mono.empty());
+        return new DataNegotiationEvent(null, Mono.empty(), Mono.empty(), Mono.empty());
     }
 }

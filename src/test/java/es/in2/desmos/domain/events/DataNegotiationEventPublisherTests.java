@@ -30,7 +30,8 @@ class DataNegotiationEventPublisherTests {
         Mono<List<MVEntity4DataNegotiation>> externalEntityIds = Mono.just(MVEntity4DataNegotiationMother.list1And2());
         Mono<List<MVEntity4DataNegotiation>> internalEntityIds = Mono.just(MVEntity4DataNegotiationMother.list3And4());
 
-        DataNegotiationEvent dataNegotiationEvent = new DataNegotiationEvent(issuer, externalEntityIds, internalEntityIds);
+        String processId = "0";
+        DataNegotiationEvent dataNegotiationEvent = new DataNegotiationEvent(processId, issuer, externalEntityIds, internalEntityIds);
         dataNegotiationEventPublisher.publishEvent(dataNegotiationEvent);
 
         verify(applicationEventPublisher, times(1)).publishEvent(dataNegotiationEvent);
