@@ -23,7 +23,7 @@ import java.util.List;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class BrokerEntityGetterServiceTests {
+class BrokerEntityGetterServiceIT {
 
     @Autowired
     private ObjectMapper objectMapper;
