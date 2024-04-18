@@ -28,14 +28,14 @@ public class P2PDataSyncController {
     @PostMapping("/discovery")
     @ResponseStatus(HttpStatus.OK)
     public Mono<DiscoverySyncResponse> discoverySync(@RequestBody @Valid Mono<DiscoverySyncRequest> discoverySyncRequest) {
-        String processId = UUID.randomUUID().toString();
-        log.info("ProcessID: {} - Starting Synchronization Discovery...", processId);
+        return discoverySyncRequest.flatMap(request -> {
+            String processId = UUID.randomUUID().toString();
+            log.info("ProcessID: {} - Starting Synchronization Discovery...", processId);
 
-        Mono<String> issuer = discoverySyncRequest.map(DiscoverySyncRequest::issuer);
-        Mono<List<MVEntity4DataNegotiation>> externalMvEntities4DataNegotiation = discoverySyncRequest.map(DiscoverySyncRequest::mvEntities4DataNegotiation);
+            Mono<List<MVEntity4DataNegotiation>> externalMvEntities4DataNegotiation = Mono.just(request.mvEntities4DataNegotiation());
+            Mono<List<MVEntity4DataNegotiation>> localMvEntities4DataNegotiation = p2PDataSyncWorkflow.dataDiscovery(processId, Mono.just(request.issuer()), externalMvEntities4DataNegotiation);
 
-        Mono<List<MVEntity4DataNegotiation>> localMvEntities4DataNegotiation = p2PDataSyncWorkflow.dataDiscovery(processId, issuer, externalMvEntities4DataNegotiation);
-
-        return localMvEntities4DataNegotiation.map(mvEntities4DataNegotiation -> new DiscoverySyncResponse(contextBrokerExternalDomain, mvEntities4DataNegotiation));
+            return localMvEntities4DataNegotiation.map(mvEntities4DataNegotiation -> new DiscoverySyncResponse(contextBrokerExternalDomain, mvEntities4DataNegotiation));
+        });
     }
 }
