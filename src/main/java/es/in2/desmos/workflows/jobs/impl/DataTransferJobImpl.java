@@ -9,6 +9,7 @@ import es.in2.desmos.domain.exceptions.InvalidConsistencyException;
 import es.in2.desmos.domain.exceptions.InvalidIntegrityException;
 import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.services.api.AuditRecordService;
+import es.in2.desmos.domain.services.broker.BrokerPublisherService;
 import es.in2.desmos.domain.services.sync.EntitySyncWebClient;
 import es.in2.desmos.domain.utils.ApplicationUtils;
 import es.in2.desmos.workflows.jobs.DataTransferJob;
@@ -28,6 +29,7 @@ public class DataTransferJobImpl implements DataTransferJob {
     private final EntitySyncWebClient entitySyncWebClient;
     private final AuditRecordService auditRecordService;
     private final ObjectMapper objectMapper;
+    private final BrokerPublisherService brokerPublisherService;
 
     @Override
     public Mono<Void> syncData(String processId, Mono<DataNegotiationResult> dataNegotiationResult) {
@@ -48,10 +50,16 @@ public class DataTransferJobImpl implements DataTransferJob {
                             Mono<List<MVEntity4DataNegotiation>> allEntitiesToRequestList = Mono.just(Arrays.asList(entities));
 
                             return validateEntities(processId, entitiesById, newEntitiesOriginalValidationDataById, existingEntitiesOriginalValidationDataById)
-                                    .then(buildAndSaveAuditRecordFromDataSync(processId, issuer, entitiesById, allEntitiesToRequestList));
+                                    .then(buildAndSaveAuditRecordFromDataSync(processId, issuer, entitiesById, allEntitiesToRequestList))
+                                    .then(publishNewBatchDataToBroker(processId, allEntitiesToRequestList, entitiesById));
                         });
             });
         });
+    }
+
+    private Mono<Void> publishNewBatchDataToBroker(String processId, Mono<List<MVEntity4DataNegotiation>> mvEntity4DataNegotiationList, Mono<Map<Id, Entity>> retrievedBrokerEntitiesList) {
+        return mvEntity4DataNegotiationList.zipWith(retrievedBrokerEntitiesList)
+                .flatMap(tuple -> brokerPublisherService.publishNewBatchDataToBroker(processId, tuple.getT1(), tuple.getT2()));
     }
 
 

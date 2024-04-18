@@ -1,12 +1,18 @@
 package es.in2.desmos.domain.services.broker.impl;
 
 import es.in2.desmos.domain.models.BlockchainNotification;
+import es.in2.desmos.domain.models.Entity;
+import es.in2.desmos.domain.models.Id;
+import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
 import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import es.in2.desmos.domain.services.broker.adapter.factory.BrokerAdapterFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
+import java.util.Map;
 
 import static es.in2.desmos.domain.utils.ApplicationUtils.extractEntityIdFromDataLocation;
 
@@ -39,6 +45,11 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
                         return updateEntity(processId, retrievedBrokerEntity);
                     }
                 });
+    }
+
+    @Override
+    public Mono<Void> publishNewBatchDataToBroker(String processId, List<MVEntity4DataNegotiation> mvEntity4DataNegotiationList, Map<Id, Entity> retrievedBrokerEntitiesList) {
+        return null;
     }
 
     private Mono<Void> postEntity(String processId, String requestBody) {
