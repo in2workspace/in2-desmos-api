@@ -292,4 +292,9 @@ public class ScorpioAdapter implements BrokerAdapterService {
             return mvEntity4DataNegotiations;
         });
     }
+
+    @Override
+    public Mono<Void> batchPostEntities(String processId, String requestBody) {
+        return null;
+    }
 }
