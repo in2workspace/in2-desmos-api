@@ -23,7 +23,7 @@ public class P2PDataSyncWorkflowImpl implements P2PDataSyncWorkflow {
     public Mono<List<MVEntity4DataNegotiation>> dataDiscovery(String processId, Mono<String> issuer, Mono<List<MVEntity4DataNegotiation>> externalMvEntities4DataNegotiation) {
         Mono<List<MVEntity4DataNegotiation>> localMvEntities4DataNegotiation = brokerEntityGetterService.getMvEntities4DataNegotiation();
 
-        DataNegotiationEvent dataNegotiationEvent = new DataNegotiationEvent(issuer, externalMvEntities4DataNegotiation, localMvEntities4DataNegotiation);
+        DataNegotiationEvent dataNegotiationEvent = new DataNegotiationEvent(processId, issuer, externalMvEntities4DataNegotiation, localMvEntities4DataNegotiation);
         dataNegotiationEventPublisher.publishEvent(dataNegotiationEvent);
 
         return localMvEntities4DataNegotiation;
