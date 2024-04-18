@@ -4,6 +4,7 @@ package es.in2.desmos.workflows.jobs.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import es.in2.desmos.domain.exceptions.InvalidSyncResponseException;
 import es.in2.desmos.domain.exceptions.InvalidConsistencyException;
 import es.in2.desmos.domain.exceptions.InvalidIntegrityException;
 import es.in2.desmos.domain.models.*;
@@ -111,10 +112,12 @@ public class DataTransferJobImpl implements DataTransferJob {
                         String currentEntityId = entityNode.get("id").asText();
                         entitiesById.put(new Id(currentEntityId), new Entity(entityNode.toString()));
                     });
+                    return Mono.just(entitiesById);
+                } else {
+                    return Mono.error(new InvalidSyncResponseException("Invalid EntitySync response."));
                 }
-                return Mono.just(entitiesById);
             } catch (JsonProcessingException e) {
-                return Mono.error(e);
+                return Mono.error(new InvalidSyncResponseException("Invalid EntitySync response."));
             }
         });
     }
