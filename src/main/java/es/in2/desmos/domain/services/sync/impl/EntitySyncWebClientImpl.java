@@ -1,7 +1,6 @@
 package es.in2.desmos.domain.services.sync.impl;
 
-import es.in2.desmos.domain.models.EntitySyncRequest;
-import es.in2.desmos.domain.models.EntitySyncResponse;
+import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.domain.services.sync.EntitySyncWebClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,14 +15,13 @@ import reactor.core.publisher.Mono;
 public class EntitySyncWebClientImpl implements EntitySyncWebClient {
     private final WebClient webClient;
 
-    public Mono<EntitySyncResponse> makeRequest(Mono<String> issuer, Mono<EntitySyncRequest> entitySyncRequest) {
+    public Mono<String> makeRequest(Mono<String> issuer, Mono<MVEntity4DataNegotiation[]> entitySyncRequest) {
         return webClient
                 .post()
                 .uri(issuer + "/api/v1/sync/entities")
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(entitySyncRequest,EntitySyncRequest.class)
+                .body(entitySyncRequest, MVEntity4DataNegotiation[].class)
                 .retrieve()
-                .bodyToMono(String.class)
-                .map(EntitySyncResponse::new);
+                .bodyToMono(String.class);
     }
 }
