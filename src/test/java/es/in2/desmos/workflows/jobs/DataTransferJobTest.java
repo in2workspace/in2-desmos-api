@@ -4,12 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.domain.exceptions.InvalidConsistencyException;
 import es.in2.desmos.domain.exceptions.InvalidIntegrityException;
 import es.in2.desmos.domain.exceptions.InvalidSyncResponseException;
-import es.in2.desmos.domain.models.*;
+import es.in2.desmos.domain.models.AuditRecord;
+import es.in2.desmos.domain.models.DataNegotiationResult;
+import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
 import es.in2.desmos.domain.services.sync.EntitySyncWebClient;
 import es.in2.desmos.objectmothers.DataNegotiationResultMother;
-import es.in2.desmos.objectmothers.EntityMother;
 import es.in2.desmos.objectmothers.EntitySyncResponseMother;
 import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
 import es.in2.desmos.workflows.jobs.impl.DataTransferJobImpl;
@@ -21,8 +22,6 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -72,7 +71,7 @@ class DataTransferJobTest {
 
         when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any(), any())).thenReturn(Mono.empty());
 
-        when(brokerPublisherService.publishNewBatchDataToBroker(any(), any(), any())).thenReturn(Mono.empty());
+        when(brokerPublisherService.publishNewBatchDataToBroker(any(), any())).thenReturn(Mono.empty());
 
         Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
 
@@ -123,7 +122,7 @@ class DataTransferJobTest {
 
         when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any(), any())).thenReturn(Mono.empty());
 
-        when(brokerPublisherService.publishNewBatchDataToBroker(any(), any(), any())).thenReturn(Mono.empty());
+        when(brokerPublisherService.publishNewBatchDataToBroker(any(), any())).thenReturn(Mono.empty());
 
         Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
 
@@ -240,10 +239,6 @@ class DataTransferJobTest {
         DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
         Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
 
-        List<MVEntity4DataNegotiation> allMVEntity4DataNegotiation = Stream.concat(
-                dataNegotiationResult.newEntitiesToSync().stream(),
-                dataNegotiationResult.existingEntitiesToSync().stream()).toList();
-
         String entitySyncResponse = EntitySyncResponseMother.sample();
         Mono<String> entitySyncResponseMono = Mono.just(entitySyncResponse);
 
@@ -255,9 +250,7 @@ class DataTransferJobTest {
 
         when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any(), any())).thenReturn(Mono.empty());
 
-        Map<Id, Entity> retrievedBrokerEntitiesList = EntityMother.fullList();
-
-        when(brokerPublisherService.publishNewBatchDataToBroker(processId, allMVEntity4DataNegotiation, retrievedBrokerEntitiesList)).thenReturn(Mono.empty());
+        when(brokerPublisherService.publishNewBatchDataToBroker(processId, entitySyncResponse)).thenReturn(Mono.empty());
 
         Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
 
@@ -265,7 +258,7 @@ class DataTransferJobTest {
                 create(result)
                 .verifyComplete();
 
-        verify(brokerPublisherService, times(1)).publishNewBatchDataToBroker(processId, allMVEntity4DataNegotiation, retrievedBrokerEntitiesList);
+        verify(brokerPublisherService, times(1)).publishNewBatchDataToBroker(processId, entitySyncResponse);
         verifyNoMoreInteractions(brokerPublisherService);
 
     }
