@@ -6,7 +6,7 @@
 //import es.in2.desmos.configs.ApiConfig;
 //import es.in2.desmos.domain.models.BlockchainData;
 //import es.in2.desmos.domain.services.api.AuditRecordService;
-//import es.in2.desmos.domain.utils.BlockchainDataFactory;
+//import es.in2.desmos.domain.utils.BlockchainTxPayloadFactory;
 //import es.in2.desmos.domain.utils.ApplicationUtils;
 //import es.in2.desmos.configs.BrokerConfig;
 //import org.junit.jupiter.api.Test;
@@ -35,7 +35,7 @@
 //    @Mock
 //    private AuditRecordService auditRecordService;
 //    @InjectMocks
-//    private BlockchainDataFactory dltEventCreatorService;
+//    private BlockchainTxPayloadFactory dltEventCreatorService;
 //
 //    @Test
 //    void createDLTEvent_Success() throws JsonProcessingException, NoSuchAlgorithmException {
