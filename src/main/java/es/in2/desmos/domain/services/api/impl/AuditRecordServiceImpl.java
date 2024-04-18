@@ -144,6 +144,68 @@ public class AuditRecordServiceImpl implements AuditRecordService {
     }
 
     /**
+     * Create a new AuditRecord with status RETRIEVED and trader CONSUMER
+     * from the retrieved external sync entity in string format.
+     * If the retrievedBrokerEntity is null or blank, the status will be RECEIVED.
+     */
+    @Override
+    public Mono<Void> buildAndSaveAuditRecordFromDataSync(String processId, String issuer, MVEntity4DataNegotiation mvEntity4DataNegotiation, String retrievedBrokerEntity, AuditRecordStatus status) {
+        return fetchMostRecentAuditRecord()
+                .flatMap(lastAuditRecordRegistered -> {
+                    try {
+                        String entityHash;
+                        String entityHashLink;
+                        String dataLocation;
+                        if (retrievedBrokerEntity == null || retrievedBrokerEntity.isBlank()) {
+                            // status cases: RECEIVED
+                            entityHash = "";
+                            entityHashLink = "";
+                            dataLocation = "";
+                        } else {
+                            // status cases: RETRIEVED, PUBLISHED
+                            // We do not need to sort the fields of the retrievedBrokerEntity
+                            // because these have already been sorted in the
+                            // SubscribeWorkflowImpl.sortAttributesAlphabetically()
+                            entityHash = mvEntity4DataNegotiation.hash();
+                            entityHashLink = mvEntity4DataNegotiation.hashlink();
+                            dataLocation = issuer +
+                                    "/ngsi-ld/v1/entities/" +
+                                    mvEntity4DataNegotiation.id() +
+                                    "?"
+                                    + mvEntity4DataNegotiation.hash();
+                        }
+
+                        AuditRecord auditRecord =
+                                AuditRecord.builder()
+                                        .id(UUID.randomUUID())
+                                        .processId(processId)
+                                        .createdAt(Timestamp.from(Instant.now()))
+                                        .entityId(mvEntity4DataNegotiation.id())
+                                        .entityType(mvEntity4DataNegotiation.type())
+                                        .entityHash(entityHash)
+                                        .entityHashLink(entityHashLink)
+                                        .dataLocation(dataLocation)
+                                        .status(status)
+                                        .trader(AuditRecordTrader.CONSUMER)
+                                        .hash("")
+                                        .hashLink("")
+                                        .newTransaction(true)
+                                        .build();
+
+                        String auditRecordHash = calculateSHA256(objectMapper.writeValueAsString(auditRecord));
+                        log.debug("ProcessID: {} - Audit Record Hash: {}", processId, auditRecordHash);
+                        auditRecord.setHash(auditRecordHash);
+                        auditRecord.setHashLink(setAuditRecordHashLink(lastAuditRecordRegistered, auditRecordHash));
+
+                        return auditRecordRepository.save(auditRecord).then();
+
+                    } catch (JsonProcessingException | NoSuchAlgorithmException e) {
+                        return Mono.error(e);
+                    }
+                });
+    }
+
+    /**
      * Fetches the most recently registered audit record. If no Audit Record exists, then
      * checks if the AuditRecord table is empty. If it is, then return a Mono.empty() because
      * understand that there are no Audit Records to fetch. If the table is not empty, then
