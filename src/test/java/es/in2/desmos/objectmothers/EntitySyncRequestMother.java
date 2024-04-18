@@ -11,10 +11,17 @@ public final class EntitySyncRequestMother {
     private EntitySyncRequestMother() {
     }
 
-    public static @NotNull EntitySyncRequest simpleEntitySyncRequest() {
+    public static @NotNull EntitySyncRequest simple1and2() {
         List<MVEntity4DataNegotiation> entities = new ArrayList<>();
         entities.add(MVEntity4DataNegotiationMother.sample1());
         entities.add(MVEntity4DataNegotiationMother.sample2());
-        return new EntitySyncRequest(entities);
+        return new EntitySyncRequest(entities.toArray(MVEntity4DataNegotiation[]::new));
+    }
+
+    public static @NotNull EntitySyncRequest simple3and4() {
+        List<MVEntity4DataNegotiation> entities = new ArrayList<>();
+        entities.add(MVEntity4DataNegotiationMother.sample3());
+        entities.add(MVEntity4DataNegotiationMother.sample4());
+        return new EntitySyncRequest(entities.toArray(MVEntity4DataNegotiation[]::new));
     }
 }
