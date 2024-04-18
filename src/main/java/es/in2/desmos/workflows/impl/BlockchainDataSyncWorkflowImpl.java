@@ -34,7 +34,6 @@ public class BlockchainDataSyncWorkflowImpl implements BlockchainDataSyncWorkflo
     private final BrokerPublisherService brokerPublisherService;
 
     @Override
-    //todo: Add the case where the PUBLISHED auditRecords exist
     public Flux<Void> startBlockchainDataSyncWorkflow(String processId) {
         log.info("Starting the Blockchain Data Sync Workflow...");
         return auditRecordService.findLatestConsumerPublishedAuditRecord(processId)
@@ -64,9 +63,9 @@ public class BlockchainDataSyncWorkflowImpl implements BlockchainDataSyncWorkflo
     }
 
     private Flux<String> queryDLTAdapterFromBeginning(String processId) {
-        // long startUnixTimestampMillis = Instant.EPOCH.toEpochMilli(); // For debug purposes, the range of events will be shorter
+        long startUnixTimestampMillis = Instant.EPOCH.toEpochMilli();
         long nowUnixTimestampMillis = Instant.now().toEpochMilli();
-        return blockchainAdapterService.getEventsFromRange(processId, 1713266146360L, nowUnixTimestampMillis);
+        return blockchainAdapterService.getEventsFromRange(processId, startUnixTimestampMillis, nowUnixTimestampMillis);
     }
 
     private Flux<String> queryDLTAdapterFromLastPublished(AuditRecord auditRecord, String processId) {
