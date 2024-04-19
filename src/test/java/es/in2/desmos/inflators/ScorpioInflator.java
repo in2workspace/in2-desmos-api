@@ -36,6 +36,21 @@ public final class ScorpioInflator {
         System.out.println("Create entities to Scorpio.");
     }
 
+    public static void addInitialEntitiesToContextBroker(String brokerUrl, String requestBody) {
+        WebClient.builder()
+                .baseUrl(brokerUrl)
+                .build()
+                .post()
+                .uri("ngsi-ld/v1/entityOperations/create")
+                .contentType(APPLICATION_LD_JSON)
+                .bodyValue(requestBody)
+                .retrieve()
+                .bodyToMono(Void.class)
+                .retry(3).block();
+
+        System.out.println("Create entities to Scorpio.");
+    }
+
     public static void deleteInitialEntitiesFromContextBroker(String brokerUrl, List<String> ids){
         WebClient.builder()
                 .baseUrl(brokerUrl)

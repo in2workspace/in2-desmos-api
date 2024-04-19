@@ -21,7 +21,9 @@ public final class EntitySyncResponseMother {
                     "productOfferingPrice": {
                       "type": "Relationship",
                       "object": "urn:productOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
-                    }
+                    }, "@context": [
+                                  "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
+                              ]
                   },
                   {
                     "id": "urn:productOfferingPrice:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87",
@@ -35,7 +37,9 @@ public final class EntitySyncResponseMother {
                     "productOfferingPrice": {
                       "type": "Relationship",
                       "object": "urn:productOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
-                    }
+                    }, "@context": [
+                                  "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
+                              ]
                   },
                   {
                     "id": "urn:productOfferingPrice:537e1ee3-0556-4fff-875f-e55bb97e7ab0",
@@ -49,7 +53,9 @@ public final class EntitySyncResponseMother {
                     "productOfferingPrice": {
                       "type": "Relationship",
                       "object": "urn:productOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
-                    }
+                    }, "@context": [
+                                   "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
+                               ]
                   },
                   {
                     "id": "urn:productOfferingPrice:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c",
@@ -63,25 +69,66 @@ public final class EntitySyncResponseMother {
                     "productOfferingPrice": {
                       "type": "Relationship",
                       "object": "urn:productOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
-                    }
+                    }, "@context": [
+                                   "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
+                               ]
                   }
                 ]
                 """;
     }
 
-     public static String GetId1(){
+    public static @NotNull String sample1and2Old() {
+        return """
+                [
+                  {
+                    "id": "urn:productOffering:d86735a6-0faa-463d-a872-00b97affa1cb",
+                    "type": "productOffering",
+                    "version": "0",
+                    "lastUpdate": "2024-09-05T12:00:00Z",
+                    "productSpecification": {
+                      "id": "spec-broadband-001",
+                      "name": "32Gbps Broadband Spec"
+                    },
+                    "productOfferingPrice": {
+                      "type": "Relationship",
+                      "object": "urn:productOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
+                    }, "@context": [
+                                   "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
+                               ]
+                  },
+                  {
+                    "id": "urn:productOfferingPrice:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87",
+                    "type": "productOffering",
+                    "version": "1",
+                    "lastUpdate": "2024-07-09T12:00:00Z",
+                    "productSpecification": {
+                      "id": "spec-broadband-001",
+                      "name": "24Gbps Broadband Spec"
+                    },
+                    "productOfferingPrice": {
+                      "type": "Relationship",
+                      "object": "urn:productOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
+                    }, "@context": [
+                                   "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
+                               ]
+                  }
+                ]
+                """;
+    }
+
+     public static String getId1(){
         return "urn:productOffering:d86735a6-0faa-463d-a872-00b97affa1cb";
     }
 
-    public static String GetId2(){
+    public static String getId2(){
         return "urn:productOfferingPrice:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87";
     }
 
-    public static String GetId3(){
+    public static String getId3(){
         return "urn:productOfferingPrice:537e1ee3-0556-4fff-875f-e55bb97e7ab0";
     }
 
-    public static String GetId4(){
+    public static String getId4(){
         return "urn:productOfferingPrice:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c";
     }
 

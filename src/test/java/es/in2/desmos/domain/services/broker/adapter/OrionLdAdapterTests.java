@@ -26,11 +26,11 @@ class OrionLdAdapterTests {
     }
 
     @Test
-    void itShouldReturnNullWhenBatchPostEntities() {
+    void itShouldReturnNullWhenUpsertBatchEntities() {
         String processId = "0";
         String requestBody = EntitySyncResponseMother.sample();
 
-        Mono<Void> result = orionLdAdapter.batchPostEntities(processId, requestBody);
+        Mono<Void> result = orionLdAdapter.upsertBatchEntities(processId, requestBody);
 
         assertNull(result);
     }
