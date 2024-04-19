@@ -108,4 +108,24 @@ public final class EntityMother {
             throw new RuntimeException(e);
         }
     }
+
+    public static String scorpioSample1() {
+        return """
+                {"id":"urn:productOffering:d86735a6-0faa-463d-a872-00b97affa1cb","type":"productOffering","lastUpdate":{"type":"Property","value":"2024-09-05T12:00:00Z"},"productOfferingPrice":{"type":"Relationship","object":"urn:productOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"},"productSpecification":{"type":"Property","value":{"id":"spec-broadband-001","name":"1Gbps Broadband Spec"}},"version":{"type":"Property","value":"1.2"}}""";
+    }
+
+    public static String scorpioSample2() {
+        return """
+                {"id":"urn:productOfferingPrice:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87","type":"productOffering","lastUpdate":{"type":"Property","value":"2024-07-09T12:00:00Z"},"productOfferingPrice":{"type":"Relationship","object":"urn:productOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"},"productSpecification":{"type":"Property","value":{"id":"spec-broadband-001","name":"1Gbps Broadband Spec"}},"version":{"type":"Property","value":"2.5"}}""";
+    }
+
+    public static String scorpioSample3() {
+        return """
+                {"id":"urn:productOfferingPrice:537e1ee3-0556-4fff-875f-e55bb97e7ab0","type":"productOffering","lastUpdate":{"type":"Property","value":"2024-04-03T12:00:00Z"},"productOfferingPrice":{"type":"Relationship","object":"urn:productOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"},"productSpecification":{"type":"Property","value":{"id":"spec-broadband-001","name":"1Gbps Broadband Spec"}},"version":{"type":"Property","value":"4.3"}}""";
+    }
+
+    public static String scorpioSample4() {
+        return """
+                {"id":"urn:productOfferingPrice:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c","type":"productOffering","lastUpdate":{"type":"Property","value":"2024-06-02T12:00:00Z"},"productOfferingPrice":{"type":"Relationship","object":"urn:productOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"},"productSpecification":{"type":"Property","value":{"id":"spec-broadband-001","name":"1Gbps Broadband Spec"}},"version":{"type":"Property","value":"1.9"}}""";
+    }
 }

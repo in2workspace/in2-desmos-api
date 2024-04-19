@@ -14,7 +14,7 @@ public final class MVEntity4DataNegotiationMother {
     }
 
     public static @NotNull MVEntity4DataNegotiation sample1() {
-        return new MVEntity4DataNegotiation("urn:productOffering:d86735a6-0faa-463d-a872-00b97affa1cb", "ProductOffering", "1.2", "2024-09-05T12:00:00Z", "9ce0461d10e02556d3f16e21c8ac662c037f8b39efd059186b070f9aad8c00f0", "fa54d4a84a8c86bf91e13e0892ddab8d4728bbd27bf6629a7adbc99b79a10e86f6f5");
+        return new MVEntity4DataNegotiation("urn:productOffering:d86735a6-0faa-463d-a872-00b97affa1cb", "ProductOffering", "1.2", "2024-09-05T12:00:00Z", "ba2aa48e3390a6f39061a8efac7769c3f1c6d642ae83c8ec6d06f837375f17ae", "fa54ba2aa48e3390a6f39061a8efac7769c3f1c6d642ae83c8ec6d06f837375f17ae");
     }
 
     public static @NotNull MVEntity4DataNegotiation sample1BadHash() {
@@ -22,7 +22,7 @@ public final class MVEntity4DataNegotiationMother {
     }
 
     public static @NotNull MVEntity4DataNegotiation sample2() {
-        return new MVEntity4DataNegotiation("urn:productOfferingPrice:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87", "ProductOfferingPrice", "2.5", "2024-07-09T12:00:00Z", "402db7b4e453a291b77a879d5e3e4db5c713ea6591f090c959364f0b7f071f93", "fa54402db7b4e453a291b77a879d5e3e4db5c713ea6591f090c959364f0b7f071f93");
+        return new MVEntity4DataNegotiation("urn:productOfferingPrice:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87", "ProductOfferingPrice", "2.5", "2024-07-09T12:00:00Z", "76cbcd6d9338fdd7b9985de08f9823d455e0daabee238cb3349c424dc9c0e8bb", "fa5476cbcd6d9338fdd7b9985de08f9823d455e0daabee238cb3349c424dc9c0e8bb");
     }
 
     public static @NotNull MVEntity4DataNegotiation sample2VersionOld() {
@@ -30,7 +30,7 @@ public final class MVEntity4DataNegotiationMother {
     }
 
     public static @NotNull MVEntity4DataNegotiation sample3() {
-        return new MVEntity4DataNegotiation("urn:productOfferingPrice:537e1ee3-0556-4fff-875f-e55bb97e7ab0", "ProductOfferingPrice", "4.3", "2024-04-03T12:00:00Z", "aecb332bf1862b50aa6090e2dbbc8f28b9776777035ae6357918054869ec06bc", "fa54aecb332bf1862b50aa6090e2dbbc8f28b9776777035ae6357918054869ec06bc");
+        return new MVEntity4DataNegotiation("urn:productOfferingPrice:537e1ee3-0556-4fff-875f-e55bb97e7ab0", "ProductOfferingPrice", "4.3", "2024-04-03T12:00:00Z", "d05c64065bdddd2d44d8416b49bd3046b6679a5fa909d0459e9449cbd98cf4d0", "fa54d05c64065bdddd2d44d8416b49bd3046b6679a5fa909d0459e9449cbd98cf4d0");
     }
 
     public static @NotNull MVEntity4DataNegotiation sample3TimestampOld() {
@@ -38,7 +38,7 @@ public final class MVEntity4DataNegotiationMother {
     }
 
     public static @NotNull MVEntity4DataNegotiation sample4() {
-        return new MVEntity4DataNegotiation("urn:productOfferingPrice:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c", "ProductOfferingPrice", "1.9", "2024-06-02T12:00:00Z", "0bb46ef233d206da3e2a4f92a76d33aa624e9a29758d0d19b0990e78b4620936", "fa540bb46ef233d206da3e2a4f92a76d33aa624e9a29758d0d19b0990e78b4620936");
+        return new MVEntity4DataNegotiation("urn:productOfferingPrice:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c", "ProductOfferingPrice", "1.9", "2024-06-02T12:00:00Z", "d4b2b9f86f3f87a94604915b46faf83a037b971a4020570b34482a7a2331ecac", "fa54d4b2b9f86f3f87a94604915b46faf83a037b971a4020570b34482a7a2331ecac");
     }
 
     public static @NotNull MVEntity4DataNegotiation randomIdAndVersion() {
