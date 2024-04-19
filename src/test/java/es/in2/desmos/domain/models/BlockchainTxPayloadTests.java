@@ -102,7 +102,7 @@ class BlockchainTxPayloadTests {
     }
 
     @Test
-    public void testInvalidDataLocation() {
+    void testInvalidDataLocation() {
         // We provide an invalid URL for dataLocation
         ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
 

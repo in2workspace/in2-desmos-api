@@ -13,7 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,32 +39,23 @@ class NotificationControllerIT {
                 .notifiedAt("")
                 .build();
 
-        try {
-            String response = String.valueOf(WebClient.builder()
-                    .baseUrl("http://localhost:" + localServerPort)
-                    .build()
-                    .post()
-                    .uri("/api/v1/notifications/broker")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(Mono.just(invalidNotification), BrokerNotification.class)
-                    .retrieve()
-                    .onStatus(
-                            HttpStatusCode::isError,
-                            a -> {
-                                System.out.println(a);
-                                return a.bodyToMono(String.class).map(Exception::new);
-                            })
-                    .bodyToMono(String.class)
-                    .subscribe(responseBody -> System.out.println("Response: " + responseBody),
-                            error -> System.out.println("Error: " + error.getMessage())
-                    ));
+        WebClient webClient = WebClient.builder()
+                .baseUrl("http://localhost:" + localServerPort)
+                .build();
 
-            System.out.println("Response: " + response);
-        } catch (WebClientResponseException e) {
-            String errorResponseBody = e.getResponseBodyAsString();
-            System.out.println("Error Response Body: " + errorResponseBody);
-        }
+        webClient.post()
+                .uri("/api/v1/notifications/broker")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(invalidNotification), BrokerNotification.class)
+                .exchangeToMono(clientResponse -> {
+                    HttpStatusCode status = clientResponse.statusCode();
+                    System.out.println("HTTP Status Code: " + status);
+                    assertEquals(HttpStatus.BAD_REQUEST, status);
+                    return clientResponse.bodyToMono(GlobalErrorMessage.class);
+                })
+                .block();
     }
+
 
     @Test
     void testInvalidBrokerNotificationExceptionHandler() {
@@ -115,32 +105,23 @@ class NotificationControllerIT {
                 .previousEntityHash("")
                 .build();
 
-        try {
-            String response = String.valueOf(WebClient.builder()
-                    .baseUrl("http://localhost:" + localServerPort)
-                    .build()
-                    .post()
-                    .uri("/api/v1/notifications/dlt")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(Mono.just(invalidNotification), BlockchainNotification.class)
-                    .retrieve()
-                    .onStatus(
-                            HttpStatusCode::isError,
-                            a -> {
-                                System.out.println(a);
-                                return a.bodyToMono(String.class).map(Exception::new);
-                            })
-                    .bodyToMono(String.class)
-                    .subscribe(responseBody -> System.out.println("Response: " + responseBody),
-                            error -> System.out.println("Error: " + error.getMessage())
-                    ));
+        WebClient webClient = WebClient.builder()
+                .baseUrl("http://localhost:" + localServerPort)
+                .build();
 
-            System.out.println("Response: " + response);
-        } catch (WebClientResponseException e) {
-            String errorResponseBody = e.getResponseBodyAsString();
-            System.out.println("Error Response Body: " + errorResponseBody);
-        }
+        webClient.post()
+                .uri("/api/v1/notifications/dlt")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(invalidNotification), BlockchainNotification.class)
+                .exchangeToMono(clientResponse -> {
+                    HttpStatusCode status = clientResponse.statusCode();
+                    System.out.println("HTTP Status Code: " + status);
+                    assertEquals(HttpStatus.BAD_REQUEST, status);
+                    return clientResponse.bodyToMono(GlobalErrorMessage.class);
+                })
+                .block();
     }
+
 
     @Test
     void testInvalidBlockchainNotificationExceptionHandler() {
