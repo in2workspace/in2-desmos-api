@@ -198,6 +198,54 @@ public class ScorpioAdapter implements BrokerAdapterService {
         return null;
     }
 
+    @Override
+    public Mono<List<MVEntity4DataNegotiation>> getMvEntities4DataNegotiation(String processId) {
+        log.info("ProcessID: {} - Getting MV Entities For Data Negotiation from Scorpio", processId);
+
+        String uri = brokerConfig.getEntitiesPath() + "/" + "?type=ProductOffering&attrs=lastUpdate,version,hash,hashlink\"";
+
+        Mono<ScorpioEntity[]> scorpioProductOfferingList = webClient
+                .get()
+                .uri(uri)
+                .accept(APPLICATION_LD_JSON)
+                .retrieve()
+                .bodyToMono(ScorpioEntity[].class)
+                .retry(3);
+
+        return scorpioProductOfferingList.map(this::getMvEntity4DataNegotiations);
+    }
+
+    @Override
+    public Mono<Void> upsertBatchEntities(String processId, String requestBody) {
+        log.info("ProcessID: {} - Upserting entities to Scorpio", processId);
+
+        String uri = brokerConfig.getEntityOperationsPath() + "/" + "upsert";
+
+        return webClient.post()
+                .uri(uri)
+                .accept(APPLICATION_LD_JSON)
+                .contentType(APPLICATION_LD_JSON)
+                .bodyValue(requestBody)
+                .retrieve()
+                .bodyToMono(Void.class)
+                .retry(3);
+    }
+
+    private List<MVEntity4DataNegotiation> getMvEntity4DataNegotiations(ScorpioEntity[] x) {
+        List<MVEntity4DataNegotiation> mvEntity4DataNegotiations = new ArrayList<>();
+        for (var scorpioProductOffering : x) {
+            mvEntity4DataNegotiations.add(
+                    new MVEntity4DataNegotiation(
+                            scorpioProductOffering.id(),
+                            scorpioProductOffering.type(),
+                            scorpioProductOffering.version().value(),
+                            scorpioProductOffering.lastUpdate().value(),
+                            scorpioProductOffering.hash().value(),
+                            scorpioProductOffering.hashlink().value()));
+        }
+        return mvEntity4DataNegotiations;
+    }
+
     private Mono<Void> postSubscription(BrokerSubscription brokerSubscription) {
         return webClient.post()
                 .uri(brokerConfig.getSubscriptionsPath())
@@ -263,47 +311,5 @@ public class ScorpioAdapter implements BrokerAdapterService {
             log.error(READING_JSON_ENTITY_ERROR_MESSAGE, processId, e.getMessage());
             throw new JsonReadingException(e.getMessage());
         }
-    }
-
-    @Override
-    public Mono<List<MVEntity4DataNegotiation>> getMvEntities4DataNegotiation() {
-        String uri = brokerConfig.getEntitiesPath() + "/" + "?type=ProductOffering&attrs=lastUpdate,version,hash,hashlink\"";
-
-        Mono<ScorpioEntity[]> scorpioProductOfferingList = webClient
-                .get()
-                .uri(uri)
-                .accept(APPLICATION_LD_JSON)
-                .retrieve()
-                .bodyToMono(ScorpioEntity[].class)
-                .retry(3);
-
-        return scorpioProductOfferingList.map(x -> {
-            List<MVEntity4DataNegotiation> mvEntity4DataNegotiations = new ArrayList<>();
-            for (var scorpioProductOffering : x) {
-                mvEntity4DataNegotiations.add(
-                        new MVEntity4DataNegotiation(
-                                scorpioProductOffering.id(),
-                                scorpioProductOffering.type(),
-                                scorpioProductOffering.version().value(),
-                                scorpioProductOffering.lastUpdate().value(),
-                                scorpioProductOffering.hash().value(),
-                                scorpioProductOffering.hashlink().value()));
-            }
-            return mvEntity4DataNegotiations;
-        });
-    }
-
-    @Override
-    public Mono<Void> upsertBatchEntities(String processId, String requestBody) {
-        String uri = brokerConfig.getEntityOperationsPath() + "/" + "upsert";
-
-        return webClient.post()
-                .uri(uri)
-                .accept(APPLICATION_LD_JSON)
-                .contentType(APPLICATION_LD_JSON)
-                .bodyValue(requestBody)
-                .retrieve()
-                .bodyToMono(Void.class)
-                .retry(3);
     }
 }

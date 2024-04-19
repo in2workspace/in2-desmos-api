@@ -20,7 +20,8 @@ class OrionLdAdapterTests {
 
     @Test
     void itShouldReturnNullWhenGetMvEntities4DataNegotiation() {
-        Mono<List<MVEntity4DataNegotiation>> result = orionLdAdapter.getMvEntities4DataNegotiation();
+        String processId = "0";
+        Mono<List<MVEntity4DataNegotiation>> result = orionLdAdapter.getMvEntities4DataNegotiation(processId);
 
         assertNull(result);
     }

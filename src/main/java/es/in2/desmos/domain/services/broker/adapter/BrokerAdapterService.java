@@ -18,7 +18,7 @@ public interface BrokerAdapterService {
     Mono<Void> updateSubscription(String processId, BrokerSubscription brokerSubscription);
     Mono<Void> deleteSubscription(String processId, String subscriptionId);
 
-    Mono<List<MVEntity4DataNegotiation>> getMvEntities4DataNegotiation();
+    Mono<List<MVEntity4DataNegotiation>> getMvEntities4DataNegotiation(String processId);
 
     Mono<Void> upsertBatchEntities(String processId, String requestBody);
 }

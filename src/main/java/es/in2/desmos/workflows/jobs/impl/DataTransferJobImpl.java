@@ -34,6 +34,8 @@ public class DataTransferJobImpl implements DataTransferJob {
     @Override
     public Mono<Void> syncData(String processId, Mono<DataNegotiationResult> dataNegotiationResult) {
         return dataNegotiationResult.flatMap(result -> {
+            log.info("ProcessID: {} - Starting data transfer job", processId);
+
             Mono<MVEntity4DataNegotiation[]> allEntitiesToRequest = buildAllEntitiesToRequest(
                     Mono.just(result.newEntitiesToSync()),
                     Mono.just(result.existingEntitiesToSync())
@@ -42,8 +44,10 @@ public class DataTransferJobImpl implements DataTransferJob {
             return allEntitiesToRequest.flatMap(entities -> {
                 Mono<String> issuer = Mono.just(result.issuer());
 
-                return entitySyncWebClient.makeRequest(issuer, allEntitiesToRequest)
+                return entitySyncWebClient.makeRequest(processId, issuer, allEntitiesToRequest)
                         .flatMap(entitySyncResponse -> {
+                            log.debug("ProcessID: {} - Entity sync response: {}", processId, entitySyncResponse);
+
                             Mono<String> entitySyncResponseMono = Mono.just(entitySyncResponse);
                             Mono<Map<Id, Entity>> entitiesById = getEntitiesById(entitySyncResponseMono);
 

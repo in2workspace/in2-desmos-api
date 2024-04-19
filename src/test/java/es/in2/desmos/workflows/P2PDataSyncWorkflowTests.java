@@ -33,15 +33,16 @@ class P2PDataSyncWorkflowTests {
 
         List<MVEntity4DataNegotiation> expectedInternalEntities = MVEntity4DataNegotiationMother.list3And4();
 
-        when(brokerEntityIdGetterService.getMvEntities4DataNegotiation()).thenReturn(Mono.just(expectedInternalEntities));
+        String processId = "0";
+        when(brokerEntityIdGetterService.getMvEntities4DataNegotiation(processId)).thenReturn(Mono.just(expectedInternalEntities));
 
-        Mono<List<MVEntity4DataNegotiation>> result = p2PDataSyncWorkflow.dataDiscovery("0", Mono.just("https://example.org"), Mono.just(MVEntity4DataNegotiationMother.list1And2()));
+        Mono<List<MVEntity4DataNegotiation>> result = p2PDataSyncWorkflow.dataDiscovery(processId, Mono.just("https://example.org"), Mono.just(MVEntity4DataNegotiationMother.list1And2()));
 
         StepVerifier.create(result)
                 .expectNext(expectedInternalEntities)
                 .verifyComplete();
 
-        verify(brokerEntityIdGetterService, times(1)).getMvEntities4DataNegotiation();
+        verify(brokerEntityIdGetterService, times(1)).getMvEntities4DataNegotiation(processId);
         verifyNoMoreInteractions(brokerEntityIdGetterService);
 
     }

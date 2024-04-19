@@ -20,7 +20,7 @@ public class BrokerEntityGetterServiceImpl implements BrokerEntityGetterService 
     }
 
     @Override
-    public Mono<List<MVEntity4DataNegotiation>> getMvEntities4DataNegotiation() {
-        return brokerAdapterService.getMvEntities4DataNegotiation();
+    public Mono<List<MVEntity4DataNegotiation>> getMvEntities4DataNegotiation(String processId) {
+        return brokerAdapterService.getMvEntities4DataNegotiation(processId);
     }
 }

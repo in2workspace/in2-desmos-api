@@ -64,9 +64,9 @@ class DataTransferJobTest {
 
         Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.sample());
 
-        when(entitySyncWebClient.makeRequest(any(), any())).thenReturn(entitySyncResponseMono);
-
         String processId = "0";
+        when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
+
         when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sample3().id())).thenReturn(Mono.just(AuditRecord.builder().entityHashLink("fa54").build()));
         when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sample4().id())).thenReturn(Mono.just(AuditRecord.builder().entityHashLink("fa54").build()));
 
@@ -80,7 +80,7 @@ class DataTransferJobTest {
                 create(result)
                 .verifyComplete();
 
-        verify(entitySyncWebClient, times(1)).makeRequest(monoIssuerCaptor.capture(), entitySyncRequestCaptor.capture());
+        verify(entitySyncWebClient, times(1)).makeRequest(eq(processId), monoIssuerCaptor.capture(), entitySyncRequestCaptor.capture());
         verifyNoMoreInteractions(entitySyncWebClient);
 
         Mono<String> monoIssuerCaptured = monoIssuerCaptor.getValue();
@@ -115,9 +115,9 @@ class DataTransferJobTest {
 
         Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.sample());
 
-        when(entitySyncWebClient.makeRequest(any(), any())).thenReturn(entitySyncResponseMono);
-
         String processId = "0";
+        when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
+
         when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sample3().id())).thenReturn(Mono.just(AuditRecord.builder().entityHashLink("fa54").build()));
         when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sample4().id())).thenReturn(Mono.just(AuditRecord.builder().entityHashLink("fa54").build()));
 
@@ -131,7 +131,7 @@ class DataTransferJobTest {
                 create(result)
                 .verifyComplete();
 
-        verify(entitySyncWebClient, times(1)).makeRequest(monoIssuerCaptor.capture(), entitySyncRequestCaptor.capture());
+        verify(entitySyncWebClient, times(1)).makeRequest(eq(processId), monoIssuerCaptor.capture(), entitySyncRequestCaptor.capture());
         verifyNoMoreInteractions(entitySyncWebClient);
 
         Mono<String> monoIssuerCaptured = monoIssuerCaptor.getValue();
@@ -160,9 +160,9 @@ class DataTransferJobTest {
 
         Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.sample());
 
-        when(entitySyncWebClient.makeRequest(any(), any())).thenReturn(entitySyncResponseMono);
-
         String processId = "0";
+        when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
+
         Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
 
         StepVerifier.
@@ -180,9 +180,9 @@ class DataTransferJobTest {
 
         Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.sample());
 
-        when(entitySyncWebClient.makeRequest(any(), any())).thenReturn(entitySyncResponseMono);
-
         String processId = "0";
+        when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
+
         when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sample3().id())).thenReturn(Mono.just(AuditRecord.builder().entityHashLink("jfdlkisajlfdsafjdsafldskisjdfalsda").build()));
         when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sample4().id())).thenReturn(Mono.just(AuditRecord.builder().entityHashLink("fa54").build()));
 
@@ -203,9 +203,9 @@ class DataTransferJobTest {
 
         Mono<String> entitySyncResponseMono = Mono.just("{}");
 
-        when(entitySyncWebClient.makeRequest(any(), any())).thenReturn(entitySyncResponseMono);
-
         String processId = "0";
+        when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
+
         Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
 
         StepVerifier.
@@ -223,9 +223,9 @@ class DataTransferJobTest {
 
         Mono<String> entitySyncResponseMono = Mono.just("{[]}");
 
-        when(entitySyncWebClient.makeRequest(any(), any())).thenReturn(entitySyncResponseMono);
-
         String processId = "0";
+        when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
+
         Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
 
         StepVerifier.
@@ -244,9 +244,9 @@ class DataTransferJobTest {
         String entitySyncResponse = EntitySyncResponseMother.sample();
         Mono<String> entitySyncResponseMono = Mono.just(entitySyncResponse);
 
-        when(entitySyncWebClient.makeRequest(any(), any())).thenReturn(entitySyncResponseMono);
-
         String processId = "0";
+        when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
+
         when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sample3().id())).thenReturn(Mono.just(AuditRecord.builder().entityHashLink("fa54").build()));
         when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sample4().id())).thenReturn(Mono.just(AuditRecord.builder().entityHashLink("fa54").build()));
 

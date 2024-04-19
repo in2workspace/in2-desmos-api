@@ -57,7 +57,8 @@ class ScorpioAdapterIT {
 
     @Test
     void itShouldReturnEntityIds() {
-        Mono<List<MVEntity4DataNegotiation>> result = scorpioAdapter.getMvEntities4DataNegotiation();
+        String processId = "0";
+        Mono<List<MVEntity4DataNegotiation>> result = scorpioAdapter.getMvEntities4DataNegotiation(processId);
 
         StepVerifier.create(result)
                 .expectNext(initialMvEntity4DataNegotiationList)

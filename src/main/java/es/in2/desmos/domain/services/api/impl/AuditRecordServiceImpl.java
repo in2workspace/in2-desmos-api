@@ -193,9 +193,10 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                                         .build();
 
                         String auditRecordHash = calculateSHA256(objectMapper.writeValueAsString(auditRecord));
-                        log.debug("ProcessID: {} - Audit Record Hash: {}", processId, auditRecordHash);
                         auditRecord.setHash(auditRecordHash);
                         auditRecord.setHashLink(setAuditRecordHashLink(lastAuditRecordRegistered, auditRecordHash));
+
+                        log.debug("ProcessID: {} - Audit Record to save: {}", processId, auditRecord);
 
                         return auditRecordRepository.save(auditRecord).then();
 

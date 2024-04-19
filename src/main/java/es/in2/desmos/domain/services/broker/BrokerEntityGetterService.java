@@ -6,5 +6,5 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 public interface BrokerEntityGetterService {
-    Mono<List<MVEntity4DataNegotiation>> getMvEntities4DataNegotiation();
+    Mono<List<MVEntity4DataNegotiation>> getMvEntities4DataNegotiation(String processId);
 }

@@ -13,7 +13,8 @@ public class DataNegotiationEventPublisher {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     public void publishEvent(DataNegotiationEvent dataNegotiationEvent) {
-        log.info("Publishing data negotiation event.");
+        log.info("ProcessID: {} - Publishing data negotiation event", dataNegotiationEvent.processId());
+
         applicationEventPublisher.publishEvent(dataNegotiationEvent);
     }
 }

@@ -1,6 +1,5 @@
 package es.in2.desmos.domain.services.broker;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.ContainerManager;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
@@ -12,10 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
 import reactor.test.StepVerifier;
 
 import java.util.List;
@@ -39,15 +38,13 @@ class BrokerEntityGetterServiceIT {
 
     private static List<MVEntity4DataNegotiation> initialEntities;
 
-    private final MediaType APPLICATION_LD_JSON = new MediaType("application", "ld+json");
-
     @DynamicPropertySource
     static void setDynamicProperties(DynamicPropertyRegistry registry) {
         ContainerManager.postgresqlProperties(registry);
     }
 
     @BeforeAll
-    static void setup() throws JSONException, JsonProcessingException, org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException {
+    static void setup() throws JSONException, JsonProcessingException {
         String brokerUrl = ContainerManager.getBaseUriForScorpioA();
         initialEntities = MVEntity4DataNegotiationMother.randomList(2);
         ScorpioInflator.addInitialEntitiesToContextBroker(brokerUrl, initialEntities);
@@ -62,8 +59,9 @@ class BrokerEntityGetterServiceIT {
 
 
     @Test
-    void itShouldReturnEntityIds() throws JSONException, JsonProcessingException {
-        var result = brokerEntityGetterService.getMvEntities4DataNegotiation();
+    void itShouldReturnEntityIds() {
+        String processId = "0";
+        var result = brokerEntityGetterService.getMvEntities4DataNegotiation(processId);
 
         StepVerifier.create(result)
                 .expectNext(initialEntities)
