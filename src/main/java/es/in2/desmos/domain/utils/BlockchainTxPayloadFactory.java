@@ -63,5 +63,5 @@ public class BlockchainTxPayloadFactory {
             return Mono.error(new HashLinkException("Error creating previous hash value from notification data"));
         }
     }
-
+    
 }

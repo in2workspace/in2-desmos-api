@@ -7,7 +7,6 @@ import es.in2.desmos.configs.BrokerConfig;
 import es.in2.desmos.domain.exceptions.HashLinkException;
 import es.in2.desmos.domain.models.BlockchainTxPayload;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,27 +18,33 @@ import reactor.test.StepVerifier;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class BlockchainTxPayloadFactoryTests {
 
-    String processId;
-    Map<String, Object> dataMap = new HashMap<>();
     @Mock
     private ObjectMapper objectMapper;
+
     @Mock
     private ApiConfig apiConfig;
+
     @Mock
     private BrokerConfig brokerConfig;
+
     @InjectMocks
     private BlockchainTxPayloadFactory blockchainTxPayloadFactory;
 
-    @BeforeEach
-    void setUp() {
-        processId = "processId";
-    }
+    Map<String, Object> dataMap = Map.of(
+            "id", "entity123",
+            "type", "productOffering",
+            "name", "Cloud Services Suite",
+            "description", "Example of a Product offering for cloud services suite"
+    );
+    String processId = UUID.randomUUID().toString();
+
 
     @Test
     void testBuildBlockchainTxPayload_validData_firstHash_Success() throws Exception {
@@ -62,7 +67,6 @@ class BlockchainTxPayloadFactoryTests {
         StepVerifier.create(resultMono)
                 .assertNext(blockchainTxPayload -> Assertions.assertEquals(previousHash,
                         ApplicationUtils.extractHashLinkFromDataLocation(blockchainTxPayload.dataLocation()))).verifyComplete();
-    }
 
     @Test
     void testBuildBlockchainTxPayload_validData_differentHashes_Success() throws Exception {
@@ -126,7 +130,6 @@ class BlockchainTxPayloadFactoryTests {
         Mono<String> resultMono = blockchainTxPayloadFactory.calculatePreviousHashIfEmpty(processId, dataMap);
 
         // Assert
-        // Check that the previous hash is the hash of the data
         StepVerifier.create(resultMono)
                 .assertNext(previousHash -> {
                     try {
@@ -134,8 +137,7 @@ class BlockchainTxPayloadFactoryTests {
                     } catch (NoSuchAlgorithmException e) {
                         throw new HashLinkException("Error while calculating hash link on test");
                     }
-                })
-                .verifyComplete();
+                }).verifyComplete();
     }
 
     @Test
@@ -152,4 +154,5 @@ class BlockchainTxPayloadFactoryTests {
                 .expectErrorMatches(throwable -> throwable instanceof HashLinkException && throwable.getMessage().contains("Error creating previous hash value from notification data"))
                 .verify();
     }
+
 }
