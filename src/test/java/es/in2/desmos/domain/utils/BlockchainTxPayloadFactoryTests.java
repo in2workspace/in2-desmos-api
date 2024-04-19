@@ -16,7 +16,6 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -25,18 +24,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class BlockchainTxPayloadFactoryTests {
 
-    @Mock
-    private ObjectMapper objectMapper;
-
-    @Mock
-    private ApiConfig apiConfig;
-
-    @Mock
-    private BrokerConfig brokerConfig;
-
-    @InjectMocks
-    private BlockchainTxPayloadFactory blockchainTxPayloadFactory;
-
     Map<String, Object> dataMap = Map.of(
             "id", "entity123",
             "type", "productOffering",
@@ -44,15 +31,18 @@ class BlockchainTxPayloadFactoryTests {
             "description", "Example of a Product offering for cloud services suite"
     );
     String processId = UUID.randomUUID().toString();
-
+    @Mock
+    private ObjectMapper objectMapper;
+    @Mock
+    private ApiConfig apiConfig;
+    @Mock
+    private BrokerConfig brokerConfig;
+    @InjectMocks
+    private BlockchainTxPayloadFactory blockchainTxPayloadFactory;
 
     @Test
     void testBuildBlockchainTxPayload_validData_firstHash_Success() throws Exception {
         //Arrange
-        dataMap.put("id", "entity123");
-        dataMap.put("type", "productOffering");
-        dataMap.put("name", "Cloud Services Suite");
-        dataMap.put("description", "Example of a Product offering for cloud services suite");
         String previousHash = "5077272d496c8afd1af9d3740f9e5f11837089b5952d577eff4c20509e6e199e";
         when(objectMapper.writeValueAsString(dataMap)).thenReturn("dataMapString");
         when(brokerConfig.getEntitiesExternalDomain()).thenReturn("http://localhost:8080/entities");
@@ -67,14 +57,11 @@ class BlockchainTxPayloadFactoryTests {
         StepVerifier.create(resultMono)
                 .assertNext(blockchainTxPayload -> Assertions.assertEquals(previousHash,
                         ApplicationUtils.extractHashLinkFromDataLocation(blockchainTxPayload.dataLocation()))).verifyComplete();
+    }
 
     @Test
     void testBuildBlockchainTxPayload_validData_differentHashes_Success() throws Exception {
         // Arrange
-        dataMap.put("id", "entity123");
-        dataMap.put("type", "productOffering");
-        dataMap.put("name", "Cloud Services Suite");
-        dataMap.put("description", "Example of a Product offering for cloud services suite");
         String previousHash = "22d0ef4e87a39c52191998f4fbf32ff672f82ed5a2b4c9902371a161402a0faf";
         when(objectMapper.writeValueAsString(dataMap)).thenReturn("dataMapString");
         when(apiConfig.organizationIdHash()).thenReturn("381d18e478b9ae6e67b1bf48c9f3bcaf246d53c4311bfe81f46e63aa18167c89");
@@ -104,9 +91,6 @@ class BlockchainTxPayloadFactoryTests {
     @Test
     void testBuildBlockchainTxPayload_invalidData_Failure() throws Exception {
         // Arrange
-        dataMap.put("id", "entity123");
-        dataMap.put("name", "Cloud Services Suite");
-        dataMap.put("description", "Example of a Product offering for cloud services suite");
         String previousHash = "22d0ef4e87a39c52191998f4fbf32ff672f82ed5a2b4c9902371a161402a0faf";
         when(objectMapper.writeValueAsString(dataMap)).thenThrow(new JsonProcessingException("Error") {
         });
