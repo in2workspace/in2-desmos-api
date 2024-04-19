@@ -7,5 +7,5 @@ public interface BrokerPublisherService {
 
     Mono<Void> publishDataToBroker(String processId, BlockchainNotification blockchainNotification, String retrievedBrokerEntity);
 
-    Mono<Void> publishNewBatchDataToBroker(String processId,  String retrievedBrokerEntities);
+    Mono<Void> upsertBatchDataToBroker(String processId, String retrievedBrokerEntities);
 }
