@@ -87,6 +87,7 @@ broker:
   internalDomain: "http://localhost:9090"
   paths:
     entities: "/ngsi-ld/v1/entities"
+    entityOperations: "/ngsi-ld/v1/entityOperations"
     subscriptions: "/ngsi-ld/v1/subscriptions"
     temporal: "/ngsi-ld/v1/temporal/entities"
 
