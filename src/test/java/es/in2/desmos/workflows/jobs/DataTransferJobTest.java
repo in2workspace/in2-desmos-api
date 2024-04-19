@@ -5,6 +5,7 @@ import es.in2.desmos.domain.exceptions.InvalidConsistencyException;
 import es.in2.desmos.domain.exceptions.InvalidIntegrityException;
 import es.in2.desmos.domain.exceptions.InvalidSyncResponseException;
 import es.in2.desmos.domain.models.AuditRecord;
+import es.in2.desmos.domain.models.AuditRecordStatus;
 import es.in2.desmos.domain.models.DataNegotiationResult;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.domain.services.api.AuditRecordService;
@@ -71,7 +72,7 @@ class DataTransferJobTest {
 
         when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any(), any())).thenReturn(Mono.empty());
 
-        when(brokerPublisherService.publishNewBatchDataToBroker(any(), any())).thenReturn(Mono.empty());
+        when(brokerPublisherService.upsertBatchDataToBroker(any(), any())).thenReturn(Mono.empty());
 
         Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
 
@@ -122,7 +123,7 @@ class DataTransferJobTest {
 
         when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any(), any())).thenReturn(Mono.empty());
 
-        when(brokerPublisherService.publishNewBatchDataToBroker(any(), any())).thenReturn(Mono.empty());
+        when(brokerPublisherService.upsertBatchDataToBroker(any(), any())).thenReturn(Mono.empty());
 
         Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
 
@@ -147,7 +148,8 @@ class DataTransferJobTest {
                 .expectNextMatches(array -> Arrays.equals(entitySyncRequest, array))
                 .verifyComplete();
 
-        verify(auditRecordService, times(4)).buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any(), any());
+        verify(auditRecordService, times(4)).buildAndSaveAuditRecordFromDataSync(eq(processId), eq(dataNegotiationResult.issuer()), any(), any(), eq(AuditRecordStatus.RETRIEVED));
+        verify(auditRecordService, times(4)).buildAndSaveAuditRecordFromDataSync(eq(processId), eq(dataNegotiationResult.issuer()), any(), any(), eq(AuditRecordStatus.PUBLISHED));
         verifyNoMoreInteractions(auditRecordService);
     }
 
@@ -235,7 +237,7 @@ class DataTransferJobTest {
     }
 
     @Test
-    void itShouldPublishNewEntities() {
+    void itShouldUpsertEntities() {
         DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
         Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
 
@@ -250,7 +252,7 @@ class DataTransferJobTest {
 
         when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any(), any())).thenReturn(Mono.empty());
 
-        when(brokerPublisherService.publishNewBatchDataToBroker(processId, entitySyncResponse)).thenReturn(Mono.empty());
+        when(brokerPublisherService.upsertBatchDataToBroker(processId, entitySyncResponse)).thenReturn(Mono.empty());
 
         Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
 
@@ -258,8 +260,7 @@ class DataTransferJobTest {
                 create(result)
                 .verifyComplete();
 
-        verify(brokerPublisherService, times(1)).publishNewBatchDataToBroker(processId, entitySyncResponse);
+        verify(brokerPublisherService, times(1)).upsertBatchDataToBroker(processId, entitySyncResponse);
         verifyNoMoreInteractions(brokerPublisherService);
-
     }
 }

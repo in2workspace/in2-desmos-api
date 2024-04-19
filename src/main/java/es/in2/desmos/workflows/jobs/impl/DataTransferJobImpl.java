@@ -53,19 +53,20 @@ public class DataTransferJobImpl implements DataTransferJob {
                             Mono<List<MVEntity4DataNegotiation>> allEntitiesToRequestList = Mono.just(Arrays.asList(entities));
 
                             return validateEntities(processId, entitiesById, newEntitiesOriginalValidationDataById, existingEntitiesOriginalValidationDataById)
-                                    .then(buildAndSaveAuditRecordFromDataSync(processId, issuer, entitiesById, allEntitiesToRequestList))
-                                    .then(publishNewBatchDataToBroker(processId, entitySyncResponseMono));
+                                    .then(buildAndSaveAuditRecordFromDataSync(processId, issuer, entitiesById, allEntitiesToRequestList, AuditRecordStatus.RETRIEVED))
+                                    .then(upsertBatchDataToBroker(processId, entitySyncResponseMono))
+                                    .then(buildAndSaveAuditRecordFromDataSync(processId, issuer, entitiesById, allEntitiesToRequestList, AuditRecordStatus.PUBLISHED));
                         });
             });
         });
     }
 
-    private Mono<Void> publishNewBatchDataToBroker(String processId, Mono<String> retrievedBrokerEntitiesMono) {
-        return retrievedBrokerEntitiesMono.flatMap(retrievedBrokerEntities -> brokerPublisherService.publishNewBatchDataToBroker(processId, retrievedBrokerEntities));
+    private Mono<Void> upsertBatchDataToBroker(String processId, Mono<String> retrievedBrokerEntitiesMono) {
+        return retrievedBrokerEntitiesMono.flatMap(retrievedBrokerEntities -> brokerPublisherService.upsertBatchDataToBroker(processId, retrievedBrokerEntities));
     }
 
 
-    private Mono<Void> buildAndSaveAuditRecordFromDataSync(String processId, Mono<String> issuerMono, Mono<Map<Id, Entity>> entitiesByIdMono, Mono<List<MVEntity4DataNegotiation>> mvEntity4DataNegotiationListMono) {
+    private Mono<Void> buildAndSaveAuditRecordFromDataSync(String processId, Mono<String> issuerMono, Mono<Map<Id, Entity>> entitiesByIdMono, Mono<List<MVEntity4DataNegotiation>> mvEntity4DataNegotiationListMono, AuditRecordStatus auditRecordStatus) {
         return entitiesByIdMono
                 .flatMap(entitiesById -> {
                     List<Mono<Void>> auditRecordMonos = new ArrayList<>();
@@ -86,7 +87,7 @@ public class DataTransferJobImpl implements DataTransferJob {
                                     String issuer = tuple.getT1();
                                     MVEntity4DataNegotiation currentMvEntity4DataNegotiation = tuple.getT2();
                                     String entityValue = entity.value();
-                                    return auditRecordService.buildAndSaveAuditRecordFromDataSync(processId, issuer, currentMvEntity4DataNegotiation, entityValue, AuditRecordStatus.RETRIEVED);
+                                    return auditRecordService.buildAndSaveAuditRecordFromDataSync(processId, issuer, currentMvEntity4DataNegotiation, entityValue, auditRecordStatus);
                                 });
 
                         auditRecordMonos.add(auditRecordMono);
