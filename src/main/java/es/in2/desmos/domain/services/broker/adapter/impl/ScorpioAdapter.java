@@ -294,7 +294,16 @@ public class ScorpioAdapter implements BrokerAdapterService {
     }
 
     @Override
-    public Mono<Void> batchPostEntities(String processId, String requestBody) {
-        return null;
+    public Mono<Void> upsertBatchEntities(String processId, String requestBody) {
+        String uri = brokerConfig.getEntityOperationsPath() + "/" + "upsert";
+
+        return webClient.post()
+                .uri(uri)
+                .accept(APPLICATION_LD_JSON)
+                .contentType(APPLICATION_LD_JSON)
+                .bodyValue(requestBody)
+                .retrieve()
+                .bodyToMono(Void.class)
+                .retry(3);
     }
 }

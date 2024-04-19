@@ -77,25 +77,25 @@ class ScorpioAdapterIT {
         var entity1 = scorpioAdapter.getEntityById(processId, EntitySyncResponseMother.getId1());
         StepVerifier
                 .create(entity1)
-                .expectNext(EntityMother.json1())
+                .expectNext(EntityMother.scorpioSample1())
                 .verifyComplete();
 
         var entity2 = scorpioAdapter.getEntityById(processId, EntitySyncResponseMother.getId2());
         StepVerifier
                 .create(entity2)
-                .expectNext(EntityMother.json2())
+                .expectNext(EntityMother.scorpioSample2())
                 .verifyComplete();
 
         var entity3 = scorpioAdapter.getEntityById(processId, EntitySyncResponseMother.getId3());
         StepVerifier
                 .create(entity3)
-                .expectNext(EntityMother.json3())
+                .expectNext(EntityMother.scorpioSample3())
                 .verifyComplete();
 
         var entity4 = scorpioAdapter.getEntityById(processId, EntitySyncResponseMother.getId4());
         StepVerifier
                 .create(entity4)
-                .expectNext(EntityMother.json4())
+                .expectNext(EntityMother.scorpioSample4())
                 .verifyComplete();
     }
 
