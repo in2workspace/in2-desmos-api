@@ -1,7 +1,7 @@
 package es.in2.desmos.domain.services.broker.adapter;
 
+import es.in2.desmos.domain.models.MVBrokerEntity4DataNegotiation;
 import es.in2.desmos.domain.models.BrokerSubscription;
-import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -18,7 +18,7 @@ public interface BrokerAdapterService {
     Mono<Void> updateSubscription(String processId, BrokerSubscription brokerSubscription);
     Mono<Void> deleteSubscription(String processId, String subscriptionId);
 
-    Mono<List<MVEntity4DataNegotiation>> getMvEntities4DataNegotiation(String processId);
+    Mono<List<MVBrokerEntity4DataNegotiation>> getMvBrokerEntities4DataNegotiation(String processId);
 
     Mono<Void> upsertBatchEntities(String processId, String requestBody);
 }

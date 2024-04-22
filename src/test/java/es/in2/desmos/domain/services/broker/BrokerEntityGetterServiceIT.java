@@ -1,10 +1,11 @@
 package es.in2.desmos.domain.services.broker;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.ContainerManager;
-import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
+import es.in2.desmos.domain.models.MVBrokerEntity4DataNegotiation;
 import es.in2.desmos.inflators.ScorpioInflator;
-import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
+import es.in2.desmos.objectmothers.MVBrokerEntity4DataNegotiationMother;
 import org.json.JSONException;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,6 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
 import reactor.test.StepVerifier;
 
 import java.util.List;
@@ -36,7 +36,7 @@ class BrokerEntityGetterServiceIT {
     @Value("${broker.externalDomain}")
     private String contextBrokerExternalDomain;
 
-    private static List<MVEntity4DataNegotiation> initialEntities;
+    private static List<MVBrokerEntity4DataNegotiation> initialEntities;
 
     @DynamicPropertySource
     static void setDynamicProperties(DynamicPropertyRegistry registry) {
@@ -46,14 +46,14 @@ class BrokerEntityGetterServiceIT {
     @BeforeAll
     static void setup() throws JSONException, JsonProcessingException {
         String brokerUrl = ContainerManager.getBaseUriForScorpioA();
-        initialEntities = MVEntity4DataNegotiationMother.randomList(2);
+        initialEntities = MVBrokerEntity4DataNegotiationMother.randomList(2);
         ScorpioInflator.addInitialEntitiesToContextBroker(brokerUrl, initialEntities);
     }
 
     @AfterAll
     static void tearDown(){
         String brokerUrl = ContainerManager.getBaseUriForScorpioA();
-        List<String> ids = initialEntities.stream().map(MVEntity4DataNegotiation::id).toList();
+        List<String> ids = initialEntities.stream().map(MVBrokerEntity4DataNegotiation::id).toList();
         ScorpioInflator.deleteInitialEntitiesFromContextBroker(brokerUrl, ids);
     }
 
@@ -61,7 +61,7 @@ class BrokerEntityGetterServiceIT {
     @Test
     void itShouldReturnEntityIds() {
         String processId = "0";
-        var result = brokerEntityGetterService.getMvEntities4DataNegotiation(processId);
+        var result = brokerEntityGetterService.getMvBrokerEntities4DataNegotiation(processId);
 
         StepVerifier.create(result)
                 .expectNext(initialEntities)

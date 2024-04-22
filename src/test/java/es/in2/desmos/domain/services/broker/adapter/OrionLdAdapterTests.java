@@ -1,6 +1,6 @@
 package es.in2.desmos.domain.services.broker.adapter;
 
-import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
+import es.in2.desmos.domain.models.MVBrokerEntity4DataNegotiation;
 import es.in2.desmos.domain.services.broker.adapter.impl.OrionLdAdapter;
 import es.in2.desmos.objectmothers.EntitySyncResponseMother;
 import org.junit.jupiter.api.Test;
@@ -21,7 +21,7 @@ class OrionLdAdapterTests {
     @Test
     void itShouldReturnNullWhenGetMvEntities4DataNegotiation() {
         String processId = "0";
-        Mono<List<MVEntity4DataNegotiation>> result = orionLdAdapter.getMvEntities4DataNegotiation(processId);
+        Mono<List<MVBrokerEntity4DataNegotiation>> result = orionLdAdapter.getMvBrokerEntities4DataNegotiation(processId);
 
         assertNull(result);
     }

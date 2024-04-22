@@ -1,8 +1,8 @@
 package es.in2.desmos.domain.services.broker.adapter.impl;
 
-import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
-import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import es.in2.desmos.domain.models.BrokerSubscription;
+import es.in2.desmos.domain.models.MVBrokerEntity4DataNegotiation;
+import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -57,7 +57,7 @@ public class OrionLdAdapter implements BrokerAdapterService {
     }
 
     @Override
-    public Mono<List<MVEntity4DataNegotiation>> getMvEntities4DataNegotiation(String processId) { return null; }
+    public Mono<List<MVBrokerEntity4DataNegotiation>> getMvBrokerEntities4DataNegotiation(String processId) { return null; }
 
     @Override
     public Mono<Void> upsertBatchEntities(String processId, String requestBody) { return null; }

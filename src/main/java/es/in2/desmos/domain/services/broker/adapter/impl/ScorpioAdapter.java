@@ -7,8 +7,8 @@ import es.in2.desmos.configs.BrokerConfig;
 import es.in2.desmos.domain.exceptions.JsonReadingException;
 import es.in2.desmos.domain.exceptions.RequestErrorException;
 import es.in2.desmos.domain.exceptions.SubscriptionCreationException;
+import es.in2.desmos.domain.models.MVBrokerEntity4DataNegotiation;
 import es.in2.desmos.domain.models.BrokerSubscription;
-import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.domain.models.adapters.scorpio.ScorpioEntity;
 import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import jakarta.annotation.PostConstruct;
@@ -199,10 +199,10 @@ public class ScorpioAdapter implements BrokerAdapterService {
     }
 
     @Override
-    public Mono<List<MVEntity4DataNegotiation>> getMvEntities4DataNegotiation(String processId) {
+    public Mono<List<MVBrokerEntity4DataNegotiation>> getMvBrokerEntities4DataNegotiation(String processId) {
         log.info("ProcessID: {} - Getting MV Entities For Data Negotiation from Scorpio", processId);
 
-        String uri = brokerConfig.getEntitiesPath() + "/" + "?type=ProductOffering&attrs=lastUpdate,version,hash,hashlink\"";
+        String uri = brokerConfig.getEntitiesPath() + "/" + "?type=ProductOffering&attrs=lastUpdate,version\"";
 
         Mono<ScorpioEntity[]> scorpioProductOfferingList = webClient
                 .get()
@@ -212,7 +212,7 @@ public class ScorpioAdapter implements BrokerAdapterService {
                 .bodyToMono(ScorpioEntity[].class)
                 .retry(3);
 
-        return scorpioProductOfferingList.map(this::getMvEntity4DataNegotiations);
+        return scorpioProductOfferingList.map(this::getBrokerEntities);
     }
 
     @Override
@@ -231,19 +231,17 @@ public class ScorpioAdapter implements BrokerAdapterService {
                 .retry(3);
     }
 
-    private List<MVEntity4DataNegotiation> getMvEntity4DataNegotiations(ScorpioEntity[] x) {
-        List<MVEntity4DataNegotiation> mvEntity4DataNegotiations = new ArrayList<>();
-        for (var scorpioProductOffering : x) {
-            mvEntity4DataNegotiations.add(
-                    new MVEntity4DataNegotiation(
+    private List<MVBrokerEntity4DataNegotiation> getBrokerEntities(ScorpioEntity[] scorpioEntities) {
+        List<MVBrokerEntity4DataNegotiation> mvBrokerEntities4DataNegotiation = new ArrayList<>();
+        for (var scorpioProductOffering : scorpioEntities) {
+            mvBrokerEntities4DataNegotiation.add(
+                    new MVBrokerEntity4DataNegotiation(
                             scorpioProductOffering.id(),
                             scorpioProductOffering.type(),
                             scorpioProductOffering.version().value(),
-                            scorpioProductOffering.lastUpdate().value(),
-                            scorpioProductOffering.hash().value(),
-                            scorpioProductOffering.hashlink().value()));
+                            scorpioProductOffering.lastUpdate().value()));
         }
-        return mvEntity4DataNegotiations;
+        return mvBrokerEntities4DataNegotiation;
     }
 
     private Mono<Void> postSubscription(BrokerSubscription brokerSubscription) {

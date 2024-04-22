@@ -1,14 +1,14 @@
 package es.in2.desmos.inflators;
 
-import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import es.in2.desmos.domain.models.MVBrokerEntity4DataNegotiation;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
@@ -19,10 +19,10 @@ public final class ScorpioInflator {
 
     private final static MediaType APPLICATION_LD_JSON = new MediaType("application", "ld+json");
 
-    public static void addInitialEntitiesToContextBroker(String brokerUrl, List<MVEntity4DataNegotiation> initialEntities) throws JSONException, JsonProcessingException {
+    public static void addInitialEntitiesToContextBroker(String brokerUrl, List<MVBrokerEntity4DataNegotiation> initialEntities) throws JSONException, JsonProcessingException {
         String requestBody = createInitialEntitiesRequestBody(initialEntities);
 
-        WebClient.builder()
+        var result = WebClient.builder()
                 .baseUrl(brokerUrl)
                 .build()
                 .post()
@@ -30,14 +30,14 @@ public final class ScorpioInflator {
                 .contentType(APPLICATION_LD_JSON)
                 .bodyValue(requestBody)
                 .retrieve()
-                .bodyToMono(Void.class)
+                .bodyToMono(String.class)
                 .retry(3).block();
 
-        System.out.println("Create entities to Scorpio.");
+        System.out.println("Create entities to Scorpio: " + result);
     }
 
     public static void addInitialEntitiesToContextBroker(String brokerUrl, String requestBody) {
-        WebClient.builder()
+        var result = WebClient.builder()
                 .baseUrl(brokerUrl)
                 .build()
                 .post()
@@ -45,10 +45,10 @@ public final class ScorpioInflator {
                 .contentType(APPLICATION_LD_JSON)
                 .bodyValue(requestBody)
                 .retrieve()
-                .bodyToMono(Void.class)
+                .bodyToMono(String.class)
                 .retry(3).block();
 
-        System.out.println("Create entities to Scorpio.");
+        System.out.println("Create entities to Scorpio: " + result);
     }
 
     public static void deleteInitialEntitiesFromContextBroker(String brokerUrl, List<String> ids){
@@ -67,7 +67,7 @@ public final class ScorpioInflator {
     }
 
     @NotNull
-    private static String createInitialEntitiesRequestBody(List<MVEntity4DataNegotiation> initialEntities) throws JsonProcessingException, JSONException {
+    private static String createInitialEntitiesRequestBody(List<MVBrokerEntity4DataNegotiation> initialEntities) throws JsonProcessingException, JSONException {
         ObjectMapper objectMapper = new ObjectMapper();
         JSONArray productOfferingsJsonArray = new JSONArray();
 
