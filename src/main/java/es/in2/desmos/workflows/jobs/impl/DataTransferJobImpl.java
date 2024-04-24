@@ -71,20 +71,16 @@ public class DataTransferJobImpl implements DataTransferJob {
 
     private Mono<Void> buildAndSaveAuditRecordFromDataSync(String processId, Mono<String> issuerMono, Mono<Map<Id, Entity>> rcvdEntitiesByIdMono, Mono<List<MVEntity4DataNegotiation>> mvEntity4DataNegotiationListMono, AuditRecordStatus auditRecordStatus) {
         return rcvdEntitiesByIdMono
-                .flatMapIterable(Map::entrySet)
+                .flatMapIterable(Map::keySet)
                 .flatMap(rcvdEntityById -> {
-                    String id = rcvdEntityById.getKey().value();
-                    Entity entity = rcvdEntityById.getValue();
+                    String id = rcvdEntityById.value();
                     return mvEntity4DataNegotiationListMono
                             .flatMap(list -> Mono.justOrEmpty(
                                             list.stream()
                                                     .filter(x -> x.id().equals(id))
                                                     .findFirst())
                                     .flatMap(mvEntity4DataNegotiationList -> issuerMono
-                                            .flatMap(issuer -> {
-                                                String entityValue = entity.value();
-                                                return auditRecordService.buildAndSaveAuditRecordFromDataSync(processId, issuer, mvEntity4DataNegotiationList, entityValue, auditRecordStatus);
-                                            })));
+                                            .flatMap(issuer -> auditRecordService.buildAndSaveAuditRecordFromDataSync(processId, issuer, mvEntity4DataNegotiationList, auditRecordStatus))));
 
                 })
                 .collectList()

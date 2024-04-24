@@ -149,31 +149,21 @@ public class AuditRecordServiceImpl implements AuditRecordService {
      * If the retrievedBrokerEntity is null or blank, the status will be RECEIVED.
      */
     @Override
-    public Mono<Void> buildAndSaveAuditRecordFromDataSync(String processId, String issuer, MVEntity4DataNegotiation mvEntity4DataNegotiation, String retrievedBrokerEntity, AuditRecordStatus status) {
+    public Mono<Void> buildAndSaveAuditRecordFromDataSync(String processId, String issuer, MVEntity4DataNegotiation mvEntity4DataNegotiation, AuditRecordStatus status) {
         return fetchMostRecentAuditRecord()
                 .flatMap(lastAuditRecordRegistered -> {
                     try {
-                        String entityHash;
-                        String entityHashLink;
-                        String dataLocation;
-                        if (retrievedBrokerEntity == null || retrievedBrokerEntity.isBlank()) {
-                            // status cases: RECEIVED
-                            entityHash = "";
-                            entityHashLink = "";
-                            dataLocation = "";
-                        } else {
                             // status cases: RETRIEVED, PUBLISHED
                             // We do not need to sort the fields of the retrievedBrokerEntity
                             // because these have already been sorted in the
                             // SubscribeWorkflowImpl.sortAttributesAlphabetically()
-                            entityHash = mvEntity4DataNegotiation.hash();
-                            entityHashLink = mvEntity4DataNegotiation.hashlink();
-                            dataLocation = issuer +
-                                    "/ngsi-ld/v1/entities/" +
-                                    mvEntity4DataNegotiation.id() +
-                                    "?"
-                                    + mvEntity4DataNegotiation.hash();
-                        }
+                        String entityHash = mvEntity4DataNegotiation.hash();
+                        String entityHashLink = mvEntity4DataNegotiation.hashlink();
+                        String dataLocation = issuer +
+                                "/ngsi-ld/v1/entities/" +
+                                mvEntity4DataNegotiation.id() +
+                                "?"
+                                + mvEntity4DataNegotiation.hash();
 
                         AuditRecord auditRecord =
                                 AuditRecord.builder()

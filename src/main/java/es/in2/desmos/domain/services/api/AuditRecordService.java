@@ -11,7 +11,7 @@ public interface AuditRecordService {
 
     Mono<Void> buildAndSaveAuditRecordFromBlockchainNotification(String processId, BlockchainNotification blockchainNotification, String retrievedBrokerEntity, AuditRecordStatus status);
 
-    Mono<Void> buildAndSaveAuditRecordFromDataSync(String processId, String issuer, MVEntity4DataNegotiation mvEntity4DataNegotiation, String retrievedBrokerEntity, AuditRecordStatus status);
+    Mono<Void> buildAndSaveAuditRecordFromDataSync(String processId, String issuer, MVEntity4DataNegotiation mvEntity4DataNegotiation, AuditRecordStatus status);
 
     Mono<AuditRecord> fetchMostRecentAuditRecord();
     Mono<AuditRecord> findLatestAuditRecordForEntity(String processId, String entityId);
