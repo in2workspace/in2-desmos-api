@@ -153,10 +153,6 @@ public class AuditRecordServiceImpl implements AuditRecordService {
         return fetchMostRecentAuditRecord()
                 .flatMap(lastAuditRecordRegistered -> {
                     try {
-                            // status cases: RETRIEVED, PUBLISHED
-                            // We do not need to sort the fields of the retrievedBrokerEntity
-                            // because these have already been sorted in the
-                            // SubscribeWorkflowImpl.sortAttributesAlphabetically()
                         String entityHash = mvEntity4DataNegotiation.hash();
                         String entityHashLink = mvEntity4DataNegotiation.hashlink();
                         String dataLocation = issuer +
