@@ -54,12 +54,12 @@ public class BlockchainDataSyncWorkflowImpl implements BlockchainDataSyncWorkflo
                                                         .flatMap(retrievedBrokerEntity ->
                                                                 brokerEntityVerifyService.verifyRetrievedEntityDataIntegrity(processId, blockchainNotification, retrievedBrokerEntity)
                                                                         .then(auditRecordService.buildAndSaveAuditRecordFromBlockchainNotification(processId, blockchainNotification, retrievedBrokerEntity, AuditRecordStatus.RETRIEVED))
-                                                                        .then(brokerPublisherService.publishDataToBroker(processId, blockchainNotification, retrievedBrokerEntity))
+                                                                        .then(brokerPublisherService.publishEntityToContextBroker(processId, blockchainNotification, retrievedBrokerEntity))
                                                                         .then(auditRecordService.buildAndSaveAuditRecordFromBlockchainNotification(processId, blockchainNotification, retrievedBrokerEntity, AuditRecordStatus.PUBLISHED))
                                                         ))
                                 ))
 
-                );
+                ).doOnError(error -> log.error("Error in Blockchain Data Sync Workflow"));
     }
 
     private Flux<String> queryDLTAdapterFromBeginning(String processId) {

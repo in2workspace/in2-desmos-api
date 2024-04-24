@@ -125,7 +125,7 @@ class BlockchainDataSyncWorkflowImplTests {
         when(auditRecordService.buildAndSaveAuditRecordFromBlockchainNotification(eq("process123"), any(BlockchainNotification.class), any(), eq(AuditRecordStatus.RECEIVED))).thenReturn(Mono.empty());
         when(brokerEntityVerifyService.verifyRetrievedEntityDataIntegrity(eq("process123"), any(BlockchainNotification.class), eq(brokerEntity))).thenReturn(Mono.just(brokerEntity));
         when(auditRecordService.buildAndSaveAuditRecordFromBlockchainNotification(eq("process123"), any(BlockchainNotification.class), eq(brokerEntity), eq(AuditRecordStatus.RETRIEVED))).thenReturn(Mono.empty());
-        when(brokerPublisherService.publishDataToBroker(eq("process123"), any(BlockchainNotification.class), eq(brokerEntity))).thenReturn(Mono.empty());
+        when(brokerPublisherService.publishEntityToContextBroker(eq("process123"), any(BlockchainNotification.class), eq(brokerEntity))).thenReturn(Mono.empty());
         when(auditRecordService.buildAndSaveAuditRecordFromBlockchainNotification(eq("process123"), any(BlockchainNotification.class), eq(brokerEntity), eq(AuditRecordStatus.PUBLISHED))).thenReturn(Mono.empty());
 
         // Mock further dependencies as necessary

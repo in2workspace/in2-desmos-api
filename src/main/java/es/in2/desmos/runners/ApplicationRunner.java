@@ -60,7 +60,6 @@ public class ApplicationRunner {
                 .then();
     }
 
-    @Retryable(retryFor = RequestErrorException.class, maxAttempts = 4, backoff = @Backoff(delay = 2000))
     private Mono<Void> setBrokerSubscription() {
         // Set the processId to a random UUID
         String processId = UUID.randomUUID().toString();
@@ -170,12 +169,6 @@ public class ApplicationRunner {
                         error -> log.error("Error occurred during Subscribe Workflow"),
                         () -> log.info("Subscribe Workflow completed")
                 );
-    }
-
-    // TODO: Implement the recover method
-    @Recover
-    public void recover(RequestErrorException e) {
-        log.error("After retries, subscription failed", e);
     }
 
 }

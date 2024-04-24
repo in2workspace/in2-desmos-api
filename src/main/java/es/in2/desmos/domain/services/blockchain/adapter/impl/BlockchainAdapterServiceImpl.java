@@ -1,9 +1,12 @@
 package es.in2.desmos.domain.services.blockchain.adapter.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.configs.properties.DLTAdapterProperties;
-import es.in2.desmos.domain.models.BlockchainSubscription;
-import es.in2.desmos.domain.models.BlockchainTxPayload;
-import es.in2.desmos.domain.models.EventQueuePriority;
+import es.in2.desmos.domain.exceptions.JsonReadingException;
+import es.in2.desmos.domain.exceptions.RequestErrorException;
+import es.in2.desmos.domain.models.*;
+import es.in2.desmos.domain.services.api.RecoverRepositoryService;
 import es.in2.desmos.domain.services.blockchain.adapter.BlockchainAdapterService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +19,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.UUID;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -23,6 +28,8 @@ import reactor.core.publisher.Mono;
 public class BlockchainAdapterServiceImpl implements BlockchainAdapterService {
 
     private final DLTAdapterProperties dltAdapterProperties;
+    private final RecoverRepositoryService recoverRepositoryService;
+    private final ObjectMapper objectMapper;
 
     private WebClient webClient;
 
@@ -57,7 +64,9 @@ public class BlockchainAdapterServiceImpl implements BlockchainAdapterService {
                         response -> Mono.empty())
                 .bodyToMono(Void.class)
                 .retry(3)
-                .onErrorResume(e -> recover(processId, blockchainTxPayload));
+                .onErrorResume(e -> recover(processId, blockchainTxPayload).flatMap(
+                        error -> Mono.error(new RequestErrorException("Error posting transaction payload to DLT Adapter"))
+                ));
     }
 
     @Deprecated(since = "0.5.0", forRemoval = true)
@@ -73,9 +82,25 @@ public class BlockchainAdapterServiceImpl implements BlockchainAdapterService {
 
     @Recover
     public Mono<Void> recover(String processId, BlockchainTxPayload blockchainTxPayload) {
-        log.debug("Recovering after 3 retries");
-        EventQueuePriority eventQueuePriority = EventQueuePriority.CRITICAL;
-        // todo: set recover business logic
+        log.debug("ProcessId: {} - Recovering failed transaction", processId);
+        try {
+            return recoverRepositoryService.saveBlockchainTxPayloadRecover(processId, BlockchainTxPayloadRecover.builder()
+                    .id(UUID.randomUUID())
+                    .entityId(blockchainTxPayload.entityId())
+                    .eventType(blockchainTxPayload.eventType())
+                    .organizationId(blockchainTxPayload.organizationId())
+                    .previousEntityHash(blockchainTxPayload.previousEntityHash())
+                    .dataLocation(blockchainTxPayload.dataLocation())
+                    .relevantMetadata(objectMapper.writeValueAsString(blockchainTxPayload.metadata()))
+                    .processId(processId)
+                    .eventQueuePriority(EventQueuePriority.CRITICAL.toString())
+                    .newTransaction(true)
+                    .build());
+        } catch (JsonProcessingException e) {
+            throw new JsonReadingException("Error serializing BlockchainTxPayload");
+        }
+
+
 //        if (!checkIfHashLinkExistInDataLocation(blockchainData.dataLocation())) {
 //            eventQueuePriority = EventQueuePriority.RECOVER_DELETE;
 //        } else if (!Objects.equals(blockchainData.previousEntityHash(), "0x0000000000000000000000000000000000000000000000000000000000000000")){
@@ -94,7 +119,6 @@ public class BlockchainAdapterServiceImpl implements BlockchainAdapterService {
 //                        .newTransaction(true)
 //                        .build())
 //                .then(Mono.empty());
-        return Mono.empty();
     }
 
 }

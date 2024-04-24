@@ -7,7 +7,8 @@ import es.in2.desmos.configs.BrokerConfig;
 import es.in2.desmos.domain.exceptions.JsonReadingException;
 import es.in2.desmos.domain.exceptions.RequestErrorException;
 import es.in2.desmos.domain.exceptions.SubscriptionCreationException;
-import es.in2.desmos.domain.models.BrokerSubscription;
+import es.in2.desmos.domain.models.*;
+import es.in2.desmos.domain.services.api.RecoverRepositoryService;
 import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -15,15 +16,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.retry.annotation.Recover;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static es.in2.desmos.domain.utils.MessageUtils.*;
 
@@ -34,6 +33,7 @@ public class ScorpioAdapter implements BrokerAdapterService {
 
     private final ObjectMapper objectMapper;
     private final BrokerConfig brokerConfig;
+    private final RecoverRepositoryService recoverRepositoryService;
 
     private WebClient webClient;
 
@@ -261,6 +261,28 @@ public class ScorpioAdapter implements BrokerAdapterService {
         } catch (Exception e) {
             log.error(READING_JSON_ENTITY_ERROR_MESSAGE, processId, e.getMessage());
             throw new JsonReadingException(e.getMessage());
+        }
+    }
+
+    @Recover
+    public Mono<Void> recover(String processId, BlockchainNotification blockchainNotification) {
+        log.error("ProcessId: {} - Error occurred while publishing entity to the local broker", processId);
+        try {
+            return recoverRepositoryService.saveBlockchainNotificationRecover(processId, BlockchainNotificationRecover.builder()
+                    .id(UUID.randomUUID())
+                    .previousEntityHash(blockchainNotification.previousEntityHash())
+                    .entityIdHash(blockchainNotification.entityId())
+                    .eventType(blockchainNotification.eventType())
+                    .dataLocation(blockchainNotification.dataLocation())
+                    .relevantMetadata(objectMapper.writeValueAsString(blockchainNotification.relevantMetadata()))
+                    .publisherAddress(blockchainNotification.publisherAddress())
+                    .notificationId(String.valueOf(blockchainNotification.id()))
+                    .processId(processId)
+                    .eventQueuePriority(EventQueuePriority.CRITICAL.toString())
+                    .newTransaction(true)
+                    .build());
+        } catch (JsonProcessingException e) {
+            throw new JsonReadingException("Error serializing BlockchainTxPayload");
         }
     }
 
