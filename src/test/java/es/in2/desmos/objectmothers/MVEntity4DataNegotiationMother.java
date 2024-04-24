@@ -65,14 +65,6 @@ public final class MVEntity4DataNegotiationMother {
         return MVEntity4DataNegotiationList;
     }
 
-    public static @NotNull List<MVEntity4DataNegotiation> list2And3OldAnd4() {
-        List<MVEntity4DataNegotiation> MVEntity4DataNegotiationList = new ArrayList<>();
-        MVEntity4DataNegotiationList.add(sample2());
-        MVEntity4DataNegotiationList.add(sample3TimestampOld());
-        MVEntity4DataNegotiationList.add(sample4());
-        return MVEntity4DataNegotiationList;
-    }
-
     public static @NotNull List<MVEntity4DataNegotiation> listbadHash1And2() {
         List<MVEntity4DataNegotiation> MVEntity4DataNegotiationList = new ArrayList<>();
         MVEntity4DataNegotiationList.add(sample1BadHash());
@@ -90,18 +82,6 @@ public final class MVEntity4DataNegotiationMother {
     public static @NotNull List<MVEntity4DataNegotiation> list3And4() {
         List<MVEntity4DataNegotiation> MVEntity4DataNegotiationList = new ArrayList<>();
         MVEntity4DataNegotiationList.add(sample3());
-        MVEntity4DataNegotiationList.add(sample4());
-        return MVEntity4DataNegotiationList;
-    }
-
-    public static List<MVEntity4DataNegotiation> list2() {
-        List<MVEntity4DataNegotiation> MVEntity4DataNegotiationList = new ArrayList<>();
-        MVEntity4DataNegotiationList.add(sample2());
-        return MVEntity4DataNegotiationList;
-    }
-
-    public static List<MVEntity4DataNegotiation> list4() {
-        List<MVEntity4DataNegotiation> MVEntity4DataNegotiationList = new ArrayList<>();
         MVEntity4DataNegotiationList.add(sample4());
         return MVEntity4DataNegotiationList;
     }
