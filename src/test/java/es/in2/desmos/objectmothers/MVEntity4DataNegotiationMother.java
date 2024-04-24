@@ -14,7 +14,7 @@ public final class MVEntity4DataNegotiationMother {
     }
 
     public static @NotNull MVEntity4DataNegotiation sample1() {
-        return new MVEntity4DataNegotiation("urn:productOffering:d86735a6-0faa-463d-a872-00b97affa1cb", "ProductOffering", "1.2", "2024-09-05T12:00:00Z", "ba2aa48e3390a6f39061a8efac7769c3f1c6d642ae83c8ec6d06f837375f17ae", "fa54ba2aa48e3390a6f39061a8efac7769c3f1c6d642ae83c8ec6d06f837375f17ae");
+        return new MVEntity4DataNegotiation("urn:productOffering:d86735a6-0faa-463d-a872-00b97affa1cb", "ProductOffering", "1.2", "2024-09-05T12:00:00Z", "230df0a3a28e89ea00cc647ad5dace35bb80e94207072cd9e9cc01df7912f652", "fa54230df0a3a28e89ea00cc647ad5dace35bb80e94207072cd9e9cc01df7912f652");
     }
 
     public static @NotNull MVEntity4DataNegotiation sample1BadHash() {
@@ -22,23 +22,23 @@ public final class MVEntity4DataNegotiationMother {
     }
 
     public static @NotNull MVEntity4DataNegotiation sample2() {
-        return new MVEntity4DataNegotiation("urn:productOfferingPrice:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87", "ProductOfferingPrice", "2.5", "2024-07-09T12:00:00Z", "76cbcd6d9338fdd7b9985de08f9823d455e0daabee238cb3349c424dc9c0e8bb", "fa5476cbcd6d9338fdd7b9985de08f9823d455e0daabee238cb3349c424dc9c0e8bb");
+        return new MVEntity4DataNegotiation("urn:productOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87", "ProductOffering", "2.5", "2024-07-09T12:00:00Z", "bce7ca190970f0799c2a9e51f7ba75f8c5f04a7ce95c37498592d3eb8953dcc8", "fa54bce7ca190970f0799c2a9e51f7ba75f8c5f04a7ce95c37498592d3eb8953dcc8");
     }
 
     public static @NotNull MVEntity4DataNegotiation sample2VersionOld() {
-        return new MVEntity4DataNegotiation("urn:productOfferingPrice:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87", "ProductOfferingPrice", "2.1", "2024-07-09T12:00:00Z", "8bc17b3e9f6e3d54e3f5b63e4a8826a28bba7d03d0f46c7a79b1f4d13eb4ee2f", "fa548bc17b3e9f6e3d54e3f5b63e4a8826a28bba7d03d0f46c7a79b1f4d13eb4ee2f");
+        return new MVEntity4DataNegotiation("urn:productOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87", "ProductOffering", "2.1", "2024-07-09T12:00:00Z", "8bc17b3e9f6e3d54e3f5b63e4a8826a28bba7d03d0f46c7a79b1f4d13eb4ee2f", "fa54");
     }
 
     public static @NotNull MVEntity4DataNegotiation sample3() {
-        return new MVEntity4DataNegotiation("urn:productOfferingPrice:537e1ee3-0556-4fff-875f-e55bb97e7ab0", "ProductOfferingPrice", "4.3", "2024-04-03T12:00:00Z", "d05c64065bdddd2d44d8416b49bd3046b6679a5fa909d0459e9449cbd98cf4d0", "fa54d05c64065bdddd2d44d8416b49bd3046b6679a5fa909d0459e9449cbd98cf4d0");
+        return new MVEntity4DataNegotiation("urn:productOffering:537e1ee3-0556-4fff-875f-e55bb97e7ab0", "ProductOffering", "4.3", "2024-04-03T12:00:00Z", "5231e35892d6fc7d2912b5e4d69f67ebcba518967cb9120968cf3ace3b4f963a", "fa545231e35892d6fc7d2912b5e4d69f67ebcba518967cb9120968cf3ace3b4f963a");
     }
 
     public static @NotNull MVEntity4DataNegotiation sample3TimestampOld() {
-        return new MVEntity4DataNegotiation("urn:productOfferingPrice:537e1ee3-0556-4fff-875f-e55bb97e7ab0", "ProductOfferingPrice", "4.3", "2020-02-01T12:00:00Z", "8bc17b3e9f6e3d54e3f5b63e4a8826a28bba7d03d0f46c7a79b1f4d13eb4ee2f", "fa548bc17b3e9f6e3d54e3f5b63e4a8826a28bba7d03d0f46c7a79b1f4d13eb4ee2f");
+        return new MVEntity4DataNegotiation("urn:productOffering:537e1ee3-0556-4fff-875f-e55bb97e7ab0", "ProductOffering", "4.3", "2020-02-01T12:00:00Z", "8bc17b3e9f6e3d54e3f5b63e4a8826a28bba7d03d0f46c7a79b1f4d13eb4ee2f", "fa548bc17b3e9f6e3d54e3f5b63e4a8826a28bba7d03d0f46c7a79b1f4d13eb4ee2f");
     }
 
     public static @NotNull MVEntity4DataNegotiation sample4() {
-        return new MVEntity4DataNegotiation("urn:productOfferingPrice:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c", "ProductOfferingPrice", "1.9", "2024-06-02T12:00:00Z", "d4b2b9f86f3f87a94604915b46faf83a037b971a4020570b34482a7a2331ecac", "fa54d4b2b9f86f3f87a94604915b46faf83a037b971a4020570b34482a7a2331ecac");
+        return new MVEntity4DataNegotiation("urn:productOffering:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c", "ProductOffering", "1.9", "2024-06-02T12:00:00Z", "38d2d93c4566cba4cb84c418598e1af6cf7e9e39893362a0541591b4d53a4bc2", "fa5438d2d93c4566cba4cb84c418598e1af6cf7e9e39893362a0541591b4d53a4bc2");
     }
 
     public static @NotNull MVEntity4DataNegotiation randomIdAndVersion() {
@@ -54,6 +54,22 @@ public final class MVEntity4DataNegotiationMother {
         List<MVEntity4DataNegotiation> MVEntity4DataNegotiationList = new ArrayList<>();
         MVEntity4DataNegotiationList.add(sample1());
         MVEntity4DataNegotiationList.add(sample2());
+        return MVEntity4DataNegotiationList;
+    }
+
+    public static @NotNull List<MVEntity4DataNegotiation> list1And2OldAnd3() {
+        List<MVEntity4DataNegotiation> MVEntity4DataNegotiationList = new ArrayList<>();
+        MVEntity4DataNegotiationList.add(sample1());
+        MVEntity4DataNegotiationList.add(sample2VersionOld());
+        MVEntity4DataNegotiationList.add(sample3());
+        return MVEntity4DataNegotiationList;
+    }
+
+    public static @NotNull List<MVEntity4DataNegotiation> list2And3OldAnd4() {
+        List<MVEntity4DataNegotiation> MVEntity4DataNegotiationList = new ArrayList<>();
+        MVEntity4DataNegotiationList.add(sample2());
+        MVEntity4DataNegotiationList.add(sample3TimestampOld());
+        MVEntity4DataNegotiationList.add(sample4());
         return MVEntity4DataNegotiationList;
     }
 
@@ -74,6 +90,18 @@ public final class MVEntity4DataNegotiationMother {
     public static @NotNull List<MVEntity4DataNegotiation> list3And4() {
         List<MVEntity4DataNegotiation> MVEntity4DataNegotiationList = new ArrayList<>();
         MVEntity4DataNegotiationList.add(sample3());
+        MVEntity4DataNegotiationList.add(sample4());
+        return MVEntity4DataNegotiationList;
+    }
+
+    public static List<MVEntity4DataNegotiation> list2() {
+        List<MVEntity4DataNegotiation> MVEntity4DataNegotiationList = new ArrayList<>();
+        MVEntity4DataNegotiationList.add(sample2());
+        return MVEntity4DataNegotiationList;
+    }
+
+    public static List<MVEntity4DataNegotiation> list4() {
+        List<MVEntity4DataNegotiation> MVEntity4DataNegotiationList = new ArrayList<>();
         MVEntity4DataNegotiationList.add(sample4());
         return MVEntity4DataNegotiationList;
     }

@@ -15,17 +15,16 @@ import reactor.core.publisher.Mono;
 public class EntitySyncWebClientImpl implements EntitySyncWebClient {
     private final WebClient webClient;
 
-    public Mono<String> makeRequest(String processId, Mono<String> issuer, Mono<MVEntity4DataNegotiation[]> entitySyncRequest) {
-        String uri = issuer + "/api/v1/sync/entities";
+    public Mono<String> makeRequest(String processId, Mono<String> issuerMono, Mono<MVEntity4DataNegotiation[]> entitySyncRequest) {
+        log.debug("ProcessID: {} - Making a Entity Sync Web Client request", processId);
 
-        log.debug("ProcessID: {} - Making a request to: {}", processId, issuer);
-
-        return webClient
+        return issuerMono.flatMap(issuer -> webClient
                 .post()
-                .uri(uri)
+                .uri(issuer + "/api/v1/sync/entities")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(entitySyncRequest, MVEntity4DataNegotiation[].class)
                 .retrieve()
-                .bodyToMono(String.class);
+                .bodyToMono(String.class)
+                .retry(3));
     }
 }

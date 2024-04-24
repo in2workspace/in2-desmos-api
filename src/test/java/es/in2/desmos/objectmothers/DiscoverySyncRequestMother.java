@@ -19,4 +19,11 @@ public final class DiscoverySyncRequestMother {
 
         return new DiscoverySyncRequest(issuer, MVEntity4DataNegotiationIds);
     }
+
+    public static @NotNull DiscoverySyncRequest fullList(String issuer) {
+        List<MVEntity4DataNegotiation> MVEntity4DataNegotiationIds =
+                new ArrayList<>(MVEntity4DataNegotiationMother.fullList());
+
+        return new DiscoverySyncRequest(issuer, MVEntity4DataNegotiationIds);
+    }
 }

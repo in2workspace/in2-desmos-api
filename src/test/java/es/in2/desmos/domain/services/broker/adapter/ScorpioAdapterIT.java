@@ -4,13 +4,16 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.ContainerManager;
 import es.in2.desmos.domain.models.MVBrokerEntity4DataNegotiation;
+import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.domain.services.broker.adapter.impl.ScorpioAdapter;
 import es.in2.desmos.inflators.ScorpioInflator;
 import es.in2.desmos.objectmothers.EntityMother;
 import es.in2.desmos.objectmothers.EntitySyncResponseMother;
 import es.in2.desmos.objectmothers.MVBrokerEntity4DataNegotiationMother;
+import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
 import org.json.JSONException;
 import org.junit.jupiter.api.*;
+import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -49,7 +52,7 @@ class ScorpioAdapterIT {
 
     @AfterAll
     static void setDown() {
-        removeInitialMVEntity4DataNegotiation(initialMvEntity4DataNegotiationList);
+        removeInitialMVEntity4DataNegotiation();
     }
 
     @Test
@@ -72,28 +75,52 @@ class ScorpioAdapterIT {
         StepVerifier.create(result)
                 .verifyComplete();
 
-        var entity1 = scorpioAdapter.getEntityById(processId, EntitySyncResponseMother.getId1());
+        Mono<String> entity1Mono = scorpioAdapter.getEntityById(processId, EntitySyncResponseMother.getId1());
         StepVerifier
-                .create(entity1)
-                .expectNext(EntityMother.scorpioSample1())
+                .create(entity1Mono)
+                .consumeNextWith(entity1 -> {
+                    try {
+                        JSONAssert.assertEquals(EntityMother.scorpioJson1(), entity1, true);
+                    } catch (JSONException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
                 .verifyComplete();
 
-        var entity2 = scorpioAdapter.getEntityById(processId, EntitySyncResponseMother.getId2());
+        var entity2Mono = scorpioAdapter.getEntityById(processId, EntitySyncResponseMother.getId2());
         StepVerifier
-                .create(entity2)
-                .expectNext(EntityMother.scorpioSample2())
+                .create(entity2Mono)
+                .consumeNextWith(entity2 -> {
+                    try {
+                        JSONAssert.assertEquals(EntityMother.scorpioJson2(), entity2, true);
+                    } catch (JSONException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
                 .verifyComplete();
 
-        var entity3 = scorpioAdapter.getEntityById(processId, EntitySyncResponseMother.getId3());
+        var entity3Mono = scorpioAdapter.getEntityById(processId, EntitySyncResponseMother.getId3());
         StepVerifier
-                .create(entity3)
-                .expectNext(EntityMother.scorpioSample3())
+                .create(entity3Mono)
+                .consumeNextWith(entity3 -> {
+                    try {
+                        JSONAssert.assertEquals(EntityMother.scorpioJson3(), entity3, true);
+                    } catch (JSONException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
                 .verifyComplete();
 
-        var entity4 = scorpioAdapter.getEntityById(processId, EntitySyncResponseMother.getId4());
+        var entity4Mono = scorpioAdapter.getEntityById(processId, EntitySyncResponseMother.getId4());
         StepVerifier
-                .create(entity4)
-                .expectNext(EntityMother.scorpioSample4())
+                .create(entity4Mono)
+                .consumeNextWith(entity4 -> {
+                    try {
+                        JSONAssert.assertEquals(EntityMother.scorpioJson4(), entity4, true);
+                    } catch (JSONException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
                 .verifyComplete();
     }
 
@@ -104,9 +131,10 @@ class ScorpioAdapterIT {
         return entities;
     }
 
-    private static void removeInitialMVEntity4DataNegotiation(List<MVBrokerEntity4DataNegotiation> entities) {
+    private static void removeInitialMVEntity4DataNegotiation() {
         String brokerUrl = ContainerManager.getBaseUriForScorpioA();
-        List<String> ids = entities.stream().map(MVBrokerEntity4DataNegotiation::id).toList();
+//        List<String> ids = entities.stream().map(MVBrokerEntity4DataNegotiation::id).toList();
+        List<String> ids = MVEntity4DataNegotiationMother.fullList().stream().map(MVEntity4DataNegotiation::id).toList();
         ScorpioInflator.deleteInitialEntitiesFromContextBroker(brokerUrl, ids);
     }
 }

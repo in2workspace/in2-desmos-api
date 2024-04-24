@@ -184,7 +184,6 @@ class DataTransferJobTest {
         when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
 
         when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sample3().id())).thenReturn(Mono.just(AuditRecord.builder().entityHashLink("jfdlkisajlfdsafjdsafldskisjdfalsda").build()));
-        when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sample4().id())).thenReturn(Mono.just(AuditRecord.builder().entityHashLink("fa54").build()));
 
         Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
 
@@ -221,7 +220,7 @@ class DataTransferJobTest {
         DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
         Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
 
-        Mono<String> entitySyncResponseMono = Mono.just("{[]}");
+        Mono<String> entitySyncResponseMono = Mono.just("{}");
 
         String processId = "0";
         when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);

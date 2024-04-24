@@ -7,6 +7,7 @@ import es.in2.desmos.domain.models.AuditRecordTrader;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.domain.repositories.AuditRecordRepository;
 import es.in2.desmos.domain.services.api.impl.AuditRecordServiceImpl;
+import es.in2.desmos.objectmothers.AuditRecordMother;
 import es.in2.desmos.objectmothers.EntitySyncResponseMother;
 import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
 import org.junit.jupiter.api.Test;
@@ -46,22 +47,7 @@ class AuditRecordServiceTests {
         String retrievedBrokerEntity = EntitySyncResponseMother.sample();
         AuditRecordStatus status = AuditRecordStatus.RETRIEVED;
 
-        AuditRecord expectedAuditRecord =
-                AuditRecord.builder()
-                        .id(UUID.randomUUID())
-                        .processId(processId)
-                        .createdAt(Timestamp.from(Instant.now()))
-                        .entityId(mvEntity4DataNegotiation.id())
-                        .entityType(mvEntity4DataNegotiation.type())
-                        .entityHash("ba2aa48e3390a6f39061a8efac7769c3f1c6d642ae83c8ec6d06f837375f17ae")
-                        .entityHashLink("fa54ba2aa48e3390a6f39061a8efac7769c3f1c6d642ae83c8ec6d06f837375f17ae")
-                        .dataLocation("http://example.org/ngsi-ld/v1/entities/urn:productOffering:d86735a6-0faa-463d-a872-00b97affa1cb?ba2aa48e3390a6f39061a8efac7769c3f1c6d642ae83c8ec6d06f837375f17ae")
-                        .status(status)
-                        .trader(AuditRecordTrader.CONSUMER)
-                        .hash("")
-                        .hashLink("")
-                        .newTransaction(true)
-                        .build();
+        AuditRecord expectedAuditRecord = AuditRecordMother.createAuditRecordFromMVEntity4DataNegotiation("http://example.org", mvEntity4DataNegotiation, status);
 
         when(auditRecordRepository.findMostRecentAuditRecord()).thenReturn(Mono.just(new AuditRecord()));
 

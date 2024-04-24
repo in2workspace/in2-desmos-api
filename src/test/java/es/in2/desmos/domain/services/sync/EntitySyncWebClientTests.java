@@ -47,7 +47,8 @@ class EntitySyncWebClientTests {
     void itShouldReturnEntitySyncResponseWhenMakeRequest() {
         String processId = "0";
 
-        Mono<String> issuer = Mono.just("http://example.org");
+        String issuer = "http://example.org";
+        Mono<String> issuerMono = Mono.just(issuer);
         Mono<MVEntity4DataNegotiation[]> entitySyncRequest = Mono.just(MVEntity4DataNegotiationMother.fullList().toArray(MVEntity4DataNegotiation[]::new));
 
         String expectedResult = (EntitySyncResponseMother.sample());
@@ -62,7 +63,7 @@ class EntitySyncWebClientTests {
         when(responseSpecMock.bodyToMono(String.class)).thenReturn(Mono.just(expectedResult));
 
 
-        Mono<String> result = entitySyncWebClient.makeRequest(processId, issuer, entitySyncRequest);
+        Mono<String> result = entitySyncWebClient.makeRequest(processId, issuerMono, entitySyncRequest);
 
         StepVerifier
                 .create(result)

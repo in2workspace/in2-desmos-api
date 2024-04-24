@@ -1,13 +1,38 @@
 package es.in2.desmos.objectmothers;
 
 import es.in2.desmos.domain.models.AuditRecord;
+import es.in2.desmos.domain.models.AuditRecordStatus;
+import es.in2.desmos.domain.models.AuditRecordTrader;
+import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import org.jetbrains.annotations.NotNull;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public final class AuditRecordMother {
     private AuditRecordMother() {
+    }
+
+    public static AuditRecord createAuditRecordFromMVEntity4DataNegotiation(String baseUri, MVEntity4DataNegotiation mvEntity4DataNegotiation, AuditRecordStatus auditRecordStatus) {
+        String processId = "0";
+        return AuditRecord.builder()
+                .id(UUID.randomUUID())
+                .processId(processId)
+                .createdAt(Timestamp.from(Instant.now()))
+                .entityId(mvEntity4DataNegotiation.id())
+                .entityType(mvEntity4DataNegotiation.type())
+                .entityHash(mvEntity4DataNegotiation.hash())
+                .entityHashLink(mvEntity4DataNegotiation.hashlink())
+                .dataLocation(baseUri + "/ngsi-ld/v1/entities/" + mvEntity4DataNegotiation.id() + "?" + mvEntity4DataNegotiation.hash())
+                .status(auditRecordStatus)
+                .trader(AuditRecordTrader.CONSUMER)
+                .hash("")
+                .hashLink("")
+                .newTransaction(true)
+                .build();
     }
 
     public static @NotNull List<AuditRecord> list3And4() {

@@ -36,7 +36,8 @@ public final class ScorpioInflator {
         System.out.println("Create entities to Scorpio: " + result);
     }
 
-    public static void addInitialEntitiesToContextBroker(String brokerUrl, String requestBody) {
+    public static void addInitialEntitiesToContextBroker(String brokerUrl, String requestBody) throws JSONException, JsonProcessingException {
+        requestBody = addContextValue(requestBody);
         var result = WebClient.builder()
                 .baseUrl(brokerUrl)
                 .build()
@@ -51,7 +52,7 @@ public final class ScorpioInflator {
         System.out.println("Create entities to Scorpio: " + result);
     }
 
-    public static void deleteInitialEntitiesFromContextBroker(String brokerUrl, List<String> ids){
+    public static void deleteInitialEntitiesFromContextBroker(String brokerUrl, List<String> ids) {
         WebClient.builder()
                 .baseUrl(brokerUrl)
                 .build()
@@ -71,13 +72,11 @@ public final class ScorpioInflator {
         ObjectMapper objectMapper = new ObjectMapper();
         JSONArray productOfferingsJsonArray = new JSONArray();
 
-        for (var productOffering : initialEntities) {
-            var productOfferingJsonText = objectMapper.writeValueAsString(productOffering);
-            var productOfferingJson = new JSONObject(productOfferingJsonText);
+        for (MVBrokerEntity4DataNegotiation productOffering : initialEntities) {
+            String productOfferingJsonText = objectMapper.writeValueAsString(productOffering);
+            JSONObject productOfferingJson = new JSONObject(productOfferingJsonText);
 
-            productOfferingJson.put("type", "ProductOffering");
-
-            var contextValueFakeList = new JSONArray();
+            JSONArray contextValueFakeList = new JSONArray();
             contextValueFakeList.put("https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld");
             productOfferingJson.put("@context", contextValueFakeList);
 
@@ -88,4 +87,25 @@ public final class ScorpioInflator {
         requestBody = requestBody.replace("\\/", "/");
         return requestBody;
     }
+
+    private static String addContextValue(String requestBody) throws JsonProcessingException, JSONException {
+        var contextValueFakeList = new JSONArray();
+        contextValueFakeList.put("https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld");
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        JSONObject[] productOfferings = objectMapper.readValue(requestBody, JSONObject[].class);
+
+        JSONArray productOfferingsJsonArray = new JSONArray();
+
+        for (JSONObject productOffering : productOfferings) {
+            productOffering.put("@context", contextValueFakeList);
+
+            productOfferingsJsonArray.put(productOffering);
+        }
+
+        String newRequestBody = productOfferingsJsonArray.toString();
+        newRequestBody = newRequestBody.replace("\\/", "/");
+        return newRequestBody;
+    }
+
 }
