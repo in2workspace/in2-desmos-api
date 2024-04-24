@@ -34,7 +34,7 @@ class BrokerPublisherServiceTests {
     void itShouldUpsertBatchDataToBroker() {
         String processId = "0";
 
-        String retrievedBrokerEntities = EntitySyncResponseMother.sample();
+        String retrievedBrokerEntities = EntitySyncResponseMother.sample;
 
         when(brokerAdapterService.upsertBatchEntities(processId, retrievedBrokerEntities)).thenReturn(Mono.empty());
 

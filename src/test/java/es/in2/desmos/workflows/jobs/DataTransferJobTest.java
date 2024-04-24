@@ -62,7 +62,7 @@ class DataTransferJobTest {
                                 dataNegotiationResult.existingEntitiesToSync().stream())
                         .toArray(MVEntity4DataNegotiation[]::new);
 
-        Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.sample());
+        Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.sample);
 
         String processId = "0";
         when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
@@ -113,7 +113,7 @@ class DataTransferJobTest {
                                 dataNegotiationResult.existingEntitiesToSync().stream())
                         .toArray(MVEntity4DataNegotiation[]::new);
 
-        Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.sample());
+        Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.sample);
 
         String processId = "0";
         when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
@@ -158,7 +158,7 @@ class DataTransferJobTest {
         DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.badHash();
         Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
 
-        Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.sample());
+        Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.sample);
 
         String processId = "0";
         when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
@@ -178,7 +178,7 @@ class DataTransferJobTest {
         DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
         Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
 
-        Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.sample());
+        Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.sample);
 
         String processId = "0";
         when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
@@ -240,7 +240,7 @@ class DataTransferJobTest {
         DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
         Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
 
-        String entitySyncResponse = EntitySyncResponseMother.sample();
+        String entitySyncResponse = EntitySyncResponseMother.sample;
         Mono<String> entitySyncResponseMono = Mono.just(entitySyncResponse);
 
         String processId = "0";

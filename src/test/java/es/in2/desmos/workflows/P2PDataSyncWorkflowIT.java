@@ -113,7 +113,7 @@ class P2PDataSyncWorkflowIT {
 
     @Test
     void itShouldUpsertExternalEntities() throws IOException, InterruptedException {
-        var entitySyncResponse = EntitySyncResponseMother.sample2and4();
+        var entitySyncResponse = EntitySyncResponseMother.sample2and4;
         mockWebServer.enqueue(new MockResponse()
                 .setBody(entitySyncResponse));
 
@@ -147,10 +147,10 @@ class P2PDataSyncWorkflowIT {
                     assertEquals(expectedDiscoverySyncResponseJson, response);
 
                     try {
-                        assertScorpioEntityIsExpected(EntitySyncResponseMother.getId1(), EntityMother.scorpioJson1());
-                        assertScorpioEntityIsExpected(EntitySyncResponseMother.getId2(), EntityMother.scorpioJson2());
-                        assertScorpioEntityIsExpected(EntitySyncResponseMother.getId3(), EntityMother.scorpioJson3());
-                        assertScorpioEntityIsExpected(EntitySyncResponseMother.getId4(), EntityMother.scorpioJson4());
+                        assertScorpioEntityIsExpected(EntitySyncResponseMother.id1, EntityMother.scorpioJson1());
+                        assertScorpioEntityIsExpected(EntitySyncResponseMother.id2, EntityMother.scorpioJson2());
+                        assertScorpioEntityIsExpected(EntitySyncResponseMother.id3, EntityMother.scorpioJson3());
+                        assertScorpioEntityIsExpected(EntitySyncResponseMother.id4, EntityMother.scorpioJson4());
                     } catch (JSONException e) {
                         throw new RuntimeException(e);
                     }
@@ -166,7 +166,7 @@ class P2PDataSyncWorkflowIT {
 
     @Test
     void itShouldCreateAuditRecord() throws IOException, InterruptedException {
-        var entitySyncResponse = EntitySyncResponseMother.sample2and4();
+        var entitySyncResponse = EntitySyncResponseMother.sample2and4;
         mockWebServer.enqueue(new MockResponse()
                 .setBody(entitySyncResponse));
 
@@ -199,10 +199,10 @@ class P2PDataSyncWorkflowIT {
                 .consumeNextWith(response -> {
                     assertEquals(expectedDiscoverySyncResponseJson, response);
 
-                    assertAuditRecordEntityIsExpected(EntitySyncResponseMother.getId1(), MVEntity4DataNegotiationMother.sample1(), "http://example.org");
-                    assertAuditRecordEntityIsExpected(EntitySyncResponseMother.getId2(), MVEntity4DataNegotiationMother.sample2(), issuer);
-                    assertAuditRecordEntityIsExpected(EntitySyncResponseMother.getId3(), MVEntity4DataNegotiationMother.sample3(), "http://example.org");
-                    assertAuditRecordEntityIsExpected(EntitySyncResponseMother.getId4(), MVEntity4DataNegotiationMother.sample4(), issuer);
+                    assertAuditRecordEntityIsExpected(EntitySyncResponseMother.id1, MVEntity4DataNegotiationMother.sample1(), "http://example.org");
+                    assertAuditRecordEntityIsExpected(EntitySyncResponseMother.id2, MVEntity4DataNegotiationMother.sample2(), issuer);
+                    assertAuditRecordEntityIsExpected(EntitySyncResponseMother.id3, MVEntity4DataNegotiationMother.sample3(), "http://example.org");
+                    assertAuditRecordEntityIsExpected(EntitySyncResponseMother.id4, MVEntity4DataNegotiationMother.sample4(), issuer);
                 })
                 .verifyComplete();
 

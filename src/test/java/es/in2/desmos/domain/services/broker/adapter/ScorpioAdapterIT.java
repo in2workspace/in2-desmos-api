@@ -68,14 +68,14 @@ class ScorpioAdapterIT {
     @Test
     void itShouldUpsertBatchEntities() {
         String processId = "0";
-        String requestBody = EntitySyncResponseMother.sample();
+        String requestBody = EntitySyncResponseMother.sample;
 
         Mono<Void> result = scorpioAdapter.upsertBatchEntities(processId, requestBody);
 
         StepVerifier.create(result)
                 .verifyComplete();
 
-        Mono<String> entity1Mono = scorpioAdapter.getEntityById(processId, EntitySyncResponseMother.getId1());
+        Mono<String> entity1Mono = scorpioAdapter.getEntityById(processId, EntitySyncResponseMother.id1);
         StepVerifier
                 .create(entity1Mono)
                 .consumeNextWith(entity1 -> {
@@ -87,7 +87,7 @@ class ScorpioAdapterIT {
                 })
                 .verifyComplete();
 
-        var entity2Mono = scorpioAdapter.getEntityById(processId, EntitySyncResponseMother.getId2());
+        var entity2Mono = scorpioAdapter.getEntityById(processId, EntitySyncResponseMother.id2);
         StepVerifier
                 .create(entity2Mono)
                 .consumeNextWith(entity2 -> {
@@ -99,7 +99,7 @@ class ScorpioAdapterIT {
                 })
                 .verifyComplete();
 
-        var entity3Mono = scorpioAdapter.getEntityById(processId, EntitySyncResponseMother.getId3());
+        var entity3Mono = scorpioAdapter.getEntityById(processId, EntitySyncResponseMother.id3);
         StepVerifier
                 .create(entity3Mono)
                 .consumeNextWith(entity3 -> {
@@ -111,7 +111,7 @@ class ScorpioAdapterIT {
                 })
                 .verifyComplete();
 
-        var entity4Mono = scorpioAdapter.getEntityById(processId, EntitySyncResponseMother.getId4());
+        var entity4Mono = scorpioAdapter.getEntityById(processId, EntitySyncResponseMother.id4);
         StepVerifier
                 .create(entity4Mono)
                 .consumeNextWith(entity4 -> {

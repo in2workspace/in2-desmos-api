@@ -51,7 +51,7 @@ class EntitySyncWebClientTests {
         Mono<String> issuerMono = Mono.just(issuer);
         Mono<MVEntity4DataNegotiation[]> entitySyncRequest = Mono.just(MVEntity4DataNegotiationMother.fullList().toArray(MVEntity4DataNegotiation[]::new));
 
-        String expectedResult = (EntitySyncResponseMother.sample());
+        String expectedResult = (EntitySyncResponseMother.sample);
 
 
         when(webClientMock.post()).thenReturn(requestBodyUriSpecMock);

@@ -44,7 +44,7 @@ class AuditRecordServiceTests {
         String processId = "0";
         String issuer = "http://example.org";
         MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample1();
-        String retrievedBrokerEntity = EntitySyncResponseMother.sample();
+        String retrievedBrokerEntity = EntitySyncResponseMother.sample;
         AuditRecordStatus status = AuditRecordStatus.RETRIEVED;
 
         AuditRecord expectedAuditRecord = AuditRecordMother.createAuditRecordFromMVEntity4DataNegotiation("http://example.org", mvEntity4DataNegotiation, status);
