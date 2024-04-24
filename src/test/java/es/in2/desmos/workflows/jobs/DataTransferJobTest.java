@@ -1,5 +1,7 @@
 package es.in2.desmos.workflows.jobs;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.domain.exceptions.InvalidConsistencyException;
 import es.in2.desmos.domain.exceptions.InvalidIntegrityException;
@@ -261,5 +263,48 @@ class DataTransferJobTest {
 
         verify(brokerPublisherService, times(1)).batchUpsertEntitiesToContextBroker(processId, entitySyncResponse);
         verifyNoMoreInteractions(brokerPublisherService);
+    }
+
+    @Test
+    void itShouldReturnJsonProcessingExceptionWhenBadJsonInEntitySyncResponse() throws JsonProcessingException {
+        DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
+        Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
+
+        String processId = "0";
+        Mono<String> entitySyncResponseMono = Mono.just("invalid json");
+
+        when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
+
+        Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
+
+        StepVerifier.
+                create(result)
+                .expectErrorMatches(throwable -> throwable instanceof JsonProcessingException)
+                .verify();
+
+        verify(objectMapper, times(1)).readTree(anyString());
+    }
+
+    @Test
+    void itShouldReturnJsonProcessingExceptionWhenBadJsonSortingEntities() throws JsonProcessingException {
+        DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
+        Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
+
+        String processId = "0";
+        String entitySyncResponse = EntitySyncResponseMother.sample;
+        Mono<String> entitySyncResponseMono = Mono.just(entitySyncResponse);
+        JsonNode entitySyncResponseJsonNode = objectMapper.readTree(entitySyncResponse);
+
+        when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
+        when(objectMapper.readTree(anyString())).thenReturn(entitySyncResponseJsonNode).thenThrow(JsonProcessingException.class);
+
+        Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
+
+        StepVerifier.
+                create(result)
+                .expectErrorMatches(throwable -> throwable instanceof JsonProcessingException)
+                .verify();
+
+        verify(objectMapper, times(4)).readTree(anyString());
     }
 }

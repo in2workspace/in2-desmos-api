@@ -156,15 +156,26 @@ public class DataTransferJobImpl implements DataTransferJob {
                 .then();
     }
 
-    private static Mono<String> calculateHash(Mono<String> entityValueMono) {
-        return entityValueMono
-                .flatMap(entityValue -> {
-                    try {
-                        return Mono.just(ApplicationUtils.calculateSHA256(entityValue));
-                    } catch (NoSuchAlgorithmException e) {
-                        return Mono.error(e);
-                    }
-                });
+    private Mono<String> calculateHash(Mono<String> retrievedBrokerEntityMono) {
+        Mono<String> sortedAttributesBrokerEntityMono = sortAttributesAlphabetically(retrievedBrokerEntityMono);
+        return sortedAttributesBrokerEntityMono.flatMap(sortedAttributesBrokerEntity -> {
+            try {
+                return Mono.just(ApplicationUtils.calculateSHA256(sortedAttributesBrokerEntity));
+            } catch (NoSuchAlgorithmException e) {
+                return Mono.error(e);
+            }
+        });
+    }
+
+    private Mono<String> sortAttributesAlphabetically(Mono<String> retrievedBrokerEntityMono) {
+        return retrievedBrokerEntityMono.flatMap(retrievedBrokerEntity -> {
+            try {
+                JsonNode retrievedBrokerEntityJsonNode = objectMapper.readTree(retrievedBrokerEntity);
+                return Mono.just(objectMapper.writeValueAsString(retrievedBrokerEntityJsonNode));
+            } catch (JsonProcessingException e) {
+                return Mono.error(e);
+            }
+        });
     }
 
     private Mono<Void> validateConsistency(String processId, Mono<Map<Id, Entity>> rcvdEntitiesByIdMono, Mono<Map<Id, EntityValidationData>> existingEntitiesValidationDataByIdMono) {
