@@ -117,7 +117,7 @@ public class DataTransferJobImpl implements DataTransferJob {
                 } else {
                     return Mono.error(new InvalidSyncResponseException("Invalid EntitySync response."));
                 }
-            } catch (JsonProcessingException | RuntimeException e) {
+            } catch (JsonProcessingException e) {
                 return Mono.error(e);
             }
         });
