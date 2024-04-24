@@ -66,11 +66,11 @@ class ScorpioAdapterIT {
     }
 
     @Test
-    void itShouldUpsertBatchEntities() {
+    void itShouldBatchUpsertEntities() {
         String processId = "0";
         String requestBody = EntitySyncResponseMother.sample;
 
-        Mono<Void> result = scorpioAdapter.upsertBatchEntities(processId, requestBody);
+        Mono<Void> result = scorpioAdapter.batchUpsertEntities(processId, requestBody);
 
         StepVerifier.create(result)
                 .verifyComplete();

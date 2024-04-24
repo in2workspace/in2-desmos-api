@@ -42,12 +42,12 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
     }
 
     @Override
-    public Mono<Void> upsertBatchDataToBroker(String processId, String retrievedBrokerEntities) {
-        return upsertBatchEntities(processId, retrievedBrokerEntities);
+    public Mono<Void> batchUpsertEntitiesToContextBroker(String processId, String retrievedBrokerEntities) {
+        return batchUpsertEntities(processId, retrievedBrokerEntities);
     }
 
-    private Mono<Void> upsertBatchEntities(String processId, String requestBody) {
-        return brokerAdapterService.upsertBatchEntities(processId, requestBody);
+    private Mono<Void> batchUpsertEntities(String processId, String requestBody) {
+        return brokerAdapterService.batchUpsertEntities(processId, requestBody);
     }
 
     private Mono<Void> postEntity(String processId, String requestBody) {

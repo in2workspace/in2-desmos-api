@@ -72,7 +72,7 @@ class DataTransferJobTest {
 
         when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any(), any())).thenReturn(Mono.empty());
 
-        when(brokerPublisherService.upsertBatchDataToBroker(any(), any())).thenReturn(Mono.empty());
+        when(brokerPublisherService.batchUpsertEntitiesToContextBroker(any(), any())).thenReturn(Mono.empty());
 
         Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
 
@@ -123,7 +123,7 @@ class DataTransferJobTest {
 
         when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any(), any())).thenReturn(Mono.empty());
 
-        when(brokerPublisherService.upsertBatchDataToBroker(any(), any())).thenReturn(Mono.empty());
+        when(brokerPublisherService.batchUpsertEntitiesToContextBroker(any(), any())).thenReturn(Mono.empty());
 
         Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
 
@@ -251,7 +251,7 @@ class DataTransferJobTest {
 
         when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any(), any())).thenReturn(Mono.empty());
 
-        when(brokerPublisherService.upsertBatchDataToBroker(processId, entitySyncResponse)).thenReturn(Mono.empty());
+        when(brokerPublisherService.batchUpsertEntitiesToContextBroker(processId, entitySyncResponse)).thenReturn(Mono.empty());
 
         Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
 
@@ -259,7 +259,7 @@ class DataTransferJobTest {
                 create(result)
                 .verifyComplete();
 
-        verify(brokerPublisherService, times(1)).upsertBatchDataToBroker(processId, entitySyncResponse);
+        verify(brokerPublisherService, times(1)).batchUpsertEntitiesToContextBroker(processId, entitySyncResponse);
         verifyNoMoreInteractions(brokerPublisherService);
     }
 }

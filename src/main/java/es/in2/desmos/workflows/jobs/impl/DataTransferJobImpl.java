@@ -57,15 +57,15 @@ public class DataTransferJobImpl implements DataTransferJob {
 
                                     return validateEntities(processId, entitiesByIdMono, newEntitiesOriginalValidationDataById, existingEntitiesOriginalValidationDataById)
                                             .then(buildAndSaveAuditRecordFromDataSync(processId, issuer, entitiesByIdMono, allEntitiesToRequestList, AuditRecordStatus.RETRIEVED))
-                                            .then(upsertBatchDataToBroker(processId, entitySyncResponseMono))
+                                            .then(batchUpsertEntitiesToContextBroker(processId, entitySyncResponseMono))
                                             .then(buildAndSaveAuditRecordFromDataSync(processId, issuer, entitiesByIdMono, allEntitiesToRequestList, AuditRecordStatus.PUBLISHED));
                                 });
                     }));
         });
     }
 
-    private Mono<Void> upsertBatchDataToBroker(String processId, Mono<String> retrievedBrokerEntitiesMono) {
-        return retrievedBrokerEntitiesMono.flatMap(retrievedBrokerEntities -> brokerPublisherService.upsertBatchDataToBroker(processId, retrievedBrokerEntities));
+    private Mono<Void> batchUpsertEntitiesToContextBroker(String processId, Mono<String> retrievedBrokerEntitiesMono) {
+        return retrievedBrokerEntitiesMono.flatMap(retrievedBrokerEntities -> brokerPublisherService.batchUpsertEntitiesToContextBroker(processId, retrievedBrokerEntities));
     }
 
 

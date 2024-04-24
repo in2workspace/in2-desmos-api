@@ -31,20 +31,20 @@ class BrokerPublisherServiceTests {
     }
 
     @Test
-    void itShouldUpsertBatchDataToBroker() {
+    void itShouldBatchUpsertEntitiesToContextBroker() {
         String processId = "0";
 
         String retrievedBrokerEntities = EntitySyncResponseMother.sample;
 
-        when(brokerAdapterService.upsertBatchEntities(processId, retrievedBrokerEntities)).thenReturn(Mono.empty());
+        when(brokerAdapterService.batchUpsertEntities(processId, retrievedBrokerEntities)).thenReturn(Mono.empty());
 
-        Mono<Void> result = brokerPublisherService.upsertBatchDataToBroker(processId, retrievedBrokerEntities);
+        Mono<Void> result = brokerPublisherService.batchUpsertEntitiesToContextBroker(processId, retrievedBrokerEntities);
 
         StepVerifier
                 .create(result)
                 .verifyComplete();
 
-        verify(brokerAdapterService, times(1)).upsertBatchEntities(processId, retrievedBrokerEntities);
+        verify(brokerAdapterService, times(1)).batchUpsertEntities(processId, retrievedBrokerEntities);
         verifyNoMoreInteractions(brokerAdapterService);
     }
 }

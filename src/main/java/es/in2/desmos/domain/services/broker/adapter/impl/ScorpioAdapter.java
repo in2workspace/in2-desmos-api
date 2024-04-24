@@ -216,7 +216,7 @@ public class ScorpioAdapter implements BrokerAdapterService {
     }
 
     @Override
-    public Mono<Void> upsertBatchEntities(String processId, String requestBody) {
+    public Mono<Void> batchUpsertEntities(String processId, String requestBody) {
         log.info("ProcessID: {} - Upserting entities to Scorpio", processId);
 
         String uri = brokerConfig.getEntityOperationsPath() + "/" + "upsert";

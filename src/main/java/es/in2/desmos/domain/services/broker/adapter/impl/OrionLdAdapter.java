@@ -60,6 +60,6 @@ public class OrionLdAdapter implements BrokerAdapterService {
     public Mono<List<MVBrokerEntity4DataNegotiation>> getMvBrokerEntities4DataNegotiation(String processId) { return null; }
 
     @Override
-    public Mono<Void> upsertBatchEntities(String processId, String requestBody) { return null; }
+    public Mono<Void> batchUpsertEntities(String processId, String requestBody) { return null; }
 
 }

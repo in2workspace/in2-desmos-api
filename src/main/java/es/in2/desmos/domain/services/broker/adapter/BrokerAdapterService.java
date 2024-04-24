@@ -20,6 +20,6 @@ public interface BrokerAdapterService {
 
     Mono<List<MVBrokerEntity4DataNegotiation>> getMvBrokerEntities4DataNegotiation(String processId);
 
-    Mono<Void> upsertBatchEntities(String processId, String requestBody);
+    Mono<Void> batchUpsertEntities(String processId, String requestBody);
 }
 
