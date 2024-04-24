@@ -140,26 +140,31 @@ public class DataTransferJobImpl implements DataTransferJob {
                     Mono<String> entity = Mono.just(entry.getValue().value());
                     Id id = entry.getKey();
                     Mono<String> entityRcvdHash = allEntitiesExistingValidationDataById.map(x -> x.get(id).hash());
-                    return entity.flatMap(entityValue -> {
-                        try {
-                            String calculatedHash = ApplicationUtils.calculateSHA256(entityValue);
-                            return entityRcvdHash
-                                    .flatMap(hashValue -> {
-                                        if (calculatedHash.equals(hashValue)) {
-                                            return Mono.empty();
-                                        } else {
-                                            log.error("expected hash: {}\ncurrent hash: {}", calculatedHash, hashValue);
-                                            return Mono.error(new InvalidIntegrityException("The hash received at the origin is different from the actual hash of the entity."));
-                                        }
-                                    });
-                        } catch (NoSuchAlgorithmException e) {
-                            return Mono.error(e);
-                        }
-                    });
+                    Mono<String> calculatedHashMono = calculateHash(entity);
+                    return calculatedHashMono.flatMap(calculatedHash ->
+                            entityRcvdHash.flatMap(hashValue -> {
+                                if (calculatedHash.equals(hashValue)) {
+                                    return Mono.empty();
+                                } else {
+                                    log.error("expected hash: {}\ncurrent hash: {}", calculatedHash, hashValue);
+                                    return Mono.error(new InvalidIntegrityException("The hash received at the origin is different from the actual hash of the entity."));
+                                }
+                            }));
 
                 })
                 .collectList()
                 .then();
+    }
+
+    private static Mono<String> calculateHash(Mono<String> entityValueMono) {
+        return entityValueMono
+                .flatMap(entityValue -> {
+                    try {
+                        return Mono.just(ApplicationUtils.calculateSHA256(entityValue));
+                    } catch (NoSuchAlgorithmException e) {
+                        return Mono.error(e);
+                    }
+                });
     }
 
     private Mono<Void> validateConsistency(String processId, Mono<Map<Id, Entity>> rcvdEntitiesByIdMono, Mono<Map<Id, EntityValidationData>> existingEntitiesValidationDataByIdMono) {
@@ -182,17 +187,16 @@ public class DataTransferJobImpl implements DataTransferJob {
                                     .findLatestAuditRecordForEntity(processId, id.value())
                                     .flatMap(auditRecord -> {
                                         String entityData = rcvdEntity.get(id).value();
-                                        try {
-                                            String currentEntityHash = ApplicationUtils.calculateSHA256(entityData);
+                                        Mono<String> entityDataMono = Mono.just(entityData);
+                                        Mono<String> currentEntityHashMono = calculateHash(entityDataMono);
+                                        return currentEntityHashMono.flatMap(currentEntityHash -> {
                                             String existingHashLink = existingEntitiesValidationDataById.get(id).hashLink();
                                             if ((auditRecord.getEntityHashLink() + currentEntityHash).equals(existingHashLink)) {
                                                 return Mono.empty();
                                             } else {
                                                 return Mono.error(new InvalidConsistencyException("The hashlink received does not correspond to that of the entity."));
                                             }
-                                        } catch (NoSuchAlgorithmException e) {
-                                            return Mono.error(e);
-                                        }
+                                        });
                                     }))
                             .collectList()
                             .then();
