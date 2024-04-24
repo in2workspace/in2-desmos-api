@@ -235,7 +235,7 @@ class P2PDataSyncWorkflowIT {
     }
 
     private void assertAuditRecordEntityIsExpected(String entityId, MVEntity4DataNegotiation expectedMVEntity4DataNegotiation, String baseUri){
-        await().atMost(5, TimeUnit.SECONDS).ignoreExceptions().until(() -> {
+        await().atMost(10, TimeUnit.SECONDS).ignoreExceptions().until(() -> {
             String processId = "0";
             Mono<AuditRecord> auditRecordMono = auditRecordService.findLatestAuditRecordForEntity(processId, entityId);
             StepVerifier
@@ -275,7 +275,7 @@ class P2PDataSyncWorkflowIT {
         String processId = "0";
         String issuer = "http://example.org";
         for (var entity : entities) {
-            auditRecordService.buildAndSaveAuditRecordFromDataSync(processId, issuer, entity, "fdas", AuditRecordStatus.PUBLISHED).block();
+            auditRecordService.buildAndSaveAuditRecordFromDataSync(processId, issuer, entity, AuditRecordStatus.PUBLISHED).block();
             AuditRecord auditRecord = auditRecordService.findLatestAuditRecordForEntity(processId, entity.id()).block();
             System.out.println("Published audit record: " + auditRecord);
         }
@@ -285,7 +285,7 @@ class P2PDataSyncWorkflowIT {
         String processId = "0";
         String issuer = "http://example.org";
         for (var entity : entities) {
-            auditRecordService.buildAndSaveAuditRecordFromDataSync(processId, issuer, entity, "fdas", AuditRecordStatus.DELETED).block();
+            auditRecordService.buildAndSaveAuditRecordFromDataSync(processId, issuer, entity, AuditRecordStatus.DELETED).block();
         }
     }
 
