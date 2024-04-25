@@ -7,7 +7,10 @@ import es.in2.desmos.configs.BrokerConfig;
 import es.in2.desmos.domain.exceptions.JsonReadingException;
 import es.in2.desmos.domain.exceptions.RequestErrorException;
 import es.in2.desmos.domain.exceptions.SubscriptionCreationException;
-import es.in2.desmos.domain.models.*;
+import es.in2.desmos.domain.models.BlockchainNotification;
+import es.in2.desmos.domain.models.BlockchainNotificationRecover;
+import es.in2.desmos.domain.models.BrokerSubscription;
+import es.in2.desmos.domain.models.EventQueuePriority;
 import es.in2.desmos.domain.services.api.RecoverRepositoryService;
 import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import jakarta.annotation.PostConstruct;
@@ -16,7 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.retry.annotation.Recover;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
@@ -43,16 +45,22 @@ public class ScorpioAdapter implements BrokerAdapterService {
     }
 
     @Override
-    public Mono<Void> postEntity(String processId, String requestBody) {
-        MediaType mediaType = getContentTypeAndAcceptMediaType(requestBody);
-        return webClient.post()
-                .uri(brokerConfig.getEntitiesPath())
-                .accept(mediaType)
-                .contentType(mediaType)
-                .bodyValue(requestBody)
-                .retrieve()
-                .bodyToMono(Void.class)
-                .retry(3);
+    public Mono<Void> postEntity(String processId, String requestBody, BlockchainNotification blockchainNotification) {
+        return Mono.defer(() -> {
+            MediaType mediaType = getContentTypeAndAcceptMediaType(requestBody);
+            return webClient.post()
+                    .uri(brokerConfig.getEntitiesPath())
+                    .accept(mediaType)
+                    .contentType(mediaType)
+                    .bodyValue(requestBody)
+                    .retrieve()
+                    .bodyToMono(Void.class)
+                    .retry(3)
+                    .onErrorResume(e -> {
+                        log.error("Error after retries, moving to custom recovery", e);
+                        return recover(processId, blockchainNotification);
+                    });
+        });
     }
 
     @Override
@@ -71,7 +79,7 @@ public class ScorpioAdapter implements BrokerAdapterService {
     }
 
     @Override
-    public Mono<String> getEntityById(String processId, String entityId) {
+    public Mono<String> getEntityById(String processId, String entityId, BlockchainNotification blockchainNotification) {
         return webClient.get()
                 .uri(brokerConfig.getEntitiesPath() + "/" + entityId)
                 .accept(MediaType.APPLICATION_JSON)
@@ -83,13 +91,14 @@ public class ScorpioAdapter implements BrokerAdapterService {
                         }
                 )
                 .onStatus(HttpStatusCode::is5xxServerError,
-                        response -> Mono.error(new RequestErrorException("Internal Server Error"))
-                )
+                        response -> recover(processId, blockchainNotification)
+                                .then(Mono.defer(() -> Mono.error(new RequestErrorException("Error fetching entity from Context Broker")))
+                ))
                 .bodyToMono(String.class);
     }
 
     @Override
-    public Mono<Void> updateEntity(String processId, String requestBody) {
+    public Mono<Void> updateEntity(String processId, String requestBody, BlockchainNotification blockchainNotification) {
         return extractEntityIdFromRequestBody(processId, requestBody)
                 .flatMap(entityId -> {
                     MediaType mediaType = getContentTypeAndAcceptMediaType(requestBody);
@@ -100,7 +109,10 @@ public class ScorpioAdapter implements BrokerAdapterService {
                             .bodyValue(requestBody)
                             .retrieve()
                             .bodyToMono(Void.class)
-                            .retry(3);
+                            .retry(3)
+                            .onErrorResume(e -> recover(processId, blockchainNotification)
+                                    .then(Mono.defer(() -> Mono.error(new RequestErrorException("Error posting entity to Context Broker")
+                    ))));
                 })
                 .doOnSuccess(result -> log.info(RESOURCE_UPDATED_MESSAGE, processId))
                 .doOnError(e -> log.error(ERROR_UPDATING_RESOURCE_MESSAGE, e.getMessage()));
@@ -264,7 +276,6 @@ public class ScorpioAdapter implements BrokerAdapterService {
         }
     }
 
-    @Recover
     public Mono<Void> recover(String processId, BlockchainNotification blockchainNotification) {
         log.error("ProcessId: {} - Error occurred while publishing entity to the local broker", processId);
         try {
@@ -282,7 +293,7 @@ public class ScorpioAdapter implements BrokerAdapterService {
                     .newTransaction(true)
                     .build());
         } catch (JsonProcessingException e) {
-            throw new JsonReadingException("Error serializing BlockchainTxPayload");
+            throw new JsonReadingException("Error serializing BlockchainNotification");
         }
     }
 

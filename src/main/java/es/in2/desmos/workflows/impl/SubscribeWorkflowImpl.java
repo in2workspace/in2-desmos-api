@@ -63,7 +63,10 @@ public class SubscribeWorkflowImpl implements SubscribeWorkflow {
                                                 )
                                 )
                                 .doOnSuccess(success -> log.info("ProcessID: {} - Subscribe Workflow completed successfully.", processId))
-                                .doOnError(error -> log.error("ProcessID: {} - Error occurred while processing the Subscribe Workflow: {}", processId, error.getMessage())));
+                                .onErrorResume(error -> {
+                                    log.error("ProcessID: {} - Error occurred while processing the Subscribe Workflow: {}", processId, error.getMessage());
+                                    return Mono.empty();
+                                }));
     }
 
 

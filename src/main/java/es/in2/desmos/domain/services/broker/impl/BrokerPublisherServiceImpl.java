@@ -25,31 +25,31 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
         // This is used to check if the retrieved entity exists in the local broker or not.
         // If it exists, the entity will be updated, otherwise, it will be created.
         String entityId = extractEntityIdFromDataLocation(blockchainNotification.dataLocation());
-        return getEntityById(processId, entityId)
+        return getEntityById(processId, entityId, blockchainNotification)
                 .switchIfEmpty(Mono.just(""))
                 .flatMap(response -> {
                     if(response.isBlank()) {
                         log.info("ProcessID: {} - Entity doesn't exist", processId);
                         // Logic for when the entity does not exist, for example, creating it
-                        return postEntity(processId, retrievedBrokerEntity);
+                        return postEntity(processId, retrievedBrokerEntity, blockchainNotification);
                     } else {
                         // Logic for when the entity exists
                         log.info("ProcessId: {} - Entity exists", processId);
-                        return updateEntity(processId, retrievedBrokerEntity);
+                        return updateEntity(processId, retrievedBrokerEntity, blockchainNotification);
                     }
                 });
     }
 
-    private Mono<Void> postEntity(String processId, String requestBody) {
-        return brokerAdapterService.postEntity(processId, requestBody);
+    private Mono<Void> postEntity(String processId, String requestBody, BlockchainNotification blockchainNotification) {
+        return brokerAdapterService.postEntity(processId, requestBody, blockchainNotification);
     }
 
-    private Mono<String> getEntityById(String processId, String entityId) {
-        return brokerAdapterService.getEntityById(processId, entityId);
+    private Mono<String> getEntityById(String processId, String entityId, BlockchainNotification blockchainNotification) {
+        return brokerAdapterService.getEntityById(processId, entityId, blockchainNotification);
     }
 
-    private Mono<Void> updateEntity(String processId, String requestBody) {
-        return brokerAdapterService.updateEntity(processId, requestBody);
+    private Mono<Void> updateEntity(String processId, String requestBody, BlockchainNotification blockchainNotification) {
+        return brokerAdapterService.updateEntity(processId, requestBody, blockchainNotification);
     }
 
 }

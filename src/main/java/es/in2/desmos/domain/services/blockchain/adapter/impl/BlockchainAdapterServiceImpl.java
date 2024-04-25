@@ -64,9 +64,8 @@ public class BlockchainAdapterServiceImpl implements BlockchainAdapterService {
                         response -> Mono.empty())
                 .bodyToMono(Void.class)
                 .retry(3)
-                .onErrorResume(e -> recover(processId, blockchainTxPayload).flatMap(
-                        error -> Mono.error(new RequestErrorException("Error posting transaction payload to DLT Adapter"))
-                ));
+                .onErrorResume(e -> recover(processId, blockchainTxPayload)
+                        .then(Mono.defer(() -> Mono.error(new RequestErrorException("Error posting transaction payload to DLT Adapter")))));
     }
 
     @Deprecated(since = "0.5.0", forRemoval = true)
@@ -99,26 +98,6 @@ public class BlockchainAdapterServiceImpl implements BlockchainAdapterService {
         } catch (JsonProcessingException e) {
             throw new JsonReadingException("Error serializing BlockchainTxPayload");
         }
-
-
-//        if (!checkIfHashLinkExistInDataLocation(blockchainData.dataLocation())) {
-//            eventQueuePriority = EventQueuePriority.RECOVER_DELETE;
-//        } else if (!Objects.equals(blockchainData.previousEntityHash(), "0x0000000000000000000000000000000000000000000000000000000000000000")){
-//            eventQueuePriority = EventQueuePriority.RECOVER_EDIT;
-//        }
-//        return transactionService.saveFailedEventTransaction(processId, FailedEventTransaction.builder()
-//                        .id(UUID.randomUUID())
-//                        .transactionId(processId)
-//                        .createdAt(Timestamp.from(Instant.now()))
-//                        .entityId(extractEntityIdFromDataLocation(blockchainData.dataLocation()))
-//                        .entityType(blockchainData.eventType())
-//                        .datalocation(blockchainData.dataLocation())
-//                        .organizationId(blockchainData.organizationId())
-//                        .previousEntityHash(blockchainData.previousEntityHash())
-//                        .priority(eventQueuePriority)
-//                        .newTransaction(true)
-//                        .build())
-//                .then(Mono.empty());
     }
 
 }

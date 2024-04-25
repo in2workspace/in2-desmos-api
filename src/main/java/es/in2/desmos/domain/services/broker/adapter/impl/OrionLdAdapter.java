@@ -1,5 +1,6 @@
 package es.in2.desmos.domain.services.broker.adapter.impl;
 
+import es.in2.desmos.domain.models.BlockchainNotification;
 import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import es.in2.desmos.domain.models.BrokerSubscription;
 import org.springframework.stereotype.Component;
@@ -13,7 +14,7 @@ import java.util.List;
 public class OrionLdAdapter implements BrokerAdapterService {
 
     @Override
-    public Mono<Void> postEntity(String processId, String requestBody) {
+    public Mono<Void> postEntity(String processId, String requestBody, BlockchainNotification blockchainNotification) {
         return null;
     }
 
@@ -21,12 +22,12 @@ public class OrionLdAdapter implements BrokerAdapterService {
     public Flux<String> getEntitiesByTimeRange(String processId, String timestamp) {return null;}
 
     @Override
-    public Mono<String> getEntityById(String processId, String entityId) {
+    public Mono<String> getEntityById(String processId, String entityId, BlockchainNotification blockchainNotification) {
         return null;
     }
 
     @Override
-    public Mono<Void> updateEntity(String processId, String requestBody) {
+    public Mono<Void> updateEntity(String processId, String requestBody, BlockchainNotification blockchainNotification) {
         return null;
     }
 
