@@ -45,13 +45,13 @@ class P2PDataSyncWorkflowIT {
     private ObjectMapper objectMapper;
 
     @Autowired
-    ScorpioAdapter scorpioAdapter;
+    private ScorpioAdapter scorpioAdapter;
 
     @Autowired
-    AuditRecordService auditRecordService;
+    private AuditRecordService auditRecordService;
 
     @Autowired
-    DataTransferJobImpl dataTransferJob;
+    private DataTransferJobImpl dataTransferJob;
 
     @LocalServerPort
     private int localServerPort;
@@ -59,12 +59,12 @@ class P2PDataSyncWorkflowIT {
     @Value("${broker.externalDomain}")
     private String contextBrokerExternalDomain;
 
-    public static MockWebServer mockWebServer;
+    private MockWebServer mockWebServer;
 
-    private static List<MVEntity4DataNegotiation> initialMvEntity4DataNegotiationList;
+    private List<MVEntity4DataNegotiation> initialMvEntity4DataNegotiationList;
 
     @DynamicPropertySource
-    static void setDynamicProperties(DynamicPropertyRegistry registry) {
+    private static void setDynamicProperties(DynamicPropertyRegistry registry) {
         ContainerManager.postgresqlProperties(registry);
     }
 
@@ -255,7 +255,7 @@ class P2PDataSyncWorkflowIT {
         });
     }
 
-    private static @NotNull List<MVEntity4DataNegotiation> createInitialEntitiesInScorpio() throws JSONException, JsonProcessingException {
+    private @NotNull List<MVEntity4DataNegotiation> createInitialEntitiesInScorpio() throws JSONException, JsonProcessingException {
         String brokerUrl = ContainerManager.getBaseUriForScorpioA();
         String responseEntities = EntityMother.list1And2OldAnd3();
         ScorpioInflator.addInitialEntitiesToContextBroker(brokerUrl, responseEntities);
@@ -263,7 +263,7 @@ class P2PDataSyncWorkflowIT {
         return MVEntity4DataNegotiationMother.list1And2OldAnd3();
     }
 
-    private static void removeInitialEntitiesInScorpio() {
+    private void removeInitialEntitiesInScorpio() {
         String brokerUrl = ContainerManager.getBaseUriForScorpioA();
         List<String> ids = MVEntity4DataNegotiationMother.fullList().stream().map(MVEntity4DataNegotiation::id).toList();
         ScorpioInflator.deleteInitialEntitiesFromContextBroker(brokerUrl, ids);
@@ -281,7 +281,7 @@ class P2PDataSyncWorkflowIT {
         }
     }
 
-    private static void removeInitialEntitiesInAuditRecord(AuditRecordService auditRecordService, @NotNull List<MVEntity4DataNegotiation> entities) {
+    private void removeInitialEntitiesInAuditRecord(AuditRecordService auditRecordService, @NotNull List<MVEntity4DataNegotiation> entities) {
         String processId = "0";
         String issuer = "http://example.org";
         for (var entity : entities) {
@@ -289,12 +289,12 @@ class P2PDataSyncWorkflowIT {
         }
     }
 
-    private static void startMockWebServer() throws IOException {
+    private void startMockWebServer() throws IOException {
         mockWebServer = new MockWebServer();
         mockWebServer.start();
     }
 
-    private static void stopMockWebServer() throws IOException {
+    private void stopMockWebServer() throws IOException {
         mockWebServer.shutdown();
     }
 }

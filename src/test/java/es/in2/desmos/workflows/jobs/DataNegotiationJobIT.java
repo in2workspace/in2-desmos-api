@@ -27,7 +27,7 @@ class DataNegotiationJobIT {
     private DataNegotiationJob dataNegotiationJob;
 
     @DynamicPropertySource
-    static void setDynamicProperties(DynamicPropertyRegistry registry) {
+    private static void setDynamicProperties(DynamicPropertyRegistry registry) {
         ContainerManager.postgresqlProperties(registry);
     }
 

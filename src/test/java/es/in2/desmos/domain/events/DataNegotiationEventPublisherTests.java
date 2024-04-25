@@ -18,10 +18,10 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class DataNegotiationEventPublisherTests {
     @InjectMocks
-    DataNegotiationEventPublisher dataNegotiationEventPublisher;
+    private DataNegotiationEventPublisher dataNegotiationEventPublisher;
 
     @Mock
-    ApplicationEventPublisher applicationEventPublisher;
+    private ApplicationEventPublisher applicationEventPublisher;
 
     @Test
     void itShouldPublicateEvent(){
