@@ -45,7 +45,7 @@ class DataTransferJobTest {
     private BrokerPublisherService brokerPublisherService;
 
     @Spy
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private static ObjectMapper objectMapper = new ObjectMapper();
 
     @Captor
     private ArgumentCaptor<Mono<String>> monoIssuerCaptor;

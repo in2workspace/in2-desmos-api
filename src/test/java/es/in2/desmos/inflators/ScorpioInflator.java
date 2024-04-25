@@ -14,6 +14,8 @@ import java.util.List;
 
 public final class ScorpioInflator {
 
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
     private ScorpioInflator() {
     }
 
@@ -69,7 +71,6 @@ public final class ScorpioInflator {
 
     @NotNull
     private static String createInitialEntitiesRequestBody(List<MVBrokerEntity4DataNegotiation> initialEntities) throws JsonProcessingException, JSONException {
-        ObjectMapper objectMapper = new ObjectMapper();
         JSONArray productOfferingsJsonArray = new JSONArray();
 
         for (MVBrokerEntity4DataNegotiation productOffering : initialEntities) {
@@ -92,7 +93,6 @@ public final class ScorpioInflator {
         var contextValueFakeList = new JSONArray();
         contextValueFakeList.put("https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld");
 
-        ObjectMapper objectMapper = new ObjectMapper();
         JSONObject[] productOfferings = objectMapper.readValue(requestBody, JSONObject[].class);
 
         JSONArray productOfferingsJsonArray = new JSONArray();

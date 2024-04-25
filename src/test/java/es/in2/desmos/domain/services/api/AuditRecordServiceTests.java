@@ -28,7 +28,7 @@ class AuditRecordServiceTests {
     private AuditRecordRepository auditRecordRepository;
 
     @Spy
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private static ObjectMapper objectMapper = new ObjectMapper();
 
     @Captor
     private ArgumentCaptor<AuditRecord> auditRecordArgumentCaptor;

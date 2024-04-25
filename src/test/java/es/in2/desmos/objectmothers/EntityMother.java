@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class EntityMother {
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
     private EntityMother() {
     }
 
@@ -96,7 +98,6 @@ public final class EntityMother {
         jsonObjects.add(json2Old());
         jsonObjects.add(json3());
 
-        ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.writeValueAsString(jsonObjects);
     }
 
