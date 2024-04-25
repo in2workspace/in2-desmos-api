@@ -50,7 +50,7 @@ class BlockchainTxPayloadRecoverTests {
     void testIsNew() {
         // Arrange
         BlockchainTxPayloadRecover txPayloadRecover = new BlockchainTxPayloadRecover();
-        txPayloadRecover.setNewTransaction(true);
+        txPayloadRecover.setNewBlockchainTxPayloadRecover(true);
 
         // Act & Assert
         assertTrue(txPayloadRecover.isNew(), "The entity should be considered 'new' if newTransaction is true.");

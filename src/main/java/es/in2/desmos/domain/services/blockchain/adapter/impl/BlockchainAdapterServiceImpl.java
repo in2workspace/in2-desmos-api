@@ -93,7 +93,7 @@ public class BlockchainAdapterServiceImpl implements BlockchainAdapterService {
                     .relevantMetadata(objectMapper.writeValueAsString(blockchainTxPayload.metadata()))
                     .processId(processId)
                     .eventQueuePriority(EventQueuePriority.CRITICAL.toString())
-                    .newTransaction(true)
+                    .newBlockchainTxPayloadRecover(true)
                     .build());
         } catch (JsonProcessingException e) {
             throw new JsonReadingException("Error serializing BlockchainTxPayload");

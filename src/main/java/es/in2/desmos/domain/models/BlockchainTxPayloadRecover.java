@@ -48,7 +48,7 @@ public class BlockchainTxPayloadRecover implements Persistable<UUID> {
     private String eventQueuePriority;
 
     @Transient
-    private boolean newTransaction;
+    private boolean newBlockchainTxPayloadRecover;
 
     @Override
     public UUID getId() {
@@ -57,7 +57,7 @@ public class BlockchainTxPayloadRecover implements Persistable<UUID> {
 
     @Override
     public boolean isNew() {
-        return this.newTransaction || id == null;
+        return this.newBlockchainTxPayloadRecover || id == null;
     }
 
 }

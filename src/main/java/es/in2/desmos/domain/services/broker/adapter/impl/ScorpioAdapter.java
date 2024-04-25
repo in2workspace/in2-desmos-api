@@ -290,7 +290,7 @@ public class ScorpioAdapter implements BrokerAdapterService {
                     .notificationId(String.valueOf(blockchainNotification.id()))
                     .processId(processId)
                     .eventQueuePriority(EventQueuePriority.CRITICAL.toString())
-                    .newTransaction(true)
+                    .newBlockchainNotificationRecover(true)
                     .build());
         } catch (JsonProcessingException e) {
             throw new JsonReadingException("Error serializing BlockchainNotification");

@@ -56,7 +56,7 @@ class BlockchainNotificationRecoverTests {
         // Arrange
         BlockchainNotificationRecover notificationRecover = BlockchainNotificationRecover.builder()
                 .id(UUID.randomUUID())
-                .newTransaction(true)
+                .newBlockchainNotificationRecover(true)
                 .build();
 
         // Act & Assert
