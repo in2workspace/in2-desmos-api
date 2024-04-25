@@ -28,15 +28,24 @@ public class P2PDataSyncController {
     @PostMapping("/discovery")
     @ResponseStatus(HttpStatus.OK)
     public Mono<DiscoverySyncResponse> discoverySync(@RequestBody @Valid Mono<DiscoverySyncRequest> discoverySyncRequest) {
+        String processId = UUID.randomUUID().toString();
+        log.info("ProcessID: {} - Starting Synchronization Discovery", processId);
+
         return discoverySyncRequest.flatMap(request -> {
-            String processId = UUID.randomUUID().toString();
-            log.info("ProcessID: {} - Starting Synchronization Discovery", processId);
-            log.debug("ProcessID: {} - Starting Synchronization Discovery: {}", processId, request);
+                    log.debug("ProcessID: {} - Starting Synchronization Discovery: {}", processId, request);
 
-            Mono<List<MVEntity4DataNegotiation>> externalMvEntities4DataNegotiation = Mono.just(request.mvEntities4DataNegotiation());
-            Mono<List<MVEntity4DataNegotiation>> localMvEntities4DataNegotiation = p2PDataSyncWorkflow.dataDiscovery(processId, Mono.just(request.issuer()), externalMvEntities4DataNegotiation);
+                    Mono<List<MVEntity4DataNegotiation>> externalMvEntities4DataNegotiationMono = Mono.just(request.mvEntities4DataNegotiation());
+                    Mono<String> issuerMono = Mono.just(request.issuer());
 
-            return localMvEntities4DataNegotiation.map(mvEntities4DataNegotiation -> new DiscoverySyncResponse(contextBrokerExternalDomain, mvEntities4DataNegotiation));
-        });
+                    return p2PDataSyncWorkflow.dataDiscovery(processId, issuerMono, externalMvEntities4DataNegotiationMono)
+                            .flatMap(localMvEntities4DataNegotiation -> {
+                                Mono<List<MVEntity4DataNegotiation>> localMvEntities4DataNegotiationMono = Mono.just(localMvEntities4DataNegotiation);
+
+                                return localMvEntities4DataNegotiationMono.map(mvEntities4DataNegotiation ->
+                                        new DiscoverySyncResponse(contextBrokerExternalDomain, mvEntities4DataNegotiation));
+                            });
+                })
+                .doOnSuccess(success -> log.info("ProcessID: {} - Subscribe Workflow completed successfully.", processId))
+                .doOnError(error -> log.error("ProcessID: {} - Error occurred while processing the Subscribe Workflow: {}", processId, error.getMessage()));
     }
 }
