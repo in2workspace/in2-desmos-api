@@ -29,10 +29,10 @@ public class P2PDataSyncController {
     @ResponseStatus(HttpStatus.OK)
     public Mono<DiscoverySyncResponse> discoverySync(@RequestBody @Valid Mono<DiscoverySyncRequest> discoverySyncRequest) {
         String processId = UUID.randomUUID().toString();
-        log.info("ProcessID: {} - Starting Synchronization Discovery", processId);
+        log.info("ProcessID: {} - Starting P2P Data Synchronization Discovery Controller", processId);
 
         return discoverySyncRequest.flatMap(request -> {
-                    log.debug("ProcessID: {} - Starting Synchronization Discovery: {}", processId, request);
+                    log.debug("ProcessID: {} - Starting P2P Data Synchronization Discovery: {}", processId, request);
 
                     Mono<List<MVEntity4DataNegotiation>> externalMvEntities4DataNegotiationMono = Mono.just(request.mvEntities4DataNegotiation());
                     Mono<String> issuerMono = Mono.just(request.issuer());
@@ -45,7 +45,7 @@ public class P2PDataSyncController {
                                         new DiscoverySyncResponse(contextBrokerExternalDomain, mvEntities4DataNegotiation));
                             });
                 })
-                .doOnSuccess(success -> log.info("ProcessID: {} - Subscribe Workflow completed successfully.", processId))
-                .doOnError(error -> log.error("ProcessID: {} - Error occurred while processing the Subscribe Workflow: {}", processId, error.getMessage()));
+                .doOnSuccess(success -> log.info("ProcessID: {} - P2P Data Synchronization Discovery successfully.", processId))
+                .doOnError(error -> log.error("ProcessID: {} - Error occurred while processing the P2P Data Synchronization Discovery Controller: {}", processId, error.getMessage()));
     }
 }
