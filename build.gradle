@@ -50,6 +50,16 @@ configurations {
     }
 }
 
+configurations.configureEach {
+    resolutionStrategy {
+        eachDependency { DependencyResolveDetails details ->
+            if (details.requested.group.startsWith('com.fasterxml.jackson')) {
+                details.useVersion '2.17.0'
+            }
+        }
+    }
+}
+
 repositories {
     mavenCentral()
 }
