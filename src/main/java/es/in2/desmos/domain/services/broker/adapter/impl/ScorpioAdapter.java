@@ -199,7 +199,7 @@ public class ScorpioAdapter implements BrokerAdapterService {
     }
 
     @Override
-    public Mono<List<MVBrokerEntity4DataNegotiation>> getMvBrokerEntities4DataNegotiation(String processId) {
+    public Mono<List<MVBrokerEntity4DataNegotiation>> getMVBrokerEntities4DataNegotiation(String processId) {
         log.info("ProcessID: {} - Getting MV Entities For Data Negotiation from Scorpio", processId);
 
         String uri = brokerConfig.getEntitiesPath() + "/" + "?type=ProductOffering&attrs=lastUpdate,version\"";
@@ -212,7 +212,7 @@ public class ScorpioAdapter implements BrokerAdapterService {
                 .bodyToMono(ScorpioEntity[].class)
                 .retry(3);
 
-        return scorpioProductOfferingList.map(this::getBrokerEntities);
+        return scorpioProductOfferingList.map(this::getMVBrokerEntities4DataNegotiationFromScorpioEntities);
     }
 
     @Override
@@ -231,7 +231,7 @@ public class ScorpioAdapter implements BrokerAdapterService {
                 .retry(3);
     }
 
-    private List<MVBrokerEntity4DataNegotiation> getBrokerEntities(ScorpioEntity[] scorpioEntities) {
+    private List<MVBrokerEntity4DataNegotiation> getMVBrokerEntities4DataNegotiationFromScorpioEntities(ScorpioEntity[] scorpioEntities) {
         List<MVBrokerEntity4DataNegotiation> mvBrokerEntities4DataNegotiation = new ArrayList<>();
         for (var scorpioProductOffering : scorpioEntities) {
             mvBrokerEntities4DataNegotiation.add(

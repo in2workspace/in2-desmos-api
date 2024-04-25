@@ -15,7 +15,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -28,24 +31,24 @@ public class P2PDataSyncWorkflowImpl implements P2PDataSyncWorkflow {
     private final DataNegotiationEventPublisher dataNegotiationEventPublisher;
 
     @Override
-    public Mono<List<MVEntity4DataNegotiation>> dataDiscovery(String processId, Mono<String> issuer, Mono<List<MVEntity4DataNegotiation>> externalMvEntities4DataNegotiation) {
-        log.info("ProcessID: {} - Starting the P2P Data Sync Workflow", processId);
+    public Mono<List<MVEntity4DataNegotiation>> dataDiscovery(String processId, Mono<String> issuer, Mono<List<MVEntity4DataNegotiation>> externalMvEntities4DataNegotiationMono) {
+        log.info("ProcessID: {} - Starting P2P Data Synchronization Discovery Workflow", processId);
 
-        Mono<List<MVBrokerEntity4DataNegotiation>> mvBrokerEntities4DataNegotiationMono = brokerEntityGetterService.getMvBrokerEntities4DataNegotiation(processId);
+        return createLocalMvEntities4DataNegotiation(processId).map(localMvEntities4DataNegotiation -> {
+                    log.debug("ProcessID: {} - Local MV Entities 4 Data Negotiation: {}", processId, localMvEntities4DataNegotiation);
 
-        Mono<List<String>> entities4DataNegotiationIds = mvBrokerEntities4DataNegotiationMono.map(x -> x.stream().map(MVBrokerEntity4DataNegotiation::id).toList());
-        Mono<List<MVAuditServiceEntity4DataNegotiation>> mvAuditServiceEntities4DataNegotiationMono = getMvAuditServiceEntity4DataNegotiation(processId, entities4DataNegotiationIds);
+                    var localMvEntities4DataNegotiationMono = Mono.just(localMvEntities4DataNegotiation);
 
-        Mono<List<MVEntity4DataNegotiation>> localMvEntities4DataNegotiation = createLocalMvEntities4DataNegotiation(mvBrokerEntities4DataNegotiationMono, mvAuditServiceEntities4DataNegotiationMono);
+                    var dataNegotiationEvent = new DataNegotiationEvent(processId, issuer, externalMvEntities4DataNegotiationMono, localMvEntities4DataNegotiationMono);
+                    dataNegotiationEventPublisher.publishEvent(dataNegotiationEvent);
 
-        DataNegotiationEvent dataNegotiationEvent = new DataNegotiationEvent(processId, issuer, externalMvEntities4DataNegotiation, localMvEntities4DataNegotiation);
-        dataNegotiationEventPublisher.publishEvent(dataNegotiationEvent);
-
-        log.info("ProcessID: {} - Finishing the P2P Data Sync Workflow", processId);
-        return localMvEntities4DataNegotiation;
+                    return localMvEntities4DataNegotiation;
+                })
+                .doOnSuccess(success -> log.info("ProcessID: {} - P2P Data Synchronization Discovery Workflow successfully.", processId))
+                .doOnError(error -> log.error("ProcessID: {} - Error occurred while processing the P2P Data Synchronization Discovery Workflow: {}", processId, error.getMessage()));
     }
 
-    private Mono<List<MVAuditServiceEntity4DataNegotiation>> getMvAuditServiceEntity4DataNegotiation(String processId, Mono<List<String>> entities4DataNegotiationIdsMono) {
+    private Mono<List<MVAuditServiceEntity4DataNegotiation>> getMvAuditServiceEntities4DataNegotiation(String processId, Mono<List<String>> entities4DataNegotiationIdsMono) {
         return entities4DataNegotiationIdsMono.flatMap(entities4DataNegotiationIds ->
                 Flux.fromIterable(entities4DataNegotiationIds)
                         .flatMap(id -> auditRecordService.findLatestAuditRecordForEntity(processId, id)
@@ -60,35 +63,42 @@ public class P2PDataSyncWorkflowImpl implements P2PDataSyncWorkflow {
         );
     }
 
-    private Mono<List<MVEntity4DataNegotiation>> createLocalMvEntities4DataNegotiation(
-            Mono<List<MVBrokerEntity4DataNegotiation>> mvBrokerEntities4DataNegotiationMono,
-            Mono<List<MVAuditServiceEntity4DataNegotiation>> mvAuditServiceEntities4DataNegotiationMono) {
-        return Mono.zip(mvBrokerEntities4DataNegotiationMono, mvAuditServiceEntities4DataNegotiationMono)
-                .map(tuple -> {
-                    var mvBrokerEntities4DataNegotiation = tuple.getT1();
-                    var mvAuditServiceEntities4DataNegotiation = tuple.getT2();
+    private Mono<List<MVEntity4DataNegotiation>> createLocalMvEntities4DataNegotiation(String processId) {
+        return brokerEntityGetterService.getMVBrokerEntities4DataNegotiation(processId)
+                .flatMap(mvBrokerEntities4DataNegotiation -> {
+                    log.debug("ProcessID: {} - MV Broker Entities 4 Data Negotiation: {}", processId, mvBrokerEntities4DataNegotiation);
 
-                    return mvBrokerEntities4DataNegotiation.stream()
-                            .map(brokerEntity -> {
-                                var auditServiceEntity = mvAuditServiceEntities4DataNegotiation.stream()
-                                        .filter(auditEntity -> auditEntity.id().equals(brokerEntity.id()))
-                                        .findFirst()
-                                        .orElse(null);
+                    Mono<List<String>> entities4DataNegotiationIdsMono = getEntities4DataNegotiationIds(Mono.just(mvBrokerEntities4DataNegotiation));
 
-                                if (auditServiceEntity != null) {
-                                    return new MVEntity4DataNegotiation(
-                                            brokerEntity.id(),
-                                            brokerEntity.type(),
-                                            brokerEntity.version(),
-                                            brokerEntity.lastUpdate(),
-                                            auditServiceEntity.hash(),
-                                            auditServiceEntity.hashlink());
-                                } else {
-                                    return null;
-                                }
-                            })
-                            .filter(Objects::nonNull)
-                            .toList();
+                    return getMvAuditServiceEntities4DataNegotiation(processId, entities4DataNegotiationIdsMono)
+                            .map(mvAuditServiceEntities4DataNegotiation -> {
+                                log.debug("ProcessID: {} - MV Audit Service Entities 4 Data Negotiation: {}", processId, mvAuditServiceEntities4DataNegotiation);
+
+                                Map<String, MVAuditServiceEntity4DataNegotiation> auditServiceEntityMap = mvAuditServiceEntities4DataNegotiation.stream()
+                                        .collect(Collectors.toMap(MVAuditServiceEntity4DataNegotiation::id, Function.identity()));
+
+                                return mvBrokerEntities4DataNegotiation.stream()
+                                        .map(brokerEntity -> {
+                                            MVAuditServiceEntity4DataNegotiation auditServiceEntity = auditServiceEntityMap.get(brokerEntity.id());
+                                            if (auditServiceEntity != null) {
+                                                return new MVEntity4DataNegotiation(
+                                                        brokerEntity.id(),
+                                                        brokerEntity.type(),
+                                                        brokerEntity.version(),
+                                                        brokerEntity.lastUpdate(),
+                                                        auditServiceEntity.hash(),
+                                                        auditServiceEntity.hashlink());
+                                            } else {
+                                                return null;
+                                            }
+                                        })
+                                        .filter(Objects::nonNull)
+                                        .toList();
+                            });
                 });
+    }
+
+    private static Mono<List<String>> getEntities4DataNegotiationIds(Mono<List<MVBrokerEntity4DataNegotiation>> mvBrokerEntities4DataNegotiationMono) {
+        return mvBrokerEntities4DataNegotiationMono.map(x -> x.stream().map(MVBrokerEntity4DataNegotiation::id).toList());
     }
 }

@@ -58,7 +58,7 @@ class ScorpioAdapterIT {
     @Test
     void itShouldReturnEntityIds() {
         String processId = "0";
-        Mono<List<MVBrokerEntity4DataNegotiation>> result = scorpioAdapter.getMvBrokerEntities4DataNegotiation(processId);
+        Mono<List<MVBrokerEntity4DataNegotiation>> result = scorpioAdapter.getMVBrokerEntities4DataNegotiation(processId);
 
         StepVerifier.create(result)
                 .expectNext(initialMvEntity4DataNegotiationList)
@@ -133,8 +133,12 @@ class ScorpioAdapterIT {
 
     private static void removeInitialMVEntity4DataNegotiation() {
         String brokerUrl = ContainerManager.getBaseUriForScorpioA();
-//        List<String> ids = entities.stream().map(MVBrokerEntity4DataNegotiation::id).toList();
+
         List<String> ids = MVEntity4DataNegotiationMother.fullList().stream().map(MVEntity4DataNegotiation::id).toList();
         ScorpioInflator.deleteInitialEntitiesFromContextBroker(brokerUrl, ids);
+
+        ids = initialMvEntity4DataNegotiationList.stream().map(MVBrokerEntity4DataNegotiation::id).toList();
+        ScorpioInflator.deleteInitialEntitiesFromContextBroker(brokerUrl, ids);
+
     }
 }
