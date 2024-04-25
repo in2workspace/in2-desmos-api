@@ -57,7 +57,7 @@ public class ScorpioAdapter implements BrokerAdapterService {
                     .bodyToMono(Void.class)
                     .retry(3)
                     .onErrorResume(e -> {
-                        log.error("Error after retries, moving to custom recovery", e);
+                        log.error("Error after retries, moving recover...", e);
                         return recover(processId, blockchainNotification);
                     });
         });
