@@ -6,7 +6,7 @@ public final class EntitySyncResponseMother {
     private EntitySyncResponseMother() {
     }
 
-    public static @NotNull String sample = """
+    public static final @NotNull String sample = """
             [
                  {
                      "id": "urn:productOffering:d86735a6-0faa-463d-a872-00b97affa1cb",
@@ -79,7 +79,7 @@ public final class EntitySyncResponseMother {
              ]
             """;
 
-    public static String sample2and4 = """
+    public static final String sample2and4 = """
             [
                  {
                      "id": "urn:productOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87",
@@ -118,12 +118,12 @@ public final class EntitySyncResponseMother {
              ]
             """;
 
-    public static String id1 = "urn:productOffering:d86735a6-0faa-463d-a872-00b97affa1cb";
+    public final static String id1 = "urn:productOffering:d86735a6-0faa-463d-a872-00b97affa1cb";
 
-    public static String id2 = "urn:productOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87";
+    public final static String id2 = "urn:productOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87";
 
-    public static String id3 = "urn:productOffering:537e1ee3-0556-4fff-875f-e55bb97e7ab0";
+    public final static String id3 = "urn:productOffering:537e1ee3-0556-4fff-875f-e55bb97e7ab0";
 
-    public static String id4 = "urn:productOffering:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c";
+    public final static String id4 = "urn:productOffering:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c";
 
 }
