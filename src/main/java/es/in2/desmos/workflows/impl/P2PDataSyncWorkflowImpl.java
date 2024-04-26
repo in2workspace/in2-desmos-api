@@ -16,7 +16,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -65,19 +64,14 @@ public class P2PDataSyncWorkflowImpl implements P2PDataSyncWorkflow {
                                 return mvBrokerEntities4DataNegotiation.stream()
                                         .map(brokerEntity -> {
                                             MVAuditServiceEntity4DataNegotiation auditServiceEntity = auditServiceEntityMap.get(brokerEntity.id());
-                                            if (auditServiceEntity != null) {
-                                                return new MVEntity4DataNegotiation(
-                                                        brokerEntity.id(),
-                                                        brokerEntity.type(),
-                                                        brokerEntity.version(),
-                                                        brokerEntity.lastUpdate(),
-                                                        auditServiceEntity.hash(),
-                                                        auditServiceEntity.hashlink());
-                                            } else {
-                                                return null;
-                                            }
+                                            return new MVEntity4DataNegotiation(
+                                                    brokerEntity.id(),
+                                                    brokerEntity.type(),
+                                                    brokerEntity.version(),
+                                                    brokerEntity.lastUpdate(),
+                                                    auditServiceEntity.hash(),
+                                                    auditServiceEntity.hashlink());
                                         })
-                                        .filter(Objects::nonNull)
                                         .toList();
                             });
                 });
