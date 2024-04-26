@@ -54,20 +54,19 @@ class ApplicationRunnerTests {
     @InjectMocks
     private ApplicationRunner applicationRunner;
 
-    // Fixme:
-//    @Test
-//    void whenApplicationIsReady_thenSetBrokerSubscriptionAndBlockchainSubscription() {
-//        // Arrange
-//        when(brokerListenerService.createSubscription(anyString(), any())).thenReturn(Mono.empty());
-//        Mockito.when(blockchainListenerService.createSubscription(Mockito.anyString(), Mockito.any(BlockchainSubscription.class)))
-//                .thenReturn(Mono.empty());
-//        Mockito.when(blockchainDataSyncJob.startBlockchainDataSyncJob(Mockito.anyString())).thenReturn(Flux.empty());
-//        Mockito.when(publishWorkflow.startPublishWorkflow(Mockito.anyString())).thenReturn(Flux.empty());
-//        Mockito.when(subscribeWorkflow.startSubscribeWorkflow()).thenReturn(Flux.empty());
-//        // Act
-//        ApplicationReadyEvent event = mock(ApplicationReadyEvent.class);
-//        StepVerifier.create(applicationRunner.onApplicationReady()).verifyComplete();
-//    }
+    @Test
+    void whenApplicationIsReady_thenSetBrokerSubscriptionAndBlockchainSubscription() {
+        // Arrange
+        when(brokerListenerService.createSubscription(anyString(), any())).thenReturn(Mono.empty());
+        Mockito.when(blockchainListenerService.createSubscription(Mockito.anyString(), Mockito.any(BlockchainSubscription.class)))
+                .thenReturn(Mono.empty());
+        Mockito.when(dataSyncWorkflow.startDataSyncWorkflow(Mockito.anyString())).thenReturn(Flux.empty());
+        Mockito.when(publishWorkflow.startPublishWorkflow(Mockito.anyString())).thenReturn(Flux.empty());
+        Mockito.when(subscribeWorkflow.startSubscribeWorkflow()).thenReturn(Flux.empty());
+        // Act
+        ApplicationReadyEvent event = mock(ApplicationReadyEvent.class);
+        StepVerifier.create(applicationRunner.onApplicationReady()).verifyComplete();
+    }
 
     // Fixme: Retry and recover does not work with MockitoExtension
 //    @Test
