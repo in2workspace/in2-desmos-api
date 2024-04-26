@@ -1,4 +1,4 @@
-package es.in2.desmos.domain.services.sync;
+package es.in2.desmos.domain.services.sync.jobs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
