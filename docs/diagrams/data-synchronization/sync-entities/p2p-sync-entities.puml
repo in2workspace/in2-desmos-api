@@ -1,0 +1,65 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+'---------- Config ----------------
+
+autonumber
+
+'---------- Header ----------------
+
+boundary "External Access Node" as ean
+
+box "Access Node"
+
+  control "P2PDataSyncController" as p2pController
+  participant "P2PDataSyncWorkflow" as p2pWorkflow
+  participant "BrokerEntityGetterService" as begs
+  participant "BrokerAdapterService" as bas
+  participant "Context Broker" as cb
+
+end box
+
+'---------- Diagram ----------------
+
+ean -> p2pController++: POST /sync/p2p/entities \nPayload: EntitySyncRequest
+
+note right of ean
+    EntitySyncRequest:
+        List<Id> ids
+    Id:
+        String value
+end note
+
+    p2pController -> p2pWorkflow++: getLocalEntities()
+        p2pWorkflow -> begs++: getAllProductOfferings()
+            begs -> bas++: getAllProductOfferings()
+                bas -> cb++: GET /ngsi-ld/v1/entities?type=ProductOffering
+                return 200 OK - Payload: ScorpioGetProductOfferingsResponse
+
+                note left of cb
+                    ScorpioGetProductOfferingsResponse:
+                        ScorpioProductOffering[] scorpioProductOfferings
+                end note
+
+            return ScorpioProductOffering[]
+        return List<ScorpioProductOffering>
+            p2pWorkflow -> p2pWorkflow++: getEntitiesRelationshipsIds()
+            return List<String>
+        p2pWorkflow -> begs++: getEntitiesRelationshipsByIds\n(List<String> entitiesRelationshipsIds)
+            loop for each entity in entitiesRelationshipsIds
+                begs -> bas++: getEntityById(entityRelationshipId)
+                    bas -> cb++: GET /ngsi-ld/v1/entities/{entityRelationshipId}
+                    return 200 OK - Payload: String entity
+                return String
+            end
+            return List<String>
+            p2pWorkflow -> p2pWorkflow++: getEntitiesList(\nList<ScorpioProductOffering> scorpioProductOfferings,\n List<String> entitiesRelationships)
+            return List<String> localEntities
+        return List<String> localEntities
+return 200 OK - Payload: DiscoverySyncResponse
+
+note left of p2pController
+    EntitySyncResponse:
+        JsonNode entities
+end note
+@enduml
