@@ -96,4 +96,16 @@ class DataSyncServiceImplTests {
                 .expectError(HashLinkException.class)
                 .verify();
     }
+
+    @Test
+    void testVerifyDataIntegrity_JsonProcessingExceptionError() throws JsonProcessingException {
+        JsonNode mockJsonNode = Mockito.mock(JsonNode.class);
+        when(objectMapper.readTree(anyString())).thenReturn(mockJsonNode);
+        when(objectMapper.writeValueAsString(mockJsonNode)).thenThrow(JsonProcessingException.class);
+
+
+        StepVerifier.create(dataSyncService.verifyRetrievedEntityData("processId", errorNotification, retrievedBrokerEntity))
+                .expectError(JsonProcessingException.class)
+                .verify();
+    }
 }
