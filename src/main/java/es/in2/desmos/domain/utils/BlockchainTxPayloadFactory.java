@@ -6,7 +6,6 @@ import es.in2.desmos.configs.ApiConfig;
 import es.in2.desmos.configs.BrokerConfig;
 import es.in2.desmos.domain.exceptions.HashLinkException;
 import es.in2.desmos.domain.models.BlockchainTxPayload;
-import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -16,7 +15,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
 
-import static es.in2.desmos.domain.utils.ApplicationUtils.*;
+import static es.in2.desmos.domain.utils.ApplicationUtils.HASH_PREFIX;
+import static es.in2.desmos.domain.utils.ApplicationUtils.calculateSHA256;
 
 @Slf4j
 @Component
@@ -38,21 +38,14 @@ public class BlockchainTxPayloadFactory {
             String dataLocation = brokerConfig.getEntitiesExternalDomain() + "/" + entityId + ApplicationUtils.HASHLINK_PREFIX + entityHashLink;
             String organizationId = HASH_PREFIX + apiConfig.organizationIdHash();
             String previousEntityHash = HASH_PREFIX + previousHash;
-            BlockchainTxPayload payload = BlockchainTxPayload.builder()
+            return Mono.just(BlockchainTxPayload.builder()
                     .eventType(entityType)
                     .organizationId(organizationId)
                     .entityId(entityIdHash)
                     .previousEntityHash(previousEntityHash)
                     .dataLocation(dataLocation)
                     .metadata(List.of())
-                    .build();
-
-            validate(payload);
-
-            return Mono.just(payload);
-        } catch (ConstraintViolationException e) {
-            log.warn("ProcessID: {} - Error validating blockchain transaction payload: {}", processId, e.getMessage());
-            return Mono.error(e);
+                    .build());
         } catch (JsonProcessingException | NoSuchAlgorithmException e) {
             log.warn("ProcessID: {} - Error creating blockchain transaction payload: {}", processId, e.getMessage());
             return Mono.error(new HashLinkException("Error creating blockchain transaction payload"));

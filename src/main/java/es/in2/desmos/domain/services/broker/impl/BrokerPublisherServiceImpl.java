@@ -21,7 +21,7 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
     }
 
     @Override
-    public Mono<Void> publishDataToBroker(String processId, BlockchainNotification blockchainNotification, String retrievedBrokerEntity) {
+    public Mono<Void> PublishEntityToContextBroker(String processId, BlockchainNotification blockchainNotification, String retrievedBrokerEntity) {
         // Get the entity id from the retrieved broker entity.
         // This is used to check if the retrieved entity exists in the local broker or not.
         // If it exists, the entity will be updated, otherwise it will be created.

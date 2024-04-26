@@ -26,7 +26,7 @@ public record BlockchainNotification(
         String eventType,
 
         @JsonProperty("timestamp")
-//        @ValidTimestamp
+        @PositiveOrZero(message = "timestamp must be positive or zero")
         long timestamp,
 
         @JsonProperty("dataLocation")

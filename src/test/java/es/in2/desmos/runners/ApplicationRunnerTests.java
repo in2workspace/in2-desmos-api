@@ -8,8 +8,6 @@ import es.in2.desmos.domain.services.broker.BrokerListenerService;
 import es.in2.desmos.workflows.DataSyncWorkflow;
 import es.in2.desmos.workflows.PublishWorkflow;
 import es.in2.desmos.workflows.SubscribeWorkflow;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,7 +23,8 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ApplicationRunnerTests {
@@ -71,58 +70,6 @@ class ApplicationRunnerTests {
         ApplicationReadyEvent event = mock(ApplicationReadyEvent.class);
         StepVerifier.create(applicationRunner.onApplicationReady()).verifyComplete();
     }
-
-    @Test
-    void whenBlockchainSubscriptionIsInvalid_thenErrorIsThrown() {
-        // Arrange
-        List<String> invalidEntityTypes = List.of("   ", "ProductOffering", "");
-        lenient().when(blockchainConfig.getEntityTypes()).thenReturn(invalidEntityTypes);
-        lenient().when(blockchainConfig.getNotificationEndpoint()).thenReturn("");
-        lenient().when(brokerListenerService.createSubscription(anyString(), any())).thenReturn(Mono.empty());
-        lenient().when(blockchainListenerService.createSubscription(anyString(), Mockito.any(BlockchainSubscription.class)))
-                .thenReturn(Mono.empty());
-        lenient().when(dataSyncWorkflow.startDataSyncWorkflow(Mockito.anyString())).thenReturn(Flux.empty());
-        lenient().when(publishWorkflow.startPublishWorkflow(Mockito.anyString())).thenReturn(Flux.empty());
-        lenient().when(subscribeWorkflow.startSubscribeWorkflow()).thenReturn(Flux.empty());
-        // Act & Assert
-        StepVerifier.create(applicationRunner.onApplicationReady())
-                .expectErrorMatches(throwable -> {
-                    if (throwable instanceof ConstraintViolationException cve) {
-                        for (ConstraintViolation<?> violation : cve.getConstraintViolations()) {
-                            System.out.println(violation.getPropertyPath() + ": " + violation.getMessage());
-                        }
-                        return true;
-                    }
-                    return false;
-                })
-                .verify();
-    }
-
-    @Test
-    void whenBrokerSubscriptionIsInvalid_thenErrorIsThrown() {
-        // Arrange
-        lenient().when(blockchainConfig.getEntityTypes()).thenReturn(List.of("   ", "ProductOffering", ""));
-        lenient().when(blockchainConfig.getNotificationEndpoint()).thenReturn("http://example.com/notifications");
-        lenient().when(brokerListenerService.createSubscription(anyString(), any())).thenReturn(Mono.empty());
-        lenient().when(blockchainListenerService.createSubscription(anyString(), Mockito.any(BlockchainSubscription.class)))
-                .thenReturn(Mono.empty());
-        lenient().when(dataSyncWorkflow.startDataSyncWorkflow(Mockito.anyString())).thenReturn(Flux.empty());
-        lenient().when(publishWorkflow.startPublishWorkflow(Mockito.anyString())).thenReturn(Flux.empty());
-        lenient().when(subscribeWorkflow.startSubscribeWorkflow()).thenReturn(Flux.empty());
-        // Act & Assert
-        StepVerifier.create(applicationRunner.onApplicationReady())
-                .expectErrorMatches(throwable -> {
-                    if (throwable instanceof ConstraintViolationException cve) {
-                        for (ConstraintViolation<?> violation : cve.getConstraintViolations()) {
-                            System.out.println(violation.getPropertyPath() + ": " + violation.getMessage());
-                        }
-                        return true;
-                    }
-                    return false;
-                })
-                .verify();
-    }
-
 
     // Fixme: Retry and recover does not work with MockitoExtension
 //    @Test

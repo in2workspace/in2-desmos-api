@@ -6,8 +6,6 @@ import es.in2.desmos.configs.ApiConfig;
 import es.in2.desmos.configs.BrokerConfig;
 import es.in2.desmos.domain.exceptions.HashLinkException;
 import es.in2.desmos.domain.models.BlockchainTxPayload;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,11 +16,9 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -101,35 +97,6 @@ class BlockchainTxPayloadFactoryTests {
         // Assert
         StepVerifier.create(resultMono)
                 .expectErrorMatches(throwable -> throwable instanceof HashLinkException && throwable.getMessage().contains("Error creating blockchain transaction payload"))
-                .verify();
-    }
-
-    @Test
-    void testInvalidBlockchainData() throws Exception {
-        // Arrange
-        Map<String, Object> dataMap = new HashMap<>();
-        dataMap.put("id", "");
-        dataMap.put("type", null);
-        String previousHash = "22d0ef4e87a39c52191998f4fbf32ff672f82ed5a2b4c9902371a161402a0faf";
-
-        when(objectMapper.writeValueAsString(any())).thenReturn("sampleData");
-        when(apiConfig.organizationIdHash()).thenReturn("validOrganizationIdHash");
-        when(brokerConfig.getEntitiesExternalDomain()).thenReturn("https://example.com/ngsi-ld/v1/entities");
-
-        // Act
-        Mono<BlockchainTxPayload> result = blockchainTxPayloadFactory.buildBlockchainTxPayload(processId, dataMap, previousHash);
-
-        // Assert
-        StepVerifier.create(result)
-                .expectErrorMatches(throwable -> {
-                    if (throwable instanceof ConstraintViolationException cve) {
-                        for (ConstraintViolation<?> violation : cve.getConstraintViolations()) {
-                            System.out.println(violation.getPropertyPath() + ": " + violation.getMessage());
-                        }
-                        return true;
-                    }
-                    return false;
-                })
                 .verify();
     }
 

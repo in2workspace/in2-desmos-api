@@ -33,11 +33,9 @@ public class BlockchainListenerServiceImpl implements BlockchainListenerService 
 
     @Override
     public Mono<Void> processBlockchainNotification(String processId, BlockchainNotification blockchainNotification) {
-        // Ensure that BlockchainNotification is not null
-        return validateDLTNotification(blockchainNotification)
-                // Create and AuditRecord with status RECEIVED
-                .then(auditRecordService.buildAndSaveAuditRecordFromBlockchainNotification(processId, blockchainNotification,
-                        null, AuditRecordStatus.RECEIVED))
+        // Create and AuditRecord with status RECEIVED
+        return auditRecordService.buildAndSaveAuditRecordFromBlockchainNotification(processId, blockchainNotification,
+                        null, AuditRecordStatus.RECEIVED)
                 // Set priority for the pendingSubscribeEventsQueue event
                 .then(Mono.just(EventQueuePriority.MEDIUM))
                 // Enqueue DLTNotification to DataRetrievalQueue
@@ -46,17 +44,6 @@ public class BlockchainListenerServiceImpl implements BlockchainListenerService 
                                 .event(Collections.singletonList(blockchainNotification))
                                 .priority(eventQueuePriority)
                                 .build()));
-    }
-
-    private Mono<Void> validateDLTNotification(BlockchainNotification blockchainNotification) {
-        checkIfNotificationIsNullOrDataLocationIsEmpty(blockchainNotification);
-        return Mono.empty();
-    }
-
-    private void checkIfNotificationIsNullOrDataLocationIsEmpty(BlockchainNotification blockchainNotification) {
-        if (blockchainNotification == null || blockchainNotification.dataLocation().isEmpty()) {
-            throw new IllegalArgumentException("Invalid Blockchain Notification");
-        }
     }
 
 }

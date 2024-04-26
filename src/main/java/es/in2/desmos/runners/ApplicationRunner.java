@@ -10,7 +10,6 @@ import es.in2.desmos.domain.services.broker.BrokerListenerService;
 import es.in2.desmos.workflows.DataSyncWorkflow;
 import es.in2.desmos.workflows.PublishWorkflow;
 import es.in2.desmos.workflows.SubscribeWorkflow;
-import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -28,8 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static es.in2.desmos.domain.utils.ApplicationUtils.validate;
 
 @Slf4j
 @Configuration
@@ -68,39 +65,20 @@ public class ApplicationRunner {
         List<BrokerSubscription.Entity> entities = new ArrayList<>();
         brokerConfig.getEntityTypes().forEach(entityType -> entities.add(BrokerSubscription.Entity.builder().type(entityType).build()));
         // Create the Broker Subscription object
-        BrokerSubscription brokerSubscription;
-        try {
-            BrokerSubscription.SubscriptionNotification.SubscriptionEndpoint.RetrievalInfoContentType retrievalInfoContentType =
-                    BrokerSubscription.SubscriptionNotification.SubscriptionEndpoint.RetrievalInfoContentType.builder()
-                            .contentType(MediaType.APPLICATION_JSON_VALUE)
-                            .build();
-            validate(retrievalInfoContentType);
-
-            BrokerSubscription.SubscriptionNotification.SubscriptionEndpoint subscriptionEndpoint =
-                    BrokerSubscription.SubscriptionNotification.SubscriptionEndpoint.builder()
-                            .uri(brokerConfig.getNotificationEndpoint())
-                            .accept(MediaType.APPLICATION_JSON_VALUE)
-                            .receiverInfo(List.of(retrievalInfoContentType))
-                            .build();
-            validate(subscriptionEndpoint);
-
-            BrokerSubscription.SubscriptionNotification notification =
-                    BrokerSubscription.SubscriptionNotification.builder()
-                            .subscriptionEndpoint(subscriptionEndpoint)
-                            .build();
-            validate(notification);
-
-            brokerSubscription = BrokerSubscription.builder()
-                    .id(SUBSCRIPTION_ID_PREFIX + UUID.randomUUID())
-                    .type(SUBSCRIPTION_TYPE)
-                    .entities(entities)
-                    .notification(notification)
-                    .build();
-            validate(brokerSubscription);
-        } catch (ConstraintViolationException e) {
-            log.error("Error creating Broker Subscription due to validation failure", e);
-            return Mono.error(e);
-        }
+        BrokerSubscription brokerSubscription = BrokerSubscription.builder()
+                .id(SUBSCRIPTION_ID_PREFIX + UUID.randomUUID())
+                .type(SUBSCRIPTION_TYPE)
+                .entities(entities)
+                .notification(BrokerSubscription.SubscriptionNotification.builder()
+                        .subscriptionEndpoint(BrokerSubscription.SubscriptionNotification.SubscriptionEndpoint.builder()
+                                .uri(brokerConfig.getNotificationEndpoint())
+                                .accept(MediaType.APPLICATION_JSON_VALUE)
+                                .receiverInfo(List.of(BrokerSubscription.SubscriptionNotification.SubscriptionEndpoint.RetrievalInfoContentType.builder()
+                                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                                        .build()))
+                                .build())
+                        .build())
+                .build();
         // Create the subscription and log the result
         log.debug("ProcessID: {} - Broker Subscription: {}", processId, brokerSubscription);
         return brokerListenerService.createSubscription(processId, brokerSubscription)
@@ -118,12 +96,6 @@ public class ApplicationRunner {
                 .eventTypes(blockchainConfig.getEntityTypes())
                 .notificationEndpoint(blockchainConfig.getNotificationEndpoint())
                 .build();
-        try {
-            validate(blockchainSubscription);
-        } catch (ConstraintViolationException e) {
-            log.error("Error creating Blockchain Subscription due to validation failure", e);
-            return Mono.error(e);
-        }
         // Create the subscription
         return blockchainListenerService.createSubscription(processId, blockchainSubscription)
                 .doOnSuccess(response -> log.info("Blockchain Subscription created successfully."))

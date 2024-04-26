@@ -13,8 +13,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Objects;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -38,10 +36,9 @@ public class PublishWorkflowImpl implements PublishWorkflow {
         // Get the event stream from the data publication queue
         return pendingPublishEventsQueue.getEventStream()
                 // Get the first event from the event stream,
-                // parse it as a BrokerNotification and filter out null values
+                // parse it as a BrokerNotification
                 .flatMap(pendingPublishQueueEventStream ->
                         Mono.just((BrokerNotification) pendingPublishQueueEventStream.getEvent().get(0))
-                                .filter(Objects::nonNull)
                                 // Create an event from the BrokerNotification
                                 .flatMap(brokerNotification ->
                                         // Get the last AuditRecord stored for the same entityId; it is used to calculate the hashLink
@@ -54,7 +51,7 @@ public class PublishWorkflowImpl implements PublishWorkflow {
                                                 .flatMap(blockchainTxPayload ->
                                                         auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(processId, brokerNotification.data().get(0), AuditRecordStatus.CREATED, blockchainTxPayload)
                                                                 // Publish the data event to the Blockchain
-                                                                .then(blockchainPublisherService.publishDataToBlockchain(processId, blockchainTxPayload))))
+                                                                .then(blockchainPublisherService.PublishBlockchainTxPayloadToDltAdapter(processId, blockchainTxPayload))))
                                 .doOnSuccess(success ->
                                         log.info("ProcessID: {} - Publish Workflow completed successfully.", processId))
                                 .doOnError(error ->

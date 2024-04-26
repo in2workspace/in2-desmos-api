@@ -21,7 +21,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.Objects;
 import java.util.UUID;
 
 import static es.in2.desmos.domain.utils.ApplicationUtils.*;
@@ -55,8 +54,6 @@ public class SubscribeWorkflowImpl implements SubscribeWorkflow {
                 // get the next BlockchainNotification from the queue
                 .flatMap(pendingSubscribeQueueEventStream ->
                         Mono.just((BlockchainNotification) pendingSubscribeQueueEventStream.getEvent().get(0))
-                                // verify that the DLTNotification is not null
-                                .filter(Objects::nonNull)
                                 // retrieve the entity from the source broker
                                 .flatMap(blockchainNotification ->
                                         retrieveEntityFromExternalBroker(processId, blockchainNotification)
@@ -66,7 +63,7 @@ public class SubscribeWorkflowImpl implements SubscribeWorkflow {
                                                                 // build and save the audit record for RETRIEVED status
                                                                 .then(auditRecordService.buildAndSaveAuditRecordFromBlockchainNotification(processId, blockchainNotification, retrievedBrokerEntity, AuditRecordStatus.RETRIEVED))
                                                                 // publish the retrieved entity to the local broker
-                                                                .then(brokerPublisherService.publishDataToBroker(processId, blockchainNotification, retrievedBrokerEntity))
+                                                                .then(brokerPublisherService.PublishEntityToContextBroker(processId, blockchainNotification, retrievedBrokerEntity))
                                                                 // build and save the audit record for PUBLISHED status
                                                                 .then(auditRecordService.buildAndSaveAuditRecordFromBlockchainNotification(processId, blockchainNotification, retrievedBrokerEntity, AuditRecordStatus.PUBLISHED))
                                                 )

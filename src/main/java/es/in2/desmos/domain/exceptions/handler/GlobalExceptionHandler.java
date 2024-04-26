@@ -23,90 +23,90 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(SubscriptionCreationException.class)
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
     @ResponseBody
-    public Mono<GlobalErrorMessage> handleBlockchainNodeSubscriptionException(SubscriptionCreationException ex, ServerHttpRequest request) {
-        log.error("SubscriptionCreationException: {}", ex.getMessage());
+    public Mono<GlobalErrorMessage> handleBlockchainNodeSubscriptionException(SubscriptionCreationException subscriptionCreationException, ServerHttpRequest request) {
+        log.error("SubscriptionCreationException: {}", subscriptionCreationException.getMessage());
         String path = String.valueOf(request.getPath());
-        return Mono.just(GlobalErrorMessage.builder().title("SubscriptionCreationException").message(ex.getMessage()).path(path).build());
+        return Mono.just(GlobalErrorMessage.builder().title("SubscriptionCreationException").message(subscriptionCreationException.getMessage()).path(path).build());
     }
 
     @ExceptionHandler(BrokerNotificationParserException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public Mono<GlobalErrorMessage> handleBrokerNotificationParserException(BrokerNotificationParserException ex, ServerHttpRequest request) {
-        log.error("BrokerNotificationParserException: {}", ex.getMessage());
+    public Mono<GlobalErrorMessage> handleBrokerNotificationParserException(BrokerNotificationParserException brokerNotificationParserException, ServerHttpRequest request) {
+        log.error("BrokerNotificationParserException: {}", brokerNotificationParserException.getMessage());
         String path = String.valueOf(request.getPath());
-        return Mono.just(GlobalErrorMessage.builder().title("BrokerNotificationParserException").message(ex.getMessage()).path(path).build());
+        return Mono.just(GlobalErrorMessage.builder().title("BrokerNotificationParserException").message(brokerNotificationParserException.getMessage()).path(path).build());
     }
 
     @ExceptionHandler(HashCreationException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
-    public Mono<GlobalErrorMessage> handleHashCreationException(HashCreationException ex, ServerHttpRequest request) {
-        log.error("HashCreationException: {}", ex.getMessage());
+    public Mono<GlobalErrorMessage> handleHashCreationException(HashCreationException hashCreationException, ServerHttpRequest request) {
+        log.error("HashCreationException: {}", hashCreationException.getMessage());
         String path = String.valueOf(request.getPath());
-        return Mono.just(GlobalErrorMessage.builder().title("HashCreationException").message(ex.getMessage()).path(path).build());
+        return Mono.just(GlobalErrorMessage.builder().title("HashCreationException").message(hashCreationException.getMessage()).path(path).build());
     }
 
     @ExceptionHandler(HashLinkException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public Mono<GlobalErrorMessage> handleHashLinkException(HashLinkException ex, ServerHttpRequest request) {
-        log.error("HashLinkException: {}", ex.getMessage());
+    public Mono<GlobalErrorMessage> handleHashLinkException(HashLinkException hashLinkException, ServerHttpRequest request) {
+        log.error("HashLinkException: {}", hashLinkException.getMessage());
         String path = String.valueOf(request.getPath());
-        return Mono.just(GlobalErrorMessage.builder().title("HashLinkException").message(ex.getMessage()).path(path).build());
+        return Mono.just(GlobalErrorMessage.builder().title("HashLinkException").message(hashLinkException.getMessage()).path(path).build());
     }
 
     @ExceptionHandler(JsonReadingException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public Mono<GlobalErrorMessage> handleJsonReadingException(JsonReadingException ex, ServerHttpRequest request) {
-        log.error("JsonReadingException: {}", ex.getMessage());
+    public Mono<GlobalErrorMessage> handleJsonReadingException(JsonReadingException jsonReadingException, ServerHttpRequest request) {
+        log.error("JsonReadingException: {}", jsonReadingException.getMessage());
         String path = String.valueOf(request.getPath());
-        return Mono.just(GlobalErrorMessage.builder().title("JsonReadingException").message(ex.getMessage()).path(path).build());
+        return Mono.just(GlobalErrorMessage.builder().title("JsonReadingException").message(jsonReadingException.getMessage()).path(path).build());
     }
 
     @ExceptionHandler(AuditRecordCreationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public Mono<GlobalErrorMessage> handleAuditRecordCreationException(AuditRecordCreationException ex, ServerHttpRequest request) {
-        log.error("AuditRecordCreationException: {}", ex.getMessage());
+    public Mono<GlobalErrorMessage> handleAuditRecordCreationException(AuditRecordCreationException auditRecordCreationException, ServerHttpRequest request) {
+        log.error("AuditRecordCreationException: {}", auditRecordCreationException.getMessage());
         String path = String.valueOf(request.getPath());
-        return Mono.just(GlobalErrorMessage.builder().title("AuditRecordCreationException").message(ex.getMessage()).path(path).build());
+        return Mono.just(GlobalErrorMessage.builder().title("AuditRecordCreationException").message(auditRecordCreationException.getMessage()).path(path).build());
     }
 
     @ExceptionHandler(RequestErrorException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public Mono<GlobalErrorMessage> handleRequestErrorException(RequestErrorException ex, ServerHttpRequest request) {
-        log.error("RequestErrorException: {}", ex.getMessage());
+    public Mono<GlobalErrorMessage> handleRequestErrorException(RequestErrorException requestErrorException, ServerHttpRequest request) {
+        log.error("RequestErrorException: {}", requestErrorException.getMessage());
         String path = String.valueOf(request.getPath());
-        return Mono.just(GlobalErrorMessage.builder().title("RequestErrorException").message(ex.getMessage()).path(path).build());
+        return Mono.just(GlobalErrorMessage.builder().title("RequestErrorException").message(requestErrorException.getMessage()).path(path).build());
     }
 
     @ExceptionHandler(BrokerEntityRetrievalException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public Mono<GlobalErrorMessage> handleBrokerEntityRetrievalException(BrokerEntityRetrievalException ex, ServerHttpRequest request) {
-        log.error("BrokerEntityRetrievalException: {}", ex.getMessage());
+    public Mono<GlobalErrorMessage> handleBrokerEntityRetrievalException(BrokerEntityRetrievalException brokerEntityRetrievalException, ServerHttpRequest request) {
+        log.error("BrokerEntityRetrievalException: {}", brokerEntityRetrievalException.getMessage());
         String path = String.valueOf(request.getPath());
-        return Mono.just(GlobalErrorMessage.builder().title("BrokerEntityRetrievalException").message(ex.getMessage()).path(path).build());
+        return Mono.just(GlobalErrorMessage.builder().title("BrokerEntityRetrievalException").message(brokerEntityRetrievalException.getMessage()).path(path).build());
     }
 
 
     @ExceptionHandler(WebExchangeBindException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public Mono<GlobalErrorMessage> handleWebExchangeBindException(WebExchangeBindException ex, ServerHttpRequest request) {
+    public Mono<GlobalErrorMessage> handleWebExchangeBindException(WebExchangeBindException webExchangeBindException, ServerHttpRequest request) {
         String path = String.valueOf(request.getPath());
-        Map<String, String> errors = new HashMap<>();
+        Map<String, String> errorMap = new HashMap<>();
 
-        ex.getBindingResult().getAllErrors().forEach(error -> {
+        webExchangeBindException.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((org.springframework.validation.FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
+            errorMap.put(fieldName, errorMessage);
         });
 
-        String globalErrorMessage = errors.entrySet().stream()
+        String globalErrorMessage = errorMap.entrySet().stream()
                 .map(entry -> entry.getKey() + ": " + entry.getValue())
                 .collect(Collectors.joining(", "));
 
@@ -116,6 +116,5 @@ public class GlobalExceptionHandler {
                 .path(path)
                 .build());
     }
-
 
 }
