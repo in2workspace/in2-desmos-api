@@ -84,7 +84,6 @@ public class SubscribeWorkflowImpl implements SubscribeWorkflow {
         log.debug("ProcessID: {} - Retrieving entity from the external broker...", processId);
         // Get the External Broker URL from the dataLocation
         String externalBrokerURL = extractContextBrokerUrlFromDataLocation(blockchainNotification.dataLocation());
-        log.debug("ProcessID: {} - External Broker URL: {}", processId, externalBrokerURL);
         // Retrieve entity from the External Broker
         return apiConfig.webClient()
                 .get()
@@ -121,7 +120,6 @@ public class SubscribeWorkflowImpl implements SubscribeWorkflow {
             // The previousHash field starts with "0x" and the hashLink in the dataLocation field does not.
             String previousEntityHash = blockchainNotification.previousEntityHash().substring(2);
             String expectedEntityHasLink = extractHashLinkFromDataLocation(blockchainNotification.dataLocation());
-            // WIP: Calculates the hashlink of the retrieved entity hash and the previous entity hash if the previous entity hash is different from the hashlink in the dataLocation
             String calculatedEntityHasLink = previousEntityHash.equals(extractHashLinkFromDataLocation(blockchainNotification.dataLocation()))
                     ? previousEntityHash : calculateHashLink(previousEntityHash, retrievedEntityHash);
             // If the calculated hashLink does not match the expected hashLink, an exception is thrown.

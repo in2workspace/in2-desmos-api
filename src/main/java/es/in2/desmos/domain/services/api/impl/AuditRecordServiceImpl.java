@@ -131,7 +131,6 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                                 .build();
                         // Firstly, we calculate the hash of the entity without the hash and hashLink fields
                         String auditRecordHash = calculateSHA256(objectMapper.writeValueAsString(auditRecord));
-                        log.debug("ProcessID: {} - Audit Record Hash: {}", processId, auditRecordHash);
                         auditRecord.setHash(auditRecordHash);
                         // Then, we calculate the hashLink of the entity concatenating the previous hashLink
                         // with the hash of the current entity
