@@ -1,5 +1,6 @@
 package es.in2.desmos.domain.services.api;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.AuditRecordStatus;
@@ -59,5 +60,24 @@ class AuditRecordServiceTests {
                 .usingRecursiveComparison()
                 .ignoringFields("id", "createdAt", "hash", "hashLink")
                 .isEqualTo(expectedAuditRecord);
+    }
+
+    @Test
+    void itShouldReturnErrorWhenAuditRecordCreatesIncorrectJson() throws JsonProcessingException {
+        String processId = "0";
+        String issuer = "http://example.org";
+        MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample1();
+        AuditRecordStatus status = AuditRecordStatus.RETRIEVED;
+
+        when(auditRecordRepository.findMostRecentAuditRecord()).thenReturn(Mono.just(new AuditRecord()));
+
+        when(objectMapper.writeValueAsString(any())).thenThrow(JsonProcessingException.class);
+
+        var result = auditRecordService.buildAndSaveAuditRecordFromDataSync(processId, issuer, mvEntity4DataNegotiation, status);
+
+        StepVerifier
+                .create(result)
+                .expectErrorMatches(throwable -> throwable instanceof JsonProcessingException)
+                .verify();
     }
 }
