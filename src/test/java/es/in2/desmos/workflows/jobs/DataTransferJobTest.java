@@ -44,6 +44,7 @@ class DataTransferJobTest {
     @Mock
     private BrokerPublisherService brokerPublisherService;
 
+    @SuppressWarnings("CanBeFinal")
     @Spy
     private static ObjectMapper objectMapper = new ObjectMapper();
 
