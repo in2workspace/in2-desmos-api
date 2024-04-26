@@ -24,16 +24,26 @@ public class DataNegotiationJobImpl implements DataNegotiationJob {
 
     @Override
     public Mono<Void> negotiateDataSync(DataNegotiationEvent dataNegotiationEvent) {
-        log.info("ProcessID: {} - Starting data negotiation event", dataNegotiationEvent.processId());
+        String processId = dataNegotiationEvent.processId();
 
-        var externalEntityIds = dataNegotiationEvent.externalEntityIds();
-        var localEntityIds = dataNegotiationEvent.localEntityIds();
+        log.info("ProcessID: {} - Starting Data Negotiation Job", processId);
 
-        return checkWithExternalDataIsMissing(externalEntityIds, localEntityIds)
-                .zipWith(checkVersionsAndLastUpdateFromEntityIdMatched(externalEntityIds, localEntityIds))
-                .flatMap(tuple -> createDataNegotiationResult(dataNegotiationEvent, Mono.just(tuple.getT1()), Mono.just(tuple.getT2())))
+        Mono<List<MVEntity4DataNegotiation>> externalMVEntities4DataNegotiationMono = dataNegotiationEvent.externalMVEntities4DataNegotiation();
+        Mono<List<MVEntity4DataNegotiation>> localMVEntities4DataNegotiationMono = dataNegotiationEvent.localMVEntities4DataNegotiation();
+
+        return checkWithExternalDataIsMissing(externalMVEntities4DataNegotiationMono, localMVEntities4DataNegotiationMono)
+                .zipWith(checkVersionsAndLastUpdateFromEntityIdMatched(externalMVEntities4DataNegotiationMono, localMVEntities4DataNegotiationMono))
+                .flatMap(tuple -> {
+                    List<MVEntity4DataNegotiation> externalMVEntities4DataNegotiation = tuple.getT1();
+                    List<MVEntity4DataNegotiation> localMVEntities4DataNegotiation = tuple.getT2();
+
+                    log.debug("ProcessID: {} - External MV Entities 4 Data Negotiation: {}", processId, externalMVEntities4DataNegotiation);
+                    log.debug("ProcessID: {} - Local MV Entities 4 Data Negotiation: {}", processId, localMVEntities4DataNegotiation);
+
+                    return createDataNegotiationResult(dataNegotiationEvent, Mono.just(externalMVEntities4DataNegotiation), Mono.just(localMVEntities4DataNegotiation));
+                })
                 .flatMap(dataNegotiationResult -> {
-                    log.debug("ProcessID: {} - Data negotiation result: {}", dataNegotiationEvent.processId(), dataNegotiationResult);
+                    log.debug("ProcessID: {} - Data Negotiation Result: {}", dataNegotiationEvent.processId(), dataNegotiationResult);
                     return dataTransferJob.syncData(dataNegotiationEvent.processId(), Mono.just(dataNegotiationResult));
                 });
     }
@@ -42,17 +52,16 @@ public class DataNegotiationJobImpl implements DataNegotiationJob {
             Mono<List<MVEntity4DataNegotiation>> externalEntityIds,
             Mono<List<MVEntity4DataNegotiation>> localEntityIds) {
         return externalEntityIds.zipWith(localEntityIds)
-                .map(tuple -> getNotExistentItems(tuple.getT1(), tuple.getT2()));
-    }
+                .map(tuple -> {
+                    List<MVEntity4DataNegotiation> originalList = tuple.getT1();
+                    Set<String> idsToCheck = tuple.getT2().stream()
+                            .map(MVEntity4DataNegotiation::id)
+                            .collect(Collectors.toSet());
 
-    private List<MVEntity4DataNegotiation> getNotExistentItems(List<MVEntity4DataNegotiation> originalList, List<MVEntity4DataNegotiation> itemsToCheck) {
-        Set<String> idsToCheck = itemsToCheck.stream()
-                .map(MVEntity4DataNegotiation::id)
-                .collect(Collectors.toSet());
-
-        return originalList.stream()
-                .filter(entity -> !idsToCheck.contains(entity.id()))
-                .toList();
+                    return originalList.stream()
+                            .filter(entity -> !idsToCheck.contains(entity.id()))
+                            .toList();
+                });
     }
 
     private Mono<List<MVEntity4DataNegotiation>> checkVersionsAndLastUpdateFromEntityIdMatched(
