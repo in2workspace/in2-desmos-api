@@ -33,6 +33,15 @@ public class GlobalExceptionHandler {
         return Mono.just(GlobalErrorMessage.builder().title("BrokerNotificationParserException").message(ex.getMessage()).path(path).build());
     }
 
+    @ExceptionHandler(BrokerNotificationSelfGeneratedException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public Mono<GlobalErrorMessage> handleBrokerNotificationSelfGeneratedException(BrokerNotificationSelfGeneratedException ex, ServerHttpRequest request) {
+        log.error("BrokerNotificationSelfGeneratedException: {}", ex.getMessage());
+        String path = String.valueOf(request.getPath());
+        return Mono.just(GlobalErrorMessage.builder().title("BrokerNotificationSelfGeneratedException").message(ex.getMessage()).path(path).build());
+    }
+
     @ExceptionHandler(HashCreationException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody

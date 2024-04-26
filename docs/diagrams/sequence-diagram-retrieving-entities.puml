@@ -1,0 +1,35 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+skinparam BoxPadding 10
+
+box "Blockchain Connector" #LightBlue
+    participant "Entity Retrieval Service" as entity_retrieval_service
+    participant "Notification Mapper" as notification_mapper
+    participant "Entity Publish Service" as entity_publish_service
+    queue "DLT Queue" as dlt_queue
+end box
+
+participant "External Broker" as external_broker
+
+activate entity_retrieval_service
+
+entity_retrieval_service -> dlt_queue++: GetEventStream()
+return dlt_notification
+
+entity_retrieval_service -> notification_mapper++: MapNotificationToEvent(dlt_notification)
+return Event
+
+entity_retrieval_service -> entity_retrieval_service++: ExecuteDataLocation(Event)
+    entity_retrieval_service -> external_broker++: GET /entities/{entityId}
+    return 200 OK Payload: Entity
+return Entity
+
+entity_retrieval_service -> entity_retrieval_service: VerifyEntityIntegrity(Entity, Event)
+
+alt valid
+    entity_retrieval_service -> entity_publish_service++: PublishEntity(Entity)
+end
+
+@enduml

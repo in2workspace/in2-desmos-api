@@ -39,7 +39,8 @@ class GlobalExceptionHandlerTests {
                 JsonReadingException.class,
                 AuditRecordCreationException.class,
                 RequestErrorException.class,
-                BrokerEntityRetrievalException.class
+                BrokerEntityRetrievalException.class,
+                BrokerNotificationSelfGeneratedException.class
         ));
         List<String> messages = new ArrayList<>(List.of(
                 "SubscriptionCreationException",
@@ -49,7 +50,8 @@ class GlobalExceptionHandlerTests {
                 "JsonReadingException",
                 "AuditRecordCreation",
                 "RequestErrorException",
-                "BrokerEntityRetrievalException"
+                "BrokerEntityRetrievalException",
+                "BrokerNotificationSelfGeneratedException"
         ));
         List<Throwable> nullCauseThrowableList = new ArrayList<>();
         List<Throwable> exceptionCauseThrowableList = new ArrayList<>();
@@ -70,7 +72,8 @@ class GlobalExceptionHandlerTests {
                 (ex, req) -> globalExceptionHandler.handleJsonReadingException((JsonReadingException) ex, req),
                 (ex, req) -> globalExceptionHandler.handleAuditRecordCreationException((AuditRecordCreationException) ex, req),
                 (ex, req) -> globalExceptionHandler.handleRequestErrorException((RequestErrorException) ex, req),
-                (ex, req) -> globalExceptionHandler.handleBrokerEntityRetrievalException((BrokerEntityRetrievalException) ex, req)
+                (ex, req) -> globalExceptionHandler.handleBrokerEntityRetrievalException((BrokerEntityRetrievalException) ex, req),
+                (ex, req) -> globalExceptionHandler.handleBrokerNotificationSelfGeneratedException((BrokerNotificationSelfGeneratedException) ex, req)
         ));
         classes.addAll(new ArrayList<>(classes));
         messages.addAll(new ArrayList<>(messages));

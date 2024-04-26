@@ -1,0 +1,50 @@
+@startuml
+'https://plantuml.com/activity-diagram-beta
+
+start
+partition "process: Receive Notification" {
+    :Receive the notification\nfrom the DLT Adapter;
+    :Create audit record — RECEIVED;
+    if (Check the validity of the notification) then (valid)
+        :Prioritize the notification;
+        :Enqueue the notification;
+        (A)
+        detach
+    else (invalid)
+        #Salmon:Discard the notification;
+        end
+    endif
+}
+partition "process: Entity Retrieval" {
+    (A)
+    :Get the notification from the Queue;
+    :Map the notification to capture\nthe Event's data;
+    :Validate the Event's data;
+    if (The Event's data is valid) then (yes)
+        :Execute data location and\nretrieval Entity;
+        :Validate Entity's integrity;
+        :Update the audit record status — RETRIEVED;
+        :Enqueue the Entity to be published;
+        (B)
+        detach
+    else (no)
+        #Salmon:Error;
+        :Store Event's data in the local\ndatabase to be retried later;
+        stop
+    endif
+}
+partition "process: Broker Publication" {
+    (B)
+    :Get the Entity from the Queue;
+    :Publish Entity to the local\nContext Broker;
+    if (The event is successfully published) then (yes)
+        :Update the audit record status — PUBLISHED;
+    else (no)
+        #Salmon:Error;
+        :Get the Entity and store it in\nthe local database to be retried later;
+        stop
+    endif
+}
+end
+
+@enduml

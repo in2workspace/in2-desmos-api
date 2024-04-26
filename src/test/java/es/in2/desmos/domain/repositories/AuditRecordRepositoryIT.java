@@ -8,10 +8,7 @@ import es.in2.desmos.ContainerManager;
 import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.AuditRecordStatus;
 import es.in2.desmos.domain.models.AuditRecordTrader;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -81,6 +78,16 @@ class AuditRecordRepositoryIT {
             .hashLink("")
             .newTransaction(true)
             .build();
+
+    private static boolean isCleanupDone = false;
+
+    @BeforeEach
+    void cleanup() {
+        if (!isCleanupDone) {
+            auditRecordRepository.deleteAll().block();
+            isCleanupDone = true;
+        }
+    }
 
     @Order(0)
     @Test
