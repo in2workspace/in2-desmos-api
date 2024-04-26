@@ -34,7 +34,11 @@ public class DataTransferJobImpl implements DataTransferJob {
     @Override
     public Mono<Void> syncData(String processId, Mono<DataNegotiationResult> dataNegotiationResult) {
         return dataNegotiationResult.flatMap(result -> {
-            log.info("ProcessID: {} - Starting data transfer job", processId);
+            log.info("ProcessID: {} - Starting Data Transfer Job", processId);
+
+            log.debug("ProcessID: {} - Issuer: {}", processId, result.issuer());
+            log.debug("ProcessID: {} - New Entities to Sync: {}", processId, result.newEntitiesToSync());
+            log.debug("ProcessID: {} - Existing Entities to Sync: {}", processId, result.existingEntitiesToSync());
 
             Mono<String> issuer = Mono.just(result.issuer());
 
@@ -45,10 +49,10 @@ public class DataTransferJobImpl implements DataTransferJob {
 
             return allEntitiesToRequest.flatMap(entities -> entitySyncWebClient.makeRequest(processId, issuer, allEntitiesToRequest)
                     .flatMap(entitySyncResponse -> {
-                        var entitySyncResponseMono = Mono.just(entitySyncResponse);
+                        Mono<String> entitySyncResponseMono = Mono.just(entitySyncResponse);
                         return getEntitiesById(entitySyncResponseMono)
                                 .flatMap(entitiesById -> {
-                                    var entitiesByIdMono = Mono.just(entitiesById);
+                                    Mono<Map<Id, Entity>> entitiesByIdMono = Mono.just(entitiesById);
 
                                     Mono<Map<Id, EntityValidationData>> newEntitiesOriginalValidationDataById = getEntitiesOriginalValidationDataById(Mono.just(result.newEntitiesToSync()));
                                     Mono<Map<Id, EntityValidationData>> existingEntitiesOriginalValidationDataById = getEntitiesOriginalValidationDataById(Mono.just(result.existingEntitiesToSync()));
@@ -61,39 +65,6 @@ public class DataTransferJobImpl implements DataTransferJob {
                                             .then(buildAndSaveAuditRecordFromDataSync(processId, issuer, entitiesByIdMono, allEntitiesToRequestList, AuditRecordStatus.PUBLISHED));
                                 });
                     }));
-        });
-    }
-
-    private Mono<Void> batchUpsertEntitiesToContextBroker(String processId, Mono<String> retrievedBrokerEntitiesMono) {
-        return retrievedBrokerEntitiesMono.flatMap(retrievedBrokerEntities -> brokerPublisherService.batchUpsertEntitiesToContextBroker(processId, retrievedBrokerEntities));
-    }
-
-
-    private Mono<Void> buildAndSaveAuditRecordFromDataSync(String processId, Mono<String> issuerMono, Mono<Map<Id, Entity>> rcvdEntitiesByIdMono, Mono<List<MVEntity4DataNegotiation>> mvEntity4DataNegotiationListMono, AuditRecordStatus auditRecordStatus) {
-        return rcvdEntitiesByIdMono
-                .flatMapIterable(Map::keySet)
-                .flatMap(rcvdEntityById -> {
-                    String id = rcvdEntityById.value();
-                    return mvEntity4DataNegotiationListMono
-                            .flatMap(list -> Mono.justOrEmpty(
-                                            list.stream()
-                                                    .filter(x -> x.id().equals(id))
-                                                    .findFirst())
-                                    .flatMap(mvEntity4DataNegotiationList -> issuerMono
-                                            .flatMap(issuer -> auditRecordService.buildAndSaveAuditRecordFromDataSync(processId, issuer, mvEntity4DataNegotiationList, auditRecordStatus))));
-
-                })
-                .collectList()
-                .then();
-    }
-
-    private Mono<Map<Id, EntityValidationData>> getEntitiesOriginalValidationDataById(Mono<List<MVEntity4DataNegotiation>> allEntitiesToValidate) {
-        return allEntitiesToValidate.map(mvEntity4DataNegotiationsList -> {
-            Map<Id, EntityValidationData> entityValidationDataMap = new HashMap<>(mvEntity4DataNegotiationsList.size());
-            for (MVEntity4DataNegotiation mvEntity4DataNegotiation : mvEntity4DataNegotiationsList) {
-                entityValidationDataMap.put(new Id(mvEntity4DataNegotiation.id()), new EntityValidationData(mvEntity4DataNegotiation.hash(), mvEntity4DataNegotiation.hashlink()));
-            }
-            return entityValidationDataMap;
         });
     }
 
@@ -123,6 +94,16 @@ public class DataTransferJobImpl implements DataTransferJob {
         });
     }
 
+    private Mono<Map<Id, EntityValidationData>> getEntitiesOriginalValidationDataById(Mono<List<MVEntity4DataNegotiation>> allEntitiesToValidate) {
+        return allEntitiesToValidate.map(mvEntity4DataNegotiationsList -> {
+            Map<Id, EntityValidationData> entityValidationDataMap = new HashMap<>(mvEntity4DataNegotiationsList.size());
+            for (MVEntity4DataNegotiation mvEntity4DataNegotiation : mvEntity4DataNegotiationsList) {
+                entityValidationDataMap.put(new Id(mvEntity4DataNegotiation.id()), new EntityValidationData(mvEntity4DataNegotiation.hash(), mvEntity4DataNegotiation.hashlink()));
+            }
+            return entityValidationDataMap;
+        });
+    }
+
     private Mono<Void> validateEntities(String processId, Mono<Map<Id, Entity>> entitiesByIdMono, Mono<Map<Id, EntityValidationData>> newEntitiesOriginalValidationDataById, Mono<Map<Id, EntityValidationData>> existingEntitiesOriginalValidationDataById) {
         Mono<Map<Id, EntityValidationData>> allEntitiesOriginalValidationDataById =
                 concatTwoEntitiesOriginalValidationDataByIdMaps(
@@ -131,6 +112,18 @@ public class DataTransferJobImpl implements DataTransferJob {
 
         return validateIntegrity(entitiesByIdMono, allEntitiesOriginalValidationDataById)
                 .then(validateConsistency(processId, entitiesByIdMono, existingEntitiesOriginalValidationDataById));
+    }
+
+    private Mono<Map<Id, EntityValidationData>> concatTwoEntitiesOriginalValidationDataByIdMaps
+            (Mono<Map<Id, EntityValidationData>> newEntitiesOriginalValidationDataById, Mono<Map<Id, EntityValidationData>> existingEntitiesOriginalValidationDataById) {
+        return newEntitiesOriginalValidationDataById
+                .zipWith(existingEntitiesOriginalValidationDataById)
+                .flatMap(tuple -> {
+                    Map<Id, EntityValidationData> allEntitiesOriginalDataValidation = new HashMap<>();
+                    allEntitiesOriginalDataValidation.putAll(tuple.getT1());
+                    allEntitiesOriginalDataValidation.putAll(tuple.getT2());
+                    return Mono.just(allEntitiesOriginalDataValidation);
+                });
     }
 
     private Mono<Void> validateIntegrity(Mono<Map<Id, Entity>> entitiesByIdMono, Mono<Map<Id, EntityValidationData>> allEntitiesExistingValidationDataById) {
@@ -214,15 +207,26 @@ public class DataTransferJobImpl implements DataTransferJob {
                 });
     }
 
-    private static Mono<Map<Id, EntityValidationData>> concatTwoEntitiesOriginalValidationDataByIdMaps
-            (Mono<Map<Id, EntityValidationData>> newEntitiesOriginalValidationDataById, Mono<Map<Id, EntityValidationData>> existingEntitiesOriginalValidationDataById) {
-        return newEntitiesOriginalValidationDataById
-                .zipWith(existingEntitiesOriginalValidationDataById)
-                .flatMap(tuple -> {
-                    Map<Id, EntityValidationData> allEntitiesOriginalDataValidation = new HashMap<>();
-                    allEntitiesOriginalDataValidation.putAll(tuple.getT1());
-                    allEntitiesOriginalDataValidation.putAll(tuple.getT2());
-                    return Mono.just(allEntitiesOriginalDataValidation);
-                });
+    private Mono<Void> buildAndSaveAuditRecordFromDataSync(String processId, Mono<String> issuerMono, Mono<Map<Id, Entity>> rcvdEntitiesByIdMono, Mono<List<MVEntity4DataNegotiation>> mvEntity4DataNegotiationListMono, AuditRecordStatus auditRecordStatus) {
+        return rcvdEntitiesByIdMono
+                .flatMapIterable(Map::keySet)
+                .flatMap(rcvdEntityById -> {
+                    String id = rcvdEntityById.value();
+                    return mvEntity4DataNegotiationListMono
+                            .flatMap(list -> Mono.justOrEmpty(
+                                            list.stream()
+                                                    .filter(x -> x.id().equals(id))
+                                                    .findFirst())
+                                    .flatMap(mvEntity4DataNegotiationList -> issuerMono
+                                            .flatMap(issuer -> auditRecordService.buildAndSaveAuditRecordFromDataSync(processId, issuer, mvEntity4DataNegotiationList, auditRecordStatus))));
+
+                })
+                .collectList()
+                .then();
     }
+
+    private Mono<Void> batchUpsertEntitiesToContextBroker(String processId, Mono<String> retrievedBrokerEntitiesMono) {
+        return retrievedBrokerEntitiesMono.flatMap(retrievedBrokerEntities -> brokerPublisherService.batchUpsertEntitiesToContextBroker(processId, retrievedBrokerEntities));
+    }
+
 }
