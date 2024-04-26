@@ -143,19 +143,17 @@ class P2PDataSyncWorkflowIT {
 
         StepVerifier
                 .create(responseMono)
-                .consumeNextWith(response -> {
-                    assertEquals(expectedDiscoverySyncResponseJson, response);
-
-                    try {
-                        assertScorpioEntityIsExpected(EntitySyncResponseMother.id1, EntityMother.scorpioJson1());
-                        assertScorpioEntityIsExpected(EntitySyncResponseMother.id2, EntityMother.scorpioJson2());
-                        assertScorpioEntityIsExpected(EntitySyncResponseMother.id3, EntityMother.scorpioJson3());
-                        assertScorpioEntityIsExpected(EntitySyncResponseMother.id4, EntityMother.scorpioJson4());
-                    } catch (JSONException e) {
-                        throw new RuntimeException(e);
-                    }
-                })
+                .expectNext(expectedDiscoverySyncResponseJson)
                 .verifyComplete();
+
+        try {
+            assertScorpioEntityIsExpected(EntitySyncResponseMother.id1, EntityMother.scorpioJson1());
+            assertScorpioEntityIsExpected(EntitySyncResponseMother.id2, EntityMother.scorpioJson2());
+            assertScorpioEntityIsExpected(EntitySyncResponseMother.id3, EntityMother.scorpioJson3());
+            assertScorpioEntityIsExpected(EntitySyncResponseMother.id4, EntityMother.scorpioJson4());
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
 
 
         RecordedRequest request = mockWebServer.takeRequest();
@@ -196,15 +194,13 @@ class P2PDataSyncWorkflowIT {
 
         StepVerifier
                 .create(responseMono)
-                .consumeNextWith(response -> {
-                    assertEquals(expectedDiscoverySyncResponseJson, response);
-
-                    assertAuditRecordEntityIsExpected(EntitySyncResponseMother.id1, MVEntity4DataNegotiationMother.sample1(), "http://example.org");
-                    assertAuditRecordEntityIsExpected(EntitySyncResponseMother.id2, MVEntity4DataNegotiationMother.sample2(), issuer);
-                    assertAuditRecordEntityIsExpected(EntitySyncResponseMother.id3, MVEntity4DataNegotiationMother.sample3(), "http://example.org");
-                    assertAuditRecordEntityIsExpected(EntitySyncResponseMother.id4, MVEntity4DataNegotiationMother.sample4(), issuer);
-                })
+                .expectNext(expectedDiscoverySyncResponseJson)
                 .verifyComplete();
+
+        assertAuditRecordEntityIsExpected(EntitySyncResponseMother.id1, MVEntity4DataNegotiationMother.sample1(), "http://example.org");
+        assertAuditRecordEntityIsExpected(EntitySyncResponseMother.id2, MVEntity4DataNegotiationMother.sample2(), issuer);
+        assertAuditRecordEntityIsExpected(EntitySyncResponseMother.id3, MVEntity4DataNegotiationMother.sample3(), "http://example.org");
+        assertAuditRecordEntityIsExpected(EntitySyncResponseMother.id4, MVEntity4DataNegotiationMother.sample4(), issuer);
 
 
         RecordedRequest request = mockWebServer.takeRequest();
@@ -234,15 +230,18 @@ class P2PDataSyncWorkflowIT {
         });
     }
 
-    private void assertAuditRecordEntityIsExpected(String entityId, MVEntity4DataNegotiation expectedMVEntity4DataNegotiation, String baseUri){
+    private void assertAuditRecordEntityIsExpected(String entityId, MVEntity4DataNegotiation expectedMVEntity4DataNegotiation, String baseUri) {
         await().atMost(10, TimeUnit.SECONDS).ignoreExceptions().until(() -> {
             String processId = "0";
             Mono<AuditRecord> auditRecordMono = auditRecordService.findLatestAuditRecordForEntity(processId, entityId);
+
             StepVerifier
                     .create(auditRecordMono)
                     .consumeNextWith(auditRecord -> {
                         System.out.println("Entity audit record AuditRecord entity check: " + auditRecord);
+
                         AuditRecord expectedAuditRecord = AuditRecordMother.createAuditRecordFromMVEntity4DataNegotiation(baseUri, expectedMVEntity4DataNegotiation, AuditRecordStatus.PUBLISHED);
+
                         assertThat(auditRecord)
                                 .usingRecursiveComparison()
                                 .ignoringFields("processId", "id", "createdAt", "hash", "hashLink", "newTransaction")
