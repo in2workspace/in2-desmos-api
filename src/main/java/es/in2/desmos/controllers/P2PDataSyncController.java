@@ -34,7 +34,7 @@ public class P2PDataSyncController {
         return discoverySyncRequest.flatMap(request -> {
                     log.debug("ProcessID: {} - Starting P2P Data Synchronization Discovery: {}", processId, request);
 
-                    Mono<List<MVEntity4DataNegotiation>> externalMvEntities4DataNegotiationMono = Mono.just(request.mvEntities4DataNegotiation());
+                    Mono<List<MVEntity4DataNegotiation>> externalMvEntities4DataNegotiationMono = Mono.just(request.externalMVEntities4DataNegotiation());
                     Mono<String> issuerMono = Mono.just(request.issuer());
 
                     return p2PDataSyncWorkflow.dataDiscovery(processId, issuerMono, externalMvEntities4DataNegotiationMono)
