@@ -33,12 +33,12 @@ checkstyleTest {
 
 sonar {
     properties {
-        property "sonar.projectName", "Desmos"
+        property "sonar.projectName", "Desmos API"
         property "sonar.projectKey", "in2workspace_desmos"
         property "sonar.organization", "in2workspace"
         property "sonar.host.url", "https://sonarcloud.io"
         property "sonar.coverage.exclusions",
-                "src/main/java/es/in2/desmos/DesmosApplication.java, "
+                "src/main/java/es/in2/desmos/DesmosApiApplication.java, "
     }
 }
 
@@ -131,7 +131,7 @@ tasks.jacocoTestReport {
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.collect {
             fileTree(dir: it, exclude: [
-                    '**/DesmosApplication.class',
+                    '**/DesmosApiApplication.class',
                     '**/configs/properties/**',
                     '**/configs/FlywayConfig.class',
                     '**/configs/QueueConfig.class'

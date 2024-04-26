@@ -62,7 +62,7 @@ public class BlockchainAdapterServiceImpl implements BlockchainAdapterService {
 
     @Deprecated(since = "0.5.0", forRemoval = true)
     @Override
-    public Flux<String> getEventsFromRange(String processId, long from, long to) {
+    public Flux<String> getEventsFromRangeOfTime(String processId, long from, long to) {
         return webClient.get()
                 .uri(dltAdapterProperties.paths()
                         .events() + "?startDate=" + from + "&endDate=" + to)

@@ -7,7 +7,6 @@ import es.in2.desmos.domain.models.BlockchainSubscription;
 import es.in2.desmos.domain.models.BrokerSubscription;
 import es.in2.desmos.domain.services.blockchain.BlockchainListenerService;
 import es.in2.desmos.domain.services.broker.BrokerListenerService;
-import es.in2.desmos.workflows.BlockchainDataSyncWorkflow;
 import es.in2.desmos.workflows.DataSyncWorkflow;
 import es.in2.desmos.workflows.PublishWorkflow;
 import es.in2.desmos.workflows.SubscribeWorkflow;
@@ -41,7 +40,6 @@ public class ApplicationRunner {
     private final DataSyncWorkflow dataSyncWorkflow;
     private final PublishWorkflow publishWorkflow;
     private final SubscribeWorkflow subscribeWorkflow;
-    private final BlockchainDataSyncWorkflow blockchainDataSyncWorkflow;
 
     private final AtomicBoolean isQueueAuthorizedForEmit = new AtomicBoolean(false);
     private Disposable publishQueueDisposable;
@@ -112,7 +110,7 @@ public class ApplicationRunner {
         log.info("ProcessID: {} - Initializing Data Synchronization Workflow...", processId);
         // Start data synchronization process
         log.debug("ProcessID: {} - Starting Blockchain Data Synchronization Workflow...", processId);
-        return blockchainDataSyncWorkflow.startBlockchainDataSyncWorkflow(processId)
+        return dataSyncWorkflow.startDataSyncWorkflow(processId)
                 // When the synchronization is finished, enable queue to process the
                 // data synchronization using pub-sub.
                 .doOnTerminate(() -> {

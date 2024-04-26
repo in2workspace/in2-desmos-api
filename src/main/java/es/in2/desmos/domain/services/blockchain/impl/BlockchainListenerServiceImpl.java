@@ -51,11 +51,13 @@ public class BlockchainListenerServiceImpl implements BlockchainListenerService 
                 });
     }
 
+    // todo: this method will be removed in the future when validation is implemented
     private Mono<Void> validateDLTNotification(BlockchainNotification blockchainNotification) {
         checkIfNotificationIsNullOrDataLocationIsEmpty(blockchainNotification);
         return Mono.empty();
     }
 
+    // todo: this method will be removed in the future when validation is implemented
     private void checkIfNotificationIsNullOrDataLocationIsEmpty(BlockchainNotification blockchainNotification) {
         if (blockchainNotification == null || blockchainNotification.dataLocation().isEmpty()) {
             throw new IllegalArgumentException("Invalid Blockchain Notification");

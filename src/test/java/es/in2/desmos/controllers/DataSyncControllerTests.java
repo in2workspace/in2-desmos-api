@@ -1,6 +1,6 @@
 package es.in2.desmos.controllers;
 
-import es.in2.desmos.domain.services.sync.DataSyncService;
+import es.in2.desmos.domain.services.sync.services.DataSyncService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

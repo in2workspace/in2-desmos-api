@@ -1,5 +1,6 @@
 package es.in2.desmos.workflows.impl;
 
+import es.in2.desmos.domain.services.sync.jobs.BlockchainDataSyncJob;
 import es.in2.desmos.workflows.DataSyncWorkflow;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,20 +12,12 @@ import reactor.core.publisher.Flux;
 @RequiredArgsConstructor
 public class DataSyncWorkflowImpl implements DataSyncWorkflow {
 
-    /*
-     *  Workflow steps:
-     *  1. Get all ProductOffering ID entities from the local Broker.
-     *  2. Send a POST request to the configured external Broker with the ProductOffering ID entity list.
-     *  3. Compare the response with the list of ProductOffering ID entities from the local Broker.
-     *  4. If the response contains new ProductOffering ID entities,
-     *  send a request to the external Broker to get the new ProductOfferings and its related entities.
-     *  5. Publish the new ProductOfferings and its related entities to the local Broker.
-     */
+    private final BlockchainDataSyncJob blockchainDataSyncJob;
 
     @Override
     public Flux<Void> startDataSyncWorkflow(String processId) {
-        // TODO: Add code here
-        return Flux.empty();
+        // TODO: Change blockchainDataSyncService to p2pDataSyncService in future
+        return blockchainDataSyncJob.startBlockchainDataSyncJob(processId);
     }
 
 }
