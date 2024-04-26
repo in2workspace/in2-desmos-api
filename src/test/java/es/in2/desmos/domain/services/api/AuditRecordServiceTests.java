@@ -28,6 +28,7 @@ class AuditRecordServiceTests {
     @Mock
     private AuditRecordRepository auditRecordRepository;
 
+    @SuppressWarnings("CanBeFinal")
     @Spy
     private static ObjectMapper objectMapper = new ObjectMapper();
 
