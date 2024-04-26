@@ -42,6 +42,7 @@ class AuditRecordRepositoryIT {
 
     private final ObjectMapper objectMapper = JsonMapper.builder()
             .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES).build();
+
     private final AuditRecord auditRecordRoot = AuditRecord.builder()
             .id(UUID.fromString("5d72b588-5257-46a0-8636-cf9226c8ebc6"))
             .processId("f3a387e5-c862-4b93-b5f8-d80f83b0e400")
@@ -59,6 +60,7 @@ class AuditRecordRepositoryIT {
             .hashLink("")
             .newTransaction(true)
             .build();
+
     private final AuditRecord auditRecord = AuditRecord.builder()
             .id(UUID.fromString("ae277aa0-7677-4038-acf6-52a8e70c4d04"))
             .processId("14f121af-d720-4a53-bc08-fc00bdbbbebe")

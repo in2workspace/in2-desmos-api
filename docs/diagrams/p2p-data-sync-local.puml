@@ -1,0 +1,119 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+'---------- Config ----------------
+
+autonumber
+
+'---------- Header ----------------
+
+boundary "External Access Node" as ean
+
+box "Access Node"
+  queue "ApplicationContext" as ac
+  participant "DataNegotiationJob" as dnj
+  participant "DataTransferJob" as dtj
+  participant "BrokerPublisher" as bp
+  participant "AuditRecordService" as ars
+  participant "Context Broker" as cb
+
+end box
+
+'---------- Diagram ----------------
+
+ac -> dnj++: Notifies DataNegotiationEvent
+
+note right of dnj
+    @EventListener(DataNegotiationEvent)
+    negotiateDataSync(DataNegotiationEvent) {}
+
+    DataNegotiationEvent:
+    {
+        List<ExternalEntitiesDTO>,
+        List<LocalEntitiesDTO>,
+        ExternalIssuer
+    }
+end note
+
+dnj -> dnj: checkWhichExternalDataIsMissing()
+dnj -> dnj: checkVersionsAndTimestampsFromEntityIdMatched()
+dnj -> dnj: createDataNegotiationResult()
+note right of dnj
+    DataNegotiationResult:
+    {
+        List<NewEntitiesToSync>,
+        List<ExistingEntitiesToSync>,
+        ExternalIssuer
+    }
+
+    NewEntitiesToSync is a list of EntityIds of the
+    entities that are not present in the local database
+end note
+
+dnj -> dtj++: syncData(DataNegotiationResult)
+    dtj -> dtj: buildEntitiesToSyncRequest()
+    dtj -> ean++: POST /sync/entities - Payload: EntitiesToSyncRequest
+    return 200 OK - Payload: List<Entities>
+    note right of ean
+        List<Entities> is a list of ProductOffering
+        and all related sub-entities, i.e.,
+        ProductSpecification, ProductOfferingPrice,
+        Catalog, etc.
+    end note
+
+    dtj -> dtj++: validateEntities()
+    note right of dtj
+        validateEntities:
+            validateIntegrity (hash)
+            validateConsistency(getLastAuditRecordByEntityId())
+        }
+    end note
+        dtj -> ars++: findLatestAuditRecordForEntity(EntityId)
+        alt no audit record
+            note right of dtj
+                My new AuditRecord hashlink value needs to
+                the same as the hashlink value received from the externalEntityList
+            end note
+        else audit record exists
+            note right of dtj
+                If my audit record hashlink value + retrievedEntityHash
+                equals the hashlink value received from the externalEntityList
+                then the entity is consistent
+            end note
+            return AuditRecord
+        end
+
+    return
+
+    dtj -> ars++: buildAndSaveAuditRecordFromDataSync()
+    note right of ars
+        We are acting as a Consumer here.
+        Status = "RETRIEVED"
+        dataLocation = ""
+    end note
+    return
+
+
+    alt new entity
+        dtj -> bp++: publishEntitiesToBroker(List<Entities>)
+            bp -> cb++: POST /ngsi-ld/v1/entities - Payload: List<Entity>
+            return 201 Created
+        bp --> dtj: success/failure
+    else update entity
+        dtj -> bp: updateEntitiesToBroker(List<Entities>)
+                bp -> cb++: PATCH /ngsi-ld/v1/entities - Payload: List<Entity>
+                return 204 No Content
+        return success/failure
+    end
+
+    dtj -> ars++: buildAndSaveAuditRecordFromDataSync()
+    note right of ars
+        We are acting as a Consumer here.
+        Status = "PUBLISHED"
+        dataLocation = ""
+    end note
+    return
+return
+
+
+@enduml

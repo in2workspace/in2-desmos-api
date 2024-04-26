@@ -1,0 +1,36 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+skinparam BoxPadding 10
+
+box "Blockchain Connector" #LightBlue
+    participant "Entity Service" as entity_service
+    participant "Event Service" as event_service
+    participant "Audit Service" as audit_service
+    database "Postgres" as local_db
+    queue "Broker Queue" as broker_queue
+    queue "EventBuffer" as event_buffer
+end box
+
+activate entity_service
+
+entity_service -> broker_queue++: GetEventStream()
+return broker_notification
+entity_service -> event_service++: BuildEvent(BrokerNotification)
+    event_service -> event_service++: MapBrokerNotificationToEntity(brokerNotification)
+    return Entity
+    event_service -> local_db++: GetPreviousEntityHashFromTransaction(Entity.id)
+    return previous_entity_hash
+    event_service -> event_service++: BuildEvent(previousEntityHash, Entity)
+    return Event
+    event_service -> audit_service++: BuildTransaction(BrokerNotification)
+        audit_service -> local_db++: SaveTransaction(Transaction)
+        return
+    return
+    event_service -> event_buffer++: Enqueue(Event)
+    return
+return
+@enduml
+
+

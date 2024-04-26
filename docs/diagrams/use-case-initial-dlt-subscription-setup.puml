@@ -1,0 +1,37 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+skinparam BoxPadding 10
+
+boundary "Context Broker" as context_broker
+
+box "Blockchain Connector" #LightBlue
+    participant "InitialSubscriptionSetupService" as initial_subscription_setup_service
+    participant "BrokerService" as broker_service
+    participant "DltService" as dlt_service
+end box
+
+boundary "DLT Adapter" as dlt_adapter
+
+initial_subscription_setup_service -> initial_subscription_setup_service: Listen for \nApplicationReadyEvent
+activate initial_subscription_setup_service
+
+initial_subscription_setup_service -> dlt_service++: CreateDltSubscription()
+    dlt_service -> dlt_service++: BuildDltSubscription()
+    return DltSubscription
+    dlt_service -> dlt_service++: SendBrokerSubscription()
+        alt success
+            dlt_service -> dlt_adapter++: POST /api/v1/subscribe\nPayload: DltSubscription
+            return 201 Created
+        else fail
+            loop 3 times
+                dlt_service -> dlt_adapter++: Retry POST
+                return 4xx || 5xx
+            end
+            dlt_service -> dlt_service: Throw Exception
+        end
+    return
+return
+
+@enduml
