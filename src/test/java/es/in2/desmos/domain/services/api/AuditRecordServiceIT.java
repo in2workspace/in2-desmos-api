@@ -5,7 +5,6 @@ import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.AuditRecordStatus;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.objectmothers.AuditRecordMother;
-import es.in2.desmos.objectmothers.EntitySyncResponseMother;
 import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
@@ -54,7 +53,7 @@ class AuditRecordServiceIT {
                 .create(result)
                 .verifyComplete();
 
-        assertAuditRecordEntityIsExpected(EntitySyncResponseMother.id1, MVEntity4DataNegotiationMother.sample1(), issuer);
+        assertAuditRecordEntityIsExpected(mvEntity4DataNegotiation.id(), MVEntity4DataNegotiationMother.sample1(), issuer);
     }
 
     private void assertAuditRecordEntityIsExpected(String entityId, MVEntity4DataNegotiation expectedMVEntity4DataNegotiation, String baseUri) {
