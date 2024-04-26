@@ -123,9 +123,6 @@ public class SubscribeWorkflowImpl implements SubscribeWorkflow {
             String calculatedEntityHasLink = previousEntityHash.equals(extractHashLinkFromDataLocation(blockchainNotification.dataLocation()))
                     ? previousEntityHash : calculateHashLink(previousEntityHash, retrievedEntityHash);
             // If the calculated hashLink does not match the expected hashLink, an exception is thrown.
-            log.debug("ProcessID: {} - Retrieved Entity Hash: {}", processId, retrievedEntityHash);
-            log.debug("ProcessID: {} - Calculated HashLink: {}", processId, calculatedEntityHasLink);
-            log.debug("ProcessID: {} - Expected HashLink: {}", processId, expectedEntityHasLink);
             if (!calculatedEntityHasLink.equals(expectedEntityHasLink)) {
                 log.error("ProcessID: {} - Error occurred while verifying the data integrity of the retrieved entity: HashLink verification failed", processId);
                 return Mono.error(new HashLinkException("HashLink verification failed"));
