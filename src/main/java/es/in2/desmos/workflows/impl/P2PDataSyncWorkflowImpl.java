@@ -48,21 +48,6 @@ public class P2PDataSyncWorkflowImpl implements P2PDataSyncWorkflow {
                 .doOnError(error -> log.error("ProcessID: {} - Error occurred while processing the P2P Data Synchronization Discovery Workflow: {}", processId, error.getMessage()));
     }
 
-    private Mono<List<MVAuditServiceEntity4DataNegotiation>> getMvAuditServiceEntities4DataNegotiation(String processId, Mono<List<String>> entities4DataNegotiationIdsMono) {
-        return entities4DataNegotiationIdsMono.flatMap(entities4DataNegotiationIds ->
-                Flux.fromIterable(entities4DataNegotiationIds)
-                        .flatMap(id -> auditRecordService.findLatestAuditRecordForEntity(processId, id)
-                                .map(auditRecord -> new MVAuditServiceEntity4DataNegotiation(
-                                                auditRecord.getEntityId(),
-                                                auditRecord.getEntityHash(),
-                                                auditRecord.getEntityHashLink()
-                                        )
-                                )
-                        )
-                        .collectList()
-        );
-    }
-
     private Mono<List<MVEntity4DataNegotiation>> createLocalMvEntities4DataNegotiation(String processId) {
         return brokerEntityGetterService.getMVBrokerEntities4DataNegotiation(processId)
                 .flatMap(mvBrokerEntities4DataNegotiation -> {
@@ -100,5 +85,20 @@ public class P2PDataSyncWorkflowImpl implements P2PDataSyncWorkflow {
 
     private static Mono<List<String>> getEntities4DataNegotiationIds(Mono<List<MVBrokerEntity4DataNegotiation>> mvBrokerEntities4DataNegotiationMono) {
         return mvBrokerEntities4DataNegotiationMono.map(x -> x.stream().map(MVBrokerEntity4DataNegotiation::id).toList());
+    }
+
+    private Mono<List<MVAuditServiceEntity4DataNegotiation>> getMvAuditServiceEntities4DataNegotiation(String processId, Mono<List<String>> entities4DataNegotiationIdsMono) {
+        return entities4DataNegotiationIdsMono.flatMap(entities4DataNegotiationIds ->
+                Flux.fromIterable(entities4DataNegotiationIds)
+                        .flatMap(id -> auditRecordService.findLatestAuditRecordForEntity(processId, id)
+                                .map(auditRecord -> new MVAuditServiceEntity4DataNegotiation(
+                                                auditRecord.getEntityId(),
+                                                auditRecord.getEntityHash(),
+                                                auditRecord.getEntityHashLink()
+                                        )
+                                )
+                        )
+                        .collectList()
+        );
     }
 }
