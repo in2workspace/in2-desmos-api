@@ -57,6 +57,7 @@ public class BlockchainTxPayloadFactory {
 
     public Mono<String> calculatePreviousHashIfEmpty(String processId, Map<String, Object> dataMap) {
         try {
+            log.debug("ProcessID: {} - Calculating previous hash...", processId);
             return Mono.just(calculateSHA256(objectMapper.writeValueAsString(dataMap)));
         } catch (JsonProcessingException | NoSuchAlgorithmException e) {
             log.warn("ProcessID: {} - Error creating previous hash from notification data: {}", processId, e.getMessage());

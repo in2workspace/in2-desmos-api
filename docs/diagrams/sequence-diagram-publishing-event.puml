@@ -1,0 +1,36 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+skinparam BoxPadding 10
+
+box "Blockchain Connector" #LightBlue
+    participant "Event Publication Service" as event_pub_service
+    queue "EventBuffer" as event_buffer
+    participant "Audit Service" as audit_service
+    database "Postgres" as local_db
+end box
+
+participant "DLT Adapter/API" as dlt_adapter
+
+activate event_buffer
+loop Every second
+    event_buffer -> event_buffer: checkSize()
+    alt Si size >= MAX_EVENTS o time >= MAX_DURATION
+        event_buffer -> event_pub_service++: processEvents()
+            event_pub_service -> event_pub_service: Build AggregatorEvent
+            event_pub_service -> dlt_adapter++: POST /api/v1/publishEvent \nPayload: AggregatorEvent
+            return 200 OK
+            loop forEach Event : AggregatorEvent
+                event_pub_service -> audit_service++: BuildTransaction()
+                    audit_service -> local_db++: SaveTransaction(Transaction)
+                    return
+                return
+            end
+    else
+        event_buffer --> event_buffer: Wait
+    end
+end
+@enduml
+
+

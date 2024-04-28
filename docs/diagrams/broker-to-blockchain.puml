@@ -1,0 +1,60 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+boundary "Context Broker" as cb
+
+box "Blockchain Connector"
+    control "Notification" as notification
+    entity "Process" as event
+    queue "Buffer" as buffer
+end box
+
+boundary "DLT API" as dlt
+
+note over cb, dlt
+    The Blockchain Connector has configured a subscription to
+    the Context Broker to receive notifications of new entities
+    (e.g., Product-Offering).
+end note
+
+cb -> notification++: Notify new/update entity
+    notification -> event++: Process entity
+    event -> event: Create AggregatedEvent
+    note right event
+        AggregatedEvent = {
+            "eventType": "ProductOffering",
+            "iss": "organizationId",
+            "entityId": "entityId",
+            "previousEntityHash": "previousEntityHash",
+            "dataLocation": "dataLocation",
+            "relatedEntities": [
+              {
+                "entityType": "Prize",
+                "previousEntityHash": "previousEntityHash"
+                "dataLocation": "dataLocation",
+                "relevantMetadata": ["metadata"]
+              },
+              ...
+            ],
+            "relevantMetadata": ["metadata"]
+        }
+    end note
+    loop
+        event -> event: get related entity
+        event -> cb++: get entity data
+        return entity data
+        event -> event: Create event
+        event -> event: Add event to AggregatedEvent
+    end
+
+    event -> buffer++: Send AggregatedEvent
+
+    loop (buffer < 15 events || 10 seconds)
+        buffer -> dlt++: Send events
+        return 200 OK
+    end
+
+
+@enduml

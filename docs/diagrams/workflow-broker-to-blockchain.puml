@@ -1,0 +1,52 @@
+@startuml
+'https://plantuml.com/activity-diagram-beta
+start
+partition "process: Receive Notification" {
+    :Receive the notification\nfrom the Context Broker;
+    :Create audit record — RECEIVED;
+    if (Check the validity of the notification) then (valid)
+        :Prioritize the notification;
+        :Enqueue the notification;
+        (A)
+        detach
+    else (invalid)
+        #Salmon:Discard the notification;
+        end
+    endif
+}
+partition "process: Event Creation" {
+    (A)
+    :Get the notification from the Queue;
+    :Map the notification\nto capture the Entity's data;
+    :Validate the Entity's data;
+    if(is Valid?) then (yes)
+        :Create Event with the Entity;
+        :Update the audit record status — CREATED;
+        :Enqueue the event;
+        (B)
+        detach
+    else (no)
+        #Salmon:Error;
+        :Store Entity's data\nin the local database;
+        stop
+    endif
+}
+partition "process: Buffering and Publication" {
+    (B)
+    repeat
+        if (there are 10 events in the queue\nor 10 seconds have passed) then (yes)
+            :Create an AggregateEvent\nwith the events in the queue;
+            :Send the AggregatedEvent payload\nto be published on the node;
+            if (Is the event successfully published?) then (yes)
+                :Update the audit record status — PUBLISHED;
+            else (no)
+                #Salmon:Error;
+                :Get the event and store it\nin the local database to be retried later;
+                stop
+            endif
+        else (no)
+        endif
+    repeat while (Check continues)
+}
+end
+@enduml
