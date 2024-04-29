@@ -209,6 +209,46 @@ class P2PDataSyncWorkflowIT {
         System.out.println("Integration Test Actual Response: " + responseMono);
     }
 
+    @Test
+    void itShouldReturnAllRequestedEntities() throws JSONException, JsonProcessingException {
+        givenEntitiesToRequestInScorpio();
+        Mono<String> resultMono = whenUserRequestEntities();
+        thenApplicationReturnRequestedEntities(resultMono);
+    }
+
+    private void givenEntitiesToRequestInScorpio() throws JSONException, JsonProcessingException {
+        String brokerUrl = ContainerManager.getBaseUriForScorpioA();
+        String entities = BrokerDataMother.getEntityRequestBrokerJson;
+        ScorpioInflator.addInitialJsonEntitiesToContextBroker(brokerUrl, entities);
+    }
+
+    private Mono<String> whenUserRequestEntities() {
+        Mono<Id[]> entitySyncRequest = Mono.just(IdMother.entitiesRequest);
+        return WebClient.builder()
+                .baseUrl("http://localhost:" + localServerPort)
+                .build()
+                .post()
+                .uri("/api/v1/sync/p2p/entities")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(entitySyncRequest, Id[].class)
+                .retrieve()
+                .bodyToMono(String.class)
+                .retry(3);
+    }
+
+    private void thenApplicationReturnRequestedEntities(Mono<String> resultMono) {
+        StepVerifier
+                .create(resultMono)
+                .consumeNextWith(result -> {
+                    try {
+                        JSONAssert.assertEquals(BrokerDataMother.getEntityRequestBrokerJson, result, false);
+                    } catch (JSONException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .verifyComplete();
+    }
+
     private void assertScorpioEntityIsExpected(String entityId, String expectedEntityResponse) {
         await().atMost(5, TimeUnit.SECONDS).ignoreExceptions().until(() -> {
             String processId = "0";

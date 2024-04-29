@@ -54,6 +54,21 @@ public final class ScorpioInflator {
         System.out.println("Create entities to Scorpio: " + result);
     }
 
+    public static void addInitialJsonEntitiesToContextBroker(String brokerUrl, String requestBody) throws JSONException, JsonProcessingException {
+        var result = WebClient.builder()
+                .baseUrl(brokerUrl)
+                .build()
+                .post()
+                .uri("ngsi-ld/v1/entityOperations/create")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
+                .retrieve()
+                .bodyToMono(String.class)
+                .retry(3).block();
+
+        System.out.println("Create entities to Scorpio: " + result);
+    }
+
     public static void deleteInitialEntitiesFromContextBroker(String brokerUrl, List<String> ids) {
         WebClient.builder()
                 .baseUrl(brokerUrl)
