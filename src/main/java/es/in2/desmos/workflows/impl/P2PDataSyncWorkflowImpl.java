@@ -47,8 +47,8 @@ public class P2PDataSyncWorkflowImpl implements P2PDataSyncWorkflow {
     }
 
     @Override
-    public Mono<List<String>> getLocalEntities(List<Id> ids) {
-        return null;
+    public Mono<List<String>> getLocalEntitiesById(List<Id> ids) {
+        return brokerPublisherService.findAllById(ids);
     }
 
     private Mono<List<MVEntity4DataNegotiation>> createLocalMvEntities4DataNegotiation(String processId) {

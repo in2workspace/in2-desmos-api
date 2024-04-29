@@ -9,5 +9,5 @@ import java.util.List;
 public interface P2PDataSyncWorkflow {
     Mono<List<MVEntity4DataNegotiation>> dataDiscovery(String processId, Mono<String> issuer, Mono<List<MVEntity4DataNegotiation>> externalMvEntities4DataNegotiation);
 
-    Mono<List<String>> getLocalEntities(List<Id> ids);
+    Mono<List<String>> getLocalEntitiesById(List<Id> ids);
 }

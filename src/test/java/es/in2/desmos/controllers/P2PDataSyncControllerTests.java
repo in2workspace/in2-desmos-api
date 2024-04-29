@@ -85,7 +85,7 @@ class P2PDataSyncControllerTests {
         }
         Mono<List<String>> localEntitiesMono = Mono.just(localEntities);
 
-        when(p2PDataSyncWorkflow.getLocalEntities(ids)).thenReturn(localEntitiesMono);
+        when(p2PDataSyncWorkflow.getLocalEntitiesById(ids)).thenReturn(localEntitiesMono);
 
         webTestClient.post()
                 .uri("/api/v1/sync/p2p/entities")
@@ -98,7 +98,7 @@ class P2PDataSyncControllerTests {
                 .json(expectedResponse)
                 .consumeWith(System.out::println);
 
-        verify(p2PDataSyncWorkflow, times(1)).getLocalEntities(ids);
+        verify(p2PDataSyncWorkflow, times(1)).getLocalEntitiesById(ids);
         verifyNoMoreInteractions(p2PDataSyncWorkflow);
     }
 }

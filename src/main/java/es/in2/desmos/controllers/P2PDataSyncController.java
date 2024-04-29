@@ -69,7 +69,7 @@ public class P2PDataSyncController {
                 .flatMap(ids -> {
                     log.debug("ProcessID: {} - Starting P2P Entities Synchronization: {}", processId, ids);
 
-                    return p2PDataSyncWorkflow.getLocalEntities(ids)
+                    return p2PDataSyncWorkflow.getLocalEntitiesById(ids)
                             .flatMapIterable(entities -> entities)
                             .map(entity -> JsonParser.parseString(entity).getAsJsonObject())
                             .collectList()
