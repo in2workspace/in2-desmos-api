@@ -5,7 +5,7 @@ import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.MVBrokerEntity4DataNegotiation;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.domain.services.api.impl.AuditRecordServiceImpl;
-import es.in2.desmos.domain.services.broker.impl.BrokerEntityGetterServiceImpl;
+import es.in2.desmos.domain.services.broker.impl.BrokerPublisherServiceImpl;
 import es.in2.desmos.objectmothers.AuditRecordMother;
 import es.in2.desmos.objectmothers.MVBrokerEntity4DataNegotiationMother;
 import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
@@ -28,7 +28,7 @@ class P2PDataSyncWorkflowTests {
     private P2PDataSyncWorkflowImpl p2PDataSyncWorkflow;
 
     @Mock
-    private BrokerEntityGetterServiceImpl brokerEntityIdGetterService;
+    private BrokerPublisherServiceImpl brokerPublisherService;
 
     @Mock
     private AuditRecordServiceImpl auditRecordService;
@@ -46,7 +46,7 @@ class P2PDataSyncWorkflowTests {
         List<AuditRecord> auditRecordEntities = AuditRecordMother.list3And4();
 
         String processId = "0";
-        when(brokerEntityIdGetterService.getMVBrokerEntities4DataNegotiation(processId, "ProductOffering", "lastUpdate", "version")).thenReturn(Mono.just(brokerEntities));
+        when(brokerPublisherService.getMVBrokerEntities4DataNegotiation(processId, "ProductOffering", "lastUpdate", "version")).thenReturn(Mono.just(brokerEntities));
         when(auditRecordService.findLatestAuditRecordForEntity(processId, auditRecordEntities.get(0).getEntityId())).thenReturn(Mono.just(auditRecordEntities.get(0)));
         when(auditRecordService.findLatestAuditRecordForEntity(processId, auditRecordEntities.get(1).getEntityId())).thenReturn(Mono.just(auditRecordEntities.get(1)));
 
@@ -59,8 +59,8 @@ class P2PDataSyncWorkflowTests {
                 .expectNext(expectedInternalEntities)
                 .verifyComplete();
 
-        verify(brokerEntityIdGetterService, times(1)).getMVBrokerEntities4DataNegotiation(processId, "ProductOffering", "lastUpdate", "version");
-        verifyNoMoreInteractions(brokerEntityIdGetterService);
+        verify(brokerPublisherService, times(1)).getMVBrokerEntities4DataNegotiation(processId, "ProductOffering", "lastUpdate", "version");
+        verifyNoMoreInteractions(brokerPublisherService);
 
     }
 }

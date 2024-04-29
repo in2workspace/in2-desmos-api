@@ -6,7 +6,7 @@ import es.in2.desmos.domain.models.MVAuditServiceEntity4DataNegotiation;
 import es.in2.desmos.domain.models.MVBrokerEntity4DataNegotiation;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.domain.services.api.AuditRecordService;
-import es.in2.desmos.domain.services.broker.BrokerEntityGetterService;
+import es.in2.desmos.domain.services.broker.BrokerPublisherService;
 import es.in2.desmos.workflows.P2PDataSyncWorkflow;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class P2PDataSyncWorkflowImpl implements P2PDataSyncWorkflow {
-    private final BrokerEntityGetterService brokerEntityGetterService;
+    private final BrokerPublisherService brokerPublisherService;
 
     private final AuditRecordService auditRecordService;
 
@@ -50,7 +50,7 @@ public class P2PDataSyncWorkflowImpl implements P2PDataSyncWorkflow {
     }
 
     private Mono<List<MVEntity4DataNegotiation>> createLocalMvEntities4DataNegotiation(String processId) {
-        return brokerEntityGetterService.getMVBrokerEntities4DataNegotiation(processId, BROKER_TYPE, "lastUpdate", "version")
+        return brokerPublisherService.getMVBrokerEntities4DataNegotiation(processId, BROKER_TYPE, "lastUpdate", "version")
                 .flatMap(mvBrokerEntities4DataNegotiation -> {
                     log.debug("ProcessID: {} - MV Broker Entities 4 Data Negotiation: {}", processId, mvBrokerEntities4DataNegotiation);
 

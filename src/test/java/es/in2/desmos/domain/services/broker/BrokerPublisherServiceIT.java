@@ -22,13 +22,13 @@ import java.util.List;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class BrokerEntityGetterServiceIT {
+class BrokerPublisherServiceIT {
 
     @Autowired
     private ObjectMapper objectMapper;
 
     @Autowired
-    BrokerEntityGetterService brokerEntityGetterService;
+    BrokerPublisherService brokerPublisherService;
 
     @LocalServerPort
     private int localServerPort;
@@ -61,7 +61,7 @@ class BrokerEntityGetterServiceIT {
     @Test
     void itShouldReturnEntityIds() {
         String processId = "0";
-        var result = brokerEntityGetterService.getMVBrokerEntities4DataNegotiation(processId, "ProductOffering", "lastUpdate", "version");
+        var result = brokerPublisherService.getMVBrokerEntities4DataNegotiation(processId, "ProductOffering", "lastUpdate", "version");
 
         StepVerifier.create(result)
                 .expectNext(initialEntities)
