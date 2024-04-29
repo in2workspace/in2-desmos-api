@@ -1,6 +1,7 @@
 package es.in2.desmos.domain.services.broker.impl;
 
 import es.in2.desmos.domain.models.BlockchainNotification;
+import es.in2.desmos.domain.models.Id;
 import es.in2.desmos.domain.models.MVBrokerEntity4DataNegotiation;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
 import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
@@ -52,6 +53,11 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
     @Override
     public Mono<Void> batchUpsertEntitiesToContextBroker(String processId, String retrievedBrokerEntities) {
         return batchUpsertEntities(processId, retrievedBrokerEntities);
+    }
+
+    @Override
+    public Mono<List<String>> findAllById(Mono<List<Id>> ids) {
+        return null;
     }
 
     private Mono<Void> batchUpsertEntities(String processId, String requestBody) {

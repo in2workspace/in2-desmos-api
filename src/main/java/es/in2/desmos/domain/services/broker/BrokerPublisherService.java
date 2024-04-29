@@ -1,6 +1,7 @@
 package es.in2.desmos.domain.services.broker;
 
 import es.in2.desmos.domain.models.BlockchainNotification;
+import es.in2.desmos.domain.models.Id;
 import es.in2.desmos.domain.models.MVBrokerEntity4DataNegotiation;
 import reactor.core.publisher.Mono;
 
@@ -13,4 +14,6 @@ public interface BrokerPublisherService {
     Mono<List<MVBrokerEntity4DataNegotiation>> getMVBrokerEntities4DataNegotiation(String processId, String type, String firstAttribute, String secondAttribute);
 
     Mono<Void> batchUpsertEntitiesToContextBroker(String processId, String retrievedBrokerEntities);
+
+    Mono<List<String>> findAllById(Mono<List<Id>> ids);
 }

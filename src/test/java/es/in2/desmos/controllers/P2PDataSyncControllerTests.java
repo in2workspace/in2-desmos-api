@@ -23,7 +23,6 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
@@ -73,8 +72,6 @@ class P2PDataSyncControllerTests {
         Id[] entitySyncRequest = IdMother.entitiesRequest;
         Mono<Id[]> entitySyncRequestMono = Mono.just(entitySyncRequest);
 
-        List<Id> ids = Arrays.stream(entitySyncRequest).toList();
-
         String expectedResponse = BrokerDataMother.getEntityRequestBrokerJson;
 
         JSONArray expectedResponseJsonArray = new JSONArray(expectedResponse);
@@ -85,7 +82,7 @@ class P2PDataSyncControllerTests {
         }
         Mono<List<String>> localEntitiesMono = Mono.just(localEntities);
 
-        when(p2PDataSyncWorkflow.getLocalEntitiesById(ids)).thenReturn(localEntitiesMono);
+        when(p2PDataSyncWorkflow.getLocalEntitiesById(any())).thenReturn(localEntitiesMono);
 
         webTestClient.post()
                 .uri("/api/v1/sync/p2p/entities")
@@ -98,7 +95,7 @@ class P2PDataSyncControllerTests {
                 .json(expectedResponse)
                 .consumeWith(System.out::println);
 
-        verify(p2PDataSyncWorkflow, times(1)).getLocalEntitiesById(ids);
+        verify(p2PDataSyncWorkflow, times(1)).getLocalEntitiesById(any());
         verifyNoMoreInteractions(p2PDataSyncWorkflow);
     }
 }
