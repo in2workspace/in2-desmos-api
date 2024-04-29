@@ -21,7 +21,7 @@ RUN addgroup -S nonroot \
     && adduser -S nonroot -G nonroot
 USER nonroot
 WORKDIR /app
-COPY --from=TEMP_BUILD /home/gradle/src/build/libs/*.jar /app/desmos.jar
+COPY --from=TEMP_BUILD /home/gradle/src/build/libs/*.jar /app/desmos-api.jar
 ENTRYPOINT ["java", "-jar", "/app/desmos-api.jar"]
 
 # docker build --build-arg SKIP_TESTS=true -t image-name .

@@ -17,7 +17,7 @@ class ApplicationUtilsTest {
         String devMetadata = ApplicationUtils.getEnvironmentMetadata("test");
         String prdMetadata = ApplicationUtils.getEnvironmentMetadata("prod");
 
-        // Assert.assertEquals("local", localMetadata);
+        assertEquals("local", localMetadata);
         assertEquals("sbx", sbxMetadata);
         assertEquals("dev", devMetadata);
         assertEquals("prd", prdMetadata);

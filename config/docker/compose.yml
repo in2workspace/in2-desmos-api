@@ -23,7 +23,7 @@ services:
   desmos:
     image: desmos:latest
     environment:
-      SPRING_PROFILE_ACTIVE: dev
+      SPRING_PROFILES_ACTIVE: dev
       SPRING_R2DBC_URL: r2dbc:postgresql://postgres:5432/dbtest
       SPRING_R2DBC_USERNAME: postgres
       SPRING_R2DBC_PASSWORD: postgres
