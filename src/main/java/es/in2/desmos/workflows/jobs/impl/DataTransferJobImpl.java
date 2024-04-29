@@ -42,7 +42,7 @@ public class DataTransferJobImpl implements DataTransferJob {
 
             Mono<String> issuer = Mono.just(result.issuer());
 
-            Mono<MVEntity4DataNegotiation[]> allEntitiesToRequest = buildAllEntitiesToRequest(
+            Mono<Id[]> allEntitiesToRequest = buildAllEntitiesToRequest(
                     Mono.just(result.newEntitiesToSync()),
                     Mono.just(result.existingEntitiesToSync())
             );
@@ -57,21 +57,30 @@ public class DataTransferJobImpl implements DataTransferJob {
                                     Mono<Map<Id, EntityValidationData>> newEntitiesOriginalValidationDataById = getEntitiesOriginalValidationDataById(Mono.just(result.newEntitiesToSync()));
                                     Mono<Map<Id, EntityValidationData>> existingEntitiesOriginalValidationDataById = getEntitiesOriginalValidationDataById(Mono.just(result.existingEntitiesToSync()));
 
-                                    Mono<List<MVEntity4DataNegotiation>> allEntitiesToRequestList = Mono.just(Arrays.asList(entities));
+                                    Mono<List<MVEntity4DataNegotiation>> allMVEntity4DataNegotiation = buildAllMVEntities4DataNegotiation(
+                                            Mono.just(result.newEntitiesToSync()),
+                                            Mono.just(result.existingEntitiesToSync())
+                                    );
 
                                     return validateEntities(processId, entitiesByIdMono, newEntitiesOriginalValidationDataById, existingEntitiesOriginalValidationDataById)
-                                            .then(buildAndSaveAuditRecordFromDataSync(processId, issuer, entitiesByIdMono, allEntitiesToRequestList, AuditRecordStatus.RETRIEVED))
+                                            .then(buildAndSaveAuditRecordFromDataSync(processId, issuer, entitiesByIdMono, allMVEntity4DataNegotiation, AuditRecordStatus.RETRIEVED))
                                             .then(batchUpsertEntitiesToContextBroker(processId, entitySyncResponseMono))
-                                            .then(buildAndSaveAuditRecordFromDataSync(processId, issuer, entitiesByIdMono, allEntitiesToRequestList, AuditRecordStatus.PUBLISHED));
+                                            .then(buildAndSaveAuditRecordFromDataSync(processId, issuer, entitiesByIdMono, allMVEntity4DataNegotiation, AuditRecordStatus.PUBLISHED));
                                 });
                     }));
         });
     }
 
-    private Mono<MVEntity4DataNegotiation[]> buildAllEntitiesToRequest(Mono<List<MVEntity4DataNegotiation>> newEntitiesToSync, Mono<List<MVEntity4DataNegotiation>> existingEntitiesToSync) {
-        return newEntitiesToSync.zipWith(existingEntitiesToSync)
+    private Mono<Id[]> buildAllEntitiesToRequest(Mono<List<MVEntity4DataNegotiation>> newEntitiesToSyncMono, Mono<List<MVEntity4DataNegotiation>> existingEntitiesToSyncMono) {
+        return newEntitiesToSyncMono.zipWith(existingEntitiesToSyncMono)
                 .flatMap(tuple ->
-                        Mono.just(Stream.concat(tuple.getT1().stream(), tuple.getT2().stream()).toArray(MVEntity4DataNegotiation[]::new)));
+                        Mono.just(Stream.concat(tuple.getT1().stream().map(x -> new Id(x.id())), tuple.getT2().stream().map(x -> new Id(x.id()))).toArray(Id[]::new)));
+    }
+
+    private Mono<List<MVEntity4DataNegotiation>> buildAllMVEntities4DataNegotiation(Mono<List<MVEntity4DataNegotiation>> newEntitiesToSyncMono, Mono<List<MVEntity4DataNegotiation>> existingEntitiesToSyncMono) {
+        return newEntitiesToSyncMono.zipWith(existingEntitiesToSyncMono)
+                .flatMap(tuple ->
+                        Mono.just(Stream.concat(tuple.getT1().stream(), tuple.getT2().stream()).toList()));
     }
 
     private Mono<Map<Id, Entity>> getEntitiesById(Mono<String> entitiesMono) {
@@ -188,7 +197,7 @@ public class DataTransferJobImpl implements DataTransferJob {
                     return idMonoList
                             .flatMapIterable(list -> list)
                             .flatMap(id -> auditRecordService
-                                    .findLatestAuditRecordForEntity(processId, id.value())
+                                    .findLatestAuditRecordForEntity(processId, id.id())
                                     .flatMap(auditRecord -> {
                                         String entityData = rcvdEntity.get(id).value();
                                         Mono<String> entityDataMono = Mono.just(entityData);
@@ -211,7 +220,7 @@ public class DataTransferJobImpl implements DataTransferJob {
         return rcvdEntitiesByIdMono
                 .flatMapIterable(Map::keySet)
                 .flatMap(rcvdEntityById -> {
-                    String id = rcvdEntityById.value();
+                    String id = rcvdEntityById.id();
                     return mvEntity4DataNegotiationListMono
                             .flatMap(list -> Mono.justOrEmpty(
                                             list.stream()

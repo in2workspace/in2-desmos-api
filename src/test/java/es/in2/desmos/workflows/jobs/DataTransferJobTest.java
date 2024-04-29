@@ -6,10 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.domain.exceptions.InvalidConsistencyException;
 import es.in2.desmos.domain.exceptions.InvalidIntegrityException;
 import es.in2.desmos.domain.exceptions.InvalidSyncResponseException;
-import es.in2.desmos.domain.models.AuditRecord;
-import es.in2.desmos.domain.models.AuditRecordStatus;
-import es.in2.desmos.domain.models.DataNegotiationResult;
-import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
+import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
 import es.in2.desmos.domain.services.sync.EntitySyncWebClient;
@@ -51,18 +48,18 @@ class DataTransferJobTest {
     private ArgumentCaptor<Mono<String>> monoIssuerCaptor;
 
     @Captor
-    private ArgumentCaptor<Mono<MVEntity4DataNegotiation[]>> entitySyncRequestCaptor;
+    private ArgumentCaptor<Mono<Id[]>> entitySyncRequestCaptor;
 
     @Test
     void itShouldRequestEntitiesToExternalAccessNode() {
         DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
         Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
 
-        MVEntity4DataNegotiation[] entitySyncRequest =
+        Id[] entitySyncRequest =
                 Stream.concat(
-                                dataNegotiationResult.newEntitiesToSync().stream(),
-                                dataNegotiationResult.existingEntitiesToSync().stream())
-                        .toArray(MVEntity4DataNegotiation[]::new);
+                                dataNegotiationResult.newEntitiesToSync().stream().map(x -> new Id(x.id())),
+                                dataNegotiationResult.existingEntitiesToSync().stream().map(x -> new Id(x.id())))
+                        .toArray(Id[]::new);
 
         Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.sample);
 
@@ -92,7 +89,7 @@ class DataTransferJobTest {
                 .expectNext(dataNegotiationResult.issuer())
                 .verifyComplete();
 
-        Mono<MVEntity4DataNegotiation[]> entitySyncRequestCaptured = entitySyncRequestCaptor.getValue();
+        Mono<Id[]> entitySyncRequestCaptured = entitySyncRequestCaptor.getValue();
 
         StepVerifier
                 .create(entitySyncRequestCaptured)
@@ -109,11 +106,11 @@ class DataTransferJobTest {
         DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
         Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
 
-        MVEntity4DataNegotiation[] entitySyncRequest =
+        Id[] entitySyncRequest =
                 Stream.concat(
-                                dataNegotiationResult.newEntitiesToSync().stream(),
-                                dataNegotiationResult.existingEntitiesToSync().stream())
-                        .toArray(MVEntity4DataNegotiation[]::new);
+                                dataNegotiationResult.newEntitiesToSync().stream().map(x -> new Id(x.id())),
+                                dataNegotiationResult.existingEntitiesToSync().stream().map(x -> new Id(x.id())))
+                        .toArray(Id[]::new);
 
         Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.sample);
 
@@ -143,7 +140,7 @@ class DataTransferJobTest {
                 .expectNext(dataNegotiationResult.issuer())
                 .verifyComplete();
 
-        Mono<MVEntity4DataNegotiation[]> entitySyncRequestCaptured = entitySyncRequestCaptor.getValue();
+        Mono<Id[]> entitySyncRequestCaptured = entitySyncRequestCaptor.getValue();
 
         StepVerifier
                 .create(entitySyncRequestCaptured)

@@ -1,6 +1,6 @@
 package es.in2.desmos.domain.services.sync;
 
-import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
+import es.in2.desmos.domain.models.Id;
 import es.in2.desmos.domain.services.sync.impl.EntitySyncWebClientImpl;
 import es.in2.desmos.objectmothers.EntitySyncResponseMother;
 import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
@@ -49,7 +49,7 @@ class EntitySyncWebClientTests {
 
         String issuer = "http://example.org";
         Mono<String> issuerMono = Mono.just(issuer);
-        Mono<MVEntity4DataNegotiation[]> entitySyncRequest = Mono.just(MVEntity4DataNegotiationMother.fullList().toArray(MVEntity4DataNegotiation[]::new));
+        Mono<Id[]> entitySyncRequest = Mono.just(MVEntity4DataNegotiationMother.fullList().stream().map(x -> new Id(x.id())).toArray(Id[]::new));
 
         String expectedResult = (EntitySyncResponseMother.sample);
 
@@ -58,7 +58,7 @@ class EntitySyncWebClientTests {
         when(requestBodyUriSpecMock.uri(issuer + "/api/v1/sync/entities")).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.contentType(MediaType.APPLICATION_JSON)).thenReturn(requestBodySpecMock);
         //noinspection unchecked
-        when(requestBodySpecMock.body(entitySyncRequest, MVEntity4DataNegotiation[].class)).thenReturn(requestHeadersSpec);
+        when(requestBodySpecMock.body(entitySyncRequest, Id[].class)).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpecMock);
         when(responseSpecMock.bodyToMono(String.class)).thenReturn(Mono.just(expectedResult));
 

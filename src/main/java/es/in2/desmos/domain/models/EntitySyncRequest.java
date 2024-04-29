@@ -2,7 +2,7 @@ package es.in2.desmos.domain.models;
 
 import java.util.Arrays;
 
-public record EntitySyncRequest(MVEntity4DataNegotiation[] entities) {
+public record EntitySyncRequest(Id[] entities) {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
