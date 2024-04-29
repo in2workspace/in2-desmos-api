@@ -97,5 +97,8 @@ class P2PDataSyncControllerTests {
                 .expectBody()
                 .json(expectedResponse)
                 .consumeWith(System.out::println);
+
+        verify(p2PDataSyncWorkflow, times(1)).getLocalEntities(ids);
+        verifyNoMoreInteractions(p2PDataSyncWorkflow);
     }
 }
