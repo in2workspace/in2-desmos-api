@@ -79,7 +79,7 @@ class EntitySyncRequestTests {
     @Test
     void testToString() {
         EntitySyncRequest element = EntitySyncRequestMother.simple1and2();
-        String expectedString = "EntitySyncRequest{entities=[MVEntity4DataNegotiation[id=urn:productOffering:d86735a6-0faa-463d-a872-00b97affa1cb, type=ProductOffering, version=1.2, lastUpdate=2024-09-05T12:00:00Z, hash=230df0a3a28e89ea00cc647ad5dace35bb80e94207072cd9e9cc01df7912f652, hashlink=fa54230df0a3a28e89ea00cc647ad5dace35bb80e94207072cd9e9cc01df7912f652], MVEntity4DataNegotiation[id=urn:productOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87, type=ProductOffering, version=2.5, lastUpdate=2024-07-09T12:00:00Z, hash=bce7ca190970f0799c2a9e51f7ba75f8c5f04a7ce95c37498592d3eb8953dcc8, hashlink=fa54bce7ca190970f0799c2a9e51f7ba75f8c5f04a7ce95c37498592d3eb8953dcc8]]}";
+        String expectedString = "EntitySyncRequest{entities=[MVEntity4DataNegotiation[id=urn:ProductOffering:d86735a6-0faa-463d-a872-00b97affa1cb, type=ProductOffering, version=1.2, lastUpdate=2024-09-05T12:00:00Z, hash=89e62d6be87fd39dc19dc69a35d58d1ac2351854bf48a8264bf075643c89eddf, hashlink=fa54230df0a3a28e89ea00cc647ad5dace35bb80e94207072cd9e9cc01df7912f652], MVEntity4DataNegotiation[id=urn:ProductOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87, type=ProductOffering, version=2.5, lastUpdate=2024-07-09T12:00:00Z, hash=08b236983ba01bbcd268793b104917f89f0bba8160d2f693911087c72b9a8051, hashlink=fa5408b236983ba01bbcd268793b104917f89f0bba8160d2f693911087c72b9a8051]]}";
 
         String result = element.toString();
 

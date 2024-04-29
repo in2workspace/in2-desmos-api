@@ -9,7 +9,7 @@ public final class EntitySyncResponseMother {
     public static final @NotNull String sample = """
             [
                  {
-                     "id": "urn:productOffering:d86735a6-0faa-463d-a872-00b97affa1cb",
+                     "id": "urn:ProductOffering:d86735a6-0faa-463d-a872-00b97affa1cb",
                      "type": "ProductOffering",
                      "version": "1.2",
                      "lastUpdate": "2024-09-05T12:00:00Z",
@@ -19,14 +19,14 @@ public final class EntitySyncResponseMother {
                      },
                      "productOfferingPrice": {
                          "type": "Relationship",
-                         "object": "urn:productOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
+                         "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
                      },
                      "@context": [
                          "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
                      ]
                  },
                  {
-                     "id": "urn:productOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87",
+                     "id": "urn:ProductOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87",
                      "type": "ProductOffering",
                      "version": "2.5",
                      "lastUpdate": "2024-07-09T12:00:00Z",
@@ -36,14 +36,14 @@ public final class EntitySyncResponseMother {
                      },
                      "productOfferingPrice": {
                          "type": "Relationship",
-                         "object": "urn:productOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
+                         "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
                      },
                      "@context": [
                          "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
                      ]
                  },
                  {
-                     "id": "urn:productOffering:537e1ee3-0556-4fff-875f-e55bb97e7ab0",
+                     "id": "urn:ProductOffering:537e1ee3-0556-4fff-875f-e55bb97e7ab0",
                      "type": "ProductOffering",
                      "version": "4.3",
                      "lastUpdate": "2024-04-03T12:00:00Z",
@@ -53,14 +53,14 @@ public final class EntitySyncResponseMother {
                      },
                      "productOfferingPrice": {
                          "type": "Relationship",
-                         "object": "urn:productOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
+                         "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
                      },
                      "@context": [
                          "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
                      ]
                  },
                  {
-                     "id": "urn:productOffering:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c",
+                     "id": "urn:ProductOffering:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c",
                      "type": "ProductOffering",
                      "version": "1.9",
                      "lastUpdate": "2024-06-02T12:00:00Z",
@@ -70,7 +70,7 @@ public final class EntitySyncResponseMother {
                      },
                      "productOfferingPrice": {
                          "type": "Relationship",
-                         "object": "urn:productOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
+                         "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
                      },
                      "@context": [
                          "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
@@ -82,7 +82,7 @@ public final class EntitySyncResponseMother {
     public static final String sample2and4 = """
             [
                  {
-                     "id": "urn:productOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87",
+                     "id": "urn:ProductOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87",
                      "type": "ProductOffering",
                      "version": "2.5",
                      "lastUpdate": "2024-07-09T12:00:00Z",
@@ -92,14 +92,14 @@ public final class EntitySyncResponseMother {
                      },
                      "productOfferingPrice": {
                          "type": "Relationship",
-                         "object": "urn:productOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
+                         "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
                      },
                      "@context": [
                          "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
                      ]
                  },
                  {
-                     "id": "urn:productOffering:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c",
+                     "id": "urn:ProductOffering:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c",
                      "type": "ProductOffering",
                      "version": "1.9",
                      "lastUpdate": "2024-06-02T12:00:00Z",
@@ -109,7 +109,7 @@ public final class EntitySyncResponseMother {
                      },
                      "productOfferingPrice": {
                          "type": "Relationship",
-                         "object": "urn:productOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
+                         "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
                      },
                      "@context": [
                          "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
@@ -118,12 +118,12 @@ public final class EntitySyncResponseMother {
              ]
             """;
 
-    public final static String id1 = "urn:productOffering:d86735a6-0faa-463d-a872-00b97affa1cb";
+    public final static String id1 = "urn:ProductOffering:d86735a6-0faa-463d-a872-00b97affa1cb";
 
-    public final static String id2 = "urn:productOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87";
+    public final static String id2 = "urn:ProductOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87";
 
-    public final static String id3 = "urn:productOffering:537e1ee3-0556-4fff-875f-e55bb97e7ab0";
+    public final static String id3 = "urn:ProductOffering:537e1ee3-0556-4fff-875f-e55bb97e7ab0";
 
-    public final static String id4 = "urn:productOffering:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c";
+    public final static String id4 = "urn:ProductOffering:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c";
 
 }

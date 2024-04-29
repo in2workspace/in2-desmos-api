@@ -47,7 +47,7 @@ public final class EntityMother {
 
         JSONObject productOfferingPrice = new JSONObject();
         productOfferingPrice.put("type", "Relationship");
-        productOfferingPrice.put("object", "urn:productOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a");
+        productOfferingPrice.put("object", "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a");
 
         productOffering.put("productOfferingPrice", productOfferingPrice);
 
@@ -78,7 +78,7 @@ public final class EntityMother {
 
         JSONObject productOfferingPrice = new JSONObject();
         productOfferingPrice.put("type", "Relationship");
-        productOfferingPrice.put("object", "urn:productOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a");
+        productOfferingPrice.put("object", "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a");
 
         productOffering.put("productOfferingPrice", productOfferingPrice);
 
