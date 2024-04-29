@@ -142,7 +142,7 @@ class DataSyncServiceImplTests {
 
 
         StepVerifier.create(dataSyncService.verifyRetrievedEntityData("processId", errorNotification, retrievedBrokerEntity))
-                .expectError(JsonProcessingException.class)
+                .expectError(HashLinkException.class)
                 .verify();
     }
 }

@@ -120,8 +120,7 @@ public class DataSyncServiceImpl implements DataSyncService {
             return Mono.just(retrievedBrokerEntity);
         } catch (JsonProcessingException | NoSuchAlgorithmException e) {
             log.warn("ProcessID: {} - Error occurred while sorting the attributes of the retrieved entity: {}", processId, e.getMessage());
-            // todo: throw custom exception (Integrity of the retrieved entity verification failed)
-            return Mono.error(e);
+            return Mono.error(new HashLinkException("Integrity of the retrieved entity verification failed"));
         }
     }
 
