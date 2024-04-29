@@ -5,5 +5,5 @@ import reactor.core.publisher.Mono;
 
 public interface BlockchainPublisherService {
 
-    Mono<Void> PublishBlockchainTxPayloadToDltAdapter(String processId, BlockchainTxPayload blockchainTxPayload);
+    Mono<Void> publishBlockchainTxPayloadToDltAdapter(String processId, BlockchainTxPayload blockchainTxPayload);
 }

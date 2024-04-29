@@ -66,7 +66,7 @@ public class SubscribeWorkflowImpl implements SubscribeWorkflow {
                                                                 // build and save the audit record for RETRIEVED status
                                                                 .then(auditRecordService.buildAndSaveAuditRecordFromBlockchainNotification(processId, blockchainNotification, retrievedBrokerEntity, AuditRecordStatus.RETRIEVED))
                                                                 // publish the retrieved entity to the local broker
-                                                                .then(brokerPublisherService.PublishEntityToContextBroker(processId, blockchainNotification, retrievedBrokerEntity))
+                                                                .then(brokerPublisherService.publishEntityToContextBroker(processId, blockchainNotification, retrievedBrokerEntity))
                                                                 // build and save the audit record for PUBLISHED status
                                                                 .then(auditRecordService.buildAndSaveAuditRecordFromBlockchainNotification(processId, blockchainNotification, retrievedBrokerEntity, AuditRecordStatus.PUBLISHED))
                                                 )

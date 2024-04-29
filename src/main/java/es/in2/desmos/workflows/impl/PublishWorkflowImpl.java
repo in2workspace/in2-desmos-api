@@ -54,7 +54,7 @@ public class PublishWorkflowImpl implements PublishWorkflow {
                                                 .flatMap(blockchainTxPayload ->
                                                         auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(processId, brokerNotification.data().get(0), AuditRecordStatus.CREATED, blockchainTxPayload)
                                                                 // Publish the data event to the Blockchain
-                                                                .then(blockchainPublisherService.PublishBlockchainTxPayloadToDltAdapter(processId, blockchainTxPayload))
+                                                                .then(blockchainPublisherService.publishBlockchainTxPayloadToDltAdapter(processId, blockchainTxPayload))
                                                                 .then(auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(processId, brokerNotification.data().get(0), AuditRecordStatus.PUBLISHED, blockchainTxPayload))))
                                 .doOnSuccess(success ->
                                         log.info("ProcessID: {} - Publish Workflow completed successfully.", processId))

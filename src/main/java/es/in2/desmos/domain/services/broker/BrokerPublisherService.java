@@ -5,6 +5,6 @@ import reactor.core.publisher.Mono;
 
 public interface BrokerPublisherService {
 
-    Mono<Void> PublishEntityToContextBroker(String processId, BlockchainNotification blockchainNotification, String retrievedBrokerEntity);
+    Mono<Void> publishEntityToContextBroker(String processId, BlockchainNotification blockchainNotification, String retrievedBrokerEntity);
 
 }
