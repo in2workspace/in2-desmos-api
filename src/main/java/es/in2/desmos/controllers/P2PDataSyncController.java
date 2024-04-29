@@ -16,9 +16,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -64,10 +64,11 @@ public class P2PDataSyncController {
         String processId = UUID.randomUUID().toString();
         log.info("ProcessID: {} - Starting P2P Entities Synchronization Controller", processId);
 
-        return entitySyncRequest.flatMap(request -> {
-                    log.debug("ProcessID: {} - Starting P2P Entities Synchronization: {}", processId, request);
+        return entitySyncRequest.flatMapMany(Flux::fromArray)
+                .collectList()
+                .flatMap(ids -> {
+                    log.debug("ProcessID: {} - Starting P2P Entities Synchronization: {}", processId, ids);
 
-                    List<Id> ids = Arrays.stream(request).toList();
                     return p2PDataSyncWorkflow.getLocalEntities(ids)
                             .flatMapIterable(entities -> entities)
                             .map(entity -> JsonParser.parseString(entity).getAsJsonObject())
