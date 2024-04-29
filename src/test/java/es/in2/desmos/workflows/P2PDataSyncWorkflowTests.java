@@ -61,6 +61,5 @@ class P2PDataSyncWorkflowTests {
 
         verify(brokerPublisherService, times(1)).getMVBrokerEntities4DataNegotiation(processId, "ProductOffering", "lastUpdate", "version");
         verifyNoMoreInteractions(brokerPublisherService);
-
     }
 }
