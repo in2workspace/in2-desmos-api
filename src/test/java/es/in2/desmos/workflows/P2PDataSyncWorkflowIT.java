@@ -210,13 +210,13 @@ class P2PDataSyncWorkflowIT {
     }
 
     @Test
-    void itShouldReturnAllRequestedEntities() throws JSONException, JsonProcessingException {
+    void itShouldReturnAllRequestedEntities() {
         givenEntitiesToRequestInScorpio();
         Mono<String> resultMono = whenUserRequestEntities();
         thenApplicationReturnRequestedEntities(resultMono);
     }
 
-    private void givenEntitiesToRequestInScorpio() throws JSONException, JsonProcessingException {
+    private void givenEntitiesToRequestInScorpio() {
         String brokerUrl = ContainerManager.getBaseUriForScorpioA();
         String entities = BrokerDataMother.getEntityRequestBrokerJson;
         ScorpioInflator.addInitialJsonEntitiesToContextBroker(brokerUrl, entities);
