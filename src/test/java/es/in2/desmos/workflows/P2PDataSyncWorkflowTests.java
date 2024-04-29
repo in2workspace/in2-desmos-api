@@ -46,7 +46,7 @@ class P2PDataSyncWorkflowTests {
         List<AuditRecord> auditRecordEntities = AuditRecordMother.list3And4();
 
         String processId = "0";
-        when(brokerEntityIdGetterService.getMVBrokerEntities4DataNegotiation(processId)).thenReturn(Mono.just(brokerEntities));
+        when(brokerEntityIdGetterService.getMVBrokerEntities4DataNegotiation(processId, "ProductOffering", "lastUpdate", "version")).thenReturn(Mono.just(brokerEntities));
         when(auditRecordService.findLatestAuditRecordForEntity(processId, auditRecordEntities.get(0).getEntityId())).thenReturn(Mono.just(auditRecordEntities.get(0)));
         when(auditRecordService.findLatestAuditRecordForEntity(processId, auditRecordEntities.get(1).getEntityId())).thenReturn(Mono.just(auditRecordEntities.get(1)));
 
@@ -59,7 +59,7 @@ class P2PDataSyncWorkflowTests {
                 .expectNext(expectedInternalEntities)
                 .verifyComplete();
 
-        verify(brokerEntityIdGetterService, times(1)).getMVBrokerEntities4DataNegotiation(processId);
+        verify(brokerEntityIdGetterService, times(1)).getMVBrokerEntities4DataNegotiation(processId, "ProductOffering", "lastUpdate", "version");
         verifyNoMoreInteractions(brokerEntityIdGetterService);
 
     }

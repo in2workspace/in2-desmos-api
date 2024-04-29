@@ -9,7 +9,7 @@ import es.in2.desmos.domain.exceptions.RequestErrorException;
 import es.in2.desmos.domain.exceptions.SubscriptionCreationException;
 import es.in2.desmos.domain.models.MVBrokerEntity4DataNegotiation;
 import es.in2.desmos.domain.models.BrokerSubscription;
-import es.in2.desmos.domain.models.adapters.scorpio.ScorpioEntity;
+import es.in2.desmos.domain.models.BrokerEntity;
 import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -199,17 +199,17 @@ public class ScorpioAdapter implements BrokerAdapterService {
     }
 
     @Override
-    public Mono<List<MVBrokerEntity4DataNegotiation>> getMVBrokerEntities4DataNegotiation(String processId) {
+    public Mono<List<MVBrokerEntity4DataNegotiation>> getMVBrokerEntities4DataNegotiation(String processId, String type, String firstAttribute, String secondAttribute) {
         log.info("ProcessID: {} - Getting MV Entities For Data Negotiation from Scorpio", processId);
 
-        String uri = brokerConfig.getEntitiesPath() + "/" + "?type=ProductOffering&attrs=lastUpdate,version\"";
+        String uri = brokerConfig.getEntitiesPath() + "/" + String.format("?type=%s&attrs=%s,%s\"", type, firstAttribute, secondAttribute);
 
-        Mono<ScorpioEntity[]> scorpioProductOfferingList = webClient
+        Mono<BrokerEntity[]> scorpioProductOfferingList = webClient
                 .get()
                 .uri(uri)
                 .accept(APPLICATION_LD_JSON)
                 .retrieve()
-                .bodyToMono(ScorpioEntity[].class)
+                .bodyToMono(BrokerEntity[].class)
                 .retry(3);
 
         return scorpioProductOfferingList.map(this::getMVBrokerEntities4DataNegotiationFromScorpioEntities);
@@ -231,7 +231,7 @@ public class ScorpioAdapter implements BrokerAdapterService {
                 .retry(3);
     }
 
-    private List<MVBrokerEntity4DataNegotiation> getMVBrokerEntities4DataNegotiationFromScorpioEntities(ScorpioEntity[] scorpioEntities) {
+    private List<MVBrokerEntity4DataNegotiation> getMVBrokerEntities4DataNegotiationFromScorpioEntities(BrokerEntity[] scorpioEntities) {
         List<MVBrokerEntity4DataNegotiation> mvBrokerEntities4DataNegotiation = new ArrayList<>();
         for (var scorpioProductOffering : scorpioEntities) {
             mvBrokerEntities4DataNegotiation.add(

@@ -1,4 +1,4 @@
-package es.in2.desmos.domain.models.adapters.scorpio;
+package es.in2.desmos.domain.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
-public record ScorpioEntity(
+public record BrokerEntity(
         @NotBlank
         @JsonProperty("id") String id,
 
@@ -14,10 +14,10 @@ public record ScorpioEntity(
         @JsonProperty("type") String type,
 
         @NotNull
-        @JsonProperty("lastUpdate") ScorpioAttribute lastUpdate,
+        @JsonProperty("lastUpdate") BrokerAttribute lastUpdate,
 
         @NotNull
-        @JsonProperty("version") ScorpioAttribute version,
+        @JsonProperty("version") BrokerAttribute version,
 
         @NotNull
         @JsonProperty("@context") List<@NotBlank String> context

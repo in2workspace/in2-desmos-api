@@ -61,7 +61,7 @@ class BrokerEntityGetterServiceIT {
     @Test
     void itShouldReturnEntityIds() {
         String processId = "0";
-        var result = brokerEntityGetterService.getMVBrokerEntities4DataNegotiation(processId);
+        var result = brokerEntityGetterService.getMVBrokerEntities4DataNegotiation(processId, "ProductOffering", "lastUpdate", "version");
 
         StepVerifier.create(result)
                 .expectNext(initialEntities)

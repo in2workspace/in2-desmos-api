@@ -29,6 +29,8 @@ public class P2PDataSyncWorkflowImpl implements P2PDataSyncWorkflow {
 
     private final DataNegotiationEventPublisher dataNegotiationEventPublisher;
 
+    private static final String BROKER_TYPE = "ProductOffering";
+
     @Override
     public Mono<List<MVEntity4DataNegotiation>> dataDiscovery(String processId, Mono<String> issuer, Mono<List<MVEntity4DataNegotiation>> externalMvEntities4DataNegotiationMono) {
         log.info("ProcessID: {} - Starting P2P Data Synchronization Discovery Workflow", processId);
@@ -48,7 +50,7 @@ public class P2PDataSyncWorkflowImpl implements P2PDataSyncWorkflow {
     }
 
     private Mono<List<MVEntity4DataNegotiation>> createLocalMvEntities4DataNegotiation(String processId) {
-        return brokerEntityGetterService.getMVBrokerEntities4DataNegotiation(processId)
+        return brokerEntityGetterService.getMVBrokerEntities4DataNegotiation(processId, BROKER_TYPE, "lastUpdate", "version")
                 .flatMap(mvBrokerEntities4DataNegotiation -> {
                     log.debug("ProcessID: {} - MV Broker Entities 4 Data Negotiation: {}", processId, mvBrokerEntities4DataNegotiation);
 

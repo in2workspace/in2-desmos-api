@@ -21,7 +21,7 @@ class OrionLdAdapterTests {
     @Test
     void itShouldReturnNullWhenGetMvEntities4DataNegotiation() {
         String processId = "0";
-        Mono<List<MVBrokerEntity4DataNegotiation>> result = orionLdAdapter.getMVBrokerEntities4DataNegotiation(processId);
+        Mono<List<MVBrokerEntity4DataNegotiation>> result = orionLdAdapter.getMVBrokerEntities4DataNegotiation(processId, "ProductOffering", "lastUpdate", "version");
 
         assertNull(result);
     }

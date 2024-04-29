@@ -1,10 +1,10 @@
-package es.in2.desmos.domain.models.adapters.scorpio;
+package es.in2.desmos.domain.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public record ScorpioAttribute(
+public record BrokerAttribute(
         @NotBlank
         @JsonProperty("type") String type,
 
