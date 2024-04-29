@@ -6,7 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.infrastructure.configs.ApiConfig;
 import es.in2.desmos.domain.exceptions.BrokerEntityRetrievalException;
 import es.in2.desmos.domain.exceptions.HashLinkException;
+import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.BlockchainNotification;
+import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.sync.services.DataSyncService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +28,7 @@ public class DataSyncServiceImpl implements DataSyncService {
 
     private final ApiConfig apiConfig;
     private final ObjectMapper objectMapper;
+    private final AuditRecordService auditRecordService;
 
     /*
      *  Workflow steps:
@@ -124,7 +127,6 @@ public class DataSyncServiceImpl implements DataSyncService {
 
     // Verify Data Consistency of the Retrieved Entity (Ensures that data does not contradict itself and remains synchronized across different parts of the system.)
     private Mono<String> verifyRetrievedEntityDataConsistency(String processId, BlockchainNotification blockchainNotification, String retrievedBrokerEntity) {
-        // todo: Implement the verification of the data consistency of the retrieved entity
         /*
          * 1. Buscamos en la BBDD si existe un registro con mismo ID de entidad (Consumer)
          * 2. Si existe, capturamos el hash de la entidad con estado (Published), esto es, aquella que finalizó
@@ -132,7 +134,28 @@ public class DataSyncServiceImpl implements DataSyncService {
          * 3. Validamos que el hash de la entidad de la BBDD corresponda con el previousHash de la notificación.
          * 4. Si corresponde, la consistencia es válida y no hemos perdido ningún dato entre ambos procesos.
          */
-        return Mono.empty();
+        return auditRecordService.findLatestConsumerPublishedAuditRecord(blockchainNotification.entityId())
+                .collectList()
+                .flatMap(auditRecords -> {
+                    if(auditRecords.isEmpty()) {
+                        // If there are no audit records, we need to start querying the DLT Adapter from the beginning
+                        return Mono.just(retrievedBrokerEntity);
+                    } else {
+                        // If there are audit records, we need to start querying the DLT Adapter from the last published audit record
+                        return verifyDataConsistency(auditRecords.get(0), blockchainNotification, retrievedBrokerEntity);
+                    }
+                });
+    }
+
+    private Mono<String> verifyDataConsistency(AuditRecord auditRecord, BlockchainNotification blockchainNotification, String retrievedBrokerEntity) {
+        String previousEntityHash = blockchainNotification.previousEntityHash().substring(2);
+        if(auditRecord.getEntityHashLink().equals(previousEntityHash)) {
+            return Mono.just(retrievedBrokerEntity);
+        } else {
+            log.error("Error occurred while verifying the data consistency of the retrieved entity: Data consistency verification failed");
+            return Mono.error(new HashLinkException("Data consistency verification failed"));
+        }
+
     }
 
     private String sortAttributesAlphabetically(String retrievedBrokerEntity) throws JsonProcessingException {
