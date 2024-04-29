@@ -3,7 +3,7 @@ package es.in2.desmos.domain.services.sync.services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import es.in2.desmos.configs.ApiConfig;
+import es.in2.desmos.infrastructure.configs.ApiConfig;
 import es.in2.desmos.domain.exceptions.HashLinkException;
 import es.in2.desmos.domain.models.BlockchainNotification;
 import es.in2.desmos.domain.services.sync.services.impl.DataSyncServiceImpl;

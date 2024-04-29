@@ -1,6 +1,6 @@
 package es.in2.desmos.domain.services.blockchain.adapter.impl;
 
-import es.in2.desmos.configs.properties.DLTAdapterProperties;
+import es.in2.desmos.infrastructure.configs.properties.DLTAdapterProperties;
 import es.in2.desmos.domain.models.BlockchainSubscription;
 import es.in2.desmos.domain.models.BlockchainTxPayload;
 import es.in2.desmos.domain.models.EventQueuePriority;
