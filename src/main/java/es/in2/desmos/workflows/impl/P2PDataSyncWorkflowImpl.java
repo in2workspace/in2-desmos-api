@@ -1,10 +1,7 @@
 package es.in2.desmos.workflows.impl;
 
 import es.in2.desmos.domain.events.DataNegotiationEventPublisher;
-import es.in2.desmos.domain.models.DataNegotiationEvent;
-import es.in2.desmos.domain.models.MVAuditServiceEntity4DataNegotiation;
-import es.in2.desmos.domain.models.MVBrokerEntity4DataNegotiation;
-import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
+import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
 import es.in2.desmos.workflows.P2PDataSyncWorkflow;
@@ -47,6 +44,11 @@ public class P2PDataSyncWorkflowImpl implements P2PDataSyncWorkflow {
                 })
                 .doOnSuccess(success -> log.info("ProcessID: {} - P2P Data Synchronization Discovery Workflow successfully.", processId))
                 .doOnError(error -> log.error("ProcessID: {} - Error occurred while processing the P2P Data Synchronization Discovery Workflow: {}", processId, error.getMessage()));
+    }
+
+    @Override
+    public Mono<List<String>> getLocalEntities(List<Id> ids) {
+        return null;
     }
 
     private Mono<List<MVEntity4DataNegotiation>> createLocalMvEntities4DataNegotiation(String processId) {
