@@ -65,7 +65,7 @@ public class BlockchainDataSyncJobImpl implements BlockchainDataSyncJob {
                                                                         // Build and save the audit record for RETRIEVED status
                                                                         .then(auditRecordService.buildAndSaveAuditRecordFromBlockchainNotification(processId, blockchainNotification, retrievedBrokerEntity, AuditRecordStatus.RETRIEVED))
                                                                         // Publish the retrieved entity to the local broker
-                                                                        .then(brokerPublisherService.publishDataToBroker(processId, blockchainNotification, retrievedBrokerEntity))
+                                                                        .then(brokerPublisherService.publishEntityToContextBroker(processId, blockchainNotification, retrievedBrokerEntity))
                                                                         // Build and save the audit record for PUBLISHED status
                                                                         .then(auditRecordService.buildAndSaveAuditRecordFromBlockchainNotification(processId, blockchainNotification, retrievedBrokerEntity, AuditRecordStatus.PUBLISHED))
                                                         )
