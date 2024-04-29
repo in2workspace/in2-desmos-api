@@ -138,6 +138,7 @@ class DataSyncServiceImplTests {
         JsonNode mockJsonNode = Mockito.mock(JsonNode.class);
         when(objectMapper.readTree(anyString())).thenReturn(mockJsonNode);
         when(objectMapper.writeValueAsString(mockJsonNode)).thenThrow(JsonProcessingException.class);
+        when(auditRecordService.findLatestConsumerPublishedAuditRecord(anyString())).thenReturn(Flux.empty());
 
 
         StepVerifier.create(dataSyncService.verifyRetrievedEntityData("processId", errorNotification, retrievedBrokerEntity))
