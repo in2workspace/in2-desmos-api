@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import es.in2.desmos.ContainerManager;
-import es.in2.desmos.controllers.NotificationController;
+import es.in2.desmos.infrastructure.controllers.NotificationController;
 import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.BrokerNotification;
 import es.in2.desmos.domain.repositories.AuditRecordRepository;
@@ -27,10 +27,9 @@ class PublishWorkflowBehaviorTest {
 
     private final Logger log = LoggerFactory.getLogger(PublishWorkflowBehaviorTest.class);
 
-    private final ObjectMapper objectMapper =
-            JsonMapper.builder()
-                    .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true)
-                    .build();
+    private final ObjectMapper objectMapper = JsonMapper.builder()
+            .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true)
+            .build();
 
     @Autowired
     private NotificationController notificationController;
