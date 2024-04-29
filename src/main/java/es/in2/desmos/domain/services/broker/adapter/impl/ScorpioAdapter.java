@@ -204,7 +204,7 @@ public class ScorpioAdapter implements BrokerAdapterService {
 
         String uri = brokerConfig.getEntitiesPath() + "/" + String.format("?type=%s&attrs=%s,%s\"", type, firstAttribute, secondAttribute);
 
-        Mono<BrokerEntity[]> scorpioProductOfferingList = webClient
+        Mono<BrokerEntity[]> scorpioEntitiesList = webClient
                 .get()
                 .uri(uri)
                 .accept(APPLICATION_LD_JSON)
@@ -212,7 +212,7 @@ public class ScorpioAdapter implements BrokerAdapterService {
                 .bodyToMono(BrokerEntity[].class)
                 .retry(3);
 
-        return scorpioProductOfferingList.map(this::getMVBrokerEntities4DataNegotiationFromScorpioEntities);
+        return scorpioEntitiesList.map(this::getMVBrokerEntities4DataNegotiationFromScorpioEntities);
     }
 
     @Override
@@ -233,13 +233,13 @@ public class ScorpioAdapter implements BrokerAdapterService {
 
     private List<MVBrokerEntity4DataNegotiation> getMVBrokerEntities4DataNegotiationFromScorpioEntities(BrokerEntity[] scorpioEntities) {
         List<MVBrokerEntity4DataNegotiation> mvBrokerEntities4DataNegotiation = new ArrayList<>();
-        for (var scorpioProductOffering : scorpioEntities) {
+        for (var scorpioEntity : scorpioEntities) {
             mvBrokerEntities4DataNegotiation.add(
                     new MVBrokerEntity4DataNegotiation(
-                            scorpioProductOffering.id(),
-                            scorpioProductOffering.type(),
-                            scorpioProductOffering.version().value(),
-                            scorpioProductOffering.lastUpdate().value()));
+                            scorpioEntity.id(),
+                            scorpioEntity.type(),
+                            scorpioEntity.version().value(),
+                            scorpioEntity.lastUpdate().value()));
         }
         return mvBrokerEntities4DataNegotiation;
     }
