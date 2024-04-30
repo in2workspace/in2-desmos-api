@@ -109,7 +109,6 @@ public class ApplicationRunner {
         String processId = UUID.randomUUID().toString();
         log.info("ProcessID: {} - Initializing Data Synchronization Workflow...", processId);
         // Start data synchronization process
-        log.debug("ProcessID: {} - Starting Blockchain Data Synchronization Workflow...", processId);
         return dataSyncWorkflow.startDataSyncWorkflow(processId)
                 // When the synchronization is finished, enable queue to process the
                 // data synchronization using pub-sub.
