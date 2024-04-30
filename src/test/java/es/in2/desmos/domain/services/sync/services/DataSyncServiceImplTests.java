@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.sql.Timestamp;
@@ -64,6 +65,16 @@ class DataSyncServiceImplTests {
             .createdAt(Timestamp.from(Instant.now()))
             .build();
 
+    AuditRecord errorAuditRecord = AuditRecord.builder()
+            .id(UUID.randomUUID())
+            .processId(UUID.randomUUID().toString())
+            .entityId(UUID.randomUUID().toString())
+            .entityType("ProductOffering")
+            .entityHashLink("fcb394bb4f2da4abbf53ab7e4898418257b7c6abe0c110f466f3ee947d057e579") // Wrong entityHashLink
+            .status(AuditRecordStatus.PUBLISHED)
+            .createdAt(Timestamp.from(Instant.now()))
+            .build();
+
     BlockchainNotification errorNotification = BlockchainNotification.builder()
             .id(2240)
             .publisherAddress("0x40b0ab9dfd960064fb7e9fdf77f889c71569e349055ff563e8d699d8fa97fa90")
@@ -99,7 +110,7 @@ class DataSyncServiceImplTests {
         JsonNode mockJsonNode = Mockito.mock(JsonNode.class);
         when(objectMapper.readTree(anyString())).thenReturn(mockJsonNode);
         when(objectMapper.writeValueAsString(mockJsonNode)).thenReturn(retrievedBrokerEntity);
-        when(auditRecordService.findLatestConsumerPublishedAuditRecord(anyString())).thenReturn(Flux.empty());
+        when(auditRecordService.findLatestConsumerPublishedAuditRecord(anyString())).thenReturn(Mono.empty());
 
 
         StepVerifier.create(dataSyncService.verifyRetrievedEntityData("processId", notification, retrievedBrokerEntity))
@@ -108,15 +119,28 @@ class DataSyncServiceImplTests {
     }
 
     @Test
-    void testVerifyDataIntegrity_Success_SecondEntity() throws JsonProcessingException {
+    void testVerifyDataIntegrityAndDataConsistency_Success() throws JsonProcessingException {
         JsonNode mockJsonNode = Mockito.mock(JsonNode.class);
         when(objectMapper.readTree(anyString())).thenReturn(mockJsonNode);
         when(objectMapper.writeValueAsString(mockJsonNode)).thenReturn(retrievedBrokerEntity);
-        when(auditRecordService.findLatestConsumerPublishedAuditRecord(anyString())).thenReturn(Flux.just(auditRecord));
+        when(auditRecordService.findLatestConsumerPublishedAuditRecord(anyString())).thenReturn(Mono.just(auditRecord));
 
         StepVerifier.create(dataSyncService.verifyRetrievedEntityData("processId", notification, retrievedBrokerEntity))
                 .assertNext(retrievedBrokerEntity -> {})
                 .verifyComplete();
+
+    }
+
+    @Test
+    void testVerifyDataIntegrityAndDataConsistency_Failure() throws JsonProcessingException {
+        JsonNode mockJsonNode = Mockito.mock(JsonNode.class);
+        when(objectMapper.readTree(anyString())).thenReturn(mockJsonNode);
+        when(objectMapper.writeValueAsString(mockJsonNode)).thenReturn(retrievedBrokerEntity);
+        when(auditRecordService.findLatestConsumerPublishedAuditRecord(anyString())).thenReturn(Mono.just(errorAuditRecord));
+
+        StepVerifier.create(dataSyncService.verifyRetrievedEntityData("processId", notification, retrievedBrokerEntity))
+                .expectError(HashLinkException.class)
+                .verify();
 
     }
 
@@ -125,7 +149,7 @@ class DataSyncServiceImplTests {
         JsonNode mockJsonNode = Mockito.mock(JsonNode.class);
         when(objectMapper.readTree(anyString())).thenReturn(mockJsonNode);
         when(objectMapper.writeValueAsString(mockJsonNode)).thenReturn(retrievedBrokerEntity);
-        when(auditRecordService.findLatestConsumerPublishedAuditRecord(anyString())).thenReturn(Flux.empty());
+        when(auditRecordService.findLatestConsumerPublishedAuditRecord(anyString())).thenReturn(Mono.empty());
 
 
         StepVerifier.create(dataSyncService.verifyRetrievedEntityData("processId", errorNotification, retrievedBrokerEntity))
@@ -134,11 +158,11 @@ class DataSyncServiceImplTests {
     }
 
     @Test
-    void testVerifyDataIntegrity_JsonProcessingExceptionError() throws JsonProcessingException {
+    void testVerifyDataIntegrity_Failure_JsonProcessingExceptionError() throws JsonProcessingException {
         JsonNode mockJsonNode = Mockito.mock(JsonNode.class);
         when(objectMapper.readTree(anyString())).thenReturn(mockJsonNode);
         when(objectMapper.writeValueAsString(mockJsonNode)).thenThrow(JsonProcessingException.class);
-        when(auditRecordService.findLatestConsumerPublishedAuditRecord(anyString())).thenReturn(Flux.empty());
+        when(auditRecordService.findLatestConsumerPublishedAuditRecord(anyString())).thenReturn(Mono.empty());
 
 
         StepVerifier.create(dataSyncService.verifyRetrievedEntityData("processId", errorNotification, retrievedBrokerEntity))

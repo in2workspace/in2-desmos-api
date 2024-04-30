@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.util.List;
@@ -36,18 +37,12 @@ public class BlockchainDataSyncJobImpl implements BlockchainDataSyncJob {
         log.info("Starting the Blockchain Data Sync Job...");
         // We need to find the last published audit record to know where to start querying the DLT Adapter
         return auditRecordService.findLatestConsumerPublishedAuditRecord(processId)
-                .collectList()
-                .flatMapMany(auditRecords -> {
-                    if (auditRecords.isEmpty()) {
-                        // If there are no audit records,
-                        // we need to start querying the DLT Adapter from the beginning
-                        return getAllTransactions(processId);
-                    } else {
-                        // If there are audit records,
-                        // we need to start querying the DLT Adapter from the last published audit record
-                        return getTransactionsFromRangeOfTime(auditRecords.get(0), processId);
-                    }
-                })
+                .flatMapMany(auditRecord ->
+                        getTransactionsFromRangeOfTime(auditRecord, processId)
+                )
+                .switchIfEmpty(
+                        getAllTransactions(processId) // Asegúrate de que este método retorne un Flux<?>
+                )
                 // Deserialize the response from the DLT Adapter
                 .flatMap(response -> deserializeBlockchainNotifications(processId, response).buffer(50)
                         .filter(notificationList -> !notificationList.isEmpty())

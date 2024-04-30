@@ -134,16 +134,12 @@ public class DataSyncServiceImpl implements DataSyncService {
          * 4. Si corresponde, la consistencia es válida y no hemos perdido ningún dato entre ambos procesos.
          */
         return auditRecordService.findLatestConsumerPublishedAuditRecord(blockchainNotification.entityId())
-                .collectList()
                 .flatMap(auditRecords -> {
-                    if(auditRecords.isEmpty()) {
-                        // If there are no audit records, we need to start querying the DLT Adapter from the beginning
-                        return Mono.just(retrievedBrokerEntity);
-                    } else {
-                        // If there are audit records, we need to start querying the DLT Adapter from the last published audit record
-                        return verifyDataConsistency(auditRecords.get(0), blockchainNotification, retrievedBrokerEntity);
-                    }
-                });
+                    // If there are audit records, we need to start querying the DLT Adapter from the last published audit record
+                    return verifyDataConsistency(auditRecords, blockchainNotification, retrievedBrokerEntity);
+
+                })
+                .switchIfEmpty(Mono.just(retrievedBrokerEntity));
     }
 
     private Mono<String> verifyDataConsistency(AuditRecord auditRecord, BlockchainNotification blockchainNotification, String retrievedBrokerEntity) {

@@ -74,7 +74,7 @@ class BlockchainDataSyncJobImplTests {
     @Test
     void testStartBlockchainDataSyncJob_withEmptyAuditRecords() {
         String processId = "process123";
-        when(auditRecordService.findLatestConsumerPublishedAuditRecord(processId)).thenReturn(Flux.empty());
+        when(auditRecordService.findLatestConsumerPublishedAuditRecord(processId)).thenReturn(Mono.empty());
         when(blockchainAdapterService.getEventsFromRangeOfTime(eq("process123"), anyLong(), anyLong())).thenReturn(Flux.empty());
 
         StepVerifier.create(workflow.startBlockchainDataSyncJob(processId))
@@ -104,7 +104,7 @@ class BlockchainDataSyncJobImplTests {
                 .hashLink("")
                 .newTransaction(true)
                 .build(); // Setup this with appropriate data
-        when(auditRecordService.findLatestConsumerPublishedAuditRecord(processId)).thenReturn(Flux.just(record));
+        when(auditRecordService.findLatestConsumerPublishedAuditRecord(processId)).thenReturn(Mono.just(record));
         when(blockchainAdapterService.getEventsFromRangeOfTime(eq("process123"), anyLong(), anyLong())).thenReturn(Flux.just(blockchainNotificationJson));
         BlockchainNotification blockchainNotification = BlockchainNotification.builder()
                 .id(2240)

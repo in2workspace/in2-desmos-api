@@ -187,7 +187,7 @@ public class AuditRecordServiceImpl implements AuditRecordService {
     }
 
     @Override
-    public Flux<AuditRecord> findLatestConsumerPublishedAuditRecord(String processId) {
+    public Mono<AuditRecord> findLatestConsumerPublishedAuditRecord(String processId) {
         log.debug("ProcessID: {} - Fetching all audit records...", processId);
         return auditRecordRepository.findLastPublishedConsumerAuditRecord();
     }
