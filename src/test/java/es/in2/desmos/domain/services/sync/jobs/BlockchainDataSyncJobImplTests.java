@@ -74,12 +74,12 @@ class BlockchainDataSyncJobImplTests {
     @Test
     void testStartBlockchainDataSyncJob_withEmptyAuditRecords() {
         String processId = "process123";
-        when(auditRecordService.findLatestConsumerPublishedAuditRecordByEntityId(processId)).thenReturn(Mono.empty());
+        when(auditRecordService.findLatestConsumerPublishedAuditRecord(processId)).thenReturn(Mono.empty());
         when(blockchainAdapterService.getEventsFromRangeOfTime(eq("process123"), anyLong(), anyLong())).thenReturn(Flux.empty());
 
         StepVerifier.create(workflow.startBlockchainDataSyncJob(processId))
                 .expectSubscription()
-                .then(() -> verify(auditRecordService).findLatestConsumerPublishedAuditRecordByEntityId(processId))
+                .then(() -> verify(auditRecordService).findLatestConsumerPublishedAuditRecord(processId))
                 // Add more expectations as needed
                 .verifyComplete();
     }
@@ -104,7 +104,7 @@ class BlockchainDataSyncJobImplTests {
                 .hashLink("")
                 .newTransaction(true)
                 .build(); // Setup this with appropriate data
-        when(auditRecordService.findLatestConsumerPublishedAuditRecordByEntityId(processId)).thenReturn(Mono.just(record));
+        when(auditRecordService.findLatestConsumerPublishedAuditRecord(processId)).thenReturn(Mono.just(record));
         when(blockchainAdapterService.getEventsFromRangeOfTime(eq("process123"), anyLong(), anyLong())).thenReturn(Flux.just(blockchainNotificationJson));
         BlockchainNotification blockchainNotification = BlockchainNotification.builder()
                 .id(2240)
@@ -129,7 +129,7 @@ class BlockchainDataSyncJobImplTests {
 
         StepVerifier.create(workflow.startBlockchainDataSyncJob(processId))
                 .expectSubscription()
-                .then(() -> verify(auditRecordService).findLatestConsumerPublishedAuditRecordByEntityId(processId))
+                .then(() -> verify(auditRecordService).findLatestConsumerPublishedAuditRecord(processId))
                 .verifyComplete();
     }
 }

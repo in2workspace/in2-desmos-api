@@ -191,6 +191,12 @@ public class AuditRecordServiceImpl implements AuditRecordService {
         return auditRecordRepository.findLastPublishedConsumerAuditRecordByEntityId(entityId);
     }
 
+    @Override
+    public Mono<AuditRecord> findLatestConsumerPublishedAuditRecord(String processId) {
+        log.debug("ProcessID: {} - Fetching all audit records...", processId);
+        return auditRecordRepository.findLastPublishedConsumerAuditRecord();
+    }
+
     private String setAuditRecordHashLink(AuditRecord lastAuditRecordRegistered, String auditRecordHash)
             throws NoSuchAlgorithmException {
         return lastAuditRecordRegistered.getHashLink() == null ? auditRecordHash

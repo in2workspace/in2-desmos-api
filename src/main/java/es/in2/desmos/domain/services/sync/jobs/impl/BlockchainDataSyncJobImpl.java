@@ -35,8 +35,7 @@ public class BlockchainDataSyncJobImpl implements BlockchainDataSyncJob {
     public Flux<Void> startBlockchainDataSyncJob(String processId) {
         log.info("Starting the Blockchain Data Sync Job...");
         // We need to find the last published audit record to know where to start querying the DLT Adapter
-        // fixme: This method does not need the entityId parameter
-        return auditRecordService.findLatestConsumerPublishedAuditRecordByEntityId(processId)
+        return auditRecordService.findLatestConsumerPublishedAuditRecord(processId)
                 .flatMapMany(auditRecord ->
                         getTransactionsFromRangeOfTime(auditRecord, processId)
                 )
