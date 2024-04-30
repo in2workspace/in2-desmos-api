@@ -17,6 +17,8 @@ import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -107,112 +109,20 @@ class BrokerPublisherServiceTests {
                 .verifyComplete();
     }
 
-    @Test
-    void itShouldNotReturnIdIfHasNotType() throws JSONException, JsonProcessingException {
+    @ParameterizedTest
+    @ValueSource(strings = {
+            BrokerDataMother.getEntityRequestBrokerNoTypeJson,
+            BrokerDataMother.getEntityRequestBrokerNoRelationshipJson,
+            BrokerDataMother.getEntityRequestBrokerNoObjectJson
+    })
+    void itShouldNotReturnIdIfIncorrectEntity(String brokerJson) throws JSONException, JsonProcessingException {
         String processId = "0";
         List<Id> ids = new ArrayList<>();
         ids.add(new Id("urn:productOffering:537e1ee3-0556-4fff-875f-e55bb97e7ab0"));
         ids.add(new Id("urn:productOffering:06f56a54-9be9-4d45-bae7-2a036b721d27"));
         Mono<List<Id>> idsMono = Mono.just(ids);
 
-        var brokerJson = BrokerDataMother.getEntityRequestBrokerNoTypeJson;
-        JSONArray expectedResponseJsonArray = new JSONArray(brokerJson);
-        List<String> localEntities = new ArrayList<>();
-        for (int i = 0; i < expectedResponseJsonArray.length(); i++) {
-            String entity = expectedResponseJsonArray.getString(i);
-
-            if (i != 2 && i != 4) {
-                localEntities.add(entity);
-            }
-        }
-
-        JsonNode rootEntityJsonNode = objectMapper.readValue(brokerJson, JsonNode.class);
-        when(brokerAdapterService.getEntityById(eq(processId), any())).thenAnswer(invocation -> {
-            String entityId = invocation.getArgument(1);
-            for (JsonNode rootEntityNodeChildren : rootEntityJsonNode) {
-                if (rootEntityNodeChildren.has("id") && rootEntityNodeChildren.get("id").asText().equals(entityId)) {
-                    return Mono.just(rootEntityNodeChildren.toString());
-                }
-            }
-            return Mono.empty();
-        });
-
-
-        var resultMono = brokerPublisherService.findAllById(processId, idsMono);
-
-        StepVerifier
-                .create(resultMono)
-                .consumeNextWith(result -> {
-                    try {
-                        String localEntitiesJson = getJsonNodeFromStringsList(localEntities).toString();
-                        String resultJson = getJsonNodeFromStringsList(result).toString();
-
-                        JSONAssert.assertEquals(localEntitiesJson, resultJson, false);
-                    } catch (JsonProcessingException | JSONException e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .verifyComplete();
-    }
-
-    @Test
-    void itShouldNotReturnIdIfHasNotRelationship() throws JSONException, JsonProcessingException {
-        String processId = "0";
-        List<Id> ids = new ArrayList<>();
-        ids.add(new Id("urn:productOffering:537e1ee3-0556-4fff-875f-e55bb97e7ab0"));
-        ids.add(new Id("urn:productOffering:06f56a54-9be9-4d45-bae7-2a036b721d27"));
-        Mono<List<Id>> idsMono = Mono.just(ids);
-
-        var brokerJson = BrokerDataMother.getEntityRequestBrokerNoRelationshipJson;
-        JSONArray expectedResponseJsonArray = new JSONArray(brokerJson);
-        List<String> localEntities = new ArrayList<>();
-        for (int i = 0; i < expectedResponseJsonArray.length(); i++) {
-            String entity = expectedResponseJsonArray.getString(i);
-
-            if (i != 2 && i != 4) {
-                localEntities.add(entity);
-            }
-        }
-
-        JsonNode rootEntityJsonNode = objectMapper.readValue(brokerJson, JsonNode.class);
-        when(brokerAdapterService.getEntityById(eq(processId), any())).thenAnswer(invocation -> {
-            String entityId = invocation.getArgument(1);
-            for (JsonNode rootEntityNodeChildren : rootEntityJsonNode) {
-                if (rootEntityNodeChildren.has("id") && rootEntityNodeChildren.get("id").asText().equals(entityId)) {
-                    return Mono.just(rootEntityNodeChildren.toString());
-                }
-            }
-            return Mono.empty();
-        });
-
-
-        var resultMono = brokerPublisherService.findAllById(processId, idsMono);
-
-        StepVerifier
-                .create(resultMono)
-                .consumeNextWith(result -> {
-                    try {
-                        String localEntitiesJson = getJsonNodeFromStringsList(localEntities).toString();
-                        String resultJson = getJsonNodeFromStringsList(result).toString();
-
-                        JSONAssert.assertEquals(localEntitiesJson, resultJson, false);
-                    } catch (JsonProcessingException | JSONException e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .verifyComplete();
-    }
-
-    @Test
-    void itShouldNotReturnIdIfHasNotObject() throws JSONException, JsonProcessingException {
-        String processId = "0";
-        List<Id> ids = new ArrayList<>();
-        ids.add(new Id("urn:productOffering:537e1ee3-0556-4fff-875f-e55bb97e7ab0"));
-        ids.add(new Id("urn:productOffering:06f56a54-9be9-4d45-bae7-2a036b721d27"));
-        Mono<List<Id>> idsMono = Mono.just(ids);
-
-        var brokerJson = BrokerDataMother.getEntityRequestBrokerNoObjectJson;
-
+        // var brokerJson = BrokerDataMother.getEntityRequestBrokerNoTypeJson;
         JSONArray expectedResponseJsonArray = new JSONArray(brokerJson);
         List<String> localEntities = new ArrayList<>();
         for (int i = 0; i < expectedResponseJsonArray.length(); i++) {
