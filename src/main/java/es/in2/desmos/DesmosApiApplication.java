@@ -13,10 +13,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @ConfigurationPropertiesScan
 @EnableScheduling
 public class DesmosApiApplication {
-    private static final ObjectMapper OBJECT_MAPPER =
-            JsonMapper.builder()
-                    .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true)
-                    .build();
+
+    private static final ObjectMapper OBJECT_MAPPER = JsonMapper.builder()
+            .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true)
+            .build();
 
     public static void main(String[] args) {
         SpringApplication.run(DesmosApiApplication.class, args);
