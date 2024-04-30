@@ -29,6 +29,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -214,6 +215,8 @@ class P2PDataSyncWorkflowIT {
         givenEntitiesToRequestInScorpio();
         Mono<String> resultMono = whenUserRequestEntities();
         thenApplicationReturnRequestedEntities(resultMono);
+
+        removeEntitiesToRequest();
     }
 
     private void givenEntitiesToRequestInScorpio() {
@@ -241,12 +244,36 @@ class P2PDataSyncWorkflowIT {
                 .create(resultMono)
                 .consumeNextWith(result -> {
                     try {
+                        System.out.println("Result: " + result);
                         JSONAssert.assertEquals(BrokerDataMother.getEntityRequestBrokerJson, result, false);
                     } catch (JSONException e) {
                         throw new RuntimeException(e);
                     }
                 })
                 .verifyComplete();
+    }
+
+    private void removeEntitiesToRequest(){
+        String brokerUrl = ContainerManager.getBaseUriForScorpioA();
+        List<String> ids = new ArrayList<>();
+        ids.add("urn:productOffering:537e1ee3-0556-4fff-875f-e55bb97e7ab0");
+        ids.add("urn:productOffering:06f56a54-9be9-4d45-bae7-2a036b721d27");
+        ids.add("urn:productOffering:e8b7e5a7-5d0f-4c9b-b1e5-9b1af474207f");
+        ids.add("urn:productOffering:d1c34fc5-0c2b-4022-94ab-d7cb99d8edc2");
+        ids.add("urn:productOffering:39e31a28-583b-4f0d-80c6-6d7600cc9e36");
+        ids.add("urn:productOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a");
+        ids.add("urn:productOfferingPrice:a395344e-2c29-4d36-8463-0c0412f024d7");
+        ids.add("urn:productOfferingPrice:cf36a34a-4e43-453c-bf8b-4a926ed59a0c");
+        ids.add("urn:productOfferingPrice:ca9b5de4-bf5f-45de-8b33-0f2518f40e69");
+        ids.add("urn:productOfferingPrice:faa692c0-1662-4fe2-b4e3-2d5ad86b47a1");
+        ids.add("urn:price:2d5f3c16-4e77-45b3-8915-3da36b714e7b");
+        ids.add("urn:price:6380d7c9-d9ec-4d35-865b-76e72d081cbf");
+        ids.add("urn:price:ab87d164-3a6c-4b61-9b40-6f615b96d35d");
+        ids.add("urn:priceAlteration:1bcaf091-16e3-4bbc-9800-a4636596384e");
+        ids.add("urn:price:21e7f562-f62d-41b7-8243-1241d0f871c2");
+        ids.add("urn:price:5a1e08b4-eb32-4b68-af44-aa35e6a40fb9");
+
+        ScorpioInflator.deleteInitialEntitiesFromContextBroker(brokerUrl, ids);
     }
 
     private void assertScorpioEntityIsExpected(String entityId, String expectedEntityResponse) {

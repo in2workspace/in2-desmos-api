@@ -1,21 +1,39 @@
 package es.in2.desmos.domain.services.broker;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import es.in2.desmos.domain.models.Id;
 import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import es.in2.desmos.domain.services.broker.adapter.factory.BrokerAdapterFactory;
 import es.in2.desmos.domain.services.broker.impl.BrokerPublisherServiceImpl;
+import es.in2.desmos.objectmothers.BrokerDataMother;
 import es.in2.desmos.objectmothers.EntitySyncResponseMother;
+import es.in2.desmos.objectmothers.IdMother;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.skyscreamer.jsonassert.JSONAssert;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class BrokerPublisherServiceTests {
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     @Mock
     private BrokerAdapterFactory brokerAdapterFactory;
 
@@ -27,7 +45,7 @@ class BrokerPublisherServiceTests {
     @BeforeEach
     void init() {
         when(brokerAdapterFactory.getBrokerAdapter()).thenReturn(brokerAdapterService);
-        brokerPublisherService = new BrokerPublisherServiceImpl(brokerAdapterFactory);
+        brokerPublisherService = new BrokerPublisherServiceImpl(brokerAdapterFactory, objectMapper);
     }
 
     @Test
@@ -46,5 +64,55 @@ class BrokerPublisherServiceTests {
 
         verify(brokerAdapterService, times(1)).batchUpsertEntities(processId, retrievedBrokerEntities);
         verifyNoMoreInteractions(brokerAdapterService);
+    }
+
+    @Test
+    void itShouldFindAllEntitiesFromListById() throws JSONException, JsonProcessingException {
+        String processId = "0";
+        Mono<List<Id>> idsMono = Mono.just(Arrays.stream(IdMother.entitiesRequest).toList());
+
+        String entityRequestBrokerJson = BrokerDataMother.getEntityRequestBrokerJson;
+        JSONArray expectedResponseJsonArray = new JSONArray(entityRequestBrokerJson);
+        List<String> localEntities = new ArrayList<>();
+        for (int i = 0; i < expectedResponseJsonArray.length(); i++) {
+            String entity = expectedResponseJsonArray.getString(i);
+            localEntities.add(entity);
+        }
+        JsonNode rootEntityJsonNode = objectMapper.readValue(BrokerDataMother.getEntityRequestBrokerJson, JsonNode.class);
+        when(brokerAdapterService.getEntityById(eq(processId), any())).thenAnswer(invocation -> {
+            String entityId = invocation.getArgument(1);
+            for (JsonNode rootEntityNodeChildren : rootEntityJsonNode) {
+                if (rootEntityNodeChildren.has("id") && rootEntityNodeChildren.get("id").asText().equals(entityId)) {
+                    return Mono.just(rootEntityNodeChildren.toString());
+                }
+            }
+            return Mono.empty();
+        });
+
+
+        var resultMono = brokerPublisherService.findAllById(processId, idsMono);
+
+        StepVerifier
+                .create(resultMono)
+                .consumeNextWith(result -> {
+                    try {
+                        String localEntitiesJson = getJsonNodeFromStringsList(localEntities).toString();
+                        String resultJson = getJsonNodeFromStringsList(result).toString();
+
+                         JSONAssert.assertEquals(localEntitiesJson, resultJson, false);
+                    } catch (JsonProcessingException | JSONException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .verifyComplete();
+    }
+
+    private JsonNode getJsonNodeFromStringsList(List<String> localEntities) throws JsonProcessingException {
+        List<JsonObject> localEntitiesObjects = new ArrayList<>();
+        for (var entity : localEntities) {
+            localEntitiesObjects.add(JsonParser.parseString(entity).getAsJsonObject());
+        }
+
+        return objectMapper.readTree(localEntitiesObjects.toString());
     }
 }

@@ -78,16 +78,17 @@ class P2PDataSyncWorkflowTests {
             localEntities.add(entity);
         }
         Mono<List<String>> localEntitiesMono = Mono.just(localEntities);
-        when(brokerPublisherService.findAllById(any())).thenReturn(localEntitiesMono);
+        String processId = "0";
+        when(brokerPublisherService.findAllById(eq(processId), any())).thenReturn(localEntitiesMono);
 
-        Mono<List<String>> result = p2PDataSyncWorkflow.getLocalEntitiesById(idsMono);
+        Mono<List<String>> result = p2PDataSyncWorkflow.getLocalEntitiesById(processId, idsMono);
 
         StepVerifier
                 .create(result)
                 .expectNext(localEntities)
                 .verifyComplete();
 
-        verify(brokerPublisherService, times(1)).findAllById(idsMono);
+        verify(brokerPublisherService, times(1)).findAllById(eq(processId), any());
         verifyNoMoreInteractions(brokerPublisherService);
     }
 }
