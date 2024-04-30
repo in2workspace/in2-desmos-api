@@ -117,4 +117,141 @@ public final class BrokerDataMother {
                             "type": "price"
                         }
                     ]""";
+
+    public final static String getEntityRequestBrokerNoTypeJson =
+            """
+                    [
+                        {
+                            "id": "urn:productOffering:537e1ee3-0556-4fff-875f-e55bb97e7ab0",
+                            "type": "productOffering",
+                            "productOfferingPrice": {
+                                "hola": "Relationship",
+                                "object": "urn:productOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
+                            }
+                        },
+                        {
+                            "id": "urn:productOffering:06f56a54-9be9-4d45-bae7-2a036b721d27",
+                            "type": "productOffering",
+                            "productOfferingPrice": {
+                                "type": "Relationship",
+                                "object": "urn:productOfferingPrice:a395344e-2c29-4d36-8463-0c0412f024d7"
+                            }
+                        },
+                        {
+                            "id": "urn:productOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a",
+                            "type": "productOfferingPrice",
+                            "price": {
+                                "type": "Relationship",
+                                "object": "urn:price:2d5f3c16-4e77-45b3-8915-3da36b714e7b"
+                            }
+                        },
+                        {
+                            "id": "urn:productOfferingPrice:a395344e-2c29-4d36-8463-0c0412f024d7",
+                            "type": "productOfferingPrice",
+                            "price": {
+                                "type": "Relationship",
+                                "object": "urn:price:6380d7c9-d9ec-4d35-865b-76e72d081cbf"
+                            }
+                        },
+                        {
+                            "id": "urn:price:2d5f3c16-4e77-45b3-8915-3da36b714e7b",
+                            "type": "price"
+                        },
+                        {
+                            "id": "urn:price:6380d7c9-d9ec-4d35-865b-76e72d081cbf",
+                            "type": "price"
+                        }
+                    ]""";
+
+    public final static String getEntityRequestBrokerNoRelationshipJson =
+            """
+                    [
+                        {
+                            "id": "urn:productOffering:537e1ee3-0556-4fff-875f-e55bb97e7ab0",
+                            "type": "productOffering",
+                            "productOfferingPrice": {
+                                "type": "hola",
+                                "object": "urn:productOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
+                            }
+                        },
+                        {
+                            "id": "urn:productOffering:06f56a54-9be9-4d45-bae7-2a036b721d27",
+                            "type": "productOffering",
+                            "productOfferingPrice": {
+                                "type": "Relationship",
+                                "object": "urn:productOfferingPrice:a395344e-2c29-4d36-8463-0c0412f024d7"
+                            }
+                        },
+                        {
+                            "id": "urn:productOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a",
+                            "type": "productOfferingPrice",
+                            "price": {
+                                "type": "Relationship",
+                                "object": "urn:price:2d5f3c16-4e77-45b3-8915-3da36b714e7b"
+                            }
+                        },
+                        {
+                            "id": "urn:productOfferingPrice:a395344e-2c29-4d36-8463-0c0412f024d7",
+                            "type": "productOfferingPrice",
+                            "price": {
+                                "type": "Relationship",
+                                "object": "urn:price:6380d7c9-d9ec-4d35-865b-76e72d081cbf"
+                            }
+                        },
+                        {
+                            "id": "urn:price:2d5f3c16-4e77-45b3-8915-3da36b714e7b",
+                            "type": "price"
+                        },
+                        {
+                            "id": "urn:price:6380d7c9-d9ec-4d35-865b-76e72d081cbf",
+                            "type": "price"
+                        }
+                    ]""";
+
+    public final static String getEntityRequestBrokerNoObjectJson =
+            """
+                    [
+                        {
+                            "id": "urn:productOffering:537e1ee3-0556-4fff-875f-e55bb97e7ab0",
+                            "type": "productOffering",
+                            "productOfferingPrice": {
+                                "type": "Relationship",
+                                "hola": "urn:productOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
+                            }
+                        },
+                        {
+                            "id": "urn:productOffering:06f56a54-9be9-4d45-bae7-2a036b721d27",
+                            "type": "productOffering",
+                            "productOfferingPrice": {
+                                "type": "Relationship",
+                                "object": "urn:productOfferingPrice:a395344e-2c29-4d36-8463-0c0412f024d7"
+                            }
+                        },
+                        {
+                            "id": "urn:productOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a",
+                            "type": "productOfferingPrice",
+                            "price": {
+                                "type": "Relationship",
+                                "object": "urn:price:2d5f3c16-4e77-45b3-8915-3da36b714e7b"
+                            }
+                        },
+                        {
+                            "id": "urn:productOfferingPrice:a395344e-2c29-4d36-8463-0c0412f024d7",
+                            "type": "productOfferingPrice",
+                            "price": {
+                                "type": "Relationship",
+                                "object": "urn:price:6380d7c9-d9ec-4d35-865b-76e72d081cbf"
+                            }
+                        },
+                        {
+                            "id": "urn:price:2d5f3c16-4e77-45b3-8915-3da36b714e7b",
+                            "type": "price"
+                        },
+                        {
+                            "id": "urn:price:6380d7c9-d9ec-4d35-865b-76e72d081cbf",
+                            "type": "price"
+                        }
+                    ]""";
+
+
 }
