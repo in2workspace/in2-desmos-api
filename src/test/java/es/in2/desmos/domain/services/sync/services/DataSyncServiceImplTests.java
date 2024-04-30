@@ -17,7 +17,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -110,7 +109,7 @@ class DataSyncServiceImplTests {
         JsonNode mockJsonNode = Mockito.mock(JsonNode.class);
         when(objectMapper.readTree(anyString())).thenReturn(mockJsonNode);
         when(objectMapper.writeValueAsString(mockJsonNode)).thenReturn(retrievedBrokerEntity);
-        when(auditRecordService.findLatestConsumerPublishedAuditRecord(anyString())).thenReturn(Mono.empty());
+        when(auditRecordService.findLatestConsumerPublishedAuditRecordByEntityId(anyString())).thenReturn(Mono.empty());
 
 
         StepVerifier.create(dataSyncService.verifyRetrievedEntityData("processId", notification, retrievedBrokerEntity))
@@ -123,7 +122,7 @@ class DataSyncServiceImplTests {
         JsonNode mockJsonNode = Mockito.mock(JsonNode.class);
         when(objectMapper.readTree(anyString())).thenReturn(mockJsonNode);
         when(objectMapper.writeValueAsString(mockJsonNode)).thenReturn(retrievedBrokerEntity);
-        when(auditRecordService.findLatestConsumerPublishedAuditRecord(anyString())).thenReturn(Mono.just(auditRecord));
+        when(auditRecordService.findLatestConsumerPublishedAuditRecordByEntityId(anyString())).thenReturn(Mono.just(auditRecord));
 
         StepVerifier.create(dataSyncService.verifyRetrievedEntityData("processId", notification, retrievedBrokerEntity))
                 .assertNext(retrievedBrokerEntity -> {})
@@ -136,7 +135,7 @@ class DataSyncServiceImplTests {
         JsonNode mockJsonNode = Mockito.mock(JsonNode.class);
         when(objectMapper.readTree(anyString())).thenReturn(mockJsonNode);
         when(objectMapper.writeValueAsString(mockJsonNode)).thenReturn(retrievedBrokerEntity);
-        when(auditRecordService.findLatestConsumerPublishedAuditRecord(anyString())).thenReturn(Mono.just(errorAuditRecord));
+        when(auditRecordService.findLatestConsumerPublishedAuditRecordByEntityId(anyString())).thenReturn(Mono.just(errorAuditRecord));
 
         StepVerifier.create(dataSyncService.verifyRetrievedEntityData("processId", notification, retrievedBrokerEntity))
                 .expectError(HashLinkException.class)
@@ -149,7 +148,7 @@ class DataSyncServiceImplTests {
         JsonNode mockJsonNode = Mockito.mock(JsonNode.class);
         when(objectMapper.readTree(anyString())).thenReturn(mockJsonNode);
         when(objectMapper.writeValueAsString(mockJsonNode)).thenReturn(retrievedBrokerEntity);
-        when(auditRecordService.findLatestConsumerPublishedAuditRecord(anyString())).thenReturn(Mono.empty());
+        when(auditRecordService.findLatestConsumerPublishedAuditRecordByEntityId(anyString())).thenReturn(Mono.empty());
 
 
         StepVerifier.create(dataSyncService.verifyRetrievedEntityData("processId", errorNotification, retrievedBrokerEntity))
@@ -162,7 +161,7 @@ class DataSyncServiceImplTests {
         JsonNode mockJsonNode = Mockito.mock(JsonNode.class);
         when(objectMapper.readTree(anyString())).thenReturn(mockJsonNode);
         when(objectMapper.writeValueAsString(mockJsonNode)).thenThrow(JsonProcessingException.class);
-        when(auditRecordService.findLatestConsumerPublishedAuditRecord(anyString())).thenReturn(Mono.empty());
+        when(auditRecordService.findLatestConsumerPublishedAuditRecordByEntityId(anyString())).thenReturn(Mono.empty());
 
 
         StepVerifier.create(dataSyncService.verifyRetrievedEntityData("processId", errorNotification, retrievedBrokerEntity))

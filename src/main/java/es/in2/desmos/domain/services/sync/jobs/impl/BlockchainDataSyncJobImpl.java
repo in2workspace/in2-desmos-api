@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.util.List;
@@ -36,7 +35,8 @@ public class BlockchainDataSyncJobImpl implements BlockchainDataSyncJob {
     public Flux<Void> startBlockchainDataSyncJob(String processId) {
         log.info("Starting the Blockchain Data Sync Job...");
         // We need to find the last published audit record to know where to start querying the DLT Adapter
-        return auditRecordService.findLatestConsumerPublishedAuditRecord(processId)
+        // fixme: This method does not need the entityId parameter
+        return auditRecordService.findLatestConsumerPublishedAuditRecordByEntityId(processId)
                 .flatMapMany(auditRecord ->
                         getTransactionsFromRangeOfTime(auditRecord, processId)
                 )

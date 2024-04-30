@@ -22,6 +22,6 @@ public interface AuditRecordService {
 
     Mono<String> fetchLatestProducerEntityHashByEntityId(String processId, String entityId);
 
-    Mono<AuditRecord> findLatestConsumerPublishedAuditRecord(String processId);
+    Mono<AuditRecord> findLatestConsumerPublishedAuditRecordByEntityId(String processId, String entityId);
 
 }

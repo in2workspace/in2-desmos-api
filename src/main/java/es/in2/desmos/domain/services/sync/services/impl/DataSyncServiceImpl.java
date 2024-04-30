@@ -124,33 +124,35 @@ public class DataSyncServiceImpl implements DataSyncService {
         }
     }
 
-    // Verify Data Consistency of the Retrieved Entity (Ensures that data does not contradict itself and remains synchronized across different parts of the system.)
+    /*
+     * 1. We search in the DB if there is a record with the same entity ID (Consumer and Published status)
+     * 2. If it exists, we capture the hash of the entity with status (Published), that is, the one that ended
+     * your integration process with the local Context Broker successfully.
+     * 3. We validate that the hash of the database entity corresponds to the previousHash of the notification.
+     * 4. If applicable, the consistency is valid, and we have not lost any data change/stage between both processes.
+     */
     private Mono<String> verifyRetrievedEntityDataConsistency(String processId, BlockchainNotification blockchainNotification, String retrievedBrokerEntity) {
-        /*
-         * 1. Buscamos en la BBDD si existe un registro con mismo ID de entidad (Consumer)
-         * 2. Si existe, capturamos el hash de la entidad con estado (Published), esto es, aquella que finalizó
-         * su proceso de integración con el Context Broker local satisfactoriamente.
-         * 3. Validamos que el hash de la entidad de la BBDD corresponda con el previousHash de la notificación.
-         * 4. Si corresponde, la consistencia es válida y no hemos perdido ningún dato entre ambos procesos.
-         */
-        return auditRecordService.findLatestConsumerPublishedAuditRecord(blockchainNotification.entityId())
-                .flatMap(auditRecords -> {
-                    // If there are audit records, we need to start querying the DLT Adapter from the last published audit record
-                    return verifyDataConsistency(auditRecords, blockchainNotification, retrievedBrokerEntity);
-
-                })
+        return auditRecordService.findLatestConsumerPublishedAuditRecordByEntityId(processId, blockchainNotification.entityId())
+                // If audit record exists,
+                // verify the data consistency of the retrieved entity,
+                // and it means that the retrieved entity is not the first entity in the chain
+                .flatMap(auditRecords ->
+                        verifyDataConsistency(processId, auditRecords, blockchainNotification, retrievedBrokerEntity))
+                // If audit record does not exist,
+                // it means that the retrieved entity is the first entity in the chain,
+                // and we do not need to verify the data consistency of the retrieved entity
                 .switchIfEmpty(Mono.just(retrievedBrokerEntity));
     }
 
-    private Mono<String> verifyDataConsistency(AuditRecord auditRecord, BlockchainNotification blockchainNotification, String retrievedBrokerEntity) {
+    private Mono<String> verifyDataConsistency(String processId, AuditRecord auditRecord, BlockchainNotification blockchainNotification, String retrievedBrokerEntity) {
         String previousEntityHash = blockchainNotification.previousEntityHash().substring(2);
         if(auditRecord.getEntityHashLink().equals(previousEntityHash)) {
+            log.info("ProcessID: {} - Data consistency verification passed successfully", processId);
             return Mono.just(retrievedBrokerEntity);
         } else {
-            log.error("Error occurred while verifying the data consistency of the retrieved entity: Data consistency verification failed");
+            log.warn("ProcessID: {} - Error occurred while verifying the data consistency of the retrieved entity: Data consistency verification failed", processId);
             return Mono.error(new HashLinkException("Data consistency verification failed"));
         }
-
     }
 
     private String sortAttributesAlphabetically(String retrievedBrokerEntity) throws JsonProcessingException {

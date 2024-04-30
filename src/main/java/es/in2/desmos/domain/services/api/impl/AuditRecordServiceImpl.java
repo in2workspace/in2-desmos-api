@@ -8,7 +8,6 @@ import es.in2.desmos.domain.services.api.AuditRecordService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.security.NoSuchAlgorithmException;
@@ -187,9 +186,9 @@ public class AuditRecordServiceImpl implements AuditRecordService {
     }
 
     @Override
-    public Mono<AuditRecord> findLatestConsumerPublishedAuditRecord(String processId) {
+    public Mono<AuditRecord> findLatestConsumerPublishedAuditRecordByEntityId(String processId, String entityId) {
         log.debug("ProcessID: {} - Fetching all audit records...", processId);
-        return auditRecordRepository.findLastPublishedConsumerAuditRecord();
+        return auditRecordRepository.findLastPublishedConsumerAuditRecordByEntityId(entityId);
     }
 
     private String setAuditRecordHashLink(AuditRecord lastAuditRecordRegistered, String auditRecordHash)
