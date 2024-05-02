@@ -9,5 +9,5 @@ import java.util.List;
 
 public record DiscoverySyncRequest(
         @JsonProperty("issuer") @NotBlank @URL String issuer,
-        @JsonProperty("external_entity_ids") @NotNull List<MVEntity4DataNegotiation> externalMVEntities4DataNegotiation) {
+        @JsonProperty("external_minimum_viable_entities_for_data_negotiation_list") @NotNull List<MVEntity4DataNegotiation> externalMVEntities4DataNegotiation) {
 }
