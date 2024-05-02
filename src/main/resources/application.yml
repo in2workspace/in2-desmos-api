@@ -77,8 +77,8 @@ openapi:
       url: "https://example.com"
 
 # Operator Configuration
-organization:
-  organizationId: "VATES-S9999999E"
+operator:
+  organizationIdentifier: "VATES-S9999999E"
 
 # Context Broker Configuration
 broker:

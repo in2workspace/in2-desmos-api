@@ -65,7 +65,7 @@ class BlockchainTxPayloadTests {
         String result = blockchainTxPayload.toString();
         // Assert
         assertTrue(result.contains("eventType=" + eventType));
-        assertTrue(result.contains("organizationId=" + organizationId));
+        assertTrue(result.contains("organizationIdentifier=" + organizationId));
         assertTrue(result.contains("entityId=" + entityId));
         assertTrue(result.contains("previousEntityHash=" + previousEntityHash));
         assertTrue(result.contains("dataLocation=" + dataLocation));
@@ -77,7 +77,7 @@ class BlockchainTxPayloadTests {
         // Arrange
         String expectedToString = "BlockchainTxPayload.BlockchainTxPayloadBuilder(" +
                 "eventType=ProductOffering, " +
-                "organizationId=0x40b0ab9dfd960064fb7e9fdf77f889c71569e349055ff563e8d699d8fa97fa90, " +
+                "organizationIdentifier=0x40b0ab9dfd960064fb7e9fdf77f889c71569e349055ff563e8d699d8fa97fa90, " +
                 "entityId=0x6f6468ded8276d009ab1b6c578c2b922053acd6b5a507f36d408d3f7c9ae91d0, " +
                 "previousEntityHash=0x98d9658d98764dbe135b316f52a98116b4b02f9d7e57212aa86335c42a58539a, " +
                 "dataLocation=http://localhost:8080/ngsi-ld/v1/entities/urn:ngsi-ld:ProductOffering:38088145-aef3-440e-ab93-a33bc9bfce69?hl=03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4, " +

@@ -3,7 +3,7 @@ package es.in2.desmos.infrastructure.configs;
 import es.in2.desmos.domain.exceptions.HashCreationException;
 import es.in2.desmos.domain.utils.ApplicationUtils;
 import es.in2.desmos.infrastructure.configs.properties.OpenApiProperties;
-import es.in2.desmos.infrastructure.configs.properties.OrganizationProperties;
+import es.in2.desmos.infrastructure.configs.properties.OperatorProperties;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -30,7 +30,7 @@ class ApiConfigTests {
     private OpenApiProperties openApiProperties;
 
     @Mock
-    private OrganizationProperties organizationProperties;
+    private OperatorProperties operatorProperties;
 
     @Mock
     private Environment environment;
@@ -43,7 +43,7 @@ class ApiConfigTests {
         // Arrange
         String mockedOrganizationId = "VATES-S9999999E";
         String expectedHastResult = "40b0ab9dfd960064fb7e9fdf77f889c71569e349055ff563e8d699d8fa97fa90";
-        when(organizationProperties.organizationId()).thenReturn(mockedOrganizationId);
+        when(operatorProperties.organizationIdentifier()).thenReturn(mockedOrganizationId);
         // Act & Assert
         assertEquals(expectedHastResult, apiConfig.organizationIdHash());
     }
@@ -51,7 +51,7 @@ class ApiConfigTests {
     @Test
     void givenHashCreationException_whenCalculatingHash_thenThrowHashCreationException() {
         // Arrange
-        when(organizationProperties.organizationId()).thenThrow(new HashCreationException("Simulated error"));
+        when(operatorProperties.organizationIdentifier()).thenThrow(new HashCreationException("Simulated error"));
         // Act & Assert
         assertThrows(HashCreationException.class, () -> apiConfig.organizationIdHash());
     }

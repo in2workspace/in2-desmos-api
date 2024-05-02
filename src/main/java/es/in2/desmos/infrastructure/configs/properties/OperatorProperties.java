@@ -5,8 +5,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 /**
  * Configuration of the organization ID which instantiates the solution.
  *
- * @param organizationId - OrganizationID information
+ * @param organizationIdentifier - OrganizationID information
  */
-@ConfigurationProperties(prefix = "organization")
-public record OrganizationProperties(String organizationId) {
+@ConfigurationProperties(prefix = "operator")
+public record OperatorProperties(String organizationIdentifier) {
 }

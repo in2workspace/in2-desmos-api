@@ -46,7 +46,7 @@
 //                                                .dataLocation(event.getDatalocation())
 //                                                .entityId(ApplicationUtils.HASH_PREFIX + ApplicationUtils.calculateSHA256(event.getEntityId()))
 //                                                .previousEntityHash(event.getPreviousEntityHash())
-//                                                .organizationId(event.getOrganizationId())
+//                                                .organizationIdentifier(event.getOrganizationId())
 //                                                .metadata(List.of())
 //                                                .build();
 //                                    } catch (NoSuchAlgorithmException e) {

@@ -88,7 +88,7 @@ public class BlockchainAdapterServiceImpl implements BlockchainAdapterService {
 //                        .entityId(extractEntityIdFromDataLocation(blockchainData.dataLocation()))
 //                        .entityType(blockchainData.eventType())
 //                        .datalocation(blockchainData.dataLocation())
-//                        .organizationId(blockchainData.organizationId())
+//                        .organizationIdentifier(blockchainData.organizationIdentifier())
 //                        .previousEntityHash(blockchainData.previousEntityHash())
 //                        .priority(eventQueuePriority)
 //                        .newTransaction(true)

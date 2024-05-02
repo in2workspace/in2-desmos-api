@@ -1,7 +1,7 @@
 package es.in2.desmos.infrastructure.configs;
 
 import es.in2.desmos.infrastructure.configs.properties.OpenApiProperties;
-import es.in2.desmos.infrastructure.configs.properties.OrganizationProperties;
+import es.in2.desmos.infrastructure.configs.properties.OperatorProperties;
 import es.in2.desmos.domain.exceptions.HashCreationException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
@@ -26,15 +26,15 @@ import static es.in2.desmos.domain.utils.ApplicationUtils.calculateSHA256;
 public class ApiConfig {
 
     private final OpenApiProperties openApiProperties;
-    private final OrganizationProperties organizationProperties;
+    private final OperatorProperties operatorProperties;
     private final Environment environment;
 
     @Bean
     public String organizationIdHash() {
         try {
-            return calculateSHA256(organizationProperties.organizationId());
+            return calculateSHA256(operatorProperties.organizationIdentifier());
         } catch (NoSuchAlgorithmException e) {
-            throw new HashCreationException("Error creating organizationId hash: " + e.getMessage());
+            throw new HashCreationException("Error creating organizationIdentifier hash: " + e.getMessage());
         }
     }
 
