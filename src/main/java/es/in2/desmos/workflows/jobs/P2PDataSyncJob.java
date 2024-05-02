@@ -7,6 +7,8 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 public interface P2PDataSyncJob {
+    Mono<Void> synchronizeData(String processId);
+
     Mono<List<MVEntity4DataNegotiation>> dataDiscovery(String processId, Mono<String> issuer, Mono<List<MVEntity4DataNegotiation>> externalMvEntities4DataNegotiation);
 
     Mono<List<String>> getLocalEntitiesById(String processId, Mono<List<Id>> ids);

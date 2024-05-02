@@ -29,6 +29,11 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
     private static final String BROKER_TYPE = "ProductOffering";
 
     @Override
+    public Mono<Void> synchronizeData(String processId) {
+        return null;
+    }
+
+    @Override
     public Mono<List<MVEntity4DataNegotiation>> dataDiscovery(String processId, Mono<String> issuer, Mono<List<MVEntity4DataNegotiation>> externalMvEntities4DataNegotiationMono) {
         log.info("ProcessID: {} - Starting P2P Data Synchronization Discovery Workflow", processId);
 

@@ -83,6 +83,35 @@ class DataSyncWorkflowIT {
     }
 
     @Test
+    void itShouldUpsertEntitiesFromOtherAccessNodes() throws InterruptedException, JSONException {
+        var entitySyncResponse = EntitySyncResponseMother.sample2and4;
+        mockWebServer.enqueue(new MockResponse()
+                .setBody(entitySyncResponse));
+
+        var response = WebClient.builder()
+                .baseUrl("http://localhost:" + localServerPort)
+                .build()
+                .get()
+                .uri("/api/v1/sync/p2p/data")
+                .retrieve()
+                .bodyToMono(Void.class)
+                .retry(3);
+
+        StepVerifier
+                .create(response)
+                .verifyComplete();
+
+            assertScorpioEntityIsExpected(EntitySyncResponseMother.id1, EntityMother.scorpioJson1());
+            assertScorpioEntityIsExpected(EntitySyncResponseMother.id2, EntityMother.scorpioJson2());
+            assertScorpioEntityIsExpected(EntitySyncResponseMother.id3, EntityMother.scorpioJson3());
+            assertScorpioEntityIsExpected(EntitySyncResponseMother.id4, EntityMother.scorpioJson4());
+
+        RecordedRequest request = mockWebServer.takeRequest();
+
+        System.out.println("Request: " + request);
+    }
+
+    @Test
     void itShouldReturnMissingExternalEntities() throws JsonProcessingException {
         DiscoverySyncRequest discoverySyncRequest = DiscoverySyncRequestMother.list1And2();
         Mono<DiscoverySyncRequest> discoverySyncRequestMono = Mono.just(discoverySyncRequest);

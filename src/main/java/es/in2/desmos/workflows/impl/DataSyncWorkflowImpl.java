@@ -38,7 +38,7 @@ public class DataSyncWorkflowImpl implements DataSyncWorkflow {
     @Override
     public Mono<Void> synchronizeData(String processId) {
         log.debug("ProcessID: {} - Synchronizing data...", processId);
-        return Mono.empty();
+        return p2PDataSyncJob.synchronizeData(processId);
     }
 
     @Override
