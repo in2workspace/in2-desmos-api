@@ -2,6 +2,7 @@ package es.in2.desmos.workflows.jobs.impl;
 
 import es.in2.desmos.domain.models.DataNegotiationEvent;
 import es.in2.desmos.domain.models.DataNegotiationResult;
+import es.in2.desmos.domain.models.Issuer;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.workflows.jobs.DataNegotiationJob;
 import es.in2.desmos.workflows.jobs.DataTransferJob;
@@ -12,6 +13,7 @@ import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,6 +23,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DataNegotiationJobImpl implements DataNegotiationJob {
     private final DataTransferJob dataTransferJob;
+
+    @Override
+    public Mono<Void> negotiateDataSync(String processId, Mono<Map<Issuer, List<MVEntity4DataNegotiation>>> localMvEntities4DataNegotiationMono, Mono<List<MVEntity4DataNegotiation>> mvEntities4DataNegotiationMono) {
+        // TODO
+        return null;
+    }
 
     @Override
     public Mono<Void> negotiateDataSync(DataNegotiationEvent dataNegotiationEvent) {

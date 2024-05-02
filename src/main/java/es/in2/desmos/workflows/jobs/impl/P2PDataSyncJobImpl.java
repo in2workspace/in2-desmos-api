@@ -1,9 +1,12 @@
 package es.in2.desmos.workflows.jobs.impl;
 
+import es.in2.desmos.configs.ExternalAccessNodesConfig;
 import es.in2.desmos.domain.events.DataNegotiationEventPublisher;
 import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
+import es.in2.desmos.domain.services.sync.DiscoverySyncWebClient;
+import es.in2.desmos.workflows.jobs.DataNegotiationJob;
 import es.in2.desmos.workflows.jobs.P2PDataSyncJob;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,17 +23,48 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class P2PDataSyncJobImpl implements P2PDataSyncJob {
+    private final ExternalAccessNodesConfig externalAccessNodesConfig;
+
     private final BrokerPublisherService brokerPublisherService;
 
     private final AuditRecordService auditRecordService;
 
     private final DataNegotiationEventPublisher dataNegotiationEventPublisher;
 
+    private final DataNegotiationJob dataNegotiationJob;
+
+    private final DiscoverySyncWebClient discoverySyncWebClient;
+
     private static final String BROKER_TYPE = "ProductOffering";
 
     @Override
     public Mono<Void> synchronizeData(String processId) {
-        return null;
+        log.info("ProcessID: {} - Starting P2P Data Synchronization Workflow", processId);
+
+        return createLocalMvEntities4DataNegotiation(processId).flatMap(localMvEntities4DataNegotiation -> {
+            log.debug("ProcessID: {} - Local MV Entities 4 Data Negotiation synchronizing data: {}", processId, localMvEntities4DataNegotiation);
+
+            return getExternalMVEntities4DataNegotiationByIssuer(processId, localMvEntities4DataNegotiation)
+                    .flatMap(mvEntities4DataNegotiationByIssuer -> {
+                        Mono<Map<Issuer, List<MVEntity4DataNegotiation>>> mvEntities4DataNegotiationByIssuerMono = Mono.just(mvEntities4DataNegotiationByIssuer);
+                        Mono<List<MVEntity4DataNegotiation>> localMvEntities4DataNegotiationMono = Mono.just(localMvEntities4DataNegotiation);
+
+                        return dataNegotiationJob.negotiateDataSync(processId, mvEntities4DataNegotiationByIssuerMono, localMvEntities4DataNegotiationMono);
+                    });
+        });
+    }
+
+    private Mono<Map<Issuer, List<MVEntity4DataNegotiation>>> getExternalMVEntities4DataNegotiationByIssuer(String processId, List<MVEntity4DataNegotiation> localMvEntities4DataNegotiation) {
+        return externalAccessNodesConfig.getExternalAccessNodesUrls()
+                .flatMapIterable(externalAccessNodesList -> externalAccessNodesList)
+                .flatMap(externalAccessNode -> {
+                    Issuer issuer = new Issuer(externalAccessNode);
+                    Mono<List<MVEntity4DataNegotiation>> localMvEntities4DataNegotiationMono = Mono.just(localMvEntities4DataNegotiation);
+
+                    return discoverySyncWebClient.makeRequest(processId, Mono.just(externalAccessNode), localMvEntities4DataNegotiationMono)
+                            .map(resultList -> Map.entry(issuer, resultList));
+                })
+                .collectMap(Map.Entry::getKey, Map.Entry::getValue);
     }
 
     @Override
@@ -104,4 +138,5 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                         .collectList()
         );
     }
+
 }
