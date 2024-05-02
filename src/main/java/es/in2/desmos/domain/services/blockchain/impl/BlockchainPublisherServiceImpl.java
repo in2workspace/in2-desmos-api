@@ -19,7 +19,7 @@ public class BlockchainPublisherServiceImpl implements BlockchainPublisherServic
     }
 
     @Override
-    public Mono<Void> PublishBlockchainTxPayloadToDltAdapter(String processId, BlockchainTxPayload blockchainTxPayload) {
+    public Mono<Void> publishDataToBlockchain(String processId, BlockchainTxPayload blockchainTxPayload) {
         return blockchainAdapterService.postTxPayload(processId, blockchainTxPayload);
     }
 

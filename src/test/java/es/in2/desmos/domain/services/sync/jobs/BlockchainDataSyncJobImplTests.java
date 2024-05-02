@@ -84,6 +84,7 @@ class BlockchainDataSyncJobImplTests {
                 .verifyComplete();
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void testStartBlockchainDataSyncJob_withAuditRecords() throws JsonProcessingException {
         String processId = "process123";
