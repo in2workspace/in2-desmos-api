@@ -79,7 +79,7 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                         return Mono.error(e);
                     }
                     return auditRecordRepository.save(auditRecord)
-                            .doOnSuccess(unused -> log.info("ProcessID: {} - Audit record saved successfully.", processId))
+                            .doOnSuccess(unused -> log.info("ProcessID: {} - Audit record saved successfully. - Status: {}", processId, status))
                             .then();
                 })
                 .then();

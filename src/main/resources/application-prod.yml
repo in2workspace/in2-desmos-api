@@ -11,7 +11,7 @@ spring:
     generate-unique-name: true
   flyway:
     url: "jdbc:postgresql://localhost:5433/desmos"
-    locations: classpath:db/migrations
+    locations: classpath:db/migration
 
 # Spring Logging Configuration
 logging:

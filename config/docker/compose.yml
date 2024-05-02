@@ -48,8 +48,8 @@ services:
       POSTGRES_DB: ngb
 
   desmos-node-a:
-    image: in2workspace/desmos-api:v0.6.0-SNAPSHOT
-#    image: desmos-api:latest
+#    image: in2workspace/desmos-api:v0.6.0-SNAPSHOT
+    image: desmos-api:latest
     environment:
       SPRING_PROFILES_ACTIVE: dev
       LOGGING_LEVEL_ES_IN2_DESMOS: INFO
@@ -57,7 +57,7 @@ services:
       SPRING_R2DBC_USERNAME: postgres
       SPRING_R2DBC_PASSWORD: postgres
       SPRING_FLYWAY_URL: jdbc:postgresql://postgres-node-a:5432/dbtest
-      CLIENT_ORGANIZATIONID: VATES-S9999999E
+      CLIENT_ORGANIZATIONID: VATES-S0000000E
       DLT_ADAPTER_PROVIDER: digitelts
       DLT_ADAPTER_INTERNAL_DOMAIN: http://dlt-adapter-node-a:8080
       DLT_ADAPTER_EXTERNAL_DOMAIN: http://dlt-adapter-node-a:8080
@@ -85,11 +85,12 @@ services:
       POSTGRES_DB: dbtest
 
   dlt-adapter-node-a:
-    image: quay.io/digitelts/dlt-adapter:1.4-SNAPSHOT
+    image: quay.io/digitelts/dlt-adapter:1.4
     environment:
       PRIVATE_KEY: 0x304d170fb355df65cc17ef7934404fe9baee73a1244380076436dec6fafb1e1f
       DOME_EVENTS_CONTRACT_ADDRESS:
       RPC_ADDRESS: http://ganache:8545
+#      RPC_ADDRESS: https://red-t.alastria.io/v0/9461d9f4292b41230527d57ee90652a6
       DOME_PRODUCTION_BLOCK_NUMBER: 0
       ISS: 0x9eb763b0a6b7e617d56b85f1df943f176018c8eedb2dd9dd37c0bd77496833fe
     ports:
@@ -116,8 +117,8 @@ services:
       POSTGRES_DB: ngb
 
   desmos-node-b:
-    image: in2workspace/desmos-api:v0.6.0-SNAPSHOT
-#    image: desmos-api:latest
+#    image: in2workspace/desmos-api:v0.6.0-SNAPSHOT
+    image: desmos-api:latest
     environment:
       SPRING_PROFILES_ACTIVE: dev
       LOGGING_LEVEL_ES_IN2_DESMOS: DEBUG
@@ -153,12 +154,13 @@ services:
       POSTGRES_DB: dbtest
 
   dlt-adapter-node-b:
-    image: quay.io/digitelts/dlt-adapter:1.4-SNAPSHOT
+    image: quay.io/digitelts/dlt-adapter:1.4
     environment:
       PRIVATE_KEY: 0x304d170fb355df65cc17ef7934404fe9baee73a1244380076436dec6fafb1e1f
       DOME_EVENTS_CONTRACT_ADDRESS:
       RPC_ADDRESS: http://ganache:8545
+#      RPC_ADDRESS: https://red-t.alastria.io/v0/9461d9f4292b41230527d57ee90652a6
       DOME_PRODUCTION_BLOCK_NUMBER: 0
-      ISS: 0x9eb763b0a6b7e617d56b85f1df943f176018c8eedb2dd9dd37c0bd77496833fe
+      ISS: 0x9eb763b0a6b7e617d56b85f1df943f176018c8eedb2dd9dd37c0bd77496833f3
     ports:
       - "9095:8080"
