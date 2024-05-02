@@ -23,6 +23,12 @@ public class DataNegotiationJobImpl implements DataNegotiationJob {
     private final DataTransferJob dataTransferJob;
 
     @Override
+    public Mono<Void> negotiateDataSync() {
+        // TODO
+        return null;
+    }
+
+    @Override
     public Mono<Void> negotiateDataSync(DataNegotiationEvent dataNegotiationEvent) {
         String processId = dataNegotiationEvent.processId();
 

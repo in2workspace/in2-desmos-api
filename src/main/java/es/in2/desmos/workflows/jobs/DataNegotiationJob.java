@@ -5,6 +5,9 @@ import org.springframework.context.event.EventListener;
 import reactor.core.publisher.Mono;
 
 public interface DataNegotiationJob {
+
+    Mono<Void> negotiateDataSync();
+
     @EventListener
     Mono<Void> negotiateDataSync(DataNegotiationEvent dataNegotiationEvent);
 }

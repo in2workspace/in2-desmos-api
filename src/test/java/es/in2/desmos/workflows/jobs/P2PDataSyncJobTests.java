@@ -39,6 +39,25 @@ class P2PDataSyncJobTests {
     @Mock
     private DataNegotiationEventPublisher dataNegotiationEventPublisher;
 
+    @Mock
+    private DataNegotiationJob dataNegotiationJob;
+
+    @Test
+    void itShouldUpsertEntitiesFromOtherAccessNodes(){
+        String processId = "0";
+
+        when(dataNegotiationJob.negotiateDataSync()).thenReturn(Mono.empty());
+
+        var result = p2PDataSyncWorkflow.synchronizeData(processId);
+
+        StepVerifier
+                .create(result)
+                .verifyComplete();
+
+        verify(dataNegotiationJob, times(1)).negotiateDataSync();
+        verifyNoMoreInteractions(brokerPublisherService);
+    }
+
     @Test
     void itShouldReturnInternalEntities() {
 

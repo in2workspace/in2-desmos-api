@@ -4,6 +4,7 @@ import es.in2.desmos.domain.events.DataNegotiationEventPublisher;
 import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
+import es.in2.desmos.workflows.jobs.DataNegotiationJob;
 import es.in2.desmos.workflows.jobs.P2PDataSyncJob;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,11 +27,13 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
 
     private final DataNegotiationEventPublisher dataNegotiationEventPublisher;
 
+    private final DataNegotiationJob dataNegotiationJob;
+
     private static final String BROKER_TYPE = "ProductOffering";
 
     @Override
     public Mono<Void> synchronizeData(String processId) {
-        return null;
+        return dataNegotiationJob.negotiateDataSync();
     }
 
     @Override
