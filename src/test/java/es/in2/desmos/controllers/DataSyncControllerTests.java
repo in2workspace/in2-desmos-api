@@ -46,13 +46,13 @@ class DataSyncControllerTests {
 
     @Test
     void testSyncData() {
-        // Arrange
         Mockito.when(dataSyncWorkflow.synchronizeData(anyString())).thenReturn(Mono.empty());
-        // Act
+
         webTestClient.get()
                 .uri("/api/v1/sync/p2p/data")
                 .exchange()
-                .expectStatus().isOk();
+                .expectStatus().isOk()
+                .expectHeader().contentLength(-1);
     }
 
     @Test
