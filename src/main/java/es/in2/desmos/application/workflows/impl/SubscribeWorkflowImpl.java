@@ -14,7 +14,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
-import java.util.UUID;
 
 /*
  *  Workflow steps:
@@ -23,7 +22,6 @@ import java.util.UUID;
  *  3. Verify the data integrity of the retrieved entity.
  *  4. Publish the retrieved entity to the local Broker.
  */
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -35,10 +33,8 @@ public class SubscribeWorkflowImpl implements SubscribeWorkflow {
     private final DataSyncService dataSyncService;
 
     @Override
-    public Flux<Void> startSubscribeWorkflow() {
-        log.info("Starting the Subscribe Workflow...");
-        String processId = UUID.randomUUID().toString();
-        log.debug("Process of retrieving data from the external sources started with processID: {}", processId);
+    public Flux<Void> startSubscribeWorkflow(String processId) {
+        log.info("ProcessID: {} - Starting the Subscribe Workflow...", processId);
         // Get the event stream for the events that need to be synchronized to the local broker
         return pendingSubscribeEventsQueue.getEventStream()
                 // Get the next event (BlockchainNotification) from the queue

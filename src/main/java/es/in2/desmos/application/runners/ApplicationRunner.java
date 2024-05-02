@@ -50,18 +50,16 @@ public class ApplicationRunner {
 
     @EventListener(ApplicationReadyEvent.class)
     public Mono<Void> onApplicationReady() {
-        log.info("Starting Application...");
-        log.info("Setting initial configurations...");
-        return setBrokerSubscription()
-                .then(setBlockchainSubscription())
-                // We only want to start the data synchronization process after the subscriptions have been set
-                .doOnTerminate(this::initializeDataSync);
+        String processId = UUID.randomUUID().toString();
+        log.info("ProcessID: {} - Setting initial configurations...", processId);
+        return setBrokerSubscription(processId)
+                .then(setBlockchainSubscription(processId))
+                .thenMany(initializeDataSync(processId))
+                .then();
     }
 
     @Retryable(retryFor = RequestErrorException.class, maxAttempts = 4, backoff = @Backoff(delay = 2000))
-    private Mono<Void> setBrokerSubscription() {
-        // Set the processId to a random UUID
-        String processId = UUID.randomUUID().toString();
+    private Mono<Void> setBrokerSubscription(String processId) {
         log.info("ProcessID: {} - Setting Broker Subscription...", processId);
         // Build Entity Type List to subscribe to
         List<BrokerSubscription.Entity> entities = new ArrayList<>();
@@ -84,49 +82,45 @@ public class ApplicationRunner {
         // Create the subscription and log the result
         log.debug("ProcessID: {} - Broker Subscription: {}", processId, brokerSubscription);
         return brokerListenerService.createSubscription(processId, brokerSubscription)
-                .doOnSuccess(response ->
-                        log.info("ProcessID: {} - Broker Subscription created successfully.", processId))
+                .doOnSuccess(response -> log.info("ProcessID: {} - Broker Subscription created successfully.", processId))
                 .doOnError(e -> log.error("ProcessID: {} - Error creating Broker Subscription", processId, e));
     }
 
     @Retryable(retryFor = RequestErrorException.class, maxAttempts = 4, backoff = @Backoff(delay = 2000))
-    private Mono<Void> setBlockchainSubscription() {
-        log.info("Setting Blockchain Subscription...");
-        String processId = UUID.randomUUID().toString();
-        // Create the EVM Subscription object
+    private Mono<Void> setBlockchainSubscription(String processId) {
+        log.info("ProcessID: {} - Setting Blockchain Subscription...", processId);
+        // Create the Blockchain Subscription object
         BlockchainSubscription blockchainSubscription = BlockchainSubscription.builder()
                 .eventTypes(blockchainConfig.getEntityTypes())
                 .notificationEndpoint(blockchainConfig.getNotificationEndpoint())
                 .build();
         // Create the subscription
         return blockchainListenerService.createSubscription(processId, blockchainSubscription)
-                .doOnSuccess(response -> log.info("Blockchain Subscription created successfully."))
-                .doOnError(e -> log.error("Error creating Blockchain Subscription", e));
+                .doOnSuccess(response -> log.info("ProcessID: {} - Blockchain Subscription created successfully.", processId))
+                .doOnError(e -> log.error("ProcessID: {} - Error creating Blockchain Subscription", processId, e));
     }
 
-    private Flux<Void> initializeDataSync() {
-        // Set up the initial data synchronization process
-        String processId = UUID.randomUUID().toString();
+    private Flux<Void> initializeDataSync(String processId) {
         log.info("ProcessID: {} - Initializing Data Synchronization Workflow...", processId);
         // Start data synchronization process
         return dataSyncWorkflow.startDataSyncWorkflow(processId)
-                // When the synchronization is finished, enable queue to process the
-                // data synchronization using pub-sub.
-                .doOnTerminate(() -> {
-                    log.info("Data Synchronization Workflow has finished.");
-                    log.info("Authorizing queues for Pub-Sub Workflows...");
+                .doOnComplete(() -> {
+                    log.info("ProcessID: {} - Data Synchronization Workflow has finished.", processId);
+                    log.info("ProcessID: {} - Authorizing queues for Pub-Sub Workflows...", processId);
                     isQueueAuthorizedForEmit.set(true);
+                })
+                .doOnTerminate(() -> {
                     initializeQueueProcessing(processId);
-                    log.info("Queues have been authorized and enabled.");
+                    log.info("ProcessID: {} - Queues have been authorized and enabled.", processId);
                 });
     }
 
     private void initializeQueueProcessing(String processId) {
         if (!isQueueProcessingAuthorized()) {
-            log.debug("Queue processing is currently paused.");
+            log.debug("ProcessID: {} - Queue processing is currently paused.", processId);
             return;
         }
-        log.debug("Starting queue processing...");
+        log.debug("ProcessID: {} - Starting queue processing...", processId);
         restartQueueProcessing(processId);
     }
 
@@ -135,12 +129,14 @@ public class ApplicationRunner {
     }
 
     private void restartQueueProcessing(String processId) {
-        resetActiveSubscriptions();
+        log.debug("ProcessID: {} - Restarting queue processing...", processId);
+        resetActiveSubscriptions(processId);
         startBlockchainEventProcessing(processId);
-        startBrokerEventProcessing();
+        startBrokerEventProcessing(processId);
     }
 
-    private void resetActiveSubscriptions() {
+    private void resetActiveSubscriptions(String processId) {
+        log.debug("ProcessID: {} - Resetting active subscriptions...", processId);
         disposeIfActive(publishQueueDisposable);
         disposeIfActive(subscribeQueueDisposable);
     }
@@ -155,17 +151,17 @@ public class ApplicationRunner {
         publishQueueDisposable = publishWorkflow.startPublishWorkflow(processId)
                 .subscribe(
                         null,
-                        error -> log.error("Error occurred during Publish Workflow"),
-                        () -> log.info("Publish Workflow completed")
+                        error -> log.error("ProcessID: {} - Error occurred during Publish Workflow", processId, error),
+                        () -> log.info("ProcessID: {} - Publish Workflow completed", processId)
                 );
     }
 
-    private void startBrokerEventProcessing() {
-        subscribeQueueDisposable = subscribeWorkflow.startSubscribeWorkflow()
+    private void startBrokerEventProcessing(String processId) {
+        subscribeQueueDisposable = subscribeWorkflow.startSubscribeWorkflow(processId)
                 .subscribe(
                         null,
-                        error -> log.error("Error occurred during Subscribe Workflow"),
-                        () -> log.info("Subscribe Workflow completed")
+                        error -> log.error("ProcessID: {} - Error occurred during Subscribe Workflow", processId, error),
+                        () -> log.info("ProcessID: {} - Subscribe Workflow completed", processId)
                 );
     }
 

@@ -34,7 +34,7 @@ public class PublishWorkflowImpl implements PublishWorkflow {
 
     @Override
     public Flux<Void> startPublishWorkflow(String processId) {
-        log.info("Starting the Publish Workflow...");
+        log.info("ProcessID: {} - Starting the Publish Workflow...", processId);
         // Get the event stream from the data publication queue
         return pendingPublishEventsQueue.getEventStream()
                 // Get the first event from the event stream,

@@ -35,7 +35,7 @@ public class BlockchainAdapterServiceImpl implements BlockchainAdapterService {
 
     @Override
     public Mono<Void> createSubscription(String processId, BlockchainSubscription blockchainSubscription) {
-        log.info("ProcessId: {} - Creating subscription...", processId);
+        log.debug("ProcessId: {} - Creating subscription...", processId);
         return webClient.post()
                 .uri(dltAdapterProperties.paths()
                         .subscription())

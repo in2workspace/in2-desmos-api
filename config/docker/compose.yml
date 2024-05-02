@@ -51,11 +51,11 @@ services:
     image: in2workspace/desmos-api:v0.6.0-SNAPSHOT
 #    image: desmos-api:latest
     environment:
+      LOGGING_LEVEL_ES_IN2_DESMOS: INFO
       SPRING_R2DBC_URL: r2dbc:postgresql://postgres-node-a:5432/dbtest
       SPRING_R2DBC_USERNAME: postgres
       SPRING_R2DBC_PASSWORD: postgres
       SPRING_FLYWAY_URL: jdbc:postgresql://postgres-node-a:5432/dbtest
-      LOGGING_LEVEL_ES_IN2_DESMOS: DEBUG
       CLIENT_ORGANIZATIONID: VATES-S9999999E
       DLT_ADAPTER_PROVIDER: digitelts
       DLT_ADAPTER_INTERNAL_DOMAIN: http://dlt-adapter-node-a:8080
@@ -118,11 +118,11 @@ services:
     image: in2workspace/desmos-api:v0.6.0-SNAPSHOT
 #    image: desmos-api:latest
     environment:
+      LOGGING_LEVEL_ES_IN2_DESMOS: DEBUG
       SPRING_R2DBC_URL: r2dbc:postgresql://postgres-node-b:5432/dbtest
       SPRING_R2DBC_USERNAME: postgres
       SPRING_R2DBC_PASSWORD: postgres
       SPRING_FLYWAY_URL: jdbc:postgresql://postgres-node-b:5432/dbtest
-      LOGGING_LEVEL_ES_IN2_DESMOS: DEBUG
       CLIENT_ORGANIZATIONID: VATES-S9999999E
       DLT_ADAPTER_PROVIDER: digitelts
       DLT_ADAPTER_INTERNAL_DOMAIN: http://dlt-adapter-node-b:8080
