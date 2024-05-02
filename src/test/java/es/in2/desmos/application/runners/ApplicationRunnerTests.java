@@ -1,17 +1,17 @@
 package es.in2.desmos.application.runners;
 
-import es.in2.desmos.application.runners.ApplicationRunner;
-import es.in2.desmos.infrastructure.configs.BlockchainConfig;
-import es.in2.desmos.infrastructure.configs.BrokerConfig;
+import es.in2.desmos.application.workflows.DataSyncWorkflow;
+import es.in2.desmos.application.workflows.PublishWorkflow;
+import es.in2.desmos.application.workflows.SubscribeWorkflow;
 import es.in2.desmos.domain.models.BlockchainSubscription;
 import es.in2.desmos.domain.services.blockchain.BlockchainListenerService;
 import es.in2.desmos.domain.services.broker.BrokerListenerService;
 import es.in2.desmos.domain.services.sync.jobs.BlockchainDataSyncJob;
-import es.in2.desmos.application.workflows.DataSyncWorkflow;
-import es.in2.desmos.application.workflows.PublishWorkflow;
-import es.in2.desmos.application.workflows.SubscribeWorkflow;
+import es.in2.desmos.infrastructure.configs.BlockchainConfig;
+import es.in2.desmos.infrastructure.configs.BrokerConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -59,14 +59,14 @@ class ApplicationRunnerTests {
     void whenApplicationIsReady_thenSetBrokerSubscriptionAndBlockchainSubscription() {
         // Arrange
         when(brokerListenerService.createSubscription(anyString(), any())).thenReturn(Mono.empty());
-        Mockito.when(blockchainListenerService.createSubscription(Mockito.anyString(), Mockito.any(BlockchainSubscription.class)))
-                .thenReturn(Mono.empty());
-        Mockito.when(dataSyncWorkflow.startDataSyncWorkflow(Mockito.anyString())).thenReturn(Flux.empty());
-        Mockito.when(publishWorkflow.startPublishWorkflow(Mockito.anyString())).thenReturn(Flux.empty());
-        Mockito.when(subscribeWorkflow.startSubscribeWorkflow()).thenReturn(Flux.empty());
-        // Act
-        ApplicationReadyEvent event = mock(ApplicationReadyEvent.class);
+        when(blockchainListenerService.createSubscription(Mockito.anyString(), Mockito.any(BlockchainSubscription.class))).thenReturn(Mono.empty());
+        when(dataSyncWorkflow.startDataSyncWorkflow(Mockito.anyString())).thenReturn(Flux.empty());
+        mock(ApplicationReadyEvent.class);
+        // Assert
         StepVerifier.create(applicationRunner.onApplicationReady()).verifyComplete();
+        InOrder inOrder = inOrder(brokerListenerService, blockchainListenerService);
+        inOrder.verify(brokerListenerService).createSubscription(anyString(), any());
+        inOrder.verify(blockchainListenerService).createSubscription(anyString(), any());
     }
 
     // Fixme: Retry and recover does not work with MockitoExtension
