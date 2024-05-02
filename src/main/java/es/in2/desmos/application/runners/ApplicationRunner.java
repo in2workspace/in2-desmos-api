@@ -54,8 +54,8 @@ public class ApplicationRunner {
         log.info("Setting initial configurations...");
         return setBrokerSubscription()
                 .then(setBlockchainSubscription())
-                .thenMany(initializeDataSync())
-                .then();
+                // We only want to start the data synchronization process after the subscriptions have been set
+                .doOnTerminate(this::initializeDataSync);
     }
 
     @Retryable(retryFor = RequestErrorException.class, maxAttempts = 4, backoff = @Backoff(delay = 2000))

@@ -1,6 +1,7 @@
 services:
 
   # INFRASTRUCTURE
+
   ganache:
     image: trufflesuite/ganache-cli:latest
     command:
@@ -47,7 +48,8 @@ services:
       POSTGRES_DB: ngb
 
   desmos-node-a:
-    image: desmos-api:latest
+    image: in2workspace/desmos-api:v0.6.0-SNAPSHOT
+#    image: desmos-api:latest
     environment:
       SPRING_R2DBC_URL: r2dbc:postgresql://postgres-node-a:5432/dbtest
       SPRING_R2DBC_USERNAME: postgres
@@ -113,7 +115,8 @@ services:
       POSTGRES_DB: ngb
 
   desmos-node-b:
-    image: desmos-api:latest
+    image: in2workspace/desmos-api:v0.6.0-SNAPSHOT
+#    image: desmos-api:latest
     environment:
       SPRING_R2DBC_URL: r2dbc:postgresql://postgres-node-b:5432/dbtest
       SPRING_R2DBC_USERNAME: postgres
