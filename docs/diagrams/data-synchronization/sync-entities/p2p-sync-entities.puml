@@ -11,9 +11,9 @@ boundary "External Access Node" as ean
 
 box "Access Node"
 
-  control "P2PDataSyncController" as p2pController
-  participant "P2PDataSyncWorkflow" as p2pWorkflow
-  participant "BrokerPublisherService" as begs
+  control "DataSyncController" as dsc
+  participant "P2PDataSyncWorkflow" as p2p_dsw
+  participant "BrokerPublisherService" as bps
   participant "BrokerAdapterService" as bas
   participant "Context Broker" as cb
 
@@ -21,7 +21,7 @@ end box
 
 '---------- Diagram ----------------
 
-ean -> p2pController++: POST /sync/p2p/entities \nPayload: EntitySyncRequest
+ean -> dsc++: POST /sync/p2p/entities \nPayload: EntitySyncRequest
 
 note right of ean
     EntitySyncRequest:
@@ -30,35 +30,23 @@ note right of ean
         String id
 end note
 
-    p2pController -> p2pWorkflow++: getLocalEntities()
-        p2pWorkflow -> begs++: getAllByType(String type)
-            begs -> bas++: getAllByType(String type)
-                bas -> cb++: GET /ngsi-ld/v1/entities?type={type}
-                return 200 OK - Payload: BrokerGetEntitiesResponse
+    dsc -> p2p_dsw++: getLocalEntities()
+        p2p_dsw -> bps++: findAllById(List<Ids>)
+        loop forEach id
+            bps -> bas++: getEntityById(Id)
+                bas -> cb++: GET /ngsi-ld/v1/entities{Id}
+                return 200 OK - Payload: Entity
+            return Entity
+            bps -> bps++: getRelationshipIds(Entity)
+            return List<EntityRelationshipIds>
+            bps -> bps: findAllById(List<EntityRelationshipIds>)
 
-                note left of cb
-                    ScorpioGetEntitiesResponse:
-                        BrokerEntities[] brokerEntities
-                end note
+        end
+        return List<Entity>
+    return List<Entity>
+return 200 OK - \nPayload: EntitySyncResponse
 
-            return BrokerEntities[]
-        return List<BrokerEntities>
-            p2pWorkflow -> p2pWorkflow++: getEntitiesRelationshipsIds(List<BrokerEntities>)
-            return List<Ids> entitiesRelationshipsIds
-        p2pWorkflow -> begs++: getEntitiesRelationshipsByIds\n(List<Ids> entitiesRelationshipsIds)
-            loop for each entity in entitiesRelationshipsIds
-                begs -> bas++: getEntityById(String)
-                    bas -> cb++: GET /ngsi-ld/v1/entities/{entityRelationshipId}
-                    return 200 OK - Payload: String entityRelationship
-                return String entityRelationship
-            end
-            return List<String> entityRelationship
-            p2pWorkflow -> p2pWorkflow++: getEntitiesList(\nList<ScorpioProductOffering>,\n List<String> entitiesRelationships)
-            return List<String> localEntities
-        return List<String> localEntities
-return 200 OK - Payload: DiscoverySyncResponse
-
-note left of p2pController
+note left of dsc
     EntitySyncResponse:
         JsonNode entities
 end note
