@@ -1,11 +1,11 @@
 package es.in2.desmos.infrastructure.configs;
 
-import es.in2.desmos.infrastructure.configs.ApiConfig;
-import es.in2.desmos.infrastructure.configs.properties.OpenApiProperties;
-import es.in2.desmos.infrastructure.configs.properties.OrganizationProperties;
 import es.in2.desmos.domain.exceptions.HashCreationException;
 import es.in2.desmos.domain.utils.ApplicationUtils;
+import es.in2.desmos.infrastructure.configs.properties.OpenApiProperties;
+import es.in2.desmos.infrastructure.configs.properties.OrganizationProperties;
 import io.swagger.v3.oas.models.OpenAPI;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,6 +13,8 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.env.Environment;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.security.NoSuchAlgorithmException;
 
@@ -23,12 +25,15 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ApiConfigTests {
-    
+
     @Mock
     private OpenApiProperties openApiProperties;
 
     @Mock
     private OrganizationProperties organizationProperties;
+
+    @Mock
+    private Environment environment;
 
     @InjectMocks
     private ApiConfig apiConfig;
@@ -81,6 +86,35 @@ class ApiConfigTests {
         assertEquals("operator@example.com", openApi.getInfo().getContact().getEmail());
         assertEquals("Operator Name", openApi.getInfo().getContact().getName());
         assertEquals("https://example.com", openApi.getInfo().getContact().getUrl());
+    }
+
+    @Test
+    void webClient_Returns_WebClient_Instance() {
+        // Act
+        WebClient webClient = apiConfig.webClient();
+        // Assert
+        Assertions.assertNotNull(webClient);
+    }
+
+    @Test
+    void getCurrentEnvironment_Returns_Default_When_No_Active_Profiles() {
+        // Arrange
+        when(environment.getActiveProfiles()).thenReturn(new String[]{});
+        when(environment.getDefaultProfiles()).thenReturn(new String[]{"default"});
+        // Act
+        String result = apiConfig.getCurrentEnvironment();
+        // Assert
+        assertEquals("default", result);
+    }
+
+    @Test
+    void getCurrentEnvironment_Returns_First_Active_Profile_When_Active_Profiles_Present() {
+        // Arrange
+        when(environment.getActiveProfiles()).thenReturn(new String[]{"dev", "test"});
+        // Act
+        String result = apiConfig.getCurrentEnvironment();
+        // Assert
+        assertEquals("dev", result);
     }
 
 }

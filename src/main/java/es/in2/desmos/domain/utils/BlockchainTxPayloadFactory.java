@@ -2,10 +2,10 @@ package es.in2.desmos.domain.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import es.in2.desmos.infrastructure.configs.ApiConfig;
-import es.in2.desmos.infrastructure.configs.BrokerConfig;
 import es.in2.desmos.domain.exceptions.HashLinkException;
 import es.in2.desmos.domain.models.BlockchainTxPayload;
+import es.in2.desmos.infrastructure.configs.ApiConfig;
+import es.in2.desmos.infrastructure.configs.BrokerConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -15,8 +15,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
 
-import static es.in2.desmos.domain.utils.ApplicationUtils.HASH_PREFIX;
-import static es.in2.desmos.domain.utils.ApplicationUtils.calculateSHA256;
+import static es.in2.desmos.domain.utils.ApplicationConstants.HASHLINK_PREFIX;
+import static es.in2.desmos.domain.utils.ApplicationConstants.HASH_PREFIX;
+import static es.in2.desmos.domain.utils.ApplicationUtils.*;
 
 @Slf4j
 @Component
@@ -34,24 +35,24 @@ public class BlockchainTxPayloadFactory {
             String entityIdHash = HASH_PREFIX + calculateSHA256(entityId);
             String entityType = (String) dataMap.get("type");
             String entityHash = calculateSHA256(objectMapper.writeValueAsString(dataMap));
-            String entityHashLink = entityHash.equals(previousHash) ? previousHash : ApplicationUtils.calculateHashLink(previousHash, entityHash);
-            String dataLocation = brokerConfig.getEntitiesExternalDomain() + "/" + entityId + ApplicationUtils.HASHLINK_PREFIX + entityHashLink;
+            String entityHashLink = entityHash.equals(previousHash) ? previousHash : calculateHashLink(previousHash, entityHash);
+            String dataLocation = brokerConfig.getEntitiesExternalDomain() + "/" + entityId + HASHLINK_PREFIX + entityHashLink;
             String organizationId = HASH_PREFIX + apiConfig.organizationIdHash();
             String previousEntityHash = HASH_PREFIX + previousHash;
+            List<String> metadataList = List.of(getEnvironmentMetadata(apiConfig.getCurrentEnvironment()));
             return Mono.just(BlockchainTxPayload.builder()
                     .eventType(entityType)
                     .organizationId(organizationId)
                     .entityId(entityIdHash)
                     .previousEntityHash(previousEntityHash)
                     .dataLocation(dataLocation)
-                    .metadata(List.of())
+                    .metadata(metadataList)
                     .build());
         } catch (JsonProcessingException | NoSuchAlgorithmException e) {
             log.warn("ProcessID: {} - Error creating blockchain transaction payload: {}", processId, e.getMessage());
             return Mono.error(new HashLinkException("Error creating blockchain transaction payload"));
         }
     }
-
 
     public Mono<String> calculatePreviousHashIfEmpty(String processId, Map<String, Object> dataMap) {
         try {

@@ -1,5 +1,6 @@
 package es.in2.desmos.application.runners;
 
+import es.in2.desmos.infrastructure.configs.ApiConfig;
 import es.in2.desmos.infrastructure.configs.BlockchainConfig;
 import es.in2.desmos.infrastructure.configs.BrokerConfig;
 import es.in2.desmos.domain.exceptions.RequestErrorException;
@@ -28,13 +29,16 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static es.in2.desmos.domain.utils.ApplicationConstants.SUBSCRIPTION_ID_PREFIX;
+import static es.in2.desmos.domain.utils.ApplicationConstants.SUBSCRIPTION_TYPE;
+import static es.in2.desmos.domain.utils.ApplicationUtils.getEnvironmentMetadata;
+
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class ApplicationRunner {
 
-    private static final String SUBSCRIPTION_ID_PREFIX = "urn:ngsi-ld:Subscription:";
-    private static final String SUBSCRIPTION_TYPE = "Subscription";
+    private final ApiConfig apiConfig;
     private final BrokerConfig brokerConfig;
     private final BlockchainConfig blockchainConfig;
     private final BrokerListenerService brokerListenerService;
@@ -43,6 +47,7 @@ public class ApplicationRunner {
     private final PublishWorkflow publishWorkflow;
     private final SubscribeWorkflow subscribeWorkflow;
     private final AtomicBoolean isQueueAuthorizedForEmit = new AtomicBoolean(false);
+    private final String getCurrentEnvironment;
     private Disposable publishQueueDisposable;
     private Disposable subscribeQueueDisposable;
 
@@ -90,6 +95,7 @@ public class ApplicationRunner {
         // Create the Blockchain Subscription object
         BlockchainSubscription blockchainSubscription = BlockchainSubscription.builder()
                 .eventTypes(blockchainConfig.getEntityTypes())
+                .metadata(List.of(getEnvironmentMetadata(apiConfig.getCurrentEnvironment())))
                 .notificationEndpoint(blockchainConfig.getNotificationEndpoint())
                 .build();
         // Create the subscription

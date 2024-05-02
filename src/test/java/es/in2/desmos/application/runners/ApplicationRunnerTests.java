@@ -7,6 +7,7 @@ import es.in2.desmos.domain.models.BlockchainSubscription;
 import es.in2.desmos.domain.services.blockchain.BlockchainListenerService;
 import es.in2.desmos.domain.services.broker.BrokerListenerService;
 import es.in2.desmos.domain.services.sync.jobs.BlockchainDataSyncJob;
+import es.in2.desmos.infrastructure.configs.ApiConfig;
 import es.in2.desmos.infrastructure.configs.BlockchainConfig;
 import es.in2.desmos.infrastructure.configs.BrokerConfig;
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,9 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ApplicationRunnerTests {
+
+    @Mock
+    private ApiConfig apiConfig;
 
     @Mock
     private BrokerConfig brokerConfig;
@@ -62,6 +66,7 @@ class ApplicationRunnerTests {
         when(dataSyncWorkflow.startDataSyncWorkflow(anyString())).thenReturn(Flux.empty());
         when(publishWorkflow.startPublishWorkflow(anyString())).thenReturn(Flux.empty());
         when(subscribeWorkflow.startSubscribeWorkflow(anyString())).thenReturn(Flux.empty());
+        when(apiConfig.getCurrentEnvironment()).thenReturn("dev");
         // Act
         mock(ApplicationReadyEvent.class);
         StepVerifier.create(applicationRunner.onApplicationReady()).verifyComplete();
