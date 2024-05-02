@@ -36,12 +36,8 @@ public class BlockchainDataSyncJobImpl implements BlockchainDataSyncJob {
         log.info("Starting the Blockchain Data Sync Job...");
         // We need to find the last published audit record to know where to start querying the DLT Adapter
         return auditRecordService.findLatestConsumerPublishedAuditRecord(processId)
-                .flatMapMany(auditRecord ->
-                        getTransactionsFromRangeOfTime(auditRecord, processId)
-                )
-                .switchIfEmpty(
-                        getAllTransactions(processId) // Asegúrate de que este método retorne un Flux<?>
-                )
+                .flatMapMany(auditRecord -> getTransactionsFromRangeOfTime(auditRecord, processId))
+                .switchIfEmpty(getAllTransactions(processId))
                 // Deserialize the response from the DLT Adapter
                 .flatMap(response -> deserializeBlockchainNotifications(processId, response).buffer(50)
                         .filter(notificationList -> !notificationList.isEmpty())
@@ -52,7 +48,6 @@ public class BlockchainDataSyncJobImpl implements BlockchainDataSyncJob {
                                                 // todo: consider to add this blockchainNotification as en event of the queue with High priority.
                                                 //  These lines of code are duplicated from the SubscribeWorkflowImpl(51-62)
                                                 .then(dataSyncService.getEntityFromExternalSource(processId, blockchainNotification)
-                                                        // verify the data integrity of the retrieved entity
                                                         .flatMap(retrievedBrokerEntity ->
                                                                 // Verify the integrity and consistency of the retrieved entity
                                                                 dataSyncService.verifyRetrievedEntityData(processId, blockchainNotification, retrievedBrokerEntity)
