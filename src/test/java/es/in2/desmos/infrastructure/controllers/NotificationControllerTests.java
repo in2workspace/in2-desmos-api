@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -20,6 +19,7 @@ import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class NotificationControllerTests {
@@ -43,7 +43,7 @@ class NotificationControllerTests {
                 .subscriptionId("subscriptionId")
                 .notifiedAt("notifiedAt")
                 .build();
-        Mockito.when(brokerListenerService.processBrokerNotification(anyString(), any(BrokerNotification.class)))
+        when(brokerListenerService.processBrokerNotification(anyString(), any(BrokerNotification.class)))
                 .thenReturn(Mono.empty());
         // Act
         WebTestClient.bindToController(notificationController)
@@ -72,7 +72,7 @@ class NotificationControllerTests {
                 .entityId("0x6f6468ded8276d009ab1b6c578c2b922053acd6b5a507f36d408d3f7c9ae91d0")
                 .previousEntityHash("0x98d9658d98764dbe135b316f52a98116b4b02f9d7e57212aa86335c42a58539a")
                 .build();
-        Mockito.when(blockchainListenerService.processBlockchainNotification(anyString(), any(BlockchainNotification.class)))
+        when(blockchainListenerService.processBlockchainNotification(anyString(), any(BlockchainNotification.class)))
                 .thenReturn(Mono.empty());
         // Act
         WebTestClient.bindToController(notificationController)

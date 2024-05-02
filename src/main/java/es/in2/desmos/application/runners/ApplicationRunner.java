@@ -33,6 +33,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @RequiredArgsConstructor
 public class ApplicationRunner {
 
+    private static final String SUBSCRIPTION_ID_PREFIX = "urn:ngsi-ld:Subscription:";
+    private static final String SUBSCRIPTION_TYPE = "Subscription";
     private final BrokerConfig brokerConfig;
     private final BlockchainConfig blockchainConfig;
     private final BrokerListenerService brokerListenerService;
@@ -40,13 +42,9 @@ public class ApplicationRunner {
     private final DataSyncWorkflow dataSyncWorkflow;
     private final PublishWorkflow publishWorkflow;
     private final SubscribeWorkflow subscribeWorkflow;
-
     private final AtomicBoolean isQueueAuthorizedForEmit = new AtomicBoolean(false);
     private Disposable publishQueueDisposable;
     private Disposable subscribeQueueDisposable;
-
-    private static final String SUBSCRIPTION_ID_PREFIX = "urn:ngsi-ld:Subscription:";
-    private static final String SUBSCRIPTION_TYPE = "Subscription";
 
     @EventListener(ApplicationReadyEvent.class)
     public Mono<Void> onApplicationReady() {

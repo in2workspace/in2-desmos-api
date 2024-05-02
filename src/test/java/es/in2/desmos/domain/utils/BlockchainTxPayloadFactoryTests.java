@@ -24,18 +24,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class BlockchainTxPayloadFactoryTests {
 
-    @Mock
-    private ObjectMapper objectMapper;
-
-    @Mock
-    private ApiConfig apiConfig;
-
-    @Mock
-    private BrokerConfig brokerConfig;
-
-    @InjectMocks
-    private BlockchainTxPayloadFactory blockchainTxPayloadFactory;
-
     Map<String, Object> dataMap = Map.of(
             "id", "entity123",
             "type", "productOffering",
@@ -43,6 +31,14 @@ class BlockchainTxPayloadFactoryTests {
             "description", "Example of a Product offering for cloud services suite"
     );
     String processId = UUID.randomUUID().toString();
+    @Mock
+    private ObjectMapper objectMapper;
+    @Mock
+    private ApiConfig apiConfig;
+    @Mock
+    private BrokerConfig brokerConfig;
+    @InjectMocks
+    private BlockchainTxPayloadFactory blockchainTxPayloadFactory;
 
     @Test
     void testBuildBlockchainTxPayload_validData_firstHash_Success() throws Exception {

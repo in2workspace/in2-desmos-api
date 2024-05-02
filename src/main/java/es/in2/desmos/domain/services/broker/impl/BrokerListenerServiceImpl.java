@@ -46,7 +46,7 @@ public class BrokerListenerServiceImpl implements BrokerListenerService {
     public Mono<Void> processBrokerNotification(String processId, BrokerNotification brokerNotification) {
         log.info("ProcessID: {} - Processing Broker Notification...", processId);
         // Validate BrokerNotification is not null and has data
-        return validateBrokerNotification(brokerNotification)
+        return getDataFromBrokerNotification(brokerNotification)
                 // Validate if BrokerNotification is from an external source or self-generated
                 .flatMap(dataMap -> isBrokerNotificationFromExternalSource(processId, dataMap)
                         // Create and AuditRecord with status RECEIVED
@@ -63,25 +63,10 @@ public class BrokerListenerServiceImpl implements BrokerListenerService {
                 .doOnError(throwable -> log.error("ProcessID: {} - Error processing Broker Notification: {}", processId, throwable.getMessage()));
     }
 
-    private Mono<Map<String, Object>> validateBrokerNotification(BrokerNotification brokerNotification) {
-        // Validate brokerNotification
-        checkIfBrokerNotificationIsNullOrEmpty(brokerNotification);
-        // Validate brokerNotification data
+    private Mono<Map<String, Object>> getDataFromBrokerNotification(BrokerNotification brokerNotification) {
+        //Get data from brokerNotification
         Map<String, Object> dataMap = brokerNotification.data().get(0);
-        checkIfBrokerNotificationDataIsNullOrHasNullId(dataMap);
         return Mono.just(dataMap);
-    }
-
-    private void checkIfBrokerNotificationIsNullOrEmpty(BrokerNotification brokerNotification) {
-        if (brokerNotification == null || brokerNotification.data().isEmpty()) {
-            throw new IllegalArgumentException("Invalid BrokerNotificationDTO");
-        }
-    }
-
-    private void checkIfBrokerNotificationDataIsNullOrHasNullId(Map<String, Object> dataMap) {
-        if (dataMap == null || dataMap.get("id") == null) {
-            throw new IllegalArgumentException("Invalid dataMap in BrokerNotificationDTO");
-        }
     }
 
     private Mono<Map<String, Object>> isBrokerNotificationFromExternalSource(String processId, Map<String, Object> dataMap) {

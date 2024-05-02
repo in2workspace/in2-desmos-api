@@ -29,10 +29,10 @@ public record BrokerSubscription(
                 @JsonProperty("accept") String accept,
                 @JsonProperty("receiverInfo") List<RetrievalInfoContentType> receiverInfo) {
 
-                    @Builder
-                    @JsonIgnoreProperties(ignoreUnknown = true)
-                    public record RetrievalInfoContentType(@JsonProperty("Content-Type") String contentType) {
-                    }
+            @Builder
+            @JsonIgnoreProperties(ignoreUnknown = true)
+            public record RetrievalInfoContentType(@JsonProperty("Content-Type") String contentType) {
+            }
 
         }
 

@@ -1,6 +1,5 @@
 package es.in2.desmos.domain.models;
 
-import es.in2.desmos.domain.models.BlockchainTxPayload;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
@@ -8,6 +7,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
 
 class BlockchainTxPayloadTests {
 

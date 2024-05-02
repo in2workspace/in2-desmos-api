@@ -52,6 +52,7 @@ public class BlockchainTxPayloadFactory {
         }
     }
 
+
     public Mono<String> calculatePreviousHashIfEmpty(String processId, Map<String, Object> dataMap) {
         try {
             log.debug("ProcessID: {} - Calculating previous hash...", processId);
