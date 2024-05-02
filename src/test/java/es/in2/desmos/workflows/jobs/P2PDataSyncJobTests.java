@@ -1,4 +1,4 @@
-package es.in2.desmos.workflows;
+package es.in2.desmos.workflows.jobs;
 
 import es.in2.desmos.domain.events.DataNegotiationEventPublisher;
 import es.in2.desmos.domain.models.AuditRecord;
@@ -8,7 +8,7 @@ import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.domain.services.api.impl.AuditRecordServiceImpl;
 import es.in2.desmos.domain.services.broker.impl.BrokerPublisherServiceImpl;
 import es.in2.desmos.objectmothers.*;
-import es.in2.desmos.workflows.impl.P2PDataSyncWorkflowImpl;
+import es.in2.desmos.workflows.jobs.impl.P2PDataSyncJobImpl;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
@@ -26,9 +26,9 @@ import java.util.List;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class P2PDataSyncWorkflowTests {
+class P2PDataSyncJobTests {
     @InjectMocks
-    private P2PDataSyncWorkflowImpl p2PDataSyncWorkflow;
+    private P2PDataSyncJobImpl p2PDataSyncWorkflow;
 
     @Mock
     private BrokerPublisherServiceImpl brokerPublisherService;

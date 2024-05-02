@@ -1,10 +1,10 @@
-package es.in2.desmos.workflows.impl;
+package es.in2.desmos.workflows.jobs.impl;
 
 import es.in2.desmos.domain.events.DataNegotiationEventPublisher;
 import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
-import es.in2.desmos.workflows.P2PDataSyncWorkflow;
+import es.in2.desmos.workflows.jobs.P2PDataSyncJob;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class P2PDataSyncWorkflowImpl implements P2PDataSyncWorkflow {
+public class P2PDataSyncJobImpl implements P2PDataSyncJob {
     private final BrokerPublisherService brokerPublisherService;
 
     private final AuditRecordService auditRecordService;
