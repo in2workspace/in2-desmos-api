@@ -85,8 +85,6 @@ class BrokerListenerServiceTests {
         when(auditRecordService.findLatestAuditRecordForEntity(anyString(), any())).thenReturn(Mono.empty());
         when(auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(anyString(), any(), any(), any())).thenReturn(Mono.empty());
         when(queueService.enqueueEvent(any())).thenReturn(Mono.empty());
-
-
         // Assert
         StepVerifier.create(brokerListenerService.processBrokerNotification(processId, brokerNotification))
                 .verifyComplete();
@@ -128,7 +126,6 @@ class BrokerListenerServiceTests {
                   "notifiedAt": "2023-03-14T16:38:15.123456Z"
                 }""");
         when(auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(anyString(), any(), any(), any())).thenReturn(Mono.empty());
-
         // Assert
         StepVerifier.create(brokerListenerService.processBrokerNotification(processId, brokerNotification))
                 .expectError(BrokerNotificationSelfGeneratedException.class)
@@ -172,11 +169,10 @@ class BrokerListenerServiceTests {
                 }""");
         when(auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(anyString(), any(), any(), any())).thenReturn(Mono.empty());
         when(queueService.enqueueEvent(any())).thenReturn(Mono.empty());
-
-
         // Assert
         StepVerifier.create(brokerListenerService.processBrokerNotification(processId, brokerNotification))
                 .verifyComplete();
     }
+    
 }
 
