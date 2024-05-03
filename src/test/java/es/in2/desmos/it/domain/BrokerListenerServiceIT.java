@@ -1,10 +1,10 @@
-package es.in2.desmos.domain.services.broker;
+package es.in2.desmos.it.domain;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import es.in2.desmos.ContainerManager;
+import es.in2.desmos.it.ContainerManager;
 import es.in2.desmos.domain.models.BrokerSubscription;
 import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import es.in2.desmos.domain.services.broker.adapter.factory.BrokerAdapterFactory;
@@ -19,7 +19,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 
-import static es.in2.desmos.ContainerManager.getBaseUriForScorpioA;
+import static es.in2.desmos.it.ContainerManager.getBaseUriForScorpioA;
 
 @SpringBootTest
 @Testcontainers

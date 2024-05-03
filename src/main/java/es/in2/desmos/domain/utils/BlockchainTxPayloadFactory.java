@@ -37,12 +37,12 @@ public class BlockchainTxPayloadFactory {
             String entityHash = calculateSHA256(objectMapper.writeValueAsString(dataMap));
             String entityHashLink = entityHash.equals(previousHash) ? previousHash : calculateHashLink(previousHash, entityHash);
             String dataLocation = brokerConfig.getEntitiesExternalDomain() + "/" + entityId + HASHLINK_PREFIX + entityHashLink;
-            String organizationId = HASH_PREFIX + apiConfig.organizationIdHash();
+            String organizationIdentifier = HASH_PREFIX + apiConfig.organizationIdHash();
             String previousEntityHash = HASH_PREFIX + previousHash;
             List<String> metadataList = List.of(getEnvironmentMetadata(apiConfig.getCurrentEnvironment()));
             return Mono.just(BlockchainTxPayload.builder()
                     .eventType(entityType)
-                    .organizationId(organizationId)
+                    .organizationIdentifier(organizationIdentifier)
                     .entityId(entityIdHash)
                     .previousEntityHash(previousEntityHash)
                     .dataLocation(dataLocation)

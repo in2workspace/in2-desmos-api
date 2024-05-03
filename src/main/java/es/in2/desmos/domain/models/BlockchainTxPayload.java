@@ -8,7 +8,7 @@ import java.util.List;
 @Builder
 public record BlockchainTxPayload(
         @JsonProperty("eventType") String eventType,
-        @JsonProperty("iss") String organizationId,
+        @JsonProperty("iss") String organizationIdentifier,
         @JsonProperty("entityId") String entityId,
         @JsonProperty("previousEntityHash") String previousEntityHash,
         @JsonProperty("dataLocation") String dataLocation,

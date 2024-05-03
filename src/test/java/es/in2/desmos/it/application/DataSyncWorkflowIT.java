@@ -1,4 +1,4 @@
-package es.in2.desmos.application.workflows;
+package es.in2.desmos.it.application;
 
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.TestMethodOrder;

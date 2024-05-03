@@ -1,9 +1,9 @@
-package es.in2.desmos.bdd;
+package es.in2.desmos.it.application;
 
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import es.in2.desmos.ContainerManager;
+import es.in2.desmos.it.ContainerManager;
 import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.BlockchainNotification;
 import es.in2.desmos.domain.repositories.AuditRecordRepository;

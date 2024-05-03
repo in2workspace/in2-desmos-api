@@ -1,4 +1,4 @@
-package es.in2.desmos;
+package es.in2.desmos.it;
 
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
