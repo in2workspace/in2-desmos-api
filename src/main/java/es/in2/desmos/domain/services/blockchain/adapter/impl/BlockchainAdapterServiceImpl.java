@@ -1,6 +1,6 @@
 package es.in2.desmos.domain.services.blockchain.adapter.impl;
 
-import es.in2.desmos.configs.properties.DLTAdapterProperties;
+import es.in2.desmos.infrastructure.configs.properties.DLTAdapterProperties;
 import es.in2.desmos.domain.models.BlockchainSubscription;
 import es.in2.desmos.domain.models.BlockchainTxPayload;
 import es.in2.desmos.domain.models.EventQueuePriority;
@@ -35,7 +35,7 @@ public class BlockchainAdapterServiceImpl implements BlockchainAdapterService {
 
     @Override
     public Mono<Void> createSubscription(String processId, BlockchainSubscription blockchainSubscription) {
-        log.info("ProcessId: {} - Creating subscription...", processId);
+        log.debug("ProcessId: {} - Creating subscription...", processId);
         return webClient.post()
                 .uri(dltAdapterProperties.paths()
                         .subscription())
@@ -62,7 +62,7 @@ public class BlockchainAdapterServiceImpl implements BlockchainAdapterService {
 
     @Deprecated(since = "0.5.0", forRemoval = true)
     @Override
-    public Flux<String> getEventsFromRange(String processId, long from, long to) {
+    public Flux<String> getEventsFromRangeOfTime(String processId, long from, long to) {
         return webClient.get()
                 .uri(dltAdapterProperties.paths()
                         .events() + "?startDate=" + from + "&endDate=" + to)
@@ -88,7 +88,7 @@ public class BlockchainAdapterServiceImpl implements BlockchainAdapterService {
 //                        .entityId(extractEntityIdFromDataLocation(blockchainData.dataLocation()))
 //                        .entityType(blockchainData.eventType())
 //                        .datalocation(blockchainData.dataLocation())
-//                        .organizationId(blockchainData.organizationId())
+//                        .organizationIdentifier(blockchainData.organizationIdentifier())
 //                        .previousEntityHash(blockchainData.previousEntityHash())
 //                        .priority(eventQueuePriority)
 //                        .newTransaction(true)

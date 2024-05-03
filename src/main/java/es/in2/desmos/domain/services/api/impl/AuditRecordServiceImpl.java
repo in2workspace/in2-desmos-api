@@ -79,7 +79,7 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                         return Mono.error(e);
                     }
                     return auditRecordRepository.save(auditRecord)
-                            .doOnSuccess(unused -> log.info("ProcessID: {} - Audit record saved successfully.", processId))
+                            .doOnSuccess(unused -> log.info("ProcessID: {} - Audit record saved successfully. - Status: {}", processId, status))
                             .then();
                 })
                 .then();
@@ -183,6 +183,18 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                 .flatMap(auditRecord -> auditRecord != null
                         ? Mono.just(auditRecord.getEntityHash())
                         : Mono.error(new NoSuchElementException()));
+    }
+
+    @Override
+    public Mono<AuditRecord> findLatestConsumerPublishedAuditRecordByEntityId(String processId, String entityId) {
+        log.debug("ProcessID: {} - Fetching all audit records...", processId);
+        return auditRecordRepository.findLastPublishedConsumerAuditRecordByEntityId(entityId);
+    }
+
+    @Override
+    public Mono<AuditRecord> findLatestConsumerPublishedAuditRecord(String processId) {
+        log.debug("ProcessID: {} - Fetching all audit records...", processId);
+        return auditRecordRepository.findLastPublishedConsumerAuditRecord();
     }
 
     private String setAuditRecordHashLink(AuditRecord lastAuditRecordRegistered, String auditRecordHash)

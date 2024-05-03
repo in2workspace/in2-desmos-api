@@ -16,9 +16,6 @@ import java.util.regex.Pattern;
 @Slf4j
 public class ApplicationUtils {
 
-    public static final String HASH_PREFIX = "0x";
-    public static final String HASHLINK_PREFIX = "?hl=";
-
     private ApplicationUtils() {
         throw new IllegalStateException("Utility class");
     }
@@ -87,6 +84,17 @@ public class ApplicationUtils {
             queryPairs.put(pair.substring(0, idx), idx > 0 && pair.length() > idx + 1 ? pair.substring(idx + 1) : null);
         }
         return queryPairs;
+    }
+
+    public static String getEnvironmentMetadata(String activeProfile) {
+
+        return switch (activeProfile) {
+            case "default" -> "local";
+            case "dev" -> "sbx";
+            case "test" -> "dev";
+            case "prod" -> "prd";
+            default -> throw new IllegalArgumentException("Unsupported profile: " + activeProfile);
+        };
     }
 
 }

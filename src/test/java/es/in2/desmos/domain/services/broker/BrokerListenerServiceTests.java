@@ -12,11 +12,10 @@ import es.in2.desmos.domain.services.api.QueueService;
 import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import es.in2.desmos.domain.services.broker.adapter.factory.BrokerAdapterFactory;
 import es.in2.desmos.domain.services.broker.impl.BrokerListenerServiceImpl;
-import es.in2.desmos.domain.utils.ApplicationUtils;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -86,8 +85,6 @@ class BrokerListenerServiceTests {
         when(auditRecordService.findLatestAuditRecordForEntity(anyString(), any())).thenReturn(Mono.empty());
         when(auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(anyString(), any(), any(), any())).thenReturn(Mono.empty());
         when(queueService.enqueueEvent(any())).thenReturn(Mono.empty());
-
-
         // Assert
         StepVerifier.create(brokerListenerService.processBrokerNotification(processId, brokerNotification))
                 .verifyComplete();
@@ -129,7 +126,6 @@ class BrokerListenerServiceTests {
                   "notifiedAt": "2023-03-14T16:38:15.123456Z"
                 }""");
         when(auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(anyString(), any(), any(), any())).thenReturn(Mono.empty());
-
         // Assert
         StepVerifier.create(brokerListenerService.processBrokerNotification(processId, brokerNotification))
                 .expectError(BrokerNotificationSelfGeneratedException.class)
@@ -173,11 +169,10 @@ class BrokerListenerServiceTests {
                 }""");
         when(auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(anyString(), any(), any(), any())).thenReturn(Mono.empty());
         when(queueService.enqueueEvent(any())).thenReturn(Mono.empty());
-
-
         // Assert
         StepVerifier.create(brokerListenerService.processBrokerNotification(processId, brokerNotification))
                 .verifyComplete();
     }
+    
 }
 

@@ -8,6 +8,7 @@ import java.util.List;
 @Builder
 public record BlockchainSubscription(
         @JsonProperty("eventTypes") List<String> eventTypes,
+        @JsonProperty("metadata") List<String> metadata,
         @JsonProperty("notificationEndpoint") String notificationEndpoint
 ) {
 }
