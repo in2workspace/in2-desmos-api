@@ -26,7 +26,7 @@ public class ExternalAccessNodesConfig {
         return Mono.just(Arrays.asList(commaSeparatedUrlsListWithoutSpaces.split(",")));
     }
 
-    private static String removeSpaces(String text) {
+    private String removeSpaces(String text) {
         return text.replaceAll("\\s+", "");
     }
 

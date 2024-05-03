@@ -70,9 +70,7 @@ class P2PDataSyncJobTests {
                 .thenReturn(Mono.just(sample3InList))
                 .thenReturn(Mono.just(sample4InList));
 
-        List<String> urlExternalAccessNodesList = new ArrayList<>();
-        urlExternalAccessNodesList.add("https://example1.org");
-        urlExternalAccessNodesList.add("https://example2.org");
+        List<String> urlExternalAccessNodesList = UrlMother.example1And2urlsList();
         when(externalAccessNodesConfig.getExternalAccessNodesUrls()).thenReturn(Mono.just(urlExternalAccessNodesList));
 
         when(dataNegotiationJob.negotiateDataSync(eq(processId), any(), any())).thenReturn(Mono.empty());
