@@ -107,6 +107,8 @@ dependencies {
     testImplementation 'org.testcontainers:junit-jupiter:1.19.7'
     testImplementation 'org.testcontainers:r2dbc:1.19.7'
     testImplementation 'org.testcontainers:postgresql:1.19.7'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:4.12.0'
+
 }
 
 tasks.named('compileJava') {

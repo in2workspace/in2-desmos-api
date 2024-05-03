@@ -1,12 +1,21 @@
 package es.in2.desmos.domain.services.broker.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.domain.models.BlockchainNotification;
+import es.in2.desmos.domain.models.Id;
+import es.in2.desmos.domain.models.MVBrokerEntity4DataNegotiation;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
 import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import es.in2.desmos.domain.services.broker.adapter.factory.BrokerAdapterFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static es.in2.desmos.domain.utils.ApplicationUtils.extractEntityIdFromDataLocation;
 
@@ -16,8 +25,11 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
 
     private final BrokerAdapterService brokerAdapterService;
 
-    public BrokerPublisherServiceImpl(BrokerAdapterFactory brokerAdapterFactory) {
+    private final ObjectMapper objectMapper;
+
+    public BrokerPublisherServiceImpl(BrokerAdapterFactory brokerAdapterFactory, ObjectMapper objectMapper) {
         this.brokerAdapterService = brokerAdapterFactory.getBrokerAdapter();
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -39,6 +51,79 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
                         return updateEntity(processId, retrievedBrokerEntity);
                     }
                 });
+    }
+
+    @Override
+    public Mono<List<MVBrokerEntity4DataNegotiation>> getMVBrokerEntities4DataNegotiation(String processId, String type, String firstAttribute, String secondAttribute) {
+        return brokerAdapterService.getMVBrokerEntities4DataNegotiation(processId, type, firstAttribute, secondAttribute);
+    }
+
+    @Override
+    public Mono<Void> batchUpsertEntitiesToContextBroker(String processId, String retrievedBrokerEntities) {
+        return batchUpsertEntities(processId, retrievedBrokerEntities);
+    }
+
+    @Override
+    public Mono<List<String>> findAllById(String processId, Mono<List<Id>> idsMono) {
+        return idsMono
+                .flatMapIterable(ids -> ids)
+                .flatMap(id -> brokerAdapterService.getEntityById(processId, id.id())
+                        .flatMap(entity -> {
+                            List<String> newList = new ArrayList<>();
+                            newList.add(entity);
+                            Mono<String> entityMono = Mono.just(entity);
+                            Mono<List<Id>> entityRelationshipIdsMono = getEntityRelationShipIds(entityMono);
+                            return entityRelationshipIdsMono.flatMap(entityRelationshipIds ->
+                            {
+                                Mono<List<Id>> entityRelationshipMonoMono = Mono.just(entityRelationshipIds);
+                                return findAllById(processId, entityRelationshipMonoMono).flatMap(relationshipsEntities -> {
+                                    newList.addAll(relationshipsEntities);
+                                    return Mono.just(newList);
+                                });
+                            });
+                        }))
+                .collectList()
+                .flatMap(listsList -> {
+                    List<String> resultList = new ArrayList<>();
+                    for (List<String> list : listsList) {
+                        resultList.addAll(list);
+                    }
+                    return Mono.just(resultList);
+                });
+    }
+
+    private Mono<List<Id>> getEntityRelationShipIds(Mono<String> entityMono) {
+        return entityMono.flatMap(entity -> {
+            try {
+                JsonNode rootEntityJsonNode = objectMapper.readTree(entity);
+
+                return Flux.fromIterable(rootEntityJsonNode::fields)
+                        .flatMap(rootEntityNodeField -> {
+                            JsonNode rootEntityNodeFieldValue = rootEntityNodeField.getValue();
+
+                            String typeFieldName = "type";
+                            if (rootEntityNodeFieldValue.isObject() &&
+                                    rootEntityNodeFieldValue.has(typeFieldName)) {
+                                String fieldType = rootEntityNodeFieldValue.get(typeFieldName).asText();
+
+                                String relationshipFieldName = "Relationship";
+                                String objectFieldName = "object";
+                                if (fieldType.equals(relationshipFieldName) && rootEntityNodeFieldValue.has(objectFieldName)) {
+                                    return Mono.just(new Id(rootEntityNodeFieldValue.get(objectFieldName).asText()));
+                                }
+                            }
+                            return Mono.empty();
+                        })
+                        .collectList();
+            } catch (JsonProcessingException e) {
+                return Mono.error(e);
+            }
+        });
+    }
+
+
+    private Mono<Void> batchUpsertEntities(String processId, String requestBody) {
+        return brokerAdapterService.batchUpsertEntities(processId, requestBody);
     }
 
     private Mono<Void> postEntity(String processId, String requestBody) {

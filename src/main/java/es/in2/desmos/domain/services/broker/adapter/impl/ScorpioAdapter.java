@@ -3,12 +3,14 @@ package es.in2.desmos.domain.services.broker.adapter.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import es.in2.desmos.infrastructure.configs.BrokerConfig;
 import es.in2.desmos.domain.exceptions.JsonReadingException;
 import es.in2.desmos.domain.exceptions.RequestErrorException;
 import es.in2.desmos.domain.exceptions.SubscriptionCreationException;
+import es.in2.desmos.domain.models.BrokerEntity;
 import es.in2.desmos.domain.models.BrokerSubscription;
+import es.in2.desmos.domain.models.MVBrokerEntity4DataNegotiation;
 import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
+import es.in2.desmos.infrastructure.configs.BrokerConfig;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,10 +22,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static es.in2.desmos.domain.utils.MessageUtils.*;
 
@@ -34,6 +33,8 @@ public class ScorpioAdapter implements BrokerAdapterService {
 
     private final ObjectMapper objectMapper;
     private final BrokerConfig brokerConfig;
+
+    private static final MediaType APPLICATION_LD_JSON = new MediaType("application", "ld+json");
 
     private WebClient webClient;
 
@@ -195,6 +196,52 @@ public class ScorpioAdapter implements BrokerAdapterService {
     @Override
     public Mono<Void> deleteSubscription(String processId, String subscriptionId) {
         return null;
+    }
+
+    @Override
+    public Mono<List<MVBrokerEntity4DataNegotiation>> getMVBrokerEntities4DataNegotiation(String processId, String type, String firstAttribute, String secondAttribute) {
+        log.info("ProcessID: {} - Getting MV Entities For Data Negotiation from Scorpio", processId);
+
+        String uri = brokerConfig.getEntitiesPath() + "/" + String.format("?type=%s&attrs=%s,%s\"", type, firstAttribute, secondAttribute);
+
+        Mono<BrokerEntity[]> scorpioEntitiesList = webClient
+                .get()
+                .uri(uri)
+                .accept(APPLICATION_LD_JSON)
+                .retrieve()
+                .bodyToMono(BrokerEntity[].class)
+                .retry(3);
+
+        return scorpioEntitiesList.map(this::getMVBrokerEntities4DataNegotiationFromScorpioEntities);
+    }
+
+    @Override
+    public Mono<Void> batchUpsertEntities(String processId, String requestBody) {
+        log.info("ProcessID: {} - Upserting entities to Scorpio", processId);
+
+        String uri = brokerConfig.getEntityOperationsPath() + "/" + "upsert";
+
+        return webClient.post()
+                .uri(uri)
+                .accept(APPLICATION_LD_JSON)
+                .contentType(APPLICATION_LD_JSON)
+                .bodyValue(requestBody)
+                .retrieve()
+                .bodyToMono(Void.class)
+                .retry(3);
+    }
+
+    private List<MVBrokerEntity4DataNegotiation> getMVBrokerEntities4DataNegotiationFromScorpioEntities(BrokerEntity[] scorpioEntities) {
+        List<MVBrokerEntity4DataNegotiation> mvBrokerEntities4DataNegotiation = new ArrayList<>();
+        for (var scorpioEntity : scorpioEntities) {
+            mvBrokerEntities4DataNegotiation.add(
+                    new MVBrokerEntity4DataNegotiation(
+                            scorpioEntity.id(),
+                            scorpioEntity.type(),
+                            scorpioEntity.version().value(),
+                            scorpioEntity.lastUpdate().value()));
+        }
+        return mvBrokerEntities4DataNegotiation;
     }
 
     private Mono<Void> postSubscription(BrokerSubscription brokerSubscription) {

@@ -1,0 +1,53 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+'---------- Config ----------------
+
+autonumber
+
+'---------- Header ----------------
+
+boundary "External Access Node" as ean
+
+box "Access Node"
+
+  control "DataSyncController" as dsc
+  participant "P2PDataSyncWorkflow" as p2p_dsw
+  participant "BrokerPublisherService" as bps
+  participant "BrokerAdapterService" as bas
+  participant "Context Broker" as cb
+
+end box
+
+'---------- Diagram ----------------
+
+ean -> dsc++: POST /sync/p2p/entities \nPayload: EntitySyncRequest
+
+note right of ean
+    EntitySyncRequest:
+        List<Id> entityIds
+    Id:
+        String id
+end note
+
+    dsc -> p2p_dsw++: getLocalEntities()
+        p2p_dsw -> bps++: findAllById(List<Ids>)
+        loop forEach id
+            bps -> bas++: getEntityById(Id)
+                bas -> cb++: GET /ngsi-ld/v1/entities{Id}
+                return 200 OK - Payload: Entity
+            return Entity
+            bps -> bps++: getRelationshipIds(Entity)
+            return List<EntityRelationshipIds>
+            bps -> bps: findAllById(List<EntityRelationshipIds>)
+
+        end
+        return List<Entity>
+    return List<Entity>
+return 200 OK - \nPayload: EntitySyncResponse
+
+note left of dsc
+    EntitySyncResponse:
+        JsonNode entities
+end note
+@enduml
