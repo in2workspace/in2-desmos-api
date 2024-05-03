@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -59,10 +60,10 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                 .flatMapIterable(externalAccessNodesList -> externalAccessNodesList)
                 .flatMap(externalAccessNode -> {
                     Issuer issuer = new Issuer(externalAccessNode);
-                    Mono<List<MVEntity4DataNegotiation>> localMvEntities4DataNegotiationMono = Mono.just(localMvEntities4DataNegotiation);
+                    Mono<MVEntity4DataNegotiation[]> localMvEntities4DataNegotiationMono = Mono.just(localMvEntities4DataNegotiation.toArray(MVEntity4DataNegotiation[]::new));
 
                     return discoverySyncWebClient.makeRequest(processId, Mono.just(externalAccessNode), localMvEntities4DataNegotiationMono)
-                            .map(resultList -> Map.entry(issuer, resultList));
+                            .map(resultList -> Map.entry(issuer, Arrays.stream(resultList).toList()));
                 })
                 .collectMap(Map.Entry::getKey, Map.Entry::getValue);
     }

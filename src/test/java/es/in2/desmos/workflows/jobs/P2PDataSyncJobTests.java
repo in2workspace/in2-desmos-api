@@ -62,10 +62,12 @@ class P2PDataSyncJobTests {
         when(auditRecordService.findLatestAuditRecordForEntity(processId, auditRecordEntities.get(0).getEntityId())).thenReturn(Mono.just(auditRecordEntities.get(0)));
         when(auditRecordService.findLatestAuditRecordForEntity(processId, auditRecordEntities.get(1).getEntityId())).thenReturn(Mono.just(auditRecordEntities.get(1)));
 
-        List<MVEntity4DataNegotiation> sample3InList = new ArrayList<>();
-        sample3InList.add(MVEntity4DataNegotiationMother.sample3());
-        List<MVEntity4DataNegotiation> sample4InList = new ArrayList<>();
-        sample3InList.add(MVEntity4DataNegotiationMother.sample4());
+        MVEntity4DataNegotiation[] sample3InList = new MVEntity4DataNegotiation[]{
+                MVEntity4DataNegotiationMother.sample3()
+        };
+        MVEntity4DataNegotiation[] sample4InList = new MVEntity4DataNegotiation[]{
+                MVEntity4DataNegotiationMother.sample4()
+        };
         when(discoverySyncWebClient.makeRequest(eq(processId), any(), any()))
                 .thenReturn(Mono.just(sample3InList))
                 .thenReturn(Mono.just(sample4InList));
