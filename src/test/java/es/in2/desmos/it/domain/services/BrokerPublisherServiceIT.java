@@ -1,8 +1,9 @@
-package es.in2.desmos.domain.services.broker;
+package es.in2.desmos.it.domain.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.domain.models.MVBrokerEntity4DataNegotiation;
+import es.in2.desmos.domain.services.broker.BrokerPublisherService;
 import es.in2.desmos.inflators.ScorpioInflator;
 import es.in2.desmos.it.ContainerManager;
 import es.in2.desmos.objectmothers.MVBrokerEntity4DataNegotiationMother;

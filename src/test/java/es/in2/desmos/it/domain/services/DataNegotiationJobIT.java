@@ -1,4 +1,4 @@
-package es.in2.desmos.workflows.jobs;
+package es.in2.desmos.it.domain.services;
 
 import es.in2.desmos.domain.events.DataNegotiationEventPublisher;
 import es.in2.desmos.domain.services.sync.jobs.DataNegotiationJob;

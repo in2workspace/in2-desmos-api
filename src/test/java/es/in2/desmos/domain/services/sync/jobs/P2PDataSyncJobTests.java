@@ -1,4 +1,4 @@
-package es.in2.desmos.workflows.jobs;
+package es.in2.desmos.domain.services.sync.jobs;
 
 import es.in2.desmos.domain.events.DataNegotiationEventPublisher;
 import es.in2.desmos.domain.models.AuditRecord;
@@ -7,7 +7,6 @@ import es.in2.desmos.domain.models.MVBrokerEntity4DataNegotiation;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.domain.services.api.impl.AuditRecordServiceImpl;
 import es.in2.desmos.domain.services.broker.impl.BrokerPublisherServiceImpl;
-import es.in2.desmos.domain.services.sync.jobs.DataNegotiationJob;
 import es.in2.desmos.objectmothers.*;
 import es.in2.desmos.domain.services.sync.jobs.impl.P2PDataSyncJobImpl;
 import org.json.JSONArray;

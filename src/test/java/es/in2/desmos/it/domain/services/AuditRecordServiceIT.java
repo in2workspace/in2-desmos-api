@@ -1,8 +1,9 @@
-package es.in2.desmos.domain.services.api;
+package es.in2.desmos.it.domain.services;
 
 import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.AuditRecordStatus;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
+import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.it.ContainerManager;
 import es.in2.desmos.objectmothers.AuditRecordMother;
 import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;

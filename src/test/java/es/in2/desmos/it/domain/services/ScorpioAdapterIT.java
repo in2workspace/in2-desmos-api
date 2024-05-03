@@ -1,4 +1,4 @@
-package es.in2.desmos.domain.services.broker.adapter;
+package es.in2.desmos.it.domain.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
