@@ -39,7 +39,7 @@ class ApplicationUtilsTests {
     }
 
     @Test
-    public void testCalculateSHA256_ValidData() throws NoSuchAlgorithmException {
+    void testCalculateSHA256_ValidData() throws NoSuchAlgorithmException {
         // Arrange
         String data = "test";
         MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
@@ -52,7 +52,7 @@ class ApplicationUtilsTests {
     }
 
     @Test
-    public void testCalculateHashLink_ValidHashes() throws NoSuchAlgorithmException {
+    void testCalculateHashLink_ValidHashes() throws NoSuchAlgorithmException {
         // Arrange
         String previousHash = "5d41402abc4b2a76b9719d911017c592";
         String entityHash = "098f6bcd4621d373cade4e832627b4f6";
@@ -68,7 +68,7 @@ class ApplicationUtilsTests {
 
 
     @Test
-    public void testExtractHashLinkFromDataLocation_ValidDataLocation() {
+    void testExtractHashLinkFromDataLocation_ValidDataLocation() {
         // Arrange
         String dataLocation = "http://localhost:8080/ngsi-ld/v1/entities/" +
                 "urn:ngsi-ld:ProductOffering:38088145-aef3-440e-ab93-a33bc9bfce69" +
@@ -81,7 +81,7 @@ class ApplicationUtilsTests {
     }
 
     @Test
-    public void testExtractEntityIdFromDataLocation_ValidDataLocation() {
+    void testExtractEntityIdFromDataLocation_ValidDataLocation() {
         // Arrange
         String dataLocation = "http://localhost:8080/ngsi-ld/v1/entities/" +
                 "urn:ngsi-ld:ProductOffering:38088145-aef3-440e-ab93-a33bc9bfce69" +
@@ -94,7 +94,7 @@ class ApplicationUtilsTests {
     }
 
     @Test
-    public void testExtractEntityIdFromDataLocation_InvalidDataLocation() {
+    void testExtractEntityIdFromDataLocation_InvalidDataLocation() {
         // Arrange
         String dataLocation = "invalid-data-location";
         // Act & Assert
@@ -104,7 +104,7 @@ class ApplicationUtilsTests {
     }
 
     @Test
-    public void testExtractContextBrokerUrlFromDataLocation_ValidDataLocation() {
+    void testExtractContextBrokerUrlFromDataLocation_ValidDataLocation() {
         // Arrange
         String dataLocation = "http://localhost:8080/ngsi-ld/v1/entities/" +
                 "urn:ngsi-ld:ProductOffering:38088145-aef3-440e-ab93-a33bc9bfce69" +

@@ -71,6 +71,7 @@ public class ApplicationUtils {
 //        }
 //    }
 
+    //TODO: its use must be analyzed
 //    private static Map<String, String> splitQuery(URL url) {
 //        if (url.getQuery() == null || url.getQuery().isEmpty()) {
 //            return new HashMap<>();

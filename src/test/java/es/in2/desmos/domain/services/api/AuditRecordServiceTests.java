@@ -198,12 +198,10 @@ class AuditRecordServiceTests {
         // Arrange
         when(auditRecordRepository.findMostRecentAuditRecord()).thenReturn(Mono.empty());
         when(auditRecordRepository.count()).thenReturn(Mono.just(1L));
-
-        // Act and Assert
-        assertThrows(NoSuchElementException.class, () -> {
-            auditRecordService.fetchMostRecentAuditRecord().block();
-        });
-
+        // Act
+        Mono<AuditRecord> mono = auditRecordService.fetchMostRecentAuditRecord();
+        // Assert
+        assertThrows(NoSuchElementException.class, mono::block);
         // Verify
         verify(auditRecordRepository, times(1)).findMostRecentAuditRecord();
     }
