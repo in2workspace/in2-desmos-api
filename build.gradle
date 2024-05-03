@@ -17,18 +17,6 @@ java {
     sourceCompatibility = '17'
 }
 
-checkstyle {
-    configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
-}
-
-checkstyleMain {
-    source = 'src/main/java'
-}
-
-checkstyleTest {
-    source = 'src/test/java'
-}
-
 sonar {
     properties {
         property "sonar.projectName", "Desmos API"
@@ -125,6 +113,18 @@ tasks.named('compileJava') {
     inputs.files(tasks.named('processResources'))
 }
 
+tasks.register('printVersion') {
+    doLast {
+        println version
+    }
+}
+
+tasks.register('printProjectName') {
+    doLast {
+        println rootProject.name
+    }
+}
+
 tasks.named('test') {
     useJUnitPlatform()
     finalizedBy(tasks.jacocoTestReport)
@@ -149,15 +149,23 @@ tasks.jacocoTestReport {
     }
 }
 
-tasks.register('printVersion') {
-    doLast {
-        println version
-    }
+checkstyle {
+    toolVersion = '10.16.0'
+    configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
 }
 
-tasks.register('printProjectName') {
-    doLast {
-        println rootProject.name
+checkstyleMain {
+    source = 'src/main/java'
+}
+
+checkstyleTest {
+    source = 'src/test/java'
+}
+
+tasks.register('checkstyle') {
+    reports {
+        xml.required = false
+        html.required = true
     }
 }
 
