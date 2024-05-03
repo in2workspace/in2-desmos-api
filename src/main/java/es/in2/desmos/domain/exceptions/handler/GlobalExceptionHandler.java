@@ -42,7 +42,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public Mono<GlobalErrorMessage> handleBrokerNotificationSelfGeneratedException(BrokerNotificationSelfGeneratedException ex, ServerHttpRequest request) {
-        log.error("BrokerNotificationSelfGeneratedException: {}", ex.getMessage());
+        log.debug("BrokerNotificationSelfGeneratedException: {}", ex.getMessage());
         String path = String.valueOf(request.getPath());
         return Mono.just(GlobalErrorMessage.builder().title("BrokerNotificationSelfGeneratedException").message(ex.getMessage()).path(path).build());
     }
@@ -101,24 +101,20 @@ public class GlobalExceptionHandler {
         return Mono.just(GlobalErrorMessage.builder().title("BrokerEntityRetrievalException").message(brokerEntityRetrievalException.getMessage()).path(path).build());
     }
 
-
     @ExceptionHandler(WebExchangeBindException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public Mono<GlobalErrorMessage> handleWebExchangeBindException(WebExchangeBindException webExchangeBindException, ServerHttpRequest request) {
         String path = String.valueOf(request.getPath());
         Map<String, String> errorMap = new HashMap<>();
-
         webExchangeBindException.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((org.springframework.validation.FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
             errorMap.put(fieldName, errorMessage);
         });
-
         String globalErrorMessage = errorMap.entrySet().stream()
                 .map(entry -> entry.getKey() + ": " + entry.getValue())
                 .collect(Collectors.joining(", "));
-
         return Mono.just(GlobalErrorMessage.builder()
                 .title("WebExchangeBindException")
                 .message(globalErrorMessage)

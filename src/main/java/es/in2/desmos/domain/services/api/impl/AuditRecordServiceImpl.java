@@ -75,7 +75,7 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                         // with the hash of the current entity
                         auditRecord.setHashLink(setAuditRecordHashLink(lastAuditRecordRegistered, auditRecordHash));
                     } catch (JsonProcessingException | NoSuchAlgorithmException e) {
-                        log.info("ProcessID: {} - Error building and saving audit record: {}", processId, e.getMessage());
+                        log.warn("ProcessID: {} - Error building and saving audit record: {}", processId, e.getMessage());
                         return Mono.error(e);
                     }
                     return auditRecordRepository.save(auditRecord)
@@ -135,7 +135,9 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                         // Then, we calculate the hashLink of the entity concatenating the previous hashLink
                         // with the hash of the current entity
                         auditRecord.setHashLink(setAuditRecordHashLink(lastAuditRecordRegistered, auditRecordHash));
-                        return auditRecordRepository.save(auditRecord).then();
+                        return auditRecordRepository.save(auditRecord)
+                                .doOnSuccess(unused -> log.info("ProcessID: {} - Audit record saved successfully. - Status: {}", processId, status))
+                                .then();
                     } catch (JsonProcessingException | NoSuchAlgorithmException e) {
                         return Mono.error(e);
                     }

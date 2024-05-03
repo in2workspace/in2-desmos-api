@@ -48,10 +48,10 @@ public class BrokerListenerServiceImpl implements BrokerListenerService {
         // Validate BrokerNotification is not null and has data
         return getDataFromBrokerNotification(brokerNotification)
                 // Validate if BrokerNotification is from an external source or self-generated
-                .flatMap(dataMap -> isBrokerNotificationFromExternalSource(processId, dataMap)
-                        // Create and AuditRecord with status RECEIVED
-                        .then(auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(processId, dataMap,
-                                AuditRecordStatus.RECEIVED, null)))
+                .flatMap(dataMap -> isBrokerNotificationFromExternalSource(processId, dataMap))
+                // Create and AuditRecord with status RECEIVED
+                .flatMap(dataMap -> auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(processId, dataMap,
+                        AuditRecordStatus.RECEIVED, null))
                 // Set priority for the pendingSubscribeEventsQueue event
                 .then(Mono.just(EventQueuePriority.MEDIUM))
                 // Enqueue BrokerNotification to DataPublicationQueue
@@ -60,7 +60,13 @@ public class BrokerListenerServiceImpl implements BrokerListenerService {
                         .priority(eventQueuePriority)
                         .build()))
                 .doOnSuccess(unused -> log.info("ProcessID: {} - Broker Notification processed successfully.", processId))
-                .doOnError(throwable -> log.error("ProcessID: {} - Error processing Broker Notification: {}", processId, throwable.getMessage()));
+                .doOnError(throwable -> {
+                    if (throwable instanceof BrokerNotificationSelfGeneratedException) {
+                        log.info("ProcessID: {} - Self-Generated Broker Notification. It does not need to do nothing.", processId);
+                    } else {
+                        log.error("ProcessID: {} - Error processing Broker Notification: {}", processId, throwable.getMessage());
+                    }
+                });
     }
 
     private Mono<Map<String, Object>> getDataFromBrokerNotification(BrokerNotification brokerNotification) {
@@ -75,7 +81,6 @@ public class BrokerListenerServiceImpl implements BrokerListenerService {
                     try {
                         String newEntityHash = calculateSHA256(objectMapper.writer().writeValueAsString(dataMap));
                         if (auditRecordFound.getEntityHash().equals(newEntityHash)) {
-                            log.debug("ProcessID: {} - BrokerNotification is self-generated", processId);
                             return Mono.error(new BrokerNotificationSelfGeneratedException("BrokerNotification is self-generated"));
                         }
                     } catch (JsonProcessingException | NoSuchAlgorithmException e) {

@@ -125,7 +125,6 @@ class BrokerListenerServiceTests {
                   "subscriptionId": "urn:ngsi-ld:Subscription:122355255",
                   "notifiedAt": "2023-03-14T16:38:15.123456Z"
                 }""");
-        when(auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(anyString(), any(), any(), any())).thenReturn(Mono.empty());
         // Assert
         StepVerifier.create(brokerListenerService.processBrokerNotification(processId, brokerNotification))
                 .expectError(BrokerNotificationSelfGeneratedException.class)
@@ -173,6 +172,6 @@ class BrokerListenerServiceTests {
         StepVerifier.create(brokerListenerService.processBrokerNotification(processId, brokerNotification))
                 .verifyComplete();
     }
-    
+
 }
 
