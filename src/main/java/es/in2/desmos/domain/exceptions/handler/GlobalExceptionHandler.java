@@ -9,12 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.bind.support.WebExchangeBindException;
 import reactor.core.publisher.Mono;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestControllerAdvice
@@ -100,26 +95,4 @@ public class GlobalExceptionHandler {
         String path = String.valueOf(request.getPath());
         return Mono.just(GlobalErrorMessage.builder().title("BrokerEntityRetrievalException").message(brokerEntityRetrievalException.getMessage()).path(path).build());
     }
-
-    @ExceptionHandler(WebExchangeBindException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ResponseBody
-    public Mono<GlobalErrorMessage> handleWebExchangeBindException(WebExchangeBindException webExchangeBindException, ServerHttpRequest request) {
-        String path = String.valueOf(request.getPath());
-        Map<String, String> errorMap = new HashMap<>();
-        webExchangeBindException.getBindingResult().getAllErrors().forEach(error -> {
-            String fieldName = ((org.springframework.validation.FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errorMap.put(fieldName, errorMessage);
-        });
-        String globalErrorMessage = errorMap.entrySet().stream()
-                .map(entry -> entry.getKey() + ": " + entry.getValue())
-                .collect(Collectors.joining(", "));
-        return Mono.just(GlobalErrorMessage.builder()
-                .title("WebExchangeBindException")
-                .message(globalErrorMessage)
-                .path(path)
-                .build());
-    }
-
 }
