@@ -20,10 +20,6 @@ public final class MVBrokerEntity4DataNegotiationMother {
         return MVEntity4DataNegotiationList;
     }
 
-    public static @NotNull List<BrokerEntityWithIdTypeLastUpdateAndVersion> fromList(List<MVEntity4DataNegotiation> originalList) {
-        return mvEntitytoBrokerEntity(originalList);
-    }
-
     public static @NotNull List<BrokerEntityWithIdTypeLastUpdateAndVersion> randomList(int size){
         return mvEntitytoBrokerEntity(MVEntity4DataNegotiationMother.randomList(size));
     }
