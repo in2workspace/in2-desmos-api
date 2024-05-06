@@ -1,6 +1,5 @@
 package es.in2.desmos.domain.services.sync.jobs;
 
-import es.in2.desmos.configs.ExternalAccessNodesConfig;
 import es.in2.desmos.domain.events.DataNegotiationEventPublisher;
 import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.Id;
@@ -9,8 +8,9 @@ import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.domain.services.api.impl.AuditRecordServiceImpl;
 import es.in2.desmos.domain.services.broker.impl.BrokerPublisherServiceImpl;
 import es.in2.desmos.domain.services.sync.DiscoverySyncWebClient;
-import es.in2.desmos.objectmothers.*;
 import es.in2.desmos.domain.services.sync.jobs.impl.P2PDataSyncJobImpl;
+import es.in2.desmos.infrastructure.configs.ExternalAccessNodesConfig;
+import es.in2.desmos.objectmothers.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;

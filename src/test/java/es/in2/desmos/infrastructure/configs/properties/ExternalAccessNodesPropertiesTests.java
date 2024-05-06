@@ -1,6 +1,6 @@
-package es.in2.desmos.configs.properties;
+package es.in2.desmos.infrastructure.configs.properties;
 
-import es.in2.desmos.ContainerManager;
+import es.in2.desmos.it.ContainerManager;
 import es.in2.desmos.objectmothers.UrlMother;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

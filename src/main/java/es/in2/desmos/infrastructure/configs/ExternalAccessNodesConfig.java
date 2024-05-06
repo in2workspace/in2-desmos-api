@@ -1,6 +1,6 @@
-package es.in2.desmos.configs;
+package es.in2.desmos.infrastructure.configs;
 
-import es.in2.desmos.configs.properties.ExternalAccessNodesProperties;
+import es.in2.desmos.infrastructure.configs.properties.ExternalAccessNodesProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;

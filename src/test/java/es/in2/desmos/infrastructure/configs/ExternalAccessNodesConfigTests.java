@@ -1,6 +1,6 @@
-package es.in2.desmos.configs;
+package es.in2.desmos.infrastructure.configs;
 
-import es.in2.desmos.configs.properties.ExternalAccessNodesProperties;
+import es.in2.desmos.infrastructure.configs.properties.ExternalAccessNodesProperties;
 import es.in2.desmos.objectmothers.UrlMother;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

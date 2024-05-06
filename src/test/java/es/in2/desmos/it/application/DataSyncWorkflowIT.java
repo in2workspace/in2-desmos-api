@@ -2,11 +2,9 @@ package es.in2.desmos.it.application;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import es.in2.desmos.ContainerManager;
 import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.broker.adapter.impl.ScorpioAdapter;
-import es.in2.desmos.domain.services.sync.jobs.impl.DataTransferJobImpl;
 import es.in2.desmos.inflators.ScorpioInflator;
 import es.in2.desmos.it.ContainerManager;
 import es.in2.desmos.objectmothers.*;

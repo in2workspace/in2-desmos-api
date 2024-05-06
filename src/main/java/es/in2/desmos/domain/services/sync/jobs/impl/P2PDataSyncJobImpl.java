@@ -1,13 +1,13 @@
 package es.in2.desmos.domain.services.sync.jobs.impl;
 
-import es.in2.desmos.configs.ExternalAccessNodesConfig;
 import es.in2.desmos.domain.events.DataNegotiationEventPublisher;
 import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
 import es.in2.desmos.domain.services.sync.DiscoverySyncWebClient;
-import es.in2.desmos.workflows.jobs.DataNegotiationJob;
-import es.in2.desmos.workflows.jobs.P2PDataSyncJob;
+import es.in2.desmos.domain.services.sync.jobs.DataNegotiationJob;
+import es.in2.desmos.domain.services.sync.jobs.P2PDataSyncJob;
+import es.in2.desmos.infrastructure.configs.ExternalAccessNodesConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -1,4 +1,4 @@
-package es.in2.desmos.configs.properties;
+package es.in2.desmos.infrastructure.configs.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
