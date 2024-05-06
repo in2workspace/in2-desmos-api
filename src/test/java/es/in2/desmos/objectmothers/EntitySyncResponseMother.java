@@ -118,6 +118,50 @@ public final class EntitySyncResponseMother {
              ]
             """;
 
+    public static final String sample2 = """
+            [
+                 {
+                     "id": "urn:ProductOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87",
+                     "type": "ProductOffering",
+                     "version": "2.5",
+                     "lastUpdate": "2024-07-09T12:00:00Z",
+                     "productSpecification": {
+                         "id": "spec-broadband-001",
+                         "name": "1Gbps Broadband Spec"
+                     },
+                     "productOfferingPrice": {
+                         "type": "Relationship",
+                         "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
+                     },
+                     "@context": [
+                         "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
+                     ]
+                 }
+             ]
+            """;
+
+    public static final String sample4 = """
+            [
+                 {
+                     "id": "urn:ProductOffering:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c",
+                     "type": "ProductOffering",
+                     "version": "1.9",
+                     "lastUpdate": "2024-06-02T12:00:00Z",
+                     "productSpecification": {
+                         "id": "spec-broadband-001",
+                         "name": "1Gbps Broadband Spec"
+                     },
+                     "productOfferingPrice": {
+                         "type": "Relationship",
+                         "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
+                     },
+                     "@context": [
+                         "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
+                     ]
+                 }
+             ]
+            """;
+
     public final static String id1 = "urn:ProductOffering:d86735a6-0faa-463d-a872-00b97affa1cb";
 
     public final static String id2 = "urn:ProductOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87";

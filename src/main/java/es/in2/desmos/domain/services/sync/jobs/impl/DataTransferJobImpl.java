@@ -33,7 +33,10 @@ public class DataTransferJobImpl implements DataTransferJob {
 
     @Override
     public Mono<Void> syncDataFromList(String processId, Mono<List<DataNegotiationResult>> dataNegotiationResult) {
-        return Mono.empty();
+        return dataNegotiationResult.flatMapIterable(results -> results)
+                .flatMap(result -> syncData(processId, Mono.just(result)))
+                .collectList()
+                .then();
     }
 
     @Override
