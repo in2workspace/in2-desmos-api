@@ -27,7 +27,7 @@ public class DataNegotiationJobImpl implements DataNegotiationJob {
     @Override
     public Mono<Void> negotiateDataSync(String processId, Mono<Map<Issuer, List<MVEntity4DataNegotiation>>> localMvEntities4DataNegotiationMono, Mono<List<MVEntity4DataNegotiation>> mvEntities4DataNegotiationMono) {
         // TODO
-        return null;
+        return Mono.empty();
     }
 
     @Override

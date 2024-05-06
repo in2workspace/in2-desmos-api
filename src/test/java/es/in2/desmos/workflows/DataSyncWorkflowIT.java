@@ -8,7 +8,6 @@ import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.broker.adapter.impl.ScorpioAdapter;
 import es.in2.desmos.inflators.ScorpioInflator;
 import es.in2.desmos.objectmothers.*;
-import es.in2.desmos.workflows.jobs.impl.DataTransferJobImpl;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
@@ -41,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@TestPropertySource(properties = {"external-access-nodes.urls=https://example1.org, https://example2.org"})
+@TestPropertySource(properties = {"external-access-nodes.urls=http://localhost:49152 , http://localhost:49153"})
 class DataSyncWorkflowIT {
     @Autowired
     private ObjectMapper objectMapper;
@@ -51,9 +50,6 @@ class DataSyncWorkflowIT {
 
     @Autowired
     private AuditRecordService auditRecordService;
-
-    @Autowired
-    private DataTransferJobImpl dataTransferJob;
 
     @LocalServerPort
     private int localServerPort;
@@ -85,32 +81,38 @@ class DataSyncWorkflowIT {
     }
 
     @Test
-    void itShouldUpsertEntitiesFromOtherAccessNodes() throws InterruptedException, JSONException {
-        var entitySyncResponse = EntitySyncResponseMother.sample2and4;
-        mockWebServer.enqueue(new MockResponse()
-                .setBody(entitySyncResponse));
+    void itShouldUpsertEntitiesFromOtherAccessNodesWhenDiscoverySync() throws JSONException, IOException {
+        try (MockWebServer mockWebServer2 = new MockWebServer();
+             MockWebServer mockWebServer3 = new MockWebServer()) {
 
-        var response = WebClient.builder()
-                .baseUrl("http://localhost:" + localServerPort)
-                .build()
-                .get()
-                .uri("/api/v1/sync/p2p/data")
-                .retrieve()
-                .bodyToMono(Void.class)
-                .retry(3);
+            mockWebServer2.start(49152);
+            mockWebServer2.enqueue(new MockResponse()
+                    .setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                    .setBody(DiscoveryResponseMother.json2List()));
 
-        StepVerifier
-                .create(response)
-                .verifyComplete();
+            mockWebServer3.start(49153);
+            mockWebServer3.enqueue(new MockResponse()
+                    .setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                    .setBody(DiscoveryResponseMother.json4List()));
+
+            Mono<Void> response = WebClient.builder()
+                    .baseUrl("http://localhost:" + localServerPort)
+                    .build()
+                    .get()
+                    .uri("/api/v1/sync/p2p/data")
+                    .retrieve()
+                    .bodyToMono(Void.class)
+                    .retry(3);
+
+            StepVerifier
+                    .create(response)
+                    .verifyComplete();
 
             assertScorpioEntityIsExpected(EntitySyncResponseMother.id1, EntityMother.scorpioJson1());
             assertScorpioEntityIsExpected(EntitySyncResponseMother.id2, EntityMother.scorpioJson2());
             assertScorpioEntityIsExpected(EntitySyncResponseMother.id3, EntityMother.scorpioJson3());
             assertScorpioEntityIsExpected(EntitySyncResponseMother.id4, EntityMother.scorpioJson4());
-
-        RecordedRequest request = mockWebServer.takeRequest();
-
-        System.out.println("Request: " + request);
+        }
     }
 
     @Test
@@ -283,7 +285,7 @@ class DataSyncWorkflowIT {
                 .verifyComplete();
     }
 
-    private void removeEntitiesToRequest(){
+    private void removeEntitiesToRequest() {
         String brokerUrl = ContainerManager.getBaseUriForScorpioA();
         List<String> ids = new ArrayList<>();
         ids.add("urn:productOffering:537e1ee3-0556-4fff-875f-e55bb97e7ab0");
