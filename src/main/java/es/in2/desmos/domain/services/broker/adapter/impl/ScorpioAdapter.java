@@ -35,8 +35,6 @@ public class ScorpioAdapter implements BrokerAdapterService {
     private final ObjectMapper objectMapper;
     private final BrokerConfig brokerConfig;
 
-    private static final MediaType APPLICATION_LD_JSON = new MediaType("application", "ld+json");
-
     private WebClient webClient;
 
     @PostConstruct
@@ -220,10 +218,12 @@ public class ScorpioAdapter implements BrokerAdapterService {
 
         String uri = brokerConfig.getEntityOperationsPath() + "/" + "upsert";
 
+        var acceptContentType = getContentTypeAndAcceptMediaType(requestBody);
+
         return webClient.post()
                 .uri(uri)
-                .accept(APPLICATION_LD_JSON)
-                .contentType(APPLICATION_LD_JSON)
+                .accept(acceptContentType)
+                .contentType(acceptContentType)
                 .bodyValue(requestBody)
                 .retrieve()
                 .bodyToMono(Void.class)
@@ -272,6 +272,10 @@ public class ScorpioAdapter implements BrokerAdapterService {
     private MediaType getContentTypeAndAcceptMediaType(String requestBody) {
         try {
             JsonNode jsonNode = objectMapper.readTree(requestBody);
+            if (jsonNode.isArray()) {
+                jsonNode = jsonNode.get(0);
+            }
+
             if (jsonNode.has("@context")) {
                 return MediaType.valueOf("application/ld+json");
             } else {
