@@ -116,10 +116,7 @@ public class GlobalExceptionHandler {
                 .map(entry -> entry.getKey() + ": " + entry.getValue())
                 .collect(Collectors.joining(", "));
         return Mono.just(GlobalErrorMessage.builder()
-                .title("WebExchangeBindException")
-                .message(globalErrorMessage)
-                .path(path)
-                .build());
+                .title("WebExchangeBindException").message(globalErrorMessage).path(path).build());
     }
 
 }

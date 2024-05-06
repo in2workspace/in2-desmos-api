@@ -1,6 +1,5 @@
 package es.in2.desmos.domain.models;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -9,7 +8,7 @@ class EventQueuePriorityTests {
 
     @Test
     void testEnumValues() {
-        Assertions.assertEquals(1, EventQueuePriority.CRITICAL.getPriority());
+        assertEquals(1, EventQueuePriority.CRITICAL.getPriority());
         assertEquals(2, EventQueuePriority.HIGH.getPriority());
         assertEquals(3, EventQueuePriority.MEDIUM.getPriority());
         assertEquals(4, EventQueuePriority.LOW.getPriority());

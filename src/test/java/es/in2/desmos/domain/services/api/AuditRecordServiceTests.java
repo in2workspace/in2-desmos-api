@@ -94,6 +94,31 @@ class AuditRecordServiceTests {
     }
 
     @Test
+    void testBuildAndSaveAuditRecordFromBrokerNotification_ExceptionHandling() throws Exception {
+        // Arrange
+        String processId = "processId";
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("id", "entityId");
+        dataMap.put("type", "entityType");
+        AuditRecordStatus status = AuditRecordStatus.CREATED;
+        AuditRecord lastAuditRecordRegistered = AuditRecord.builder()
+                .hashLink("previousHashLink")
+                .build();
+
+        when(objectMapper.writeValueAsString(any())).thenThrow(JsonProcessingException.class);
+        when(auditRecordRepository.findMostRecentAuditRecord()).thenReturn(Mono.just(lastAuditRecordRegistered));
+
+        // Act
+        Mono<Void> result = auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(processId, dataMap, status, blockchainTxPayload);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectError(JsonProcessingException.class)
+                .verify();
+    }
+
+
+    @Test
     void testBuildAndSaveAuditRecordFromBlockchainNotification() throws Exception {
         // Arrange
         String processId = "processId";
@@ -122,6 +147,58 @@ class AuditRecordServiceTests {
                 .verifyComplete();
 
         verify(auditRecordRepository, times(1)).save(any());
+    }
+
+    @Test
+    void testBuildAndSaveAuditRecordFromBlockchainNotification_NullOrEmptyRetrievedEntity() throws JsonProcessingException {
+        // Arrange
+        String processId = "processId";
+        String entityId = "urn:ngsi-ld:ProductOffering:38088145-aef3-440e-ab93-a33bc9bfce69";
+        String entityHashLink = "dbff5341acad5e2a58db4efd5e72e2d9a0a843a28e02b1183c68162d0a3a3de6";
+        String dataLocation = "http://localhost:8080/ngsi-ld/v1/entities/" + entityId + "?hl=" + entityHashLink;
+        BlockchainNotification blockchainNotification = BlockchainNotification.builder()
+                .dataLocation(dataLocation).build();
+        AuditRecordStatus auditRecordStatus = AuditRecordStatus.RETRIEVED;
+        AuditRecord lastAuditRecordRegistered = AuditRecord.builder()
+                .hashLink("previousHashLink")
+                .build();
+
+        when(objectMapper.writeValueAsString(any())).thenReturn("sampleData");
+        when(auditRecordRepository.findMostRecentAuditRecord()).thenReturn(Mono.just(lastAuditRecordRegistered));
+        when(auditRecordRepository.save(any())).thenReturn(Mono.empty());
+
+        // Act
+        auditRecordService.buildAndSaveAuditRecordFromBlockchainNotification(processId, blockchainNotification, null, auditRecordStatus).block();
+
+        // Assert
+        verify(auditRecordRepository, times(1)).save(argThat(auditRecord ->
+                auditRecord.getEntityHash().isEmpty() && auditRecord.getEntityHashLink().isEmpty()));
+    }
+
+    @Test
+    void testBuildAndSaveAuditRecordFromBlockchainNotification_ExceptionHandling() throws JsonProcessingException {
+        // Arrange
+        String processId = "processId";
+        String entityId = "urn:ngsi-ld:ProductOffering:38088145-aef3-440e-ab93-a33bc9bfce69";
+        String entityHashLink = "dbff5341acad5e2a58db4efd5e72e2d9a0a843a28e02b1183c68162d0a3a3de6";
+        String dataLocation = "http://localhost:8080/ngsi-ld/v1/entities/" + entityId + "?hl=" + entityHashLink;
+        BlockchainNotification blockchainNotification = BlockchainNotification.builder()
+                .dataLocation(dataLocation).build();
+        AuditRecordStatus status = AuditRecordStatus.RETRIEVED;
+        AuditRecord lastAuditRecordRegistered = AuditRecord.builder()
+                .hashLink("previousHashLink")
+                .build();
+
+        when(objectMapper.writeValueAsString(any())).thenThrow(JsonProcessingException.class);
+        when(auditRecordRepository.findMostRecentAuditRecord()).thenReturn(Mono.just(lastAuditRecordRegistered));
+
+        // Act
+        Mono<Void> result = auditRecordService.buildAndSaveAuditRecordFromBlockchainNotification(processId, blockchainNotification, "retrievedBrokerEntity", status);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectError(JsonProcessingException.class)
+                .verify();
     }
 
     @Test
