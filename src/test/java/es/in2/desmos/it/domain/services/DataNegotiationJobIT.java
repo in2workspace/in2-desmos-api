@@ -36,7 +36,7 @@ class DataNegotiationJobIT {
     void itShouldBeListenWhenEventIsCalled() {
         dataNegotiationEventPublisher.publishEvent(DataNegotiationEventMother.empty());
 
-        verify(dataNegotiationJob, timeout(500).times(1)).negotiateDataSync(any());
+        verify(dataNegotiationJob, timeout(500).times(1)).negotiateDataSyncFromEvent(any());
         verifyNoMoreInteractions(dataNegotiationJob);
     }
 }

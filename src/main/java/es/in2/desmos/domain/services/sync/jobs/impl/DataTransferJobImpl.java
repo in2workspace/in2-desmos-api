@@ -32,6 +32,11 @@ public class DataTransferJobImpl implements DataTransferJob {
     private final BrokerPublisherService brokerPublisherService;
 
     @Override
+    public Mono<Void> syncDataFromList(String processId, Mono<List<DataNegotiationResult>> dataNegotiationResult) {
+        return Mono.empty();
+    }
+
+    @Override
     public Mono<Void> syncData(String processId, Mono<DataNegotiationResult> dataNegotiationResult) {
         return dataNegotiationResult.flatMap(result -> {
             log.info("ProcessID: {} - Starting Data Transfer Job", processId);

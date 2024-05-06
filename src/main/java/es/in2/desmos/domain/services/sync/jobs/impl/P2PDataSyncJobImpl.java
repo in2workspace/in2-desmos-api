@@ -47,10 +47,10 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
 
             return getExternalMVEntities4DataNegotiationByIssuer(processId, localMvEntities4DataNegotiation)
                     .flatMap(mvEntities4DataNegotiationByIssuer -> {
-                        Mono<Map<Issuer, List<MVEntity4DataNegotiation>>> mvEntities4DataNegotiationByIssuerMono = Mono.just(mvEntities4DataNegotiationByIssuer);
-                        Mono<List<MVEntity4DataNegotiation>> localMvEntities4DataNegotiationMono = Mono.just(localMvEntities4DataNegotiation);
+                        Mono<Map<Issuer, List<MVEntity4DataNegotiation>>> externalMVEntities4DataNegotiationByIssuerMono = Mono.just(mvEntities4DataNegotiationByIssuer);
+                        Mono<List<MVEntity4DataNegotiation>> localMVEntities4DataNegotiationMono = Mono.just(localMvEntities4DataNegotiation);
 
-                        return dataNegotiationJob.negotiateDataSync(processId, mvEntities4DataNegotiationByIssuerMono, localMvEntities4DataNegotiationMono);
+                        return dataNegotiationJob.negotiateDataSyncWithMultipleIssuers(processId, externalMVEntities4DataNegotiationByIssuerMono, localMVEntities4DataNegotiationMono);
                     });
         });
     }

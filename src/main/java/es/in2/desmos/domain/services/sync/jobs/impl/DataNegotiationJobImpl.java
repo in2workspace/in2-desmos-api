@@ -25,13 +25,34 @@ public class DataNegotiationJobImpl implements DataNegotiationJob {
     private final DataTransferJob dataTransferJob;
 
     @Override
-    public Mono<Void> negotiateDataSync(String processId, Mono<Map<Issuer, List<MVEntity4DataNegotiation>>> localMvEntities4DataNegotiationMono, Mono<List<MVEntity4DataNegotiation>> mvEntities4DataNegotiationMono) {
-        // TODO
-        return Mono.empty();
+    public Mono<Void> negotiateDataSyncWithMultipleIssuers(String processId, Mono<Map<Issuer, List<MVEntity4DataNegotiation>>> externalMVEntities4DataNegotiationByIssuerMono, Mono<List<MVEntity4DataNegotiation>> localMVEntities4DataNegotiationMono) {
+        log.info("ProcessID: {} - Starting Data Negotiation Job", processId);
+
+        return localMVEntities4DataNegotiationMono.flatMap(localMVEntities4DataNegotiation ->
+                externalMVEntities4DataNegotiationByIssuerMono
+                        .flatMapIterable(Map::entrySet)
+                        .flatMap(externalMVEntities4DataNegotiationByIssuer -> {
+                            Mono<List<MVEntity4DataNegotiation>> externalMVEntities4DataNegotiationMono = Mono.just(externalMVEntities4DataNegotiationByIssuer.getValue());
+
+                            return checkWithExternalDataIsMissing(externalMVEntities4DataNegotiationMono, localMVEntities4DataNegotiationMono)
+                                    .zipWith(checkVersionsAndLastUpdateFromEntityIdMatched(externalMVEntities4DataNegotiationMono, localMVEntities4DataNegotiationMono))
+                                    .flatMap(tuple -> {
+                                        List<MVEntity4DataNegotiation> newEntitiesToSync = tuple.getT1();
+                                        List<MVEntity4DataNegotiation> existingEntitiesToSync = tuple.getT2();
+
+                                        log.debug("ProcessID: {} - New entities to sync: {}", processId, newEntitiesToSync);
+                                        log.debug("ProcessID: {} - Existing entities to sync: {}", processId, existingEntitiesToSync);
+
+                                        Mono<String> issuerMono = Mono.just(externalMVEntities4DataNegotiationByIssuer.getKey().value());
+                                        return createDataNegotiationResult(issuerMono, Mono.just(newEntitiesToSync), Mono.just(existingEntitiesToSync));
+                                    });
+                        })
+                        .collectList()
+                        .flatMap(dataNegotiationResults -> dataTransferJob.syncDataFromList(processId, Mono.just(dataNegotiationResults))));
     }
 
     @Override
-    public Mono<Void> negotiateDataSync(DataNegotiationEvent dataNegotiationEvent) {
+    public Mono<Void> negotiateDataSyncFromEvent(DataNegotiationEvent dataNegotiationEvent) {
         String processId = dataNegotiationEvent.processId();
 
         log.info("ProcessID: {} - Starting Data Negotiation Job", processId);
@@ -121,6 +142,18 @@ public class DataNegotiationJobImpl implements DataNegotiationJob {
 
     private Mono<DataNegotiationResult> createDataNegotiationResult(DataNegotiationEvent dataNegotiationEvent, Mono<List<MVEntity4DataNegotiation>> newEntitiesToSync, Mono<List<MVEntity4DataNegotiation>> existingEntitiesToSync) {
         return Mono.zip(dataNegotiationEvent.issuer(), newEntitiesToSync, existingEntitiesToSync).map(
+                tuple -> {
+                    String issuer = tuple.getT1();
+                    List<MVEntity4DataNegotiation> newEntitiesToSyncValue = tuple.getT2();
+                    List<MVEntity4DataNegotiation> existingEntitiesToSyncValue = tuple.getT3();
+
+                    return new DataNegotiationResult(issuer, newEntitiesToSyncValue, existingEntitiesToSyncValue);
+                }
+        );
+    }
+
+    private Mono<DataNegotiationResult> createDataNegotiationResult(Mono<String> issuerMono, Mono<List<MVEntity4DataNegotiation>> newEntitiesToSync, Mono<List<MVEntity4DataNegotiation>> existingEntitiesToSync) {
+        return Mono.zip(issuerMono, newEntitiesToSync, existingEntitiesToSync).map(
                 tuple -> {
                     String issuer = tuple.getT1();
                     List<MVEntity4DataNegotiation> newEntitiesToSyncValue = tuple.getT2();

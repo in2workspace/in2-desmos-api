@@ -75,7 +75,7 @@ class P2PDataSyncJobTests {
         List<String> urlExternalAccessNodesList = UrlMother.example1And2urlsList();
         when(externalAccessNodesConfig.getExternalAccessNodesUrls()).thenReturn(Mono.just(urlExternalAccessNodesList));
 
-        when(dataNegotiationJob.negotiateDataSync(eq(processId), any(), any())).thenReturn(Mono.empty());
+        when(dataNegotiationJob.negotiateDataSyncWithMultipleIssuers(eq(processId), any(), any())).thenReturn(Mono.empty());
 
         var result = p2PDataSyncJob.synchronizeData(processId);
 
@@ -95,7 +95,7 @@ class P2PDataSyncJobTests {
         verify(externalAccessNodesConfig, times(1)).getExternalAccessNodesUrls();
         verifyNoMoreInteractions(externalAccessNodesConfig);
 
-        verify(dataNegotiationJob, times(1)).negotiateDataSync(eq(processId), any(), any());
+        verify(dataNegotiationJob, times(1)).negotiateDataSyncWithMultipleIssuers(eq(processId), any(), any());
         verifyNoMoreInteractions(dataNegotiationJob);
     }
 
