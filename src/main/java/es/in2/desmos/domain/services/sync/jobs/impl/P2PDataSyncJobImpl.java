@@ -92,7 +92,7 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
     }
 
     private Mono<List<MVEntity4DataNegotiation>> createLocalMvEntities4DataNegotiation(String processId) {
-        return brokerPublisherService.getMVBrokerEntities4DataNegotiation(processId, BROKER_TYPE, "lastUpdate", "version")
+        return brokerPublisherService.findAllIdTypeFirstAttributeAndSecondAttribute(processId, BROKER_TYPE, "lastUpdate", "version", BrokerEntityWithIdTypeLastUpdateAndVersion[].class)
                 .flatMap(mvBrokerEntities4DataNegotiation -> {
                     log.debug("ProcessID: {} - MV Broker Entities 4 Data Negotiation: {}", processId, mvBrokerEntities4DataNegotiation);
 
@@ -121,8 +121,8 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                 });
     }
 
-    private static Mono<List<String>> getEntities4DataNegotiationIds(Mono<List<MVBrokerEntity4DataNegotiation>> mvBrokerEntities4DataNegotiationMono) {
-        return mvBrokerEntities4DataNegotiationMono.map(x -> x.stream().map(MVBrokerEntity4DataNegotiation::id).toList());
+    private static Mono<List<String>> getEntities4DataNegotiationIds(Mono<List<BrokerEntityWithIdTypeLastUpdateAndVersion>> mvBrokerEntities4DataNegotiationMono) {
+        return mvBrokerEntities4DataNegotiationMono.map(x -> x.stream().map(BrokerEntityWithIdTypeLastUpdateAndVersion::id).toList());
     }
 
     private Mono<List<MVAuditServiceEntity4DataNegotiation>> getMvAuditServiceEntities4DataNegotiation(String processId, Mono<List<String>> entities4DataNegotiationIdsMono) {

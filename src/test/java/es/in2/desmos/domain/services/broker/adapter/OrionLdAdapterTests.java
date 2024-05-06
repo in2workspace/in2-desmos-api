@@ -1,6 +1,6 @@
 package es.in2.desmos.domain.services.broker.adapter;
 
-import es.in2.desmos.domain.models.MVBrokerEntity4DataNegotiation;
+import es.in2.desmos.domain.models.BrokerEntityWithIdTypeLastUpdateAndVersion;
 import es.in2.desmos.domain.services.broker.adapter.impl.OrionLdAdapter;
 import es.in2.desmos.objectmothers.EntitySyncResponseMother;
 import org.junit.jupiter.api.Test;
@@ -8,8 +8,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
-
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -21,7 +19,7 @@ class OrionLdAdapterTests {
     @Test
     void itShouldReturnNullWhenGetMvEntities4DataNegotiation() {
         String processId = "0";
-        Mono<List<MVBrokerEntity4DataNegotiation>> result = orionLdAdapter.getMVBrokerEntities4DataNegotiation(processId, "ProductOffering", "lastUpdate", "version");
+        Mono<BrokerEntityWithIdTypeLastUpdateAndVersion[]> result = orionLdAdapter.findAllIdTypeFirstAttributeAndSecondAttribute(processId, "ProductOffering", "lastUpdate", "version", BrokerEntityWithIdTypeLastUpdateAndVersion[].class);
 
         assertNull(result);
     }

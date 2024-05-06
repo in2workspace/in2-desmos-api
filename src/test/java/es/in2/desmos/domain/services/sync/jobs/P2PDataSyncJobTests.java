@@ -3,7 +3,7 @@ package es.in2.desmos.domain.services.sync.jobs;
 import es.in2.desmos.domain.events.DataNegotiationEventPublisher;
 import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.Id;
-import es.in2.desmos.domain.models.MVBrokerEntity4DataNegotiation;
+import es.in2.desmos.domain.models.BrokerEntityWithIdTypeLastUpdateAndVersion;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.domain.services.api.impl.AuditRecordServiceImpl;
 import es.in2.desmos.domain.services.broker.impl.BrokerPublisherServiceImpl;
@@ -54,8 +54,8 @@ class P2PDataSyncJobTests {
     void itShouldUpsertEntitiesFromOtherAccessNodes(){
         String processId = "0";
 
-        List<MVBrokerEntity4DataNegotiation> brokerEntities = MVBrokerEntity4DataNegotiationMother.list3And4();
-        when(brokerPublisherService.getMVBrokerEntities4DataNegotiation(processId, "ProductOffering", "lastUpdate", "version")).thenReturn(Mono.just(brokerEntities));
+        List<BrokerEntityWithIdTypeLastUpdateAndVersion> brokerEntities = MVBrokerEntity4DataNegotiationMother.list3And4();
+        when(brokerPublisherService.findAllIdTypeFirstAttributeAndSecondAttribute(processId, "ProductOffering", "lastUpdate", "version", BrokerEntityWithIdTypeLastUpdateAndVersion[].class)).thenReturn(Mono.just(brokerEntities));
 
 
         List<AuditRecord> auditRecordEntities = AuditRecordMother.list3And4();
@@ -83,7 +83,7 @@ class P2PDataSyncJobTests {
                 .create(result)
                 .verifyComplete();
 
-        verify(brokerPublisherService, times(1)).getMVBrokerEntities4DataNegotiation(processId, "ProductOffering", "lastUpdate", "version");
+        verify(brokerPublisherService, times(1)).findAllIdTypeFirstAttributeAndSecondAttribute(processId, "ProductOffering", "lastUpdate", "version", BrokerEntityWithIdTypeLastUpdateAndVersion[].class);
         verifyNoMoreInteractions(brokerPublisherService);
 
         verify(auditRecordService, times(2)).findLatestAuditRecordForEntity(eq(processId), any());
@@ -104,12 +104,12 @@ class P2PDataSyncJobTests {
 
         List<MVEntity4DataNegotiation> expectedInternalEntities = MVEntity4DataNegotiationMother.list3And4();
 
-        List<MVBrokerEntity4DataNegotiation> brokerEntities = MVBrokerEntity4DataNegotiationMother.list3And4();
+        List<BrokerEntityWithIdTypeLastUpdateAndVersion> brokerEntities = MVBrokerEntity4DataNegotiationMother.list3And4();
 
         List<AuditRecord> auditRecordEntities = AuditRecordMother.list3And4();
 
         String processId = "0";
-        when(brokerPublisherService.getMVBrokerEntities4DataNegotiation(processId, "ProductOffering", "lastUpdate", "version")).thenReturn(Mono.just(brokerEntities));
+        when(brokerPublisherService.findAllIdTypeFirstAttributeAndSecondAttribute(processId, "ProductOffering", "lastUpdate", "version", BrokerEntityWithIdTypeLastUpdateAndVersion[].class)).thenReturn(Mono.just(brokerEntities));
         when(auditRecordService.findLatestAuditRecordForEntity(processId, auditRecordEntities.get(0).getEntityId())).thenReturn(Mono.just(auditRecordEntities.get(0)));
         when(auditRecordService.findLatestAuditRecordForEntity(processId, auditRecordEntities.get(1).getEntityId())).thenReturn(Mono.just(auditRecordEntities.get(1)));
 
@@ -122,7 +122,7 @@ class P2PDataSyncJobTests {
                 .expectNext(expectedInternalEntities)
                 .verifyComplete();
 
-        verify(brokerPublisherService, times(1)).getMVBrokerEntities4DataNegotiation(processId, "ProductOffering", "lastUpdate", "version");
+        verify(brokerPublisherService, times(1)).findAllIdTypeFirstAttributeAndSecondAttribute(processId, "ProductOffering", "lastUpdate", "version", BrokerEntityWithIdTypeLastUpdateAndVersion[].class);
         verifyNoMoreInteractions(brokerPublisherService);
     }
 

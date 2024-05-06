@@ -2,7 +2,7 @@ package es.in2.desmos.it.domain.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import es.in2.desmos.domain.models.MVBrokerEntity4DataNegotiation;
+import es.in2.desmos.domain.models.BrokerEntityWithIdTypeLastUpdateAndVersion;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
 import es.in2.desmos.inflators.ScorpioInflator;
 import es.in2.desmos.it.ContainerManager;
@@ -37,7 +37,7 @@ class BrokerPublisherServiceIT {
     @Value("${broker.externalDomain}")
     private String contextBrokerExternalDomain;
 
-    private static List<MVBrokerEntity4DataNegotiation> initialEntities;
+    private static List<BrokerEntityWithIdTypeLastUpdateAndVersion> initialEntities;
 
     @DynamicPropertySource
     static void setDynamicProperties(DynamicPropertyRegistry registry) {
@@ -54,7 +54,7 @@ class BrokerPublisherServiceIT {
     @AfterAll
     static void tearDown(){
         String brokerUrl = ContainerManager.getBaseUriForScorpioA();
-        List<String> ids = initialEntities.stream().map(MVBrokerEntity4DataNegotiation::id).toList();
+        List<String> ids = initialEntities.stream().map(BrokerEntityWithIdTypeLastUpdateAndVersion::id).toList();
         ScorpioInflator.deleteInitialEntitiesFromContextBroker(brokerUrl, ids);
     }
 
@@ -62,7 +62,7 @@ class BrokerPublisherServiceIT {
     @Test
     void itShouldReturnEntityIds() {
         String processId = "0";
-        var result = brokerPublisherService.getMVBrokerEntities4DataNegotiation(processId, "ProductOffering", "lastUpdate", "version");
+        var result = brokerPublisherService.findAllIdTypeFirstAttributeAndSecondAttribute(processId, "ProductOffering", "lastUpdate", "version", BrokerEntityWithIdTypeLastUpdateAndVersion[].class);
 
         StepVerifier.create(result)
                 .expectNext(initialEntities)

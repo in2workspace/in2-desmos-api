@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.domain.models.BlockchainNotification;
 import es.in2.desmos.domain.models.Id;
-import es.in2.desmos.domain.models.MVBrokerEntity4DataNegotiation;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
 import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import es.in2.desmos.domain.services.broker.adapter.factory.BrokerAdapterFactory;
@@ -15,6 +14,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static es.in2.desmos.domain.utils.ApplicationUtils.extractEntityIdFromDataLocation;
@@ -54,8 +54,9 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
     }
 
     @Override
-    public Mono<List<MVBrokerEntity4DataNegotiation>> getMVBrokerEntities4DataNegotiation(String processId, String type, String firstAttribute, String secondAttribute) {
-        return brokerAdapterService.getMVBrokerEntities4DataNegotiation(processId, type, firstAttribute, secondAttribute);
+    public <T> Mono<List<T>> findAllIdTypeFirstAttributeAndSecondAttribute (String processId, String type, String firstAttribute, String secondAttribute, Class<T[]> responseClass) {
+        return brokerAdapterService.findAllIdTypeFirstAttributeAndSecondAttribute(processId, type, firstAttribute, secondAttribute, responseClass)
+                .map(Arrays::asList);
     }
 
     @Override

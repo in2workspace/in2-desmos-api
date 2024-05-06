@@ -2,7 +2,7 @@ package es.in2.desmos.inflators;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import es.in2.desmos.domain.models.MVBrokerEntity4DataNegotiation;
+import es.in2.desmos.domain.models.BrokerEntityWithIdTypeLastUpdateAndVersion;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,7 +21,7 @@ public final class ScorpioInflator {
 
     private final static MediaType APPLICATION_LD_JSON = new MediaType("application", "ld+json");
 
-    public static void addInitialEntitiesToContextBroker(String brokerUrl, List<MVBrokerEntity4DataNegotiation> initialEntities) throws JSONException, JsonProcessingException {
+    public static void addInitialEntitiesToContextBroker(String brokerUrl, List<BrokerEntityWithIdTypeLastUpdateAndVersion> initialEntities) throws JSONException, JsonProcessingException {
         String requestBody = createInitialEntitiesRequestBody(initialEntities);
 
         var result = WebClient.builder()
@@ -85,10 +85,10 @@ public final class ScorpioInflator {
     }
 
     @NotNull
-    private static String createInitialEntitiesRequestBody(List<MVBrokerEntity4DataNegotiation> initialEntities) throws JsonProcessingException, JSONException {
+    private static String createInitialEntitiesRequestBody(List<BrokerEntityWithIdTypeLastUpdateAndVersion> initialEntities) throws JsonProcessingException, JSONException {
         JSONArray productOfferingsJsonArray = new JSONArray();
 
-        for (MVBrokerEntity4DataNegotiation productOffering : initialEntities) {
+        for (BrokerEntityWithIdTypeLastUpdateAndVersion productOffering : initialEntities) {
             String productOfferingJsonText = objectMapper.writeValueAsString(productOffering);
             JSONObject productOfferingJson = new JSONObject(productOfferingJsonText);
 
