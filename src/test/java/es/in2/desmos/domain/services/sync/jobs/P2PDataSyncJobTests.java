@@ -1,5 +1,6 @@
 package es.in2.desmos.domain.services.sync.jobs;
 
+import es.in2.desmos.configs.ExternalAccessNodesConfig;
 import es.in2.desmos.domain.events.DataNegotiationEventPublisher;
 import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.Id;
@@ -7,6 +8,7 @@ import es.in2.desmos.domain.models.MVBrokerEntity4DataNegotiation;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.domain.services.api.impl.AuditRecordServiceImpl;
 import es.in2.desmos.domain.services.broker.impl.BrokerPublisherServiceImpl;
+import es.in2.desmos.domain.services.sync.DiscoverySyncWebClient;
 import es.in2.desmos.objectmothers.*;
 import es.in2.desmos.domain.services.sync.jobs.impl.P2PDataSyncJobImpl;
 import org.json.JSONArray;
@@ -28,7 +30,10 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class P2PDataSyncJobTests {
     @InjectMocks
-    private P2PDataSyncJobImpl p2PDataSyncWorkflow;
+    private P2PDataSyncJobImpl p2PDataSyncJob;
+
+    @Mock
+    private ExternalAccessNodesConfig externalAccessNodesConfig;
 
     @Mock
     private BrokerPublisherServiceImpl brokerPublisherService;
@@ -40,22 +45,58 @@ class P2PDataSyncJobTests {
     private DataNegotiationEventPublisher dataNegotiationEventPublisher;
 
     @Mock
+    private DiscoverySyncWebClient discoverySyncWebClient;
+
+    @Mock
     private DataNegotiationJob dataNegotiationJob;
 
     @Test
     void itShouldUpsertEntitiesFromOtherAccessNodes(){
         String processId = "0";
 
-        when(dataNegotiationJob.negotiateDataSync()).thenReturn(Mono.empty());
+        List<MVBrokerEntity4DataNegotiation> brokerEntities = MVBrokerEntity4DataNegotiationMother.list3And4();
+        when(brokerPublisherService.getMVBrokerEntities4DataNegotiation(processId, "ProductOffering", "lastUpdate", "version")).thenReturn(Mono.just(brokerEntities));
 
-        var result = p2PDataSyncWorkflow.synchronizeData(processId);
+
+        List<AuditRecord> auditRecordEntities = AuditRecordMother.list3And4();
+        when(auditRecordService.findLatestAuditRecordForEntity(processId, auditRecordEntities.get(0).getEntityId())).thenReturn(Mono.just(auditRecordEntities.get(0)));
+        when(auditRecordService.findLatestAuditRecordForEntity(processId, auditRecordEntities.get(1).getEntityId())).thenReturn(Mono.just(auditRecordEntities.get(1)));
+
+        MVEntity4DataNegotiation[] sample3InList = new MVEntity4DataNegotiation[]{
+                MVEntity4DataNegotiationMother.sample3()
+        };
+        MVEntity4DataNegotiation[] sample4InList = new MVEntity4DataNegotiation[]{
+                MVEntity4DataNegotiationMother.sample4()
+        };
+        when(discoverySyncWebClient.makeRequest(eq(processId), any(), any()))
+                .thenReturn(Mono.just(sample3InList))
+                .thenReturn(Mono.just(sample4InList));
+
+        List<String> urlExternalAccessNodesList = UrlMother.example1And2urlsList();
+        when(externalAccessNodesConfig.getExternalAccessNodesUrls()).thenReturn(Mono.just(urlExternalAccessNodesList));
+
+        when(dataNegotiationJob.negotiateDataSync(eq(processId), any(), any())).thenReturn(Mono.empty());
+
+        var result = p2PDataSyncJob.synchronizeData(processId);
 
         StepVerifier
                 .create(result)
                 .verifyComplete();
 
-        verify(dataNegotiationJob, times(1)).negotiateDataSync();
+        verify(brokerPublisherService, times(1)).getMVBrokerEntities4DataNegotiation(processId, "ProductOffering", "lastUpdate", "version");
         verifyNoMoreInteractions(brokerPublisherService);
+
+        verify(auditRecordService, times(2)).findLatestAuditRecordForEntity(eq(processId), any());
+        verifyNoMoreInteractions(auditRecordService);
+
+        verify(discoverySyncWebClient, times(2)).makeRequest(eq(processId), any(), any());
+        verifyNoMoreInteractions(discoverySyncWebClient);
+
+        verify(externalAccessNodesConfig, times(1)).getExternalAccessNodesUrls();
+        verifyNoMoreInteractions(externalAccessNodesConfig);
+
+        verify(dataNegotiationJob, times(1)).negotiateDataSync(eq(processId), any(), any());
+        verifyNoMoreInteractions(dataNegotiationJob);
     }
 
     @Test
@@ -72,7 +113,7 @@ class P2PDataSyncJobTests {
         when(auditRecordService.findLatestAuditRecordForEntity(processId, auditRecordEntities.get(0).getEntityId())).thenReturn(Mono.just(auditRecordEntities.get(0)));
         when(auditRecordService.findLatestAuditRecordForEntity(processId, auditRecordEntities.get(1).getEntityId())).thenReturn(Mono.just(auditRecordEntities.get(1)));
 
-        Mono<List<MVEntity4DataNegotiation>> result = p2PDataSyncWorkflow.dataDiscovery(
+        Mono<List<MVEntity4DataNegotiation>> result = p2PDataSyncJob.dataDiscovery(
                 processId,
                 Mono.just("https://example.org"),
                 Mono.just(MVEntity4DataNegotiationMother.list1And2()));
@@ -100,7 +141,7 @@ class P2PDataSyncJobTests {
         String processId = "0";
         when(brokerPublisherService.findAllById(eq(processId), any())).thenReturn(localEntitiesMono);
 
-        Mono<List<String>> result = p2PDataSyncWorkflow.getLocalEntitiesById(processId, idsMono);
+        Mono<List<String>> result = p2PDataSyncJob.getLocalEntitiesById(processId, idsMono);
 
         StepVerifier
                 .create(result)

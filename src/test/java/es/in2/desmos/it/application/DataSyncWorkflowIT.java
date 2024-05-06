@@ -2,6 +2,7 @@ package es.in2.desmos.it.application;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import es.in2.desmos.ContainerManager;
 import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.broker.adapter.impl.ScorpioAdapter;
@@ -23,6 +24,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import reactor.core.publisher.Mono;
@@ -40,6 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestPropertySource(properties = {"external-access-nodes.urls=http://localhost:49152 , http://localhost:49153"})
 class DataSyncWorkflowIT {
 
     @Autowired
@@ -50,9 +53,6 @@ class DataSyncWorkflowIT {
 
     @Autowired
     private AuditRecordService auditRecordService;
-
-    @Autowired
-    private DataTransferJobImpl dataTransferJob;
 
     @LocalServerPort
     private int localServerPort;
@@ -84,32 +84,38 @@ class DataSyncWorkflowIT {
     }
 
     @Test
-    void itShouldUpsertEntitiesFromOtherAccessNodes() throws InterruptedException, JSONException {
-        var entitySyncResponse = EntitySyncResponseMother.sample2and4;
-        mockWebServer.enqueue(new MockResponse()
-                .setBody(entitySyncResponse));
+    void itShouldUpsertEntitiesFromOtherAccessNodesWhenDiscoverySync() throws JSONException, IOException {
+        try (MockWebServer mockWebServer2 = new MockWebServer();
+             MockWebServer mockWebServer3 = new MockWebServer()) {
 
-        var response = WebClient.builder()
-                .baseUrl("http://localhost:" + localServerPort)
-                .build()
-                .get()
-                .uri("/api/v1/sync/p2p/data")
-                .retrieve()
-                .bodyToMono(Void.class)
-                .retry(3);
+            mockWebServer2.start(49152);
+            mockWebServer2.enqueue(new MockResponse()
+                    .setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                    .setBody(DiscoveryResponseMother.json2List()));
 
-        StepVerifier
-                .create(response)
-                .verifyComplete();
+            mockWebServer3.start(49153);
+            mockWebServer3.enqueue(new MockResponse()
+                    .setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                    .setBody(DiscoveryResponseMother.json4List()));
 
-        assertScorpioEntityIsExpected(EntitySyncResponseMother.id1, EntityMother.scorpioJson1());
-        assertScorpioEntityIsExpected(EntitySyncResponseMother.id2, EntityMother.scorpioJson2());
-        assertScorpioEntityIsExpected(EntitySyncResponseMother.id3, EntityMother.scorpioJson3());
-        assertScorpioEntityIsExpected(EntitySyncResponseMother.id4, EntityMother.scorpioJson4());
+            Mono<Void> response = WebClient.builder()
+                    .baseUrl("http://localhost:" + localServerPort)
+                    .build()
+                    .get()
+                    .uri("/api/v1/sync/p2p/data")
+                    .retrieve()
+                    .bodyToMono(Void.class)
+                    .retry(3);
 
-        RecordedRequest request = mockWebServer.takeRequest();
+            StepVerifier
+                    .create(response)
+                    .verifyComplete();
 
-        System.out.println("Request: " + request);
+            assertScorpioEntityIsExpected(EntitySyncResponseMother.id1, EntityMother.scorpioJson1());
+            assertScorpioEntityIsExpected(EntitySyncResponseMother.id2, EntityMother.scorpioJson2());
+            assertScorpioEntityIsExpected(EntitySyncResponseMother.id3, EntityMother.scorpioJson3());
+            assertScorpioEntityIsExpected(EntitySyncResponseMother.id4, EntityMother.scorpioJson4());
+        }
     }
 
     @Test
