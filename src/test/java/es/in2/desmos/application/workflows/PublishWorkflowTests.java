@@ -35,6 +35,7 @@ class PublishWorkflowTests {
     private final List<Map<String, Object>> data = List.of(Collections.singletonMap("id", "123"));
     private final String subscriptionId = "urn:ngsi-ld:Subscription:7230a0ac-ed33-44e4-bb04-ce0f345b9d2a";
     private final String notifiedAt = "2024-01-01T12:00:00Z";
+
     BrokerNotification brokerNotification = BrokerNotification.builder()
             .id(id)
             .type(type)
@@ -42,6 +43,7 @@ class PublishWorkflowTests {
             .subscriptionId(subscriptionId)
             .notifiedAt(notifiedAt)
             .build();
+
     @Mock
     private QueueService pendingPublishEventsQueue;
     @Mock
