@@ -54,7 +54,7 @@ class DiscoverySyncWebClientTests {
 
 
         when(webClientMock.post()).thenReturn(requestBodyUriSpecMock);
-        when(requestBodyUriSpecMock.uri(issuer + "/api/v1/sync/discovery")).thenReturn(requestBodySpecMock);
+        when(requestBodyUriSpecMock.uri(issuer + "/api/v1/sync/p2p/discovery")).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.contentType(MediaType.APPLICATION_JSON)).thenReturn(requestBodySpecMock);
         //noinspection unchecked
         when(requestBodySpecMock.body(entitySyncRequest, MVEntity4DataNegotiation[].class)).thenReturn(requestHeadersSpec);

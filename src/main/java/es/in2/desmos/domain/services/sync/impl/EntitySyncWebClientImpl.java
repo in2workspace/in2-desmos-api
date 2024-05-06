@@ -20,7 +20,7 @@ public class EntitySyncWebClientImpl implements EntitySyncWebClient {
 
         return issuerMono.flatMap(issuer -> webClient
                 .post()
-                .uri(issuer + "/api/v1/sync/entities")
+                .uri(issuer + "/api/v1/sync/p2p/entities")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(entitySyncRequest, Id[].class)
                 .retrieve()

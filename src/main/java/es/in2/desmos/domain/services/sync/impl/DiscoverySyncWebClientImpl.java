@@ -21,7 +21,7 @@ public class DiscoverySyncWebClientImpl implements DiscoverySyncWebClient {
 
         return externalAccessNodeMono.flatMap(externalAccessNode -> webClient
                 .post()
-                .uri(externalAccessNode + "/api/v1/sync/discovery")
+                .uri(externalAccessNode + "/api/v1/sync/p2p/discovery")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(localMvEntities4DataNegotiationMono, MVEntity4DataNegotiation[].class)
                 .retrieve()

@@ -55,7 +55,7 @@ class EntitySyncWebClientTests {
 
 
         when(webClientMock.post()).thenReturn(requestBodyUriSpecMock);
-        when(requestBodyUriSpecMock.uri(issuer + "/api/v1/sync/entities")).thenReturn(requestBodySpecMock);
+        when(requestBodyUriSpecMock.uri(issuer + "/api/v1/sync/p2p/entities")).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.contentType(MediaType.APPLICATION_JSON)).thenReturn(requestBodySpecMock);
         //noinspection unchecked
         when(requestBodySpecMock.body(entitySyncRequest, Id[].class)).thenReturn(requestHeadersSpec);

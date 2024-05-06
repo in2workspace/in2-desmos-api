@@ -1,17 +1,12 @@
 package es.in2.desmos.application.workflows.impl;
 
 import es.in2.desmos.application.workflows.DataSyncWorkflow;
-import es.in2.desmos.domain.models.Id;
-import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.domain.services.sync.jobs.BlockchainDataSyncJob;
 import es.in2.desmos.domain.services.sync.jobs.P2PDataSyncJob;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
-import java.util.List;
 
 @Slf4j
 @Service
@@ -26,5 +21,4 @@ public class DataSyncWorkflowImpl implements DataSyncWorkflow {
         // TODO: Change blockchainDataSyncService to p2pDataSyncService in future
         return blockchainDataSyncJob.startBlockchainDataSyncJob(processId);
     }
-
 }
