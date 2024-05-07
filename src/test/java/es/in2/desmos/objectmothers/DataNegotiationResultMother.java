@@ -31,6 +31,12 @@ public final class DataNegotiationResultMother {
         return dataNegotiationResults;
     }
 
+    public static DataNegotiationResult newToSync4AndExistingToSync2(){
+        List<MVEntity4DataNegotiation> newEntitiesToSync = MVEntity4DataNegotiationMother.list4();
+        List<MVEntity4DataNegotiation> existingEntitiesToSync = MVEntity4DataNegotiationMother.list2();
+        return new DataNegotiationResult("http://example.org", newEntitiesToSync, existingEntitiesToSync);
+    }
+
 
     private static DataNegotiationResult existingToSync2(String issuer){
         List<MVEntity4DataNegotiation> newEntitiesToSync = new ArrayList<>();
@@ -43,8 +49,4 @@ public final class DataNegotiationResultMother {
         List<MVEntity4DataNegotiation> existingEntitiesToSync = new ArrayList<>();
         return new DataNegotiationResult(issuer, newEntitiesToSync, existingEntitiesToSync);
     }
-
-
-
-
 }

@@ -21,6 +21,9 @@ public final class EntityMother {
         return getEntityJsonString(mvEntity4DataNegotiation);
     }
 
+    public static final String sample2 = """            
+            {"id":"urn:ProductOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87","type":"ProductOffering","version":"2.5","lastUpdate":"2024-07-09T12:00:00Z","productSpecification":{"id":"spec-broadband-001","name":"1Gbps Broadband Spec"},"productOfferingPrice":{"type":"Relationship","object":"urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"},"@context":["https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"]}""";
+
     public static String json2Old() throws JSONException {
         MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample2VersionOld();
         return getEntityJsonString(mvEntity4DataNegotiation);
@@ -30,6 +33,8 @@ public final class EntityMother {
         MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample3();
         return getEntityJsonString(mvEntity4DataNegotiation);
     }
+    public static final String sample4 = """
+            {"id":"urn:ProductOffering:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c","type":"ProductOffering","version":"1.9","lastUpdate":"2024-06-02T12:00:00Z","productSpecification":{"id":"spec-broadband-001","name":"1Gbps Broadband Spec"},"productOfferingPrice":{"type":"Relationship","object":"urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"},"@context":["https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"]}""";
 
     private static String getEntityJsonString(MVEntity4DataNegotiation mvEntity4DataNegotiation) throws JSONException {
         JSONObject productOffering = new JSONObject();
@@ -119,5 +124,15 @@ public final class EntityMother {
     public static String scorpioJson4() throws JSONException {
         MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample4();
         return getEntityJsonScorpioString(mvEntity4DataNegotiation);
+    }
+
+    public static String json2() throws JSONException {
+        MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample2();
+        return getEntityJsonString(mvEntity4DataNegotiation);
+    }
+
+    public static String json4() throws JSONException {
+        MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample4();
+        return getEntityJsonString(mvEntity4DataNegotiation);
     }
 }
