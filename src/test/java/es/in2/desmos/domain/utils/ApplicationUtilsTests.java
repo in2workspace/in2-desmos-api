@@ -1,6 +1,5 @@
 package es.in2.desmos.domain.utils;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -13,23 +12,20 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
 
 import static es.in2.desmos.domain.utils.ApplicationUtils.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class ApplicationUtilsTests {
 
     @Test
-    public void testConstructorThrowsException() {
+    void testConstructorThrowsException() throws NoSuchMethodException {
+        Constructor<ApplicationUtils> constructor = ApplicationUtils.class.getDeclaredConstructor();
+        constructor.setAccessible(true);
         try {
-            Constructor<ApplicationUtils> constructor = ApplicationUtils.class.getDeclaredConstructor();
-            constructor.setAccessible(true);
             constructor.newInstance();
-            Assertions.fail("Expected an exception to be thrown");
+            fail("Expected an exception to be thrown");
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            Assertions.assertInstanceOf(IllegalStateException.class, e.getCause());
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
+            assertInstanceOf(IllegalStateException.class, e.getCause());
         }
     }
 
