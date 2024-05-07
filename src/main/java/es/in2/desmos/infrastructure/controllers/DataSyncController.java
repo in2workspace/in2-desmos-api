@@ -4,17 +4,16 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonParser;
-import es.in2.desmos.application.workflows.DataSyncWorkflow;
 import es.in2.desmos.domain.models.DiscoverySyncRequest;
 import es.in2.desmos.domain.models.DiscoverySyncResponse;
 import es.in2.desmos.domain.models.Id;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.domain.services.sync.jobs.P2PDataSyncJob;
 import es.in2.desmos.domain.services.sync.services.DataSyncService;
+import es.in2.desmos.infrastructure.configs.BrokerConfig;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -31,11 +30,8 @@ public class DataSyncController {
 
     private final DataSyncService dataSyncService;
     private final P2PDataSyncJob p2PDataSyncJob;
+    private final BrokerConfig brokerConfig;
     private final ObjectMapper objectMapper;
-
-    // todo: move to configuration
-    @Value("${broker.externalDomain}")
-    private String contextBrokerExternalDomain;
     
     @GetMapping("/data")
     public Mono<Void> syncData2() {
@@ -58,7 +54,7 @@ public class DataSyncController {
                                 Mono<List<MVEntity4DataNegotiation>> localMvEntities4DataNegotiationMono = Mono.just(localMvEntities4DataNegotiation);
 
                                 return localMvEntities4DataNegotiationMono.map(mvEntities4DataNegotiation ->
-                                        new DiscoverySyncResponse(contextBrokerExternalDomain, mvEntities4DataNegotiation));
+                                        new DiscoverySyncResponse(brokerConfig.getExternalDomain(), mvEntities4DataNegotiation));
                             });
                 })
                 .doOnSuccess(success -> log.info("ProcessID: {} - P2P Data Synchronization Discovery successfully.", processId))

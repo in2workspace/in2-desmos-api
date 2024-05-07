@@ -8,6 +8,7 @@ import es.in2.desmos.domain.models.Id;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.domain.services.sync.jobs.P2PDataSyncJob;
 import es.in2.desmos.domain.services.sync.services.DataSyncService;
+import es.in2.desmos.infrastructure.configs.BrokerConfig;
 import es.in2.desmos.objectmothers.BrokerDataMother;
 import es.in2.desmos.objectmothers.DiscoverySyncRequestMother;
 import es.in2.desmos.objectmothers.DiscoverySyncResponseMother;
@@ -17,7 +18,6 @@ import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -40,15 +40,15 @@ class DataSyncControllerTests {
     @Autowired
     private ObjectMapper objectMapper;
 
-    // todo: move to configuration
-    @Value("${broker.externalDomain}")
-    private String contextBrokerExternalDomain;
-
     @MockBean
     private P2PDataSyncJob p2PDataSyncJob;
 
     @MockBean
     private DataSyncService dataSyncService;
+
+    @MockBean
+    private BrokerConfig brokerConfig;
+
 
     @Test
     void testSyncData() {
@@ -63,14 +63,15 @@ class DataSyncControllerTests {
 
     @Test
     void itShouldReturnEntityWithIssuer() throws JsonProcessingException {
-
         Mono<DiscoverySyncRequest> discoverySyncRequest = Mono.just(DiscoverySyncRequestMother.list1And2());
-
+        var contextBrokerExternalDomain = "http://example.org";
         DiscoverySyncResponse discoverySyncResponse = DiscoverySyncResponseMother.list3And4(contextBrokerExternalDomain);
         var discoverySyncResponseJson = objectMapper.writeValueAsString(discoverySyncResponse);
 
         Mono<List<MVEntity4DataNegotiation>> localEntityIds = Mono.just(DiscoverySyncResponseMother.list3And4(contextBrokerExternalDomain).entities());
         when(p2PDataSyncJob.dataDiscovery(anyString(), any(), any())).thenReturn(localEntityIds);
+
+        when(brokerConfig.getExternalDomain()).thenReturn(contextBrokerExternalDomain);
 
         webTestClient.post()
                 .uri("/api/v1/sync/p2p/discovery")
