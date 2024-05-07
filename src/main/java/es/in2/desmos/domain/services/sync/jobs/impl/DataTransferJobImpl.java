@@ -4,6 +4,7 @@ package es.in2.desmos.domain.services.sync.jobs.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonParser;
 import es.in2.desmos.domain.exceptions.InvalidIntegrityException;
 import es.in2.desmos.domain.exceptions.InvalidSyncResponseException;
 import es.in2.desmos.domain.models.*;
@@ -11,6 +12,7 @@ import es.in2.desmos.domain.services.sync.EntitySyncWebClient;
 import es.in2.desmos.domain.services.sync.jobs.DataTransferJob;
 import es.in2.desmos.domain.services.sync.jobs.DataVerificationJob;
 import es.in2.desmos.domain.utils.ApplicationUtils;
+import es.in2.desmos.domain.utils.Base64Converter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,7 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class DataTransferJobImpl implements DataTransferJob {
+    public static final String INVALID_ENTITY_SYNC_RESPONSE = "Invalid EntitySync response.";
     private final EntitySyncWebClient entitySyncWebClient;
     private final DataVerificationJob dataVerificationJob;
     private final ObjectMapper objectMapper;
@@ -58,29 +61,62 @@ public class DataTransferJobImpl implements DataTransferJob {
                     .flatMap(entitySyncResponse -> {
                         Mono<String> entitySyncResponseMono = Mono.just(entitySyncResponse);
 
-                        return getEntitiesById(entitySyncResponseMono)
-                                .flatMap(entitiesById -> {
+                        return decodeEntitySyncResponse(entitySyncResponseMono)
+                                .flatMap(decodedEntitySyncResponse -> {
+                                    Mono<String> decodedEntitySyncResponseMono = Mono.just(decodedEntitySyncResponse);
 
-                                    //TODO decode base64
-                                    Mono<Map<Id, Entity>> entitiesByIdMono = Mono.just(entitiesById);
+                                    return getEntitiesById(decodedEntitySyncResponseMono)
+                                            .flatMap(entitiesById -> {
+                                                Mono<Map<Id, Entity>> entitiesByIdMono = Mono.just(entitiesById);
 
-                                    Mono<Map<Id, HashAndHashLink>> newEntitiesHashAndHashLinkById = getEntitiesHashAndHashLinkById(Mono.just(result.newEntitiesToSync()));
-                                    Mono<Map<Id, HashAndHashLink>> existingEntitiesHashAndHashLinkById = getEntitiesHashAndHashLinkById(Mono.just(result.existingEntitiesToSync()));
+                                                Mono<Map<Id, HashAndHashLink>> newEntitiesHashAndHashLinkById = getEntitiesHashAndHashLinkById(Mono.just(result.newEntitiesToSync()));
+                                                Mono<Map<Id, HashAndHashLink>> existingEntitiesHashAndHashLinkById = getEntitiesHashAndHashLinkById(Mono.just(result.existingEntitiesToSync()));
 
-                                    Mono<Map<Id, HashAndHashLink>> entitiesHashAndHashlinkById =
-                                            concatTwoEntitiesOriginalValidationDataByIdMaps(
-                                                    newEntitiesHashAndHashLinkById,
-                                                    existingEntitiesHashAndHashLinkById);
-                                    
-                                    Mono<List<MVEntity4DataNegotiation>> mvEntities4DataNegotiation = buildAllMVEntities4DataNegotiation(
-                                            Mono.just(result.newEntitiesToSync()),
-                                            Mono.just(result.existingEntitiesToSync())
-                                    );
+                                                Mono<Map<Id, HashAndHashLink>> entitiesHashAndHashlinkById =
+                                                        concatTwoEntitiesOriginalValidationDataByIdMaps(
+                                                                newEntitiesHashAndHashLinkById,
+                                                                existingEntitiesHashAndHashLinkById);
 
-                                    return validateIntegrity(entitiesByIdMono, entitiesHashAndHashlinkById)
-                                            .then(dataVerificationJob.verifyData(processId, issuer, entitiesByIdMono, mvEntities4DataNegotiation, entitySyncResponseMono, existingEntitiesHashAndHashLinkById));
+                                                Mono<List<MVEntity4DataNegotiation>> mvEntities4DataNegotiation = buildAllMVEntities4DataNegotiation(
+                                                        Mono.just(result.newEntitiesToSync()),
+                                                        Mono.just(result.existingEntitiesToSync())
+                                                );
+
+                                                return validateIntegrity(entitiesByIdMono, entitiesHashAndHashlinkById)
+                                                        .then(dataVerificationJob.verifyData(processId, issuer, entitiesByIdMono, mvEntities4DataNegotiation, decodedEntitySyncResponseMono, existingEntitiesHashAndHashLinkById));
+                                            });
                                 });
                     }));
+        });
+    }
+
+    private Mono<String> decodeEntitySyncResponse(Mono<String> entitySyncResponseMono) {
+        return entitySyncResponseMono.flatMap(entitySyncResponse -> {
+            try {
+                JsonNode entitiesJsonNode = objectMapper.readTree(entitySyncResponse);
+
+                if (entitiesJsonNode.isArray()) {
+                    return Mono.just(entitiesJsonNode)
+                            .flatMapIterable(jsonNodes -> jsonNodes)
+                            .map(entityNode -> Base64Converter.convertBase64ToString(entityNode.asText()))
+                            .collectList()
+                            .flatMap(decodedList -> Mono.just(decodedList)
+                                    .flatMapIterable(entities -> entities)
+                                    .map(entity -> JsonParser.parseString(entity).getAsJsonObject())
+                                    .collectList()
+                                    .flatMap(jsonObjects -> {
+                                        try {
+                                            return Mono.just(objectMapper.readTree(jsonObjects.toString()).toString());
+                                        } catch (JsonProcessingException e) {
+                                            return Mono.error(e);
+                                        }
+                                    }));
+                } else {
+                    return Mono.error(new InvalidSyncResponseException(INVALID_ENTITY_SYNC_RESPONSE));
+                }
+            } catch (JsonProcessingException e) {
+                return Mono.error(e);
+            }
         });
     }
 
@@ -99,16 +135,22 @@ public class DataTransferJobImpl implements DataTransferJob {
     private Mono<Map<Id, Entity>> getEntitiesById(Mono<String> entitiesMono) {
         return entitiesMono.flatMap(entities -> {
             try {
-                Map<Id, Entity> entitiesById = new HashMap<>();
                 JsonNode entitiesJsonNode = objectMapper.readTree(entities);
                 if (entitiesJsonNode.isArray()) {
-                    entitiesJsonNode.forEach(entityNode -> {
-                        String currentEntityId = entityNode.get("id").asText();
-                        entitiesById.put(new Id(currentEntityId), new Entity(entityNode.toString()));
-                    });
-                    return Mono.just(entitiesById);
+                    return Mono.just(entitiesJsonNode)
+                            .flatMapIterable(entitiesJsonNodes -> entitiesJsonNodes)
+                            .flatMap(entityNode -> {
+                                if(entityNode.has("id")){
+                                    String currentEntityId = entityNode.get("id").asText();
+                                    return Mono.just(Map.entry(new Id(currentEntityId), new Entity(entityNode.toString())));
+                                } else {
+                                    return Mono.error(new InvalidSyncResponseException(INVALID_ENTITY_SYNC_RESPONSE));
+                                }
+                            })
+                            .collectMap(Map.Entry::getKey, Map.Entry::getValue);
+
                 } else {
-                    return Mono.error(new InvalidSyncResponseException("Invalid EntitySync response."));
+                    return Mono.error(new InvalidSyncResponseException(INVALID_ENTITY_SYNC_RESPONSE));
                 }
             } catch (JsonProcessingException e) {
                 return Mono.error(e);

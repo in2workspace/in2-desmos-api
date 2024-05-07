@@ -7,6 +7,7 @@ import es.in2.desmos.domain.services.broker.BrokerPublisherService;
 import es.in2.desmos.domain.services.sync.DiscoverySyncWebClient;
 import es.in2.desmos.domain.services.sync.jobs.DataNegotiationJob;
 import es.in2.desmos.domain.services.sync.jobs.P2PDataSyncJob;
+import es.in2.desmos.domain.utils.Base64Converter;
 import es.in2.desmos.infrastructure.configs.ExternalAccessNodesConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -88,7 +89,8 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
 
     @Override
     public Mono<List<String>> getLocalEntitiesById(String processId, Mono<List<Id>> ids) {
-        return brokerPublisherService.findAllById(processId, ids);
+        return brokerPublisherService.findAllById(processId, ids)
+                .map(Base64Converter::convertStringListToBase64List);
     }
 
     private Mono<List<MVEntity4DataNegotiation>> createLocalMvEntities4DataNegotiation(String processId) {

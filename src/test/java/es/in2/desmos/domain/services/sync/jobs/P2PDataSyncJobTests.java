@@ -2,8 +2,8 @@ package es.in2.desmos.domain.services.sync.jobs;
 
 import es.in2.desmos.domain.events.DataNegotiationEventPublisher;
 import es.in2.desmos.domain.models.AuditRecord;
-import es.in2.desmos.domain.models.Id;
 import es.in2.desmos.domain.models.BrokerEntityWithIdTypeLastUpdateAndVersion;
+import es.in2.desmos.domain.models.Id;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.domain.services.api.impl.AuditRecordServiceImpl;
 import es.in2.desmos.domain.services.broker.impl.BrokerPublisherServiceImpl;
@@ -23,6 +23,7 @@ import reactor.test.StepVerifier;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
@@ -135,17 +136,28 @@ class P2PDataSyncJobTests {
         List<String> localEntities = new ArrayList<>();
         for (int i = 0; i < expectedResponseJsonArray.length(); i++) {
             String entity = expectedResponseJsonArray.getString(i);
+
             localEntities.add(entity);
         }
         Mono<List<String>> localEntitiesMono = Mono.just(localEntities);
+
+        List<String> expectedLocalEntities = new ArrayList<>();
+        for(var item: localEntities){
+            String encodedItem = Base64.getEncoder().encodeToString(item.getBytes());
+
+            expectedLocalEntities.add(encodedItem);
+        }
+
         String processId = "0";
         when(brokerPublisherService.findAllById(eq(processId), any())).thenReturn(localEntitiesMono);
 
         Mono<List<String>> result = p2PDataSyncJob.getLocalEntitiesById(processId, idsMono);
 
+        System.out.println(expectedLocalEntities);
+
         StepVerifier
                 .create(result)
-                .expectNext(localEntities)
+                .expectNext(expectedLocalEntities)
                 .verifyComplete();
 
         verify(brokerPublisherService, times(1)).findAllById(eq(processId), any());

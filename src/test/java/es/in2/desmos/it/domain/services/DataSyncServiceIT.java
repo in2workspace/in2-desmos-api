@@ -94,12 +94,12 @@ class DataSyncServiceIT {
 
             mockWebServer2.start(49152);
             var json2List = DiscoveryResponseMother.json2List();
-            var entitySyncResponse2 = EntitySyncResponseMother.sample2;
+            var entitySyncResponse2 = EntitySyncResponseMother.getSample2Base64();
             mockWebServer2.setDispatcher(getDiscoverySyncMockWebServerDispatcher(json2List, entitySyncResponse2));
 
             mockWebServer3.start(49153);
             var json4List = DiscoveryResponseMother.json4List();
-            var entitySyncResponse4 = EntitySyncResponseMother.sample4;
+            var entitySyncResponse4 = EntitySyncResponseMother.getSample4Base64();
             mockWebServer3.setDispatcher(getDiscoverySyncMockWebServerDispatcher(json4List, entitySyncResponse4));
 
             Mono<Void> response = WebClient.builder()
@@ -153,7 +153,7 @@ class DataSyncServiceIT {
 
     @Test
     void itShouldUpsertExternalEntities() throws IOException, InterruptedException {
-        var entitySyncResponse = EntitySyncResponseMother.sample2and4;
+        var entitySyncResponse = EntitySyncResponseMother.getSample2And4Base64();
         mockWebServer.enqueue(new MockResponse()
                 .setBody(entitySyncResponse));
 
@@ -204,7 +204,7 @@ class DataSyncServiceIT {
 
     @Test
     void itShouldCreateAuditRecord() throws IOException, InterruptedException {
-        var entitySyncResponse = EntitySyncResponseMother.sample2and4;
+        var entitySyncResponse = EntitySyncResponseMother.getSample2And4Base64();
         mockWebServer.enqueue(new MockResponse()
                 .setBody(entitySyncResponse));
 
@@ -253,6 +253,7 @@ class DataSyncServiceIT {
     void itShouldReturnAllRequestedEntities() {
         givenEntitiesToRequestInScorpio();
         Mono<String> resultMono = whenUserRequestEntities();
+
         thenApplicationReturnRequestedEntities(resultMono);
 
         removeEntitiesToRequest();
@@ -283,9 +284,8 @@ class DataSyncServiceIT {
                 .create(resultMono)
                 .consumeNextWith(result -> {
                     try {
-                        System.out.println("Result: " + result);
-                        JSONAssert.assertEquals(BrokerDataMother.getEntityRequestBrokerJson, result, false);
-                    } catch (JSONException e) {
+                        JSONAssert.assertEquals(BrokerDataMother.getGetEntityRequestBrokerJsonBase64(), result, false);
+                    } catch (JSONException | JsonProcessingException e) {
                         throw new RuntimeException(e);
                     }
                 })

@@ -3,7 +3,7 @@ package es.in2.desmos.infrastructure.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.JsonParser;
+import com.google.gson.JsonArray;
 import es.in2.desmos.domain.models.DiscoverySyncRequest;
 import es.in2.desmos.domain.models.DiscoverySyncResponse;
 import es.in2.desmos.domain.models.Id;
@@ -32,7 +32,7 @@ public class DataSyncController {
     private final P2PDataSyncJob p2PDataSyncJob;
     private final BrokerConfig brokerConfig;
     private final ObjectMapper objectMapper;
-    
+
     @GetMapping("/data")
     public Mono<Void> syncData2() {
         String processId = UUID.randomUUID().toString();
@@ -66,6 +66,7 @@ public class DataSyncController {
     public Mono<JsonNode> entitiesSync(@RequestBody @Valid Mono<Id[]> entitySyncRequest) {
         String processId = UUID.randomUUID().toString();
         log.info("ProcessID: {} - Starting P2P Entities Synchronization Controller", processId);
+
         return entitySyncRequest.flatMapMany(Flux::fromArray)
                 .collectList()
                 .flatMap(ids -> {
@@ -73,11 +74,20 @@ public class DataSyncController {
                     Mono<List<Id>> idsMono = Mono.just(ids);
                     return p2PDataSyncJob.getLocalEntitiesById(processId, idsMono)
                             .flatMapIterable(entities -> entities)
-                            .map(entity -> JsonParser.parseString(entity).getAsJsonObject())
+                            .map(entity -> {
+                                JsonArray jsonArray = new JsonArray();
+                                jsonArray.add(entity);
+                                return jsonArray;
+                            })
                             .collectList()
                             .flatMap(jsonObjects -> {
+                                JsonArray jsonArray = new JsonArray();
+                                for (JsonArray array : jsonObjects) {
+                                    jsonArray.addAll(array);
+                                }
+
                                 try {
-                                    return Mono.just(objectMapper.readTree(jsonObjects.toString()));
+                                    return Mono.just(objectMapper.readTree(jsonArray.toString()));
                                 } catch (JsonProcessingException e) {
                                     return Mono.error(e);
                                 }

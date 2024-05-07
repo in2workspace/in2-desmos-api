@@ -20,10 +20,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.io.IOException;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
@@ -53,7 +51,7 @@ class DataTransferJobTest {
     private ArgumentCaptor<Mono<List<MVEntity4DataNegotiation>>> mvEntities4DataNegotiationCaptor;
 
     @Test
-    void itShouldRequestEntitiesToExternalAccessNodeFromMultipleIssuers() {
+    void itShouldRequestEntitiesToExternalAccessNodeFromMultipleIssuers() throws IOException {
         String issuer1 = "https://example1.org";
         String issuer2 = "https://example2.org";
         List<DataNegotiationResult> dataNegotiationResults = DataNegotiationResultMother.listNewToSync4AndExistingToSync2(issuer1, issuer2);
@@ -61,8 +59,8 @@ class DataTransferJobTest {
         Id[] entitySyncRequest1 = EntitySyncRequestMother.createFromDataNegotiationResult(dataNegotiationResults.get(0));
         Id[] entitySyncRequest2 = EntitySyncRequestMother.createFromDataNegotiationResult(dataNegotiationResults.get(1));
 
-        Mono<String> entitySyncResponseMono2 = Mono.just(EntitySyncResponseMother.sample2);
-        Mono<String> entitySyncResponseMono4 = Mono.just(EntitySyncResponseMother.sample4);
+        Mono<String> entitySyncResponseMono2 = Mono.just(EntitySyncResponseMother.getSample2Base64());
+        Mono<String> entitySyncResponseMono4 = Mono.just(EntitySyncResponseMother.getSample4Base64());
 
         String processId = "0";
         when(entitySyncWebClient.makeRequest(eq(processId), any(), any()))
@@ -120,7 +118,7 @@ class DataTransferJobTest {
 
 
     @Test
-    void itShouldRequestEntitiesToExternalAccessNode() {
+    void itShouldRequestEntitiesToExternalAccessNode() throws IOException {
         DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
         Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
 
@@ -130,7 +128,7 @@ class DataTransferJobTest {
                                 dataNegotiationResult.existingEntitiesToSync().stream().map(x -> new Id(x.id())))
                         .toArray(Id[]::new);
 
-        Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.sample);
+        Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.getSampleBase64());
 
         String processId = "0";
         when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
@@ -162,11 +160,11 @@ class DataTransferJobTest {
     }
 
     @Test
-    void itShouldReturnInvalidIntegrityExceptionWhenHashIsIncorrect() {
+    void itShouldReturnInvalidIntegrityExceptionWhenHashIsIncorrect() throws IOException {
         DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.badHash();
         Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
 
-        Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.sample);
+        Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.getSampleBase64());
 
         String processId = "0";
         when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
@@ -184,11 +182,11 @@ class DataTransferJobTest {
     }
 
     @Test
-    void itShouldReturnBadEntitySyncResponseExceptionWhenSyncResponseJsonHasNotArray() {
+    void itShouldReturnBadEntitySyncResponseExceptionWhenSyncResponseJsonHasNotArray() throws IOException {
         DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
         Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
 
-        Mono<String> entitySyncResponseMono = Mono.just("{}");
+        Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.getEmptySampleBase64());
 
         String processId = "0";
         when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
@@ -244,19 +242,17 @@ class DataTransferJobTest {
     }
 
     @Test
-    void itShouldReturnJsonProcessingExceptionWhenBadJsonSortingEntities() throws JsonProcessingException {
+    void itShouldReturnJsonProcessingExceptionWhenBadJsonSortingEntities() throws IOException {
         DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
         Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
 
         String processId = "0";
-        String entitySyncResponse = EntitySyncResponseMother.sample;
+        String entitySyncResponse = EntitySyncResponseMother.getSampleBase64();
         Mono<String> entitySyncResponseMono = Mono.just(entitySyncResponse);
         JsonNode entitySyncResponseJsonNode = objectMapper.readTree(entitySyncResponse);
 
         when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
         when(objectMapper.readTree(anyString())).thenReturn(entitySyncResponseJsonNode).thenThrow(JsonProcessingException.class);
-
-        when(dataVerificationJob.verifyData(eq(processId), any(), any(), any(), any(), any())).thenReturn(Mono.empty());
 
         Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
 
@@ -269,14 +265,14 @@ class DataTransferJobTest {
     }
 
     @Test
-    void itShouldBuildAllMVEntities4DataNegotiation() {
+    void itShouldBuildAllMVEntities4DataNegotiation() throws IOException {
         DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
         Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
 
         var allMVEntities4DataNegotiation = Stream.concat(dataNegotiationResult.newEntitiesToSync().stream(), dataNegotiationResult.existingEntitiesToSync().stream()).toList();
         List<MVEntity4DataNegotiation> expectedMVEntities4DataNegotiation = new ArrayList<>(allMVEntities4DataNegotiation);
 
-        Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.sample);
+        Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.getSampleBase64());
 
         String processId = "0";
         when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);

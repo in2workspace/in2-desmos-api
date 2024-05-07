@@ -1,8 +1,31 @@
 package es.in2.desmos.objectmothers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+
 public final class BrokerDataMother {
 
+    public final static ObjectMapper objectMapper = new ObjectMapper();
+
     private BrokerDataMother() {
+    }
+
+    public static String getGetEntityRequestBrokerJsonBase64() throws JsonProcessingException {
+        JsonNode jsonNode = objectMapper.readTree(getEntityRequestBrokerJson);
+        List<String> items = new ArrayList<>();
+        jsonNode.forEach(item -> {
+            String base64Item = Base64.getEncoder().encodeToString(item.toString().getBytes());
+            items.add(base64Item);
+        });
+
+        return objectMapper.writeValueAsString(items);
+
+
     }
 
     public final static String getEntityRequestBrokerJson =

@@ -25,6 +25,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -93,17 +94,20 @@ class DataSyncControllerTests {
         Id[] entitySyncRequest = IdMother.entitiesRequest;
         Mono<Id[]> entitySyncRequestMono = Mono.just(entitySyncRequest);
 
-        String expectedResponse = BrokerDataMother.getEntityRequestBrokerJson;
+        String entities = BrokerDataMother.getEntityRequestBrokerJson;
 
-        JSONArray expectedResponseJsonArray = new JSONArray(expectedResponse);
-        List<String> localEntities = new ArrayList<>();
-        for (int i = 0; i < expectedResponseJsonArray.length(); i++) {
-            String entity = expectedResponseJsonArray.getString(i);
-            localEntities.add(entity);
+        JSONArray originalEntities = new JSONArray(entities);
+        JSONArray expectedEntities = new JSONArray();
+        List<String> base64Entities = new ArrayList<>();
+        for (int i = 0; i < originalEntities.length(); i++) {
+            String entity = originalEntities.getString(i);
+            String encodedEntity = Base64.getEncoder().encodeToString(entity.getBytes());
+            base64Entities.add(encodedEntity);
+            expectedEntities.put(encodedEntity);
         }
-        Mono<List<String>> localEntitiesMono = Mono.just(localEntities);
 
-        when(p2PDataSyncJob.getLocalEntitiesById(any(), any())).thenReturn(localEntitiesMono);
+
+        when(p2PDataSyncJob.getLocalEntitiesById(any(), any())).thenReturn(Mono.just(base64Entities));
 
         webTestClient.post()
                 .uri("/api/v1/sync/p2p/entities")
@@ -113,7 +117,7 @@ class DataSyncControllerTests {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .json(expectedResponse)
+                .json(expectedEntities.toString())
                 .consumeWith(System.out::println);
 
         verify(p2PDataSyncJob, times(1)).getLocalEntitiesById(any(), any());
