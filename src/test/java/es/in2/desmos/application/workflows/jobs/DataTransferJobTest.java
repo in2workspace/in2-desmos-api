@@ -3,14 +3,13 @@ package es.in2.desmos.application.workflows.jobs;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import es.in2.desmos.application.workflows.jobs.DataVerificationJob;
+import es.in2.desmos.application.workflows.jobs.impl.DataTransferJobImpl;
 import es.in2.desmos.domain.exceptions.InvalidIntegrityException;
 import es.in2.desmos.domain.exceptions.InvalidSyncResponseException;
 import es.in2.desmos.domain.models.DataNegotiationResult;
 import es.in2.desmos.domain.models.Id;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.domain.services.sync.EntitySyncWebClient;
-import es.in2.desmos.application.workflows.jobs.impl.DataTransferJobImpl;
 import es.in2.desmos.objectmothers.DataNegotiationResultMother;
 import es.in2.desmos.objectmothers.EntitySyncRequestMother;
 import es.in2.desmos.objectmothers.EntitySyncResponseMother;
@@ -22,7 +21,10 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
@@ -50,6 +52,8 @@ class DataTransferJobTest {
 
     @Captor
     private ArgumentCaptor<Mono<List<MVEntity4DataNegotiation>>> mvEntities4DataNegotiationCaptor;
+
+    private static int objectMapperReadTreeCounter = 0;
 
     @Test
     void itShouldRequestEntitiesToExternalAccessNodeFromMultipleIssuers() throws IOException {
@@ -218,6 +222,59 @@ class DataTransferJobTest {
                 create(result)
                 .expectErrorMatches(throwable -> throwable instanceof InvalidSyncResponseException &&
                         throwable.getMessage().equals("Invalid EntitySync response.")
+                )
+                .verify();
+    }
+
+    @Test
+    void itShouldReturnJsonProcessingExceptionWhenDecodedJsonArrayIsNotArray() throws JsonProcessingException {
+        DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
+        Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
+
+        Mono<String> entitySyncResponseMono = Mono.just("{}");
+
+        String processId = "0";
+        when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
+
+        doAnswer(invocation -> {
+            if (objectMapperReadTreeCounter == 2) {
+                throw new JsonProcessingException("") {
+                };
+            } else {
+                objectMapperReadTreeCounter++;
+                return objectMapper.createArrayNode();
+            }
+        })
+                .when(objectMapper).readTree(anyString());
+
+        Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
+
+        StepVerifier.
+                create(result)
+                .expectErrorMatches(throwable -> throwable instanceof JsonProcessingException
+                )
+                .verify();
+    }
+
+    @Test
+    void itShouldReturnJsonProcessingExceptionWhenWriteValueAsString() throws IOException {
+        DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
+        Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
+
+        Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.getSampleBase64());
+
+        String processId = "0";
+        when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
+
+        when(dataVerificationJob.verifyData(eq(processId), any(), any(), any(), any(), any())).thenReturn(Mono.empty());
+
+        when(objectMapper.writeValueAsString(any())).thenThrow(JsonProcessingException.class);
+
+        Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
+
+        StepVerifier.
+                create(result)
+                .expectErrorMatches(throwable -> throwable instanceof JsonProcessingException
                 )
                 .verify();
     }
