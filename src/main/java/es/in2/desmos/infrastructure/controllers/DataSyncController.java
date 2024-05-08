@@ -34,7 +34,7 @@ public class DataSyncController {
     private final ObjectMapper objectMapper;
 
     @GetMapping("/data")
-    public Mono<Void> syncData2() {
+    public Mono<Void> synchronizeData() {
         String processId = UUID.randomUUID().toString();
         log.info("ProcessID: {} - Starting Data Synchronization...", processId);
         return dataSyncService.synchronizeData(processId); // todo: decide if we wanna go through the p2p or dataSync
