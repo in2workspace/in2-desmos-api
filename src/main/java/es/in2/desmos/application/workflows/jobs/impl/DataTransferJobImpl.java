@@ -136,7 +136,6 @@ public class DataTransferJobImpl implements DataTransferJob {
         return entitiesMono.flatMap(entities -> {
             try {
                 JsonNode entitiesJsonNode = objectMapper.readTree(entities);
-                if (entitiesJsonNode.isArray()) {
                     return Mono.just(entitiesJsonNode)
                             .flatMapIterable(entitiesJsonNodes -> entitiesJsonNodes)
                             .flatMap(entityNode -> {
@@ -148,10 +147,6 @@ public class DataTransferJobImpl implements DataTransferJob {
                                 }
                             })
                             .collectMap(Map.Entry::getKey, Map.Entry::getValue);
-
-                } else {
-                    return Mono.error(new InvalidSyncResponseException(INVALID_ENTITY_SYNC_RESPONSE));
-                }
             } catch (JsonProcessingException e) {
                 return Mono.error(e);
             }
