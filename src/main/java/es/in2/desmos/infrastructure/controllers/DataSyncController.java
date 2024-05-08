@@ -1,11 +1,10 @@
 package es.in2.desmos.infrastructure.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import es.in2.desmos.application.workflows.jobs.P2PDataSyncJob;
 import es.in2.desmos.domain.models.DiscoverySyncRequest;
 import es.in2.desmos.domain.models.DiscoverySyncResponse;
 import es.in2.desmos.domain.models.Id;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
-import es.in2.desmos.application.workflows.jobs.P2PDataSyncJob;
 import es.in2.desmos.domain.services.sync.services.DataSyncService;
 import es.in2.desmos.infrastructure.configs.BrokerConfig;
 import jakarta.validation.Valid;
@@ -29,7 +28,6 @@ public class DataSyncController {
     private final DataSyncService dataSyncService;
     private final P2PDataSyncJob p2PDataSyncJob;
     private final BrokerConfig brokerConfig;
-    private final ObjectMapper objectMapper;
 
     @GetMapping("/data")
     public Mono<Void> synchronizeData() {

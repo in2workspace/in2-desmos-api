@@ -1,6 +1,5 @@
 package es.in2.desmos.application.workflows.jobs;
 
-import es.in2.desmos.application.workflows.jobs.DataTransferJob;
 import es.in2.desmos.domain.models.DataNegotiationEvent;
 import es.in2.desmos.domain.models.DataNegotiationResult;
 import es.in2.desmos.domain.models.Issuer;

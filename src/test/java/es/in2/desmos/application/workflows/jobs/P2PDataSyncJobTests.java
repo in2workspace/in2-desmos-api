@@ -1,6 +1,5 @@
 package es.in2.desmos.application.workflows.jobs;
 
-import es.in2.desmos.application.workflows.jobs.DataNegotiationJob;
 import es.in2.desmos.domain.events.DataNegotiationEventPublisher;
 import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.BrokerEntityWithIdTypeLastUpdateAndVersion;
