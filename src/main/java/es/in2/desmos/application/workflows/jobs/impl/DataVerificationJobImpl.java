@@ -1,13 +1,10 @@
 package es.in2.desmos.application.workflows.jobs.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import es.in2.desmos.application.workflows.jobs.DataVerificationJob;
 import es.in2.desmos.domain.exceptions.InvalidConsistencyException;
 import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
-import es.in2.desmos.application.workflows.jobs.DataVerificationJob;
 import es.in2.desmos.domain.utils.ApplicationUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +21,6 @@ import java.util.Map;
 public class DataVerificationJobImpl implements DataVerificationJob {
     private final AuditRecordService auditRecordService;
     private final BrokerPublisherService brokerPublisherService;
-    private final ObjectMapper objectMapper;
 
     public Mono<Void> verifyData(String processId, Mono<String> issuer, Mono<Map<Id, Entity>> entitiesByIdMono, Mono<List<MVEntity4DataNegotiation>> allMVEntity4DataNegotiation, Mono<String> entitySyncResponseMono, Mono<Map<Id, HashAndHashLink>> existingEntitiesOriginalValidationDataById) {
         log.info("ProcessID: {} - Starting Data Verification Job", processId);
@@ -95,22 +91,10 @@ public class DataVerificationJobImpl implements DataVerificationJob {
     }
 
     private Mono<String> calculateHash(Mono<String> retrievedBrokerEntityMono) {
-        Mono<String> sortedAttributesBrokerEntityMono = sortAttributesAlphabetically(retrievedBrokerEntityMono);
-        return sortedAttributesBrokerEntityMono.flatMap(sortedAttributesBrokerEntity -> {
+        return retrievedBrokerEntityMono.flatMap(sortedAttributesBrokerEntity -> {
             try {
                 return Mono.just(ApplicationUtils.calculateSHA256(sortedAttributesBrokerEntity));
             } catch (NoSuchAlgorithmException e) {
-                return Mono.error(e);
-            }
-        });
-    }
-
-    private Mono<String> sortAttributesAlphabetically(Mono<String> retrievedBrokerEntityMono) {
-        return retrievedBrokerEntityMono.flatMap(retrievedBrokerEntity -> {
-            try {
-                JsonNode retrievedBrokerEntityJsonNode = objectMapper.readTree(retrievedBrokerEntity);
-                return Mono.just(objectMapper.writeValueAsString(retrievedBrokerEntityJsonNode));
-            } catch (JsonProcessingException e) {
                 return Mono.error(e);
             }
         });

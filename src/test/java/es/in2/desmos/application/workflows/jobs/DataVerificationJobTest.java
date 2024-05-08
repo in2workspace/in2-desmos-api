@@ -1,12 +1,11 @@
 package es.in2.desmos.application.workflows.jobs;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import es.in2.desmos.application.workflows.jobs.impl.DataVerificationJobImpl;
 import es.in2.desmos.domain.exceptions.InvalidConsistencyException;
 import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
-import es.in2.desmos.application.workflows.jobs.impl.DataVerificationJobImpl;
 import es.in2.desmos.objectmothers.DataNegotiationResultMother;
 import es.in2.desmos.objectmothers.EntityMother;
 import es.in2.desmos.objectmothers.EntitySyncResponseMother;
@@ -149,37 +148,5 @@ class DataVerificationJobTest {
 
         verify(brokerPublisherService, times(1)).batchUpsertEntitiesToContextBroker(processId, entitySyncResponse);
         verifyNoMoreInteractions(brokerPublisherService);
-    }
-
-    @Test
-    void itShouldReturnJsonProcessingExceptionWhenBadJsonInEntitySyncResponse() throws JsonProcessingException {
-        String entitySyncResponse = EntitySyncResponseMother.sample;
-
-        String processId = "0";
-
-        when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sample4().id())).thenReturn(Mono.just(AuditRecord.builder().entityHashLink("fa54").build()));
-
-        Mono<String> issuer = Mono.just("http://example.org");
-
-        Map<Id, Entity> entitiesById = new HashMap<>();
-        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sample2().id()), new Entity("Invalid json"));
-        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sample4().id()), new Entity("Invalid json"));
-
-        List<MVEntity4DataNegotiation> allMVEntity4DataNegotiation = new ArrayList<>();
-        allMVEntity4DataNegotiation.add(MVEntity4DataNegotiationMother.sample2());
-        allMVEntity4DataNegotiation.add(MVEntity4DataNegotiationMother.sample4());
-
-        Map<Id, HashAndHashLink> existingEntitiesOriginalValidationDataById = new HashMap<>();
-        existingEntitiesOriginalValidationDataById.put(new Id(MVEntity4DataNegotiationMother.sample2().id()), new HashAndHashLink(MVEntity4DataNegotiationMother.sample2().hash(), MVEntity4DataNegotiationMother.sample2().hashlink()));
-        existingEntitiesOriginalValidationDataById.put(new Id(MVEntity4DataNegotiationMother.sample4().id()), new HashAndHashLink(MVEntity4DataNegotiationMother.sample4().hash(), MVEntity4DataNegotiationMother.sample4().hashlink()));
-
-        Mono<Void> result = dataVerificationJob.verifyData(processId, issuer, Mono.just(entitiesById), Mono.just(allMVEntity4DataNegotiation), Mono.just(entitySyncResponse), Mono.just(existingEntitiesOriginalValidationDataById));
-
-        StepVerifier.
-                create(result)
-                .expectErrorMatches(throwable -> throwable instanceof JsonProcessingException)
-                .verify();
-
-        verify(objectMapper, times(1)).readTree(anyString());
     }
 }

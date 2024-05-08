@@ -257,29 +257,6 @@ class DataTransferJobTest {
     }
 
     @Test
-    void itShouldReturnJsonProcessingExceptionWhenWriteValueAsString() throws IOException {
-        DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
-        Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
-
-        Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.getSampleBase64());
-
-        String processId = "0";
-        when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
-
-        when(dataVerificationJob.verifyData(eq(processId), any(), any(), any(), any(), any())).thenReturn(Mono.empty());
-
-        when(objectMapper.writeValueAsString(any())).thenThrow(JsonProcessingException.class);
-
-        Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
-
-        StepVerifier.
-                create(result)
-                .expectErrorMatches(throwable -> throwable instanceof JsonProcessingException
-                )
-                .verify();
-    }
-
-    @Test
     void itShouldReturnJsonProcessingExceptionWhenBadJsonInEntitySyncResponse() throws JsonProcessingException {
         DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
         Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);

@@ -199,22 +199,10 @@ public class DataTransferJobImpl implements DataTransferJob {
     }
 
     private Mono<String> calculateHash(Mono<String> retrievedBrokerEntityMono) {
-        Mono<String> sortedAttributesBrokerEntityMono = sortAttributesAlphabetically(retrievedBrokerEntityMono);
-        return sortedAttributesBrokerEntityMono.flatMap(sortedAttributesBrokerEntity -> {
+        return retrievedBrokerEntityMono.flatMap(sortedAttributesBrokerEntity -> {
             try {
                 return Mono.just(ApplicationUtils.calculateSHA256(sortedAttributesBrokerEntity));
             } catch (NoSuchAlgorithmException e) {
-                return Mono.error(e);
-            }
-        });
-    }
-
-    private Mono<String> sortAttributesAlphabetically(Mono<String> retrievedBrokerEntityMono) {
-        return retrievedBrokerEntityMono.flatMap(retrievedBrokerEntity -> {
-            try {
-                JsonNode retrievedBrokerEntityJsonNode = objectMapper.readTree(retrievedBrokerEntity);
-                return Mono.just(objectMapper.writeValueAsString(retrievedBrokerEntityJsonNode));
-            } catch (JsonProcessingException e) {
                 return Mono.error(e);
             }
         });
