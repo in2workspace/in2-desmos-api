@@ -12,6 +12,7 @@ import es.in2.desmos.domain.services.sync.jobs.P2PDataSyncJob;
 import es.in2.desmos.domain.services.sync.services.DataSyncService;
 import es.in2.desmos.infrastructure.configs.BrokerConfig;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -63,7 +64,7 @@ public class DataSyncController {
 
     @PostMapping(value = "/entities")
     @ResponseStatus(HttpStatus.OK)
-    public Mono<JsonNode> entitiesSync(@RequestBody @Valid Mono<Id[]> entitySyncRequest) {
+    public Mono<JsonNode> entitiesSync(@RequestBody @Valid Mono<@NotNull Id[]> entitySyncRequest) {
         String processId = UUID.randomUUID().toString();
         log.info("ProcessID: {} - Starting P2P Entities Synchronization Controller", processId);
 
