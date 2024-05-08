@@ -35,7 +35,9 @@ public class DataSyncController {
     public Mono<Void> synchronizeData() {
         String processId = UUID.randomUUID().toString();
         log.info("ProcessID: {} - Starting Data Synchronization...", processId);
-        return dataSyncService.synchronizeData(processId); // todo: decide if we wanna go through the p2p or dataSync
+
+        // TODO decide if we wanna go through the p2p or dataSync
+        return dataSyncService.synchronizeData(processId);
     }
 
     @PostMapping("/discovery")
@@ -43,6 +45,7 @@ public class DataSyncController {
     public Mono<DiscoverySyncResponse> discoverySync(@RequestBody @Valid Mono<DiscoverySyncRequest> discoverySyncRequest) {
         String processId = UUID.randomUUID().toString();
         log.info("ProcessID: {} - Starting P2P Data Synchronization Discovery Controller", processId);
+
         return discoverySyncRequest.flatMap(request -> {
                     log.debug("ProcessID: {} - Starting P2P Data Synchronization Discovery: {}", processId, request);
                     Mono<List<MVEntity4DataNegotiation>> externalMvEntities4DataNegotiationMono = Mono.just(request.externalMVEntities4DataNegotiation());
@@ -69,6 +72,7 @@ public class DataSyncController {
                 .collectList()
                 .flatMap(ids -> {
                     log.debug("ProcessID: {} - Starting P2P Entities Synchronization: {}", processId, ids);
+
                     Mono<List<Id>> idsMono = Mono.just(ids);
                     return p2PDataSyncJob.getLocalEntitiesById(processId, idsMono);
                 })
