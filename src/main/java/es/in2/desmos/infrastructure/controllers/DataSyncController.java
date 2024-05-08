@@ -1,9 +1,6 @@
 package es.in2.desmos.infrastructure.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.JsonArray;
 import es.in2.desmos.domain.models.DiscoverySyncRequest;
 import es.in2.desmos.domain.models.DiscoverySyncResponse;
 import es.in2.desmos.domain.models.Id;
@@ -64,7 +61,7 @@ public class DataSyncController {
 
     @PostMapping(value = "/entities")
     @ResponseStatus(HttpStatus.OK)
-    public Mono<JsonNode> entitiesSync(@RequestBody @Valid Mono<@NotNull Id[]> entitySyncRequest) {
+    public Mono<List<String>> entitiesSync(@RequestBody @Valid Mono<@NotNull Id[]> entitySyncRequest) {
         String processId = UUID.randomUUID().toString();
         log.info("ProcessID: {} - Starting P2P Entities Synchronization Controller", processId);
 
@@ -73,26 +70,7 @@ public class DataSyncController {
                 .flatMap(ids -> {
                     log.debug("ProcessID: {} - Starting P2P Entities Synchronization: {}", processId, ids);
                     Mono<List<Id>> idsMono = Mono.just(ids);
-                    return p2PDataSyncJob.getLocalEntitiesById(processId, idsMono)
-                            .flatMapIterable(entities -> entities)
-                            .map(entity -> {
-                                JsonArray jsonArray = new JsonArray();
-                                jsonArray.add(entity);
-                                return jsonArray;
-                            })
-                            .collectList()
-                            .flatMap(jsonObjects -> {
-                                JsonArray jsonArray = new JsonArray();
-                                for (JsonArray array : jsonObjects) {
-                                    jsonArray.addAll(array);
-                                }
-
-                                try {
-                                    return Mono.just(objectMapper.readTree(jsonArray.toString()));
-                                } catch (JsonProcessingException e) {
-                                    return Mono.error(e);
-                                }
-                            });
+                    return p2PDataSyncJob.getLocalEntitiesById(processId, idsMono);
                 })
                 .doOnSuccess(success -> log.info("ProcessID: {} - P2P Entities Synchronization successfully.", processId))
                 .doOnError(error -> log.error("ProcessID: {} - Error occurred while processing the P2P Entities Synchronization Controller: {}", processId, error.getMessage()));
