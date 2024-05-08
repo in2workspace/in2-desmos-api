@@ -3,13 +3,16 @@ package es.in2.desmos.domain.services.sync.services.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import es.in2.desmos.infrastructure.configs.ApiConfig;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import es.in2.desmos.domain.exceptions.BrokerEntityRetrievalException;
 import es.in2.desmos.domain.exceptions.HashLinkException;
+import es.in2.desmos.domain.exceptions.JsonReadingException;
 import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.BlockchainNotification;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.sync.services.DataSyncService;
+import es.in2.desmos.infrastructure.configs.ApiConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatusCode;
@@ -18,6 +21,9 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
 
 import static es.in2.desmos.domain.utils.ApplicationUtils.*;
 
@@ -100,10 +106,10 @@ public class DataSyncServiceImpl implements DataSyncService {
             // To verify the data integrity: hash(previousEntityHash + retrievedEntityHash) = dataLocationHashLink
             String previousEntityHash = blockchainNotification.previousEntityHash().substring(2);
             String dataLocationHashLink = extractHashLinkFromDataLocation(blockchainNotification.dataLocation());
-            if(dataLocationHashLink.equals(previousEntityHash)) {
+            if (dataLocationHashLink.equals(previousEntityHash)) {
                 // It is the first entity in the chain, and we need to verify that
                 // the hash of the retrieved entity is equal to the hash in the dataLocation
-                if(!retrievedEntityHash.equals(dataLocationHashLink)) {
+                if (!retrievedEntityHash.equals(dataLocationHashLink)) {
                     log.error("ProcessID: {} - Error occurred while verifying the data integrity of the retrieved entity: Hash verification failed", processId);
                     return Mono.error(new HashLinkException("Hash verification failed"));
                 }
@@ -112,7 +118,7 @@ public class DataSyncServiceImpl implements DataSyncService {
                 // the hash of the retrieved entity plus the previousEntitytHash is equal
                 // to the hashLink in the dataLocation
                 String calculatedEntityHasLink = calculateHashLink(previousEntityHash, retrievedEntityHash);
-                if(!calculatedEntityHasLink.equals(dataLocationHashLink)) {
+                if (!calculatedEntityHasLink.equals(dataLocationHashLink)) {
                     log.error("ProcessID: {} - Error occurred while verifying the data integrity of the retrieved entity: HashLink verification failed", processId);
                     return Mono.error(new HashLinkException("HashLink verification failed"));
                 }
@@ -146,7 +152,7 @@ public class DataSyncServiceImpl implements DataSyncService {
 
     private Mono<String> verifyDataConsistency(String processId, AuditRecord auditRecord, BlockchainNotification blockchainNotification, String retrievedBrokerEntity) {
         String previousEntityHash = blockchainNotification.previousEntityHash().substring(2);
-        if(auditRecord.getEntityHashLink().equals(previousEntityHash)) {
+        if (auditRecord.getEntityHashLink().equals(previousEntityHash)) {
             log.info("ProcessID: {} - Data consistency verification passed successfully", processId);
             return Mono.just(retrievedBrokerEntity);
         } else {
@@ -156,9 +162,36 @@ public class DataSyncServiceImpl implements DataSyncService {
     }
 
     private String sortAttributesAlphabetically(String retrievedBrokerEntity) throws JsonProcessingException {
-        // Sort alphabetically the attributes of the retrieved broker entity
         JsonNode retrievedBrokerEntityJson = objectMapper.readTree(retrievedBrokerEntity);
-        return objectMapper.writeValueAsString(retrievedBrokerEntityJson);
+        if (retrievedBrokerEntityJson.isObject()) {
+            TreeMap<String, JsonNode> sortedMap = new TreeMap<>();
+            Iterator<Map.Entry<String, JsonNode>> jsonNodeFields = retrievedBrokerEntityJson.fields();
+            while (jsonNodeFields.hasNext()) {
+                Map.Entry<String, JsonNode> entry = jsonNodeFields.next();
+                sortedMap.put(entry.getKey(), entry.getValue());
+            }
+            ObjectNode sortedObjectNode = objectMapper.createObjectNode();
+            sortedMap.forEach(sortedObjectNode::set);
+            return objectMapper.writeValueAsString(sortedObjectNode);
+        } else if (retrievedBrokerEntityJson.isArray()) {
+            ArrayNode arrayNode = (ArrayNode) retrievedBrokerEntityJson;
+            ArrayNode sortedArrayNode = objectMapper.createArrayNode();
+            arrayNode.forEach(node -> {
+                try {
+                    if (node.isObject()) {
+                        sortedArrayNode.add(objectMapper.readTree(sortAttributesAlphabetically(node.toString())));
+                    } else {
+                        sortedArrayNode.add(node);
+                    }
+                } catch (JsonProcessingException e) {
+//                    log.warn("ProcessID: {} - Error occurred while sorting the attributes of the retrieved entity: {}", processId, e.getMessage());
+                    throw new JsonReadingException("Error occurred while parsing JSON: " + e.getMessage());
+                }
+            });
+            return objectMapper.writeValueAsString(sortedArrayNode);
+        } else {
+            return objectMapper.writeValueAsString(retrievedBrokerEntityJson);
+        }
     }
 
 }
