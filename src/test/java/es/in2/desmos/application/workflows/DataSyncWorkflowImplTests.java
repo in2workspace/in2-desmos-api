@@ -1,7 +1,7 @@
 package es.in2.desmos.application.workflows;
 
 import es.in2.desmos.application.workflows.impl.DataSyncWorkflowImpl;
-import es.in2.desmos.domain.services.sync.jobs.P2PDataSyncJob;
+import es.in2.desmos.application.workflows.jobs.P2PDataSyncJob;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

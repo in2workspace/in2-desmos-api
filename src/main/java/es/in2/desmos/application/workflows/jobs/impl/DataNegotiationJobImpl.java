@@ -1,11 +1,11 @@
-package es.in2.desmos.domain.services.sync.jobs.impl;
+package es.in2.desmos.application.workflows.jobs.impl;
 
+import es.in2.desmos.application.workflows.jobs.DataNegotiationJob;
+import es.in2.desmos.application.workflows.jobs.DataTransferJob;
 import es.in2.desmos.domain.models.DataNegotiationEvent;
 import es.in2.desmos.domain.models.DataNegotiationResult;
 import es.in2.desmos.domain.models.Issuer;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
-import es.in2.desmos.domain.services.sync.jobs.DataNegotiationJob;
-import es.in2.desmos.domain.services.sync.jobs.DataTransferJob;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

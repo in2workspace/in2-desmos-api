@@ -1,10 +1,11 @@
-package es.in2.desmos.domain.services.sync.jobs;
+package es.in2.desmos.application.workflows.jobs;
 
+import es.in2.desmos.application.workflows.jobs.DataTransferJob;
 import es.in2.desmos.domain.models.DataNegotiationEvent;
 import es.in2.desmos.domain.models.DataNegotiationResult;
 import es.in2.desmos.domain.models.Issuer;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
-import es.in2.desmos.domain.services.sync.jobs.impl.DataNegotiationJobImpl;
+import es.in2.desmos.application.workflows.jobs.impl.DataNegotiationJobImpl;
 import es.in2.desmos.objectmothers.DataNegotiationResultMother;
 import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
 import org.junit.jupiter.api.Test;

@@ -1,4 +1,4 @@
-package es.in2.desmos.domain.services.sync.jobs;
+package es.in2.desmos.application.workflows.jobs;
 
 import reactor.core.publisher.Flux;
 

@@ -1,7 +1,7 @@
 package es.in2.desmos.it.domain.services;
 
 import es.in2.desmos.domain.events.DataNegotiationEventPublisher;
-import es.in2.desmos.domain.services.sync.jobs.DataNegotiationJob;
+import es.in2.desmos.application.workflows.jobs.DataNegotiationJob;
 import es.in2.desmos.it.ContainerManager;
 import es.in2.desmos.objectmothers.DataNegotiationEventMother;
 import org.junit.jupiter.api.MethodOrderer;

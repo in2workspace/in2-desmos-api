@@ -1,4 +1,4 @@
-package es.in2.desmos.domain.services.sync.jobs;
+package es.in2.desmos.application.workflows.jobs;
 
 import es.in2.desmos.domain.models.Entity;
 import es.in2.desmos.domain.models.HashAndHashLink;

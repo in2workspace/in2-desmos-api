@@ -1,15 +1,16 @@
-package es.in2.desmos.domain.services.sync.jobs;
+package es.in2.desmos.application.workflows.jobs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import es.in2.desmos.application.workflows.jobs.DataVerificationJob;
 import es.in2.desmos.domain.exceptions.InvalidIntegrityException;
 import es.in2.desmos.domain.exceptions.InvalidSyncResponseException;
 import es.in2.desmos.domain.models.DataNegotiationResult;
 import es.in2.desmos.domain.models.Id;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.domain.services.sync.EntitySyncWebClient;
-import es.in2.desmos.domain.services.sync.jobs.impl.DataTransferJobImpl;
+import es.in2.desmos.application.workflows.jobs.impl.DataTransferJobImpl;
 import es.in2.desmos.objectmothers.DataNegotiationResultMother;
 import es.in2.desmos.objectmothers.EntitySyncRequestMother;
 import es.in2.desmos.objectmothers.EntitySyncResponseMother;

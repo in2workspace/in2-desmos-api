@@ -1,4 +1,4 @@
-package es.in2.desmos.domain.services.sync.jobs;
+package es.in2.desmos.application.workflows.jobs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -6,7 +6,7 @@ import es.in2.desmos.domain.exceptions.InvalidConsistencyException;
 import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
-import es.in2.desmos.domain.services.sync.jobs.impl.DataVerificationJobImpl;
+import es.in2.desmos.application.workflows.jobs.impl.DataVerificationJobImpl;
 import es.in2.desmos.objectmothers.DataNegotiationResultMother;
 import es.in2.desmos.objectmothers.EntityMother;
 import es.in2.desmos.objectmothers.EntitySyncResponseMother;

@@ -1,16 +1,16 @@
-package es.in2.desmos.domain.services.sync.jobs.impl;
+package es.in2.desmos.application.workflows.jobs.impl;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonParser;
+import es.in2.desmos.application.workflows.jobs.DataTransferJob;
+import es.in2.desmos.application.workflows.jobs.DataVerificationJob;
 import es.in2.desmos.domain.exceptions.InvalidIntegrityException;
 import es.in2.desmos.domain.exceptions.InvalidSyncResponseException;
 import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.services.sync.EntitySyncWebClient;
-import es.in2.desmos.domain.services.sync.jobs.DataTransferJob;
-import es.in2.desmos.domain.services.sync.jobs.DataVerificationJob;
 import es.in2.desmos.domain.utils.ApplicationUtils;
 import es.in2.desmos.domain.utils.Base64Converter;
 import lombok.RequiredArgsConstructor;

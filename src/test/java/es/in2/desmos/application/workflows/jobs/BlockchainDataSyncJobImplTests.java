@@ -1,4 +1,4 @@
-package es.in2.desmos.domain.services.sync.jobs;
+package es.in2.desmos.application.workflows.jobs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -10,7 +10,7 @@ import es.in2.desmos.domain.models.BlockchainNotification;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.blockchain.adapter.BlockchainAdapterService;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
-import es.in2.desmos.domain.services.sync.jobs.impl.BlockchainDataSyncJobImpl;
+import es.in2.desmos.application.workflows.jobs.impl.BlockchainDataSyncJobImpl;
 import es.in2.desmos.domain.services.sync.services.DataSyncService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

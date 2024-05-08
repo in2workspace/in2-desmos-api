@@ -1,7 +1,7 @@
 package es.in2.desmos.application.workflows.impl;
 
 import es.in2.desmos.application.workflows.DataSyncWorkflow;
-import es.in2.desmos.domain.services.sync.jobs.P2PDataSyncJob;
+import es.in2.desmos.application.workflows.jobs.P2PDataSyncJob;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
