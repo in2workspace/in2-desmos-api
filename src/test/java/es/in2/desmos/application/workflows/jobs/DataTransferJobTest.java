@@ -330,4 +330,21 @@ class DataTransferJobTest {
                 .expectNext(expectedMVEntities4DataNegotiation)
                 .verifyComplete();
     }
+
+    @Test
+    void itShouldNotDoDataTransferIfDataNegotiationResultIsEmpty() {
+        DataNegotiationResult dataNegotiationResults = DataNegotiationResultMother.empty();
+
+        String processId = "0";
+
+        Mono<Void> result = dataTransferJob.syncData(processId, Mono.just(dataNegotiationResults));
+
+        StepVerifier.
+                create(result)
+                .verifyComplete();
+
+        verifyNoInteractions(entitySyncWebClient);
+        verifyNoInteractions(dataVerificationJob);
+        verifyNoInteractions(objectMapper);
+    }
 }

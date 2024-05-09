@@ -37,6 +37,12 @@ public final class DataNegotiationResultMother {
         return new DataNegotiationResult("http://example.org", newEntitiesToSync, existingEntitiesToSync);
     }
 
+    public static DataNegotiationResult empty(){
+        List<MVEntity4DataNegotiation> newEntitiesToSync = new ArrayList<>();
+        List<MVEntity4DataNegotiation> existingEntitiesToSync = new ArrayList<>();
+        return new DataNegotiationResult("http://example.org", newEntitiesToSync, existingEntitiesToSync);
+    }
+
 
     private static DataNegotiationResult existingToSync2(String issuer){
         List<MVEntity4DataNegotiation> newEntitiesToSync = new ArrayList<>();

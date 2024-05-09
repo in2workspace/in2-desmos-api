@@ -50,43 +50,47 @@ public class DataTransferJobImpl implements DataTransferJob {
             log.debug("ProcessID: {} - New Entities to Sync: {}", processId, result.newEntitiesToSync());
             log.debug("ProcessID: {} - Existing Entities to Sync: {}", processId, result.existingEntitiesToSync());
 
-            Mono<String> issuer = Mono.just(result.issuer());
+            if (!result.newEntitiesToSync().isEmpty() || !result.existingEntitiesToSync().isEmpty()) {
+                Mono<String> issuer = Mono.just(result.issuer());
 
-            Mono<Id[]> entitiesToRequest = buildAllEntitiesToRequest(
-                    Mono.just(result.newEntitiesToSync()),
-                    Mono.just(result.existingEntitiesToSync())
-            );
+                Mono<Id[]> entitiesToRequest = buildAllEntitiesToRequest(
+                        Mono.just(result.newEntitiesToSync()),
+                        Mono.just(result.existingEntitiesToSync())
+                );
 
-            return entitiesToRequest.flatMap(entities -> entitySyncWebClient.makeRequest(processId, issuer, entitiesToRequest)
-                    .flatMap(entitySyncResponse -> {
-                        Mono<String> entitySyncResponseMono = Mono.just(entitySyncResponse);
+                return entitiesToRequest.flatMap(entities -> entitySyncWebClient.makeRequest(processId, issuer, entitiesToRequest)
+                        .flatMap(entitySyncResponse -> {
+                            Mono<String> entitySyncResponseMono = Mono.just(entitySyncResponse);
 
-                        return decodeEntitySyncResponse(entitySyncResponseMono)
-                                .flatMap(decodedEntitySyncResponse -> {
-                                    Mono<String> decodedEntitySyncResponseMono = Mono.just(decodedEntitySyncResponse);
+                            return decodeEntitySyncResponse(entitySyncResponseMono)
+                                    .flatMap(decodedEntitySyncResponse -> {
+                                        Mono<String> decodedEntitySyncResponseMono = Mono.just(decodedEntitySyncResponse);
 
-                                    return getEntitiesById(decodedEntitySyncResponseMono)
-                                            .flatMap(entitiesById -> {
-                                                Mono<Map<Id, Entity>> entitiesByIdMono = Mono.just(entitiesById);
+                                        return getEntitiesById(decodedEntitySyncResponseMono)
+                                                .flatMap(entitiesById -> {
+                                                    Mono<Map<Id, Entity>> entitiesByIdMono = Mono.just(entitiesById);
 
-                                                Mono<Map<Id, HashAndHashLink>> newEntitiesHashAndHashLinkById = getEntitiesHashAndHashLinkById(Mono.just(result.newEntitiesToSync()));
-                                                Mono<Map<Id, HashAndHashLink>> existingEntitiesHashAndHashLinkById = getEntitiesHashAndHashLinkById(Mono.just(result.existingEntitiesToSync()));
+                                                    Mono<Map<Id, HashAndHashLink>> newEntitiesHashAndHashLinkById = getEntitiesHashAndHashLinkById(Mono.just(result.newEntitiesToSync()));
+                                                    Mono<Map<Id, HashAndHashLink>> existingEntitiesHashAndHashLinkById = getEntitiesHashAndHashLinkById(Mono.just(result.existingEntitiesToSync()));
 
-                                                Mono<Map<Id, HashAndHashLink>> entitiesHashAndHashlinkById =
-                                                        concatTwoEntitiesOriginalValidationDataByIdMaps(
-                                                                newEntitiesHashAndHashLinkById,
-                                                                existingEntitiesHashAndHashLinkById);
+                                                    Mono<Map<Id, HashAndHashLink>> entitiesHashAndHashlinkById =
+                                                            concatTwoEntitiesOriginalValidationDataByIdMaps(
+                                                                    newEntitiesHashAndHashLinkById,
+                                                                    existingEntitiesHashAndHashLinkById);
 
-                                                Mono<List<MVEntity4DataNegotiation>> mvEntities4DataNegotiation = buildAllMVEntities4DataNegotiation(
-                                                        Mono.just(result.newEntitiesToSync()),
-                                                        Mono.just(result.existingEntitiesToSync())
-                                                );
+                                                    Mono<List<MVEntity4DataNegotiation>> mvEntities4DataNegotiation = buildAllMVEntities4DataNegotiation(
+                                                            Mono.just(result.newEntitiesToSync()),
+                                                            Mono.just(result.existingEntitiesToSync())
+                                                    );
 
-                                                return validateIntegrity(entitiesByIdMono, entitiesHashAndHashlinkById)
-                                                        .then(dataVerificationJob.verifyData(processId, issuer, entitiesByIdMono, mvEntities4DataNegotiation, decodedEntitySyncResponseMono, existingEntitiesHashAndHashLinkById));
-                                            });
-                                });
-                    }));
+                                                    return validateIntegrity(entitiesByIdMono, entitiesHashAndHashlinkById)
+                                                            .then(dataVerificationJob.verifyData(processId, issuer, entitiesByIdMono, mvEntities4DataNegotiation, decodedEntitySyncResponseMono, existingEntitiesHashAndHashLinkById));
+                                                });
+                                    });
+                        }));
+            } else {
+                return Mono.empty();
+            }
         });
     }
 
@@ -189,6 +193,7 @@ public class DataTransferJobImpl implements DataTransferJob {
                                     return Mono.empty();
                                 } else {
                                     log.error("expected hash: {}\ncurrent hash: {}", calculatedHash, hashValue);
+
                                     return Mono.error(new InvalidIntegrityException("The hash received at the origin is different from the actual hash of the entity."));
                                 }
                             }));
