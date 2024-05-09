@@ -8,10 +8,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SpringBootTest()
+@Testcontainers
+@SpringBootTest
 @TestPropertySource(properties = {"external-access-nodes.urls=https://example1.org, https://example2.org"})
 class ExternalAccessNodesPropertiesTests {
     @Autowired

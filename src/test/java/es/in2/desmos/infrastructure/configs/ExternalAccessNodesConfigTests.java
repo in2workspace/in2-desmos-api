@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.Mockito.when;
@@ -33,6 +34,32 @@ class ExternalAccessNodesConfigTests {
         StepVerifier
                 .create(result)
                 .expectNext(UrlMother.example1And2urlsList())
+                .verifyComplete();
+    }
+
+    @Test
+    void itShouldReturnEmptyListIfNull() {
+
+        when(externalAccessNodesProperties.urls()).thenReturn(null);
+
+        Mono<List<String>> result = externalAccessNodesConfig.getExternalAccessNodesUrls();
+
+        StepVerifier
+                .create(result)
+                .expectNext(new ArrayList<>())
+                .verifyComplete();
+    }
+
+    @Test
+    void itShouldReturnEmptyListIfBlank() {
+
+        when(externalAccessNodesProperties.urls()).thenReturn("  ");
+
+        Mono<List<String>> result = externalAccessNodesConfig.getExternalAccessNodesUrls();
+
+        StepVerifier
+                .create(result)
+                .expectNext(new ArrayList<>())
                 .verifyComplete();
     }
 }

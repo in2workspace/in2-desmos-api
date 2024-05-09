@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -17,7 +18,11 @@ public class ExternalAccessNodesConfig {
 
     public Mono<List<String>> getExternalAccessNodesUrls() {
         String externalAccessNodes = externalAccessNodesProperties.urls();
-        return getUrlsListFromCommaSeparatedString(externalAccessNodes);
+        if(externalAccessNodes != null && !externalAccessNodes.isBlank()){
+            return getUrlsListFromCommaSeparatedString(externalAccessNodes);
+        } else{
+            return Mono.just(new ArrayList<>());
+        }
     }
 
     private Mono<List<String>> getUrlsListFromCommaSeparatedString(String commaSeparatedUrlsList) {
