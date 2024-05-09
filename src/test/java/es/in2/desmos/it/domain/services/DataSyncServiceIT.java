@@ -74,7 +74,7 @@ class DataSyncServiceIT {
     }
 
     @BeforeEach
-    void setUp() throws IOException, JSONException {
+    void setUp() throws IOException {
         initialMvEntity4DataNegotiationList = createInitialEntitiesInScorpio();
         createInitialEntitiesInAuditRecord(auditRecordService, initialMvEntity4DataNegotiationList);
         startMockWebServer();
@@ -116,10 +116,10 @@ class DataSyncServiceIT {
                     .verifyComplete();
         }
 
-        assertScorpioEntityIsExpected(EntitySyncResponseMother.id1, EntityMother.scorpioJson1());
-        assertScorpioEntityIsExpected(EntitySyncResponseMother.id2, EntityMother.scorpioJson2());
-        assertScorpioEntityIsExpected(EntitySyncResponseMother.id3, EntityMother.scorpioJson3());
-        assertScorpioEntityIsExpected(EntitySyncResponseMother.id4, EntityMother.scorpioJson4());
+        assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sample1().id(), EntityMother.scorpioJson1());
+        assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sample2().id(), EntityMother.scorpioJson2());
+        assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sample3().id(), EntityMother.scorpioJson3());
+        assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sample4().id(), EntityMother.scorpioJson4());
     }
 
     @Test
@@ -187,10 +187,10 @@ class DataSyncServiceIT {
                 .verifyComplete();
 
         try {
-            assertScorpioEntityIsExpected(EntitySyncResponseMother.id1, EntityMother.scorpioJson1());
-            assertScorpioEntityIsExpected(EntitySyncResponseMother.id2, EntityMother.scorpioJson2());
-            assertScorpioEntityIsExpected(EntitySyncResponseMother.id3, EntityMother.scorpioJson3());
-            assertScorpioEntityIsExpected(EntitySyncResponseMother.id4, EntityMother.scorpioJson4());
+            assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sample1().id(), EntityMother.scorpioJson1());
+            assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sample2().id(), EntityMother.scorpioJson2());
+            assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sample3().id(), EntityMother.scorpioJson3());
+            assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sample4().id(), EntityMother.scorpioJson4());
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -237,10 +237,10 @@ class DataSyncServiceIT {
                 .expectNext(expectedDiscoverySyncResponseJson)
                 .verifyComplete();
 
-        assertAuditRecordEntityIsExpected(EntitySyncResponseMother.id1, MVEntity4DataNegotiationMother.sample1(), "http://example.org");
-        assertAuditRecordEntityIsExpected(EntitySyncResponseMother.id2, MVEntity4DataNegotiationMother.sample2(), issuer);
-        assertAuditRecordEntityIsExpected(EntitySyncResponseMother.id3, MVEntity4DataNegotiationMother.sample3(), "http://example.org");
-        assertAuditRecordEntityIsExpected(EntitySyncResponseMother.id4, MVEntity4DataNegotiationMother.sample4(), issuer);
+        assertAuditRecordEntityIsExpected(MVEntity4DataNegotiationMother.sample1().id(), MVEntity4DataNegotiationMother.sample1(), "http://example.org");
+        assertAuditRecordEntityIsExpected(MVEntity4DataNegotiationMother.sample2().id(), MVEntity4DataNegotiationMother.sample2(), issuer);
+        assertAuditRecordEntityIsExpected(MVEntity4DataNegotiationMother.sample3().id(), MVEntity4DataNegotiationMother.sample3(), "http://example.org");
+        assertAuditRecordEntityIsExpected(MVEntity4DataNegotiationMother.sample4().id(), MVEntity4DataNegotiationMother.sample4(), issuer);
 
 
         RecordedRequest request = mockWebServer.takeRequest();
@@ -360,9 +360,9 @@ class DataSyncServiceIT {
         });
     }
 
-    private @NotNull List<MVEntity4DataNegotiation> createInitialEntitiesInScorpio() throws JSONException, JsonProcessingException {
+    private @NotNull List<MVEntity4DataNegotiation> createInitialEntitiesInScorpio() throws JsonProcessingException {
         String brokerUrl = ContainerManager.getBaseUriForScorpioA();
-        String responseEntities = EntityMother.list1And2OldAnd3();
+        String responseEntities = EntityMother.getJsonList1And2OldAnd3();
         ScorpioInflator.addInitialEntitiesToContextBroker(brokerUrl, responseEntities);
 
         return MVEntity4DataNegotiationMother.list1And2OldAnd3();

@@ -1,8 +1,9 @@
 package es.in2.desmos.domain.services.sync;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import es.in2.desmos.domain.models.Id;
 import es.in2.desmos.domain.services.sync.impl.EntitySyncWebClientImpl;
-import es.in2.desmos.objectmothers.EntitySyncResponseMother;
+import es.in2.desmos.objectmothers.EntityMother;
 import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,14 +45,14 @@ class EntitySyncWebClientTests {
     private WebClient.RequestHeadersSpec requestHeadersSpec;
 
     @Test
-    void itShouldReturnEntitySyncResponseWhenMakeRequest() {
+    void itShouldReturnEntitySyncResponseWhenMakeRequest() throws JsonProcessingException {
         String processId = "0";
 
         String issuer = "http://example.org";
         Mono<String> issuerMono = Mono.just(issuer);
         Mono<Id[]> entitySyncRequest = Mono.just(MVEntity4DataNegotiationMother.fullList().stream().map(x -> new Id(x.id())).toArray(Id[]::new));
 
-        String expectedResult = (EntitySyncResponseMother.sample);
+        String expectedResult = (EntityMother.getFullJsonList());
 
 
         when(webClientMock.post()).thenReturn(requestBodyUriSpecMock);

@@ -38,8 +38,8 @@ public final class ScorpioInflator {
         System.out.println("Create entities to Scorpio: " + result);
     }
 
-    public static void addInitialEntitiesToContextBroker(String brokerUrl, String requestBody) throws JSONException, JsonProcessingException {
-        requestBody = addContextValue(requestBody);
+    public static void addInitialEntitiesToContextBroker(String brokerUrl, String requestBody) {
+        // requestBody = addContextValue(requestBody);
         var result = WebClient.builder()
                 .baseUrl(brokerUrl)
                 .build()
@@ -103,24 +103,4 @@ public final class ScorpioInflator {
         requestBody = requestBody.replace("\\/", "/");
         return requestBody;
     }
-
-    private static String addContextValue(String requestBody) throws JsonProcessingException, JSONException {
-        var contextValueFakeList = new JSONArray();
-        contextValueFakeList.put("https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld");
-
-        JSONObject[] productOfferings = objectMapper.readValue(requestBody, JSONObject[].class);
-
-        JSONArray productOfferingsJsonArray = new JSONArray();
-
-        for (JSONObject productOffering : productOfferings) {
-            productOffering.put("@context", contextValueFakeList);
-
-            productOfferingsJsonArray.put(productOffering);
-        }
-
-        String newRequestBody = productOfferingsJsonArray.toString();
-        newRequestBody = newRequestBody.replace("\\/", "/");
-        return newRequestBody;
-    }
-
 }

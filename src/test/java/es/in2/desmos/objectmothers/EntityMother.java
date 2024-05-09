@@ -1,13 +1,12 @@
 package es.in2.desmos.objectmothers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public final class EntityMother {
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -15,49 +14,228 @@ public final class EntityMother {
     private EntityMother() {
     }
 
-    public static String json1() throws JSONException {
-
-        MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample1();
-        return getEntityJsonString(mvEntity4DataNegotiation);
+    public static @NotNull String getFullJsonList() throws JsonProcessingException {
+        return compressJson(fullJsonList);
     }
 
-    public static final String sample2 = """            
-            {"id":"urn:ProductOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87","type":"ProductOffering","version":"2.5","lastUpdate":"2024-07-09T12:00:00Z","productSpecification":{"id":"spec-broadband-001","name":"1Gbps Broadband Spec"},"productOfferingPrice":{"type":"Relationship","object":"urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"},"@context":["https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"]}""";
-
-    public static String json2Old() throws JSONException {
-        MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample2VersionOld();
-        return getEntityJsonString(mvEntity4DataNegotiation);
+    public static String getJsonList1And2OldAnd3() throws JsonProcessingException {
+        return compressJson(jsonList1And2OldAnd3);
     }
 
-    public static String json3() throws JSONException {
-        MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample3();
-        return getEntityJsonString(mvEntity4DataNegotiation);
+    public static String getListJson2And4() throws JsonProcessingException {
+        return compressJson(listJson2And4);
     }
-    public static final String sample4 = """
-            {"id":"urn:ProductOffering:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c","type":"ProductOffering","version":"1.9","lastUpdate":"2024-06-02T12:00:00Z","productSpecification":{"id":"spec-broadband-001","name":"1Gbps Broadband Spec"},"productOfferingPrice":{"type":"Relationship","object":"urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"},"@context":["https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"]}""";
 
-    private static String getEntityJsonString(MVEntity4DataNegotiation mvEntity4DataNegotiation) throws JSONException {
-        JSONObject productOffering = new JSONObject();
-
-        productOffering.put("id", mvEntity4DataNegotiation.id());
-        productOffering.put("type", mvEntity4DataNegotiation.type());
-        productOffering.put("version", mvEntity4DataNegotiation.version());
-        productOffering.put("lastUpdate", mvEntity4DataNegotiation.lastUpdate());
-
-        JSONObject productSpecification = new JSONObject();
-        productSpecification.put("id", "spec-broadband-001");
-        productSpecification.put("name", "1Gbps Broadband Spec");
-
-        productOffering.put("productSpecification", productSpecification);
-
-        JSONObject productOfferingPrice = new JSONObject();
-        productOfferingPrice.put("type", "Relationship");
-        productOfferingPrice.put("object", "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a");
-
-        productOffering.put("productOfferingPrice", productOfferingPrice);
-
-        return productOffering.toString();
+    public static String getJson2() throws JsonProcessingException {
+        return compressJson(json2);
     }
+
+    public static String getJson4() throws JsonProcessingException {
+        return compressJson(json4);
+    }
+
+    private static final @NotNull String fullJsonList = """
+            [
+                 {
+                     "id": "urn:ProductOffering:d86735a6-0faa-463d-a872-00b97affa1cb",
+                     "type": "ProductOffering",
+                     "version": "1.2",
+                     "lastUpdate": "2024-09-05T12:00:00Z",
+                     "productSpecification": {
+                         "id": "spec-broadband-001",
+                         "name": "1Gbps Broadband Spec"
+                     },
+                     "productOfferingPrice": {
+                         "type": "Relationship",
+                         "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
+                     },
+                     "@context": [
+                         "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
+                     ]
+                 },
+                 {
+                     "id": "urn:ProductOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87",
+                     "type": "ProductOffering",
+                     "version": "2.5",
+                     "lastUpdate": "2024-07-09T12:00:00Z",
+                     "productSpecification": {
+                         "id": "spec-broadband-001",
+                         "name": "1Gbps Broadband Spec"
+                     },
+                     "productOfferingPrice": {
+                         "type": "Relationship",
+                         "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
+                     },
+                     "@context": [
+                         "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
+                     ]
+                 },
+                 {
+                     "id": "urn:ProductOffering:537e1ee3-0556-4fff-875f-e55bb97e7ab0",
+                     "type": "ProductOffering",
+                     "version": "4.3",
+                     "lastUpdate": "2024-04-03T12:00:00Z",
+                     "productSpecification": {
+                         "id": "spec-broadband-001",
+                         "name": "1Gbps Broadband Spec"
+                     },
+                     "productOfferingPrice": {
+                         "type": "Relationship",
+                         "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
+                     },
+                     "@context": [
+                         "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
+                     ]
+                 },
+                 {
+                     "id": "urn:ProductOffering:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c",
+                     "type": "ProductOffering",
+                     "version": "1.9",
+                     "lastUpdate": "2024-06-02T12:00:00Z",
+                     "productSpecification": {
+                         "id": "spec-broadband-001",
+                         "name": "1Gbps Broadband Spec"
+                     },
+                     "productOfferingPrice": {
+                         "type": "Relationship",
+                         "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
+                     },
+                     "@context": [
+                         "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
+                     ]
+                 }
+             ]""";
+
+    private static final String jsonList1And2OldAnd3 = """
+            [
+                {
+                         "id": "urn:ProductOffering:d86735a6-0faa-463d-a872-00b97affa1cb",
+                         "type": "ProductOffering",
+                         "version": "1.2",
+                         "lastUpdate": "2024-09-05T12:00:00Z",
+                         "productSpecification": {
+                             "id": "spec-broadband-001",
+                             "name": "1Gbps Broadband Spec"
+                         },
+                         "productOfferingPrice": {
+                             "type": "Relationship",
+                             "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
+                         },
+                         "@context": [
+                             "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
+                         ]
+                     },
+                     {
+                         "id": "urn:ProductOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87",
+                         "type": "ProductOffering",
+                         "version": "2.1",
+                         "lastUpdate": "2024-07-09T12:00:00Z",
+                         "productSpecification": {
+                             "id": "spec-broadband-001",
+                             "name": "1Gbps Broadband Spec"
+                         },
+                         "productOfferingPrice": {
+                             "type": "Relationship",
+                             "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
+                         },
+                         "@context": [
+                             "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
+                         ]
+                     },
+                     {
+                         "id": "urn:ProductOffering:537e1ee3-0556-4fff-875f-e55bb97e7ab0",
+                         "type": "ProductOffering",
+                         "version": "4.3",
+                         "lastUpdate": "2024-04-03T12:00:00Z",
+                         "productSpecification": {
+                             "id": "spec-broadband-001",
+                             "name": "1Gbps Broadband Spec"
+                         },
+                         "productOfferingPrice": {
+                             "type": "Relationship",
+                             "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
+                         },
+                         "@context": [
+                             "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
+                         ]
+                     }
+            ]""";
+
+    private static final String listJson2And4 = """
+            [
+                 {
+                     "id": "urn:ProductOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87",
+                     "type": "ProductOffering",
+                     "version": "2.5",
+                     "lastUpdate": "2024-07-09T12:00:00Z",
+                     "productSpecification": {
+                         "id": "spec-broadband-001",
+                         "name": "1Gbps Broadband Spec"
+                     },
+                     "productOfferingPrice": {
+                         "type": "Relationship",
+                         "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
+                     },
+                     "@context": [
+                         "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
+                     ]
+                 },
+                 {
+                     "id": "urn:ProductOffering:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c",
+                     "type": "ProductOffering",
+                     "version": "1.9",
+                     "lastUpdate": "2024-06-02T12:00:00Z",
+                     "productSpecification": {
+                         "id": "spec-broadband-001",
+                         "name": "1Gbps Broadband Spec"
+                     },
+                     "productOfferingPrice": {
+                         "type": "Relationship",
+                         "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
+                     },
+                     "@context": [
+                         "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
+                     ]
+                 }
+             ]""";
+
+    private static final String json2 = """
+            {
+                     "id": "urn:ProductOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87",
+                     "type": "ProductOffering",
+                     "version": "2.5",
+                     "lastUpdate": "2024-07-09T12:00:00Z",
+                     "productSpecification": {
+                         "id": "spec-broadband-001",
+                         "name": "1Gbps Broadband Spec"
+                     },
+                     "productOfferingPrice": {
+                         "type": "Relationship",
+                         "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
+                     },
+                     "@context": [
+                         "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
+                     ]
+                 }""";
+
+    private static final String json4 = """
+            {
+                     "id": "urn:ProductOffering:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c",
+                     "type": "ProductOffering",
+                     "version": "1.9",
+                     "lastUpdate": "2024-06-02T12:00:00Z",
+                     "productSpecification": {
+                         "id": "spec-broadband-001",
+                         "name": "1Gbps Broadband Spec"
+                     },
+                     "productOfferingPrice": {
+                         "type": "Relationship",
+                         "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
+                     },
+                     "@context": [
+                         "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
+                     ]
+                 }""";
 
     private static String getEntityJsonScorpioString(MVEntity4DataNegotiation mvEntity4DataNegotiation) throws JSONException {
         JSONObject productOffering = new JSONObject();
@@ -97,13 +275,9 @@ public final class EntityMother {
         return scorpioProperty;
     }
 
-    public static String list1And2OldAnd3() throws JSONException, JsonProcessingException {
-        List<String> jsonObjects = new ArrayList<>();
-        jsonObjects.add(json1());
-        jsonObjects.add(json2Old());
-        jsonObjects.add(json3());
-
-        return objectMapper.writeValueAsString(jsonObjects);
+    private static String compressJson(String json) throws JsonProcessingException {
+        JsonNode jsonNode = objectMapper.readTree(json);
+        return objectMapper.writeValueAsString(jsonNode);
     }
 
     public static String scorpioJson1() throws JSONException {
@@ -124,15 +298,5 @@ public final class EntityMother {
     public static String scorpioJson4() throws JSONException {
         MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample4();
         return getEntityJsonScorpioString(mvEntity4DataNegotiation);
-    }
-
-    public static String json2() throws JSONException {
-        MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample2();
-        return getEntityJsonString(mvEntity4DataNegotiation);
-    }
-
-    public static String json4() throws JSONException {
-        MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample4();
-        return getEntityJsonString(mvEntity4DataNegotiation);
     }
 }

@@ -10,7 +10,7 @@ import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import es.in2.desmos.domain.services.broker.adapter.factory.BrokerAdapterFactory;
 import es.in2.desmos.domain.services.broker.impl.BrokerPublisherServiceImpl;
 import es.in2.desmos.objectmothers.BrokerDataMother;
-import es.in2.desmos.objectmothers.EntitySyncResponseMother;
+import es.in2.desmos.objectmothers.EntityMother;
 import es.in2.desmos.objectmothers.IdMother;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -51,10 +51,10 @@ class BrokerPublisherServiceTests {
     }
 
     @Test
-    void itShouldBatchUpsertEntitiesToContextBroker() {
+    void itShouldBatchUpsertEntitiesToContextBroker() throws JsonProcessingException {
         String processId = "0";
 
-        String retrievedBrokerEntities = EntitySyncResponseMother.sample;
+        String retrievedBrokerEntities = EntityMother.getFullJsonList();
 
         when(brokerAdapterService.batchUpsertEntities(processId, retrievedBrokerEntities)).thenReturn(Mono.empty());
 

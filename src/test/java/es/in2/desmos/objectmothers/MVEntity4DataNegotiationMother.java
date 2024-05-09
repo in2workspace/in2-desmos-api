@@ -79,6 +79,13 @@ public final class MVEntity4DataNegotiationMother {
         return MVEntity4DataNegotiationList;
     }
 
+    public static List<MVEntity4DataNegotiation> list2And4() {
+        List<MVEntity4DataNegotiation> MVEntity4DataNegotiationList = new ArrayList<>();
+        MVEntity4DataNegotiationList.add(sample2());
+        MVEntity4DataNegotiationList.add(sample4());
+        return MVEntity4DataNegotiationList;
+    }
+
     public static @NotNull List<MVEntity4DataNegotiation> list3And4() {
         List<MVEntity4DataNegotiation> MVEntity4DataNegotiationList = new ArrayList<>();
         MVEntity4DataNegotiationList.add(sample3());

@@ -8,7 +8,6 @@ import es.in2.desmos.domain.services.broker.adapter.impl.ScorpioAdapter;
 import es.in2.desmos.inflators.ScorpioInflator;
 import es.in2.desmos.it.ContainerManager;
 import es.in2.desmos.objectmothers.EntityMother;
-import es.in2.desmos.objectmothers.EntitySyncResponseMother;
 import es.in2.desmos.objectmothers.MVBrokerEntity4DataNegotiationMother;
 import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
 import org.json.JSONException;
@@ -66,16 +65,16 @@ class ScorpioAdapterIT {
     }
 
     @Test
-    void itShouldBatchUpsertEntities() {
+    void itShouldBatchUpsertEntities() throws JsonProcessingException {
         String processId = "0";
-        String requestBody = EntitySyncResponseMother.sample;
+        String requestBody = EntityMother.getFullJsonList();
 
         Mono<Void> result = scorpioAdapter.batchUpsertEntities(processId, requestBody);
 
         StepVerifier.create(result)
                 .verifyComplete();
 
-        Mono<String> entity1Mono = scorpioAdapter.getEntityById(processId, EntitySyncResponseMother.id1);
+        Mono<String> entity1Mono = scorpioAdapter.getEntityById(processId, MVEntity4DataNegotiationMother.sample1().id());
         StepVerifier
                 .create(entity1Mono)
                 .consumeNextWith(entity1 -> {
@@ -87,7 +86,7 @@ class ScorpioAdapterIT {
                 })
                 .verifyComplete();
 
-        var entity2Mono = scorpioAdapter.getEntityById(processId, EntitySyncResponseMother.id2);
+        var entity2Mono = scorpioAdapter.getEntityById(processId, MVEntity4DataNegotiationMother.sample2().id());
         StepVerifier
                 .create(entity2Mono)
                 .consumeNextWith(entity2 -> {
@@ -99,7 +98,7 @@ class ScorpioAdapterIT {
                 })
                 .verifyComplete();
 
-        var entity3Mono = scorpioAdapter.getEntityById(processId, EntitySyncResponseMother.id3);
+        var entity3Mono = scorpioAdapter.getEntityById(processId, MVEntity4DataNegotiationMother.sample3().id());
         StepVerifier
                 .create(entity3Mono)
                 .consumeNextWith(entity3 -> {
@@ -111,7 +110,7 @@ class ScorpioAdapterIT {
                 })
                 .verifyComplete();
 
-        var entity4Mono = scorpioAdapter.getEntityById(processId, EntitySyncResponseMother.id4);
+        var entity4Mono = scorpioAdapter.getEntityById(processId, MVEntity4DataNegotiationMother.sample4().id());
         StepVerifier
                 .create(entity4Mono)
                 .consumeNextWith(entity4 -> {

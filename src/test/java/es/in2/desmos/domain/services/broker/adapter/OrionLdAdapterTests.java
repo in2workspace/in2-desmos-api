@@ -1,8 +1,9 @@
 package es.in2.desmos.domain.services.broker.adapter;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import es.in2.desmos.domain.models.BrokerEntityWithIdTypeLastUpdateAndVersion;
 import es.in2.desmos.domain.services.broker.adapter.impl.OrionLdAdapter;
-import es.in2.desmos.objectmothers.EntitySyncResponseMother;
+import es.in2.desmos.objectmothers.EntityMother;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,9 +26,9 @@ class OrionLdAdapterTests {
     }
 
     @Test
-    void itShouldReturnNullWhenBatchUpsertEntities() {
+    void itShouldReturnNullWhenBatchUpsertEntities() throws JsonProcessingException {
         String processId = "0";
-        String requestBody = EntitySyncResponseMother.sample;
+        String requestBody = EntityMother.getFullJsonList();
 
         Mono<Void> result = orionLdAdapter.batchUpsertEntities(processId, requestBody);
 

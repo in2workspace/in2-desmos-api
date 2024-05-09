@@ -1,5 +1,6 @@
 package es.in2.desmos.application.workflows.jobs;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.application.workflows.jobs.impl.DataVerificationJobImpl;
 import es.in2.desmos.domain.exceptions.InvalidConsistencyException;
@@ -8,9 +9,7 @@ import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
 import es.in2.desmos.objectmothers.DataNegotiationResultMother;
 import es.in2.desmos.objectmothers.EntityMother;
-import es.in2.desmos.objectmothers.EntitySyncResponseMother;
 import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
-import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
@@ -45,10 +44,10 @@ class DataVerificationJobTest {
     private ArgumentCaptor<Mono<Id[]>> entitySyncRequestCaptor;
 
     @Test
-    void itShouldBuildAnSaveAuditRecord() {
+    void itShouldBuildAnSaveAuditRecord() throws JsonProcessingException {
         DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.newToSync4AndExistingToSync2();
 
-        Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.sample2and4);
+        Mono<String> entitySyncResponseMono = Mono.just(EntityMother.getListJson2And4());
 
         String processId = "0";
 
@@ -61,8 +60,8 @@ class DataVerificationJobTest {
         Mono<String> issuer = Mono.just("http://example.org");
 
         Map<Id, Entity> entitiesById = new HashMap<>();
-        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sample2().id()), new Entity(EntityMother.sample2));
-        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sample4().id()), new Entity(EntityMother.sample4));
+        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sample2().id()), new Entity(EntityMother.getJson2()));
+        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sample4().id()), new Entity(EntityMother.getJson4()));
 
         List<MVEntity4DataNegotiation> allMVEntity4DataNegotiation = new ArrayList<>();
         allMVEntity4DataNegotiation.add(MVEntity4DataNegotiationMother.sample2());
@@ -83,8 +82,8 @@ class DataVerificationJobTest {
     }
 
     @Test
-    void itShouldReturnInvalidConsistencyException() throws JSONException {
-        Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.sample);
+    void itShouldReturnInvalidConsistencyException() throws JsonProcessingException {
+        Mono<String> entitySyncResponseMono = Mono.just(EntityMother.getFullJsonList());
 
         String processId = "0";
 
@@ -93,8 +92,8 @@ class DataVerificationJobTest {
         Mono<String> issuer = Mono.just("http://example.org");
 
         Map<Id, Entity> entitiesById = new HashMap<>();
-        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sample2().id()), new Entity(EntityMother.json2()));
-        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sample4().id()), new Entity(EntityMother.json4()));
+        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sample2().id()), new Entity(EntityMother.getJson2()));
+        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sample4().id()), new Entity(EntityMother.getJson4()));
 
         List<MVEntity4DataNegotiation> allMVEntity4DataNegotiation = new ArrayList<>();
         allMVEntity4DataNegotiation.add(MVEntity4DataNegotiationMother.sample2());
@@ -115,8 +114,8 @@ class DataVerificationJobTest {
     }
 
     @Test
-    void itShouldUpsertEntities() {
-        String entitySyncResponse = EntitySyncResponseMother.sample2and4;
+    void itShouldUpsertEntities() throws JsonProcessingException {
+        String entitySyncResponse = EntityMother.getListJson2And4();
 
         String processId = "0";
 
@@ -129,8 +128,8 @@ class DataVerificationJobTest {
         Mono<String> issuer = Mono.just("http://example.org");
 
         Map<Id, Entity> entitiesById = new HashMap<>();
-        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sample2().id()), new Entity(EntityMother.sample2));
-        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sample4().id()), new Entity(EntityMother.sample4));
+        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sample2().id()), new Entity(EntityMother.getJson2()));
+        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sample4().id()), new Entity(EntityMother.getJson4()));
 
         List<MVEntity4DataNegotiation> allMVEntity4DataNegotiation = new ArrayList<>();
         allMVEntity4DataNegotiation.add(MVEntity4DataNegotiationMother.sample2());
