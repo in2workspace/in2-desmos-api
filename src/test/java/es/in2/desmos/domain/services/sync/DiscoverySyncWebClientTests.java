@@ -1,6 +1,7 @@
 package es.in2.desmos.domain.services.sync;
 
-import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
+import es.in2.desmos.domain.models.DiscoverySyncRequest;
+import es.in2.desmos.domain.models.DiscoverySyncResponse;
 import es.in2.desmos.domain.services.sync.impl.DiscoverySyncWebClientImpl;
 import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,25 +51,27 @@ class DiscoverySyncWebClientTests {
 
         String issuer = "http://example.org";
         Mono<String> issuerMono = Mono.just(issuer);
-        Mono<MVEntity4DataNegotiation[]> entitySyncRequest = Mono.just(MVEntity4DataNegotiationMother.list1And2().toArray(MVEntity4DataNegotiation[]::new));
+        var mvEntities4DataNegotiation = MVEntity4DataNegotiationMother.list1And2();
 
-        MVEntity4DataNegotiation[] expectedResult = MVEntity4DataNegotiationMother.list3And4().toArray(MVEntity4DataNegotiation[]::new);
+        DiscoverySyncRequest discoverySyncRequest = new DiscoverySyncRequest("http://my-domain.org", mvEntities4DataNegotiation);
 
+        var expectedEntities = MVEntity4DataNegotiationMother.list3And4();
+        DiscoverySyncResponse expectedResponse = new DiscoverySyncResponse("http://external-domain.org", expectedEntities);
 
         when(webClientMock.post()).thenReturn(requestBodyUriSpecMock);
         when(requestBodyUriSpecMock.uri(issuer + "/api/v1/sync/p2p/discovery")).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.contentType(MediaType.APPLICATION_JSON)).thenReturn(requestBodySpecMock);
         //noinspection unchecked
-        when(requestBodySpecMock.body(entitySyncRequest, MVEntity4DataNegotiation[].class)).thenReturn(requestHeadersSpec);
+        when(requestBodySpecMock.body(any(), eq(DiscoverySyncRequest.class))).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpecMock);
-        when(responseSpecMock.bodyToMono(MVEntity4DataNegotiation[].class)).thenReturn(Mono.just(expectedResult));
+        when(responseSpecMock.bodyToMono(DiscoverySyncResponse.class)).thenReturn(Mono.just(expectedResponse));
 
 
-        Mono<MVEntity4DataNegotiation[]> result = discoverySyncWebClient.makeRequest(processId, issuerMono, entitySyncRequest);
+        Mono<DiscoverySyncResponse> result = discoverySyncWebClient.makeRequest(processId, issuerMono, Mono.just(discoverySyncRequest));
 
         StepVerifier
                 .create(result)
-                .expectNext(expectedResult)
+                .expectNext(expectedResponse)
                 .verifyComplete();
     }
 }

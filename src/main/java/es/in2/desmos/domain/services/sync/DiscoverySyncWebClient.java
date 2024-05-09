@@ -1,8 +1,9 @@
 package es.in2.desmos.domain.services.sync;
 
-import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
+import es.in2.desmos.domain.models.DiscoverySyncRequest;
+import es.in2.desmos.domain.models.DiscoverySyncResponse;
 import reactor.core.publisher.Mono;
 
 public interface DiscoverySyncWebClient {
-    Mono<MVEntity4DataNegotiation[]> makeRequest(String processId, Mono<String> externalAccessNodeMono, Mono<MVEntity4DataNegotiation[]> localMvEntities4DataNegotiationMono);
+    Mono<DiscoverySyncResponse> makeRequest(String processId, Mono<String> externalAccessNodeMono, Mono<DiscoverySyncRequest> localMvEntities4DataNegotiationMono);
 }

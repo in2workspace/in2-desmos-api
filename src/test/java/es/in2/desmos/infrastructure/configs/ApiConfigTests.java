@@ -21,7 +21,7 @@ import java.security.NoSuchAlgorithmException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ApiConfigTests {
@@ -115,6 +115,17 @@ class ApiConfigTests {
         String result = apiConfig.getCurrentEnvironment();
         // Assert
         assertEquals("dev", result);
+    }
+
+    @Test
+    void getOperatorExternalDomain(){
+        String externalDomain = "http://my-domain.org";
+        when(operatorProperties.externalDomain()).thenReturn(externalDomain);
+
+        assertEquals(externalDomain, apiConfig.getOperatorExternalDomain());
+
+        verify(operatorProperties, times(1)).externalDomain();
+        verifyNoMoreInteractions(operatorProperties);
     }
 
 }

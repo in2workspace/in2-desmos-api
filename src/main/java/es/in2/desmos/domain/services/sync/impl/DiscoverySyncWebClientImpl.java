@@ -1,6 +1,7 @@
 package es.in2.desmos.domain.services.sync.impl;
 
-import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
+import es.in2.desmos.domain.models.DiscoverySyncRequest;
+import es.in2.desmos.domain.models.DiscoverySyncResponse;
 import es.in2.desmos.domain.services.sync.DiscoverySyncWebClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,16 +17,16 @@ public class DiscoverySyncWebClientImpl implements DiscoverySyncWebClient {
     private final WebClient webClient;
 
     @Override
-    public Mono<MVEntity4DataNegotiation[]> makeRequest(String processId, Mono<String> externalAccessNodeMono, Mono<MVEntity4DataNegotiation[]> localMvEntities4DataNegotiationMono) {
+    public Mono<DiscoverySyncResponse> makeRequest(String processId, Mono<String> externalAccessNodeMono, Mono<DiscoverySyncRequest> discoverySyncRequest) {
         log.debug("ProcessID: {} - Making a Entity Sync Web Client request", processId);
 
         return externalAccessNodeMono.flatMap(externalAccessNode -> webClient
                 .post()
                 .uri(externalAccessNode + "/api/v1/sync/p2p/discovery")
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(localMvEntities4DataNegotiationMono, MVEntity4DataNegotiation[].class)
+                .body(discoverySyncRequest, DiscoverySyncRequest.class)
                 .retrieve()
-                .bodyToMono(MVEntity4DataNegotiation[].class)
+                .bodyToMono(DiscoverySyncResponse.class)
                 .retry(3));
     }
 }

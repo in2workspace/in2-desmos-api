@@ -1,14 +1,12 @@
 package es.in2.desmos.application.workflows.jobs;
 
+import es.in2.desmos.application.workflows.jobs.impl.P2PDataSyncJobImpl;
 import es.in2.desmos.domain.events.DataNegotiationEventPublisher;
-import es.in2.desmos.domain.models.AuditRecord;
-import es.in2.desmos.domain.models.BrokerEntityWithIdTypeLastUpdateAndVersion;
-import es.in2.desmos.domain.models.Id;
-import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
+import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.services.api.impl.AuditRecordServiceImpl;
 import es.in2.desmos.domain.services.broker.impl.BrokerPublisherServiceImpl;
 import es.in2.desmos.domain.services.sync.DiscoverySyncWebClient;
-import es.in2.desmos.application.workflows.jobs.impl.P2PDataSyncJobImpl;
+import es.in2.desmos.infrastructure.configs.ApiConfig;
 import es.in2.desmos.infrastructure.configs.ExternalAccessNodesConfig;
 import es.in2.desmos.objectmothers.*;
 import org.json.JSONArray;
@@ -37,6 +35,9 @@ class P2PDataSyncJobTests {
     private ExternalAccessNodesConfig externalAccessNodesConfig;
 
     @Mock
+    private ApiConfig apiConfig;
+
+    @Mock
     private BrokerPublisherServiceImpl brokerPublisherService;
 
     @Mock
@@ -63,15 +64,19 @@ class P2PDataSyncJobTests {
         when(auditRecordService.findLatestAuditRecordForEntity(processId, auditRecordEntities.get(0).getEntityId())).thenReturn(Mono.just(auditRecordEntities.get(0)));
         when(auditRecordService.findLatestAuditRecordForEntity(processId, auditRecordEntities.get(1).getEntityId())).thenReturn(Mono.just(auditRecordEntities.get(1)));
 
-        MVEntity4DataNegotiation[] sample3InList = new MVEntity4DataNegotiation[]{
-                MVEntity4DataNegotiationMother.sample3()
-        };
-        MVEntity4DataNegotiation[] sample4InList = new MVEntity4DataNegotiation[]{
-                MVEntity4DataNegotiationMother.sample4()
-        };
+        String myDomain = "http://my-domain.org";
+        when(apiConfig.getOperatorExternalDomain()).thenReturn(myDomain);
+
+        String externalDomain = "http://external-domain.org";
+        List<MVEntity4DataNegotiation> sample3InList = List.of(MVEntity4DataNegotiationMother.sample3());
+        DiscoverySyncResponse discoverySyncResponse3 = new DiscoverySyncResponse(externalDomain,sample3InList);
+
+        List<MVEntity4DataNegotiation> sample4InList = List.of(MVEntity4DataNegotiationMother.sample4());
+        DiscoverySyncResponse discoverySyncResponse4 = new DiscoverySyncResponse(externalDomain,sample4InList);
+
         when(discoverySyncWebClient.makeRequest(eq(processId), any(), any()))
-                .thenReturn(Mono.just(sample3InList))
-                .thenReturn(Mono.just(sample4InList));
+                .thenReturn(Mono.just(discoverySyncResponse3))
+                .thenReturn(Mono.just(discoverySyncResponse4));
 
         List<String> urlExternalAccessNodesList = UrlMother.example1And2urlsList();
         when(externalAccessNodesConfig.getExternalAccessNodesUrls()).thenReturn(Mono.just(urlExternalAccessNodesList));
@@ -83,6 +88,12 @@ class P2PDataSyncJobTests {
         StepVerifier
                 .create(result)
                 .verifyComplete();
+
+        verify(apiConfig, times(2)).getOperatorExternalDomain();
+        verifyNoMoreInteractions(apiConfig);
+
+        verify(discoverySyncWebClient, times(2)).makeRequest(eq(processId), any(), any());
+        verifyNoMoreInteractions(discoverySyncWebClient);
 
         verify(brokerPublisherService, times(1)).findAllIdTypeFirstAttributeAndSecondAttribute(processId, "ProductOffering", "lastUpdate", "version", BrokerEntityWithIdTypeLastUpdateAndVersion[].class);
         verifyNoMoreInteractions(brokerPublisherService);

@@ -8,6 +8,7 @@ import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
 import es.in2.desmos.domain.services.sync.DiscoverySyncWebClient;
 import es.in2.desmos.domain.utils.Base64Converter;
+import es.in2.desmos.infrastructure.configs.ApiConfig;
 import es.in2.desmos.infrastructure.configs.ExternalAccessNodesConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +16,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class P2PDataSyncJobImpl implements P2PDataSyncJob {
     private final ExternalAccessNodesConfig externalAccessNodesConfig;
+
+    private final ApiConfig apiConfig;
 
     private final BrokerPublisherService brokerPublisherService;
 
@@ -60,11 +62,15 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
         return externalAccessNodesConfig.getExternalAccessNodesUrls()
                 .flatMapIterable(externalAccessNodesList -> externalAccessNodesList)
                 .flatMap(externalAccessNode -> {
-                    Issuer issuer = new Issuer(externalAccessNode);
-                    Mono<MVEntity4DataNegotiation[]> localMvEntities4DataNegotiationMono = Mono.just(localMvEntities4DataNegotiation.toArray(MVEntity4DataNegotiation[]::new));
+                    var discoverySyncRequest = new DiscoverySyncRequest(apiConfig.getOperatorExternalDomain(), localMvEntities4DataNegotiation);
 
-                    return discoverySyncWebClient.makeRequest(processId, Mono.just(externalAccessNode), localMvEntities4DataNegotiationMono)
-                            .map(resultList -> Map.entry(issuer, Arrays.stream(resultList).toList()));
+                    Mono<DiscoverySyncRequest> discoverySyncRequestMono = Mono.just(discoverySyncRequest);
+
+                    return discoverySyncWebClient.makeRequest(processId, Mono.just(externalAccessNode), discoverySyncRequestMono)
+                            .map(resultList -> {
+                                Issuer issuer = new Issuer(externalAccessNode);
+                                return Map.entry(issuer, resultList.entities());
+                            });
                 })
                 .collectMap(Map.Entry::getKey, Map.Entry::getValue);
     }
