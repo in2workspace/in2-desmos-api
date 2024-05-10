@@ -37,7 +37,7 @@ import static org.awaitility.Awaitility.await;
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestPropertySource(properties = {"spring.port=55555"})
-class P2PSyncDataE2ETests {
+class P2PSyncDataIT {
 
     public static final String LOCAL_ISSUER = "http://localhost:55555";
 
