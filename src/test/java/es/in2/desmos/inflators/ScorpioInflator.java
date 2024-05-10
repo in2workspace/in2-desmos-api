@@ -39,13 +39,12 @@ public final class ScorpioInflator {
     }
 
     public static void addInitialEntitiesToContextBroker(String brokerUrl, String requestBody) {
-        // requestBody = addContextValue(requestBody);
         var result = WebClient.builder()
                 .baseUrl(brokerUrl)
                 .build()
                 .post()
                 .uri("ngsi-ld/v1/entityOperations/create")
-                .contentType(APPLICATION_LD_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestBody)
                 .retrieve()
                 .bodyToMono(String.class)

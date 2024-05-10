@@ -20,9 +20,13 @@ public final class DiscoverySyncRequestMother {
         return new DiscoverySyncRequest(issuer, MVEntity4DataNegotiationIds);
     }
 
-    public static @NotNull DiscoverySyncRequest fullList(String issuer) {
+    public static @NotNull DiscoverySyncRequest scorpioFullList(String issuer) {
         List<MVEntity4DataNegotiation> MVEntity4DataNegotiationIds =
-                new ArrayList<>(MVEntity4DataNegotiationMother.fullList());
+                List.of(
+                        MVEntity4DataNegotiationMother.sampleScorpio1(),
+                        MVEntity4DataNegotiationMother.sampleScorpio2(),
+                        MVEntity4DataNegotiationMother.sampleScorpio3(),
+                        MVEntity4DataNegotiationMother.sampleScorpio4());
 
         return new DiscoverySyncRequest(issuer, MVEntity4DataNegotiationIds);
     }

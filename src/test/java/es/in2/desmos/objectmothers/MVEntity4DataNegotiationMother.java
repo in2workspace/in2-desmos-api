@@ -22,7 +22,7 @@ public final class MVEntity4DataNegotiationMother {
     }
 
     public static @NotNull MVEntity4DataNegotiation sample2() {
-        return new MVEntity4DataNegotiation("urn:ProductOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87", "ProductOffering", "2.5", "2024-07-09T12:00:00Z", "08b236983ba01bbcd268793b104917f89f0bba8160d2f693911087c72b9a8051", "fa5408b236983ba01bbcd268793b104917f89f0bba8160d2f693911087c72b9a8051");
+        return new MVEntity4DataNegotiation("urn:ProductOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87", "ProductOffering", "2.5", "2024-07-09T12:00:00Z", "eb2a3f823a26b77562ed81e9a6d1e8f9cbd5c9dd5f89b39923dfae7fd47ac818", "fa54eb2a3f823a26b77562ed81e9a6d1e8f9cbd5c9dd5f89b39923dfae7fd47ac818");
     }
 
     public static @NotNull MVEntity4DataNegotiation sample2VersionOld() {
@@ -38,7 +38,27 @@ public final class MVEntity4DataNegotiationMother {
     }
 
     public static @NotNull MVEntity4DataNegotiation sample4() {
-        return new MVEntity4DataNegotiation("urn:ProductOffering:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c", "ProductOffering", "1.9", "2024-06-02T12:00:00Z", "cbcd525a6f2b5b6cefd8b4d9e83ac1e32946f5388634f012736bd6d543f0d017", "fa54cbcd525a6f2b5b6cefd8b4d9e83ac1e32946f5388634f012736bd6d543f0d017");
+        return new MVEntity4DataNegotiation("urn:ProductOffering:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c", "ProductOffering", "1.9", "2024-06-02T12:00:00Z", "f7e776655017d297dbf4a845db5d12595ba927460023c14bff1215acef95ec12", "fa54f7e776655017d297dbf4a845db5d12595ba927460023c14bff1215acef95ec12y");
+    }
+
+    public static @NotNull MVEntity4DataNegotiation sampleScorpio1() {
+        return getSampleScorpio(sample1(), "7074ad3789791877a4429d478a57a91c34ec709719fb61211540a5786fb65cf6", "fa547074ad3789791877a4429d478a57a91c34ec709719fb61211540a5786fb65cf6");
+    }
+
+    public static @NotNull MVEntity4DataNegotiation sampleScorpio2() {
+        return getSampleScorpio(sample2(), "86a86ae657608e86529dce432932710b65cf8f62cda4ade599b0904fa0ba5dd9", "fa5486a86ae657608e86529dce432932710b65cf8f62cda4ade599b0904fa0ba5dd9");
+    }
+
+    public static @NotNull MVEntity4DataNegotiation sampleScorpio2Old() {
+        return getSampleScorpio(sample2VersionOld(), "", "fa54");
+    }
+
+    public static @NotNull MVEntity4DataNegotiation sampleScorpio3() {
+        return getSampleScorpio(sample3(), "", "");
+    }
+
+    public static @NotNull MVEntity4DataNegotiation sampleScorpio4() {
+        return getSampleScorpio(sample4(), "8d49b6143bbd40735d85fac87ee482162919ee51a01d7ed89dbd10f950ac6b6a", "fa548d49b6143bbd40735d85fac87ee482162919ee51a01d7ed89dbd10f950ac6b6a");
     }
 
     public static @NotNull MVEntity4DataNegotiation randomIdAndVersion() {
@@ -102,24 +122,16 @@ public final class MVEntity4DataNegotiationMother {
         return MVEntity4DataNegotiationList;
     }
 
-    public static List<MVEntity4DataNegotiation> list2() {
-        List<MVEntity4DataNegotiation> MVEntity4DataNegotiationList = new ArrayList<>();
-        MVEntity4DataNegotiationList.add(sample2());
-        return MVEntity4DataNegotiationList;
-    }
-
-    public static List<MVEntity4DataNegotiation> list4() {
-        List<MVEntity4DataNegotiation> MVEntity4DataNegotiationList = new ArrayList<>();
-        MVEntity4DataNegotiationList.add(sample4());
-        return MVEntity4DataNegotiationList;
-    }
-
     public static @NotNull List<MVEntity4DataNegotiation> randomList(int size) {
         List<MVEntity4DataNegotiation> initialEntities = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             initialEntities.add(MVEntity4DataNegotiationMother.randomIdAndVersion());
         }
         return initialEntities;
+    }
+
+    private static MVEntity4DataNegotiation getSampleScorpio(MVEntity4DataNegotiation sample, String hash, String hashLink){
+        return new MVEntity4DataNegotiation(sample.id(), sample.type(), sample.version(), sample.lastUpdate(), hash, hashLink);
     }
 
     private static String generateRandomSha256() {

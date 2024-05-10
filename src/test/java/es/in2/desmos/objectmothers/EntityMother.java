@@ -3,6 +3,7 @@ package es.in2.desmos.objectmothers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
@@ -48,10 +49,7 @@ public final class EntityMother {
                      "productOfferingPrice": {
                          "type": "Relationship",
                          "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
-                     },
-                     "@context": [
-                         "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
-                     ]
+                     }
                  },
                  {
                      "id": "urn:ProductOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87",
@@ -65,10 +63,7 @@ public final class EntityMother {
                      "productOfferingPrice": {
                          "type": "Relationship",
                          "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
-                     },
-                     "@context": [
-                         "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
-                     ]
+                     }
                  },
                  {
                      "id": "urn:ProductOffering:537e1ee3-0556-4fff-875f-e55bb97e7ab0",
@@ -82,10 +77,7 @@ public final class EntityMother {
                      "productOfferingPrice": {
                          "type": "Relationship",
                          "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
-                     },
-                     "@context": [
-                         "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
-                     ]
+                     }
                  },
                  {
                      "id": "urn:ProductOffering:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c",
@@ -99,10 +91,7 @@ public final class EntityMother {
                      "productOfferingPrice": {
                          "type": "Relationship",
                          "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
-                     },
-                     "@context": [
-                         "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
-                     ]
+                     }
                  }
              ]""";
 
@@ -120,10 +109,7 @@ public final class EntityMother {
                          "productOfferingPrice": {
                              "type": "Relationship",
                              "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
-                         },
-                         "@context": [
-                             "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
-                         ]
+                         }
                      },
                      {
                          "id": "urn:ProductOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87",
@@ -137,10 +123,7 @@ public final class EntityMother {
                          "productOfferingPrice": {
                              "type": "Relationship",
                              "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
-                         },
-                         "@context": [
-                             "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
-                         ]
+                         }
                      },
                      {
                          "id": "urn:ProductOffering:537e1ee3-0556-4fff-875f-e55bb97e7ab0",
@@ -154,10 +137,7 @@ public final class EntityMother {
                          "productOfferingPrice": {
                              "type": "Relationship",
                              "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
-                         },
-                         "@context": [
-                             "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
-                         ]
+                         }
                      }
             ]""";
 
@@ -175,10 +155,7 @@ public final class EntityMother {
                      "productOfferingPrice": {
                          "type": "Relationship",
                          "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
-                     },
-                     "@context": [
-                         "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
-                     ]
+                     }
                  },
                  {
                      "id": "urn:ProductOffering:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c",
@@ -192,10 +169,7 @@ public final class EntityMother {
                      "productOfferingPrice": {
                          "type": "Relationship",
                          "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
-                     },
-                     "@context": [
-                         "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
-                     ]
+                     }
                  }
              ]""";
 
@@ -212,10 +186,7 @@ public final class EntityMother {
                      "productOfferingPrice": {
                          "type": "Relationship",
                          "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
-                     },
-                     "@context": [
-                         "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
-                     ]
+                     }
                  }""";
 
     private static final String json4 = """
@@ -231,10 +202,7 @@ public final class EntityMother {
                      "productOfferingPrice": {
                          "type": "Relationship",
                          "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
-                     },
-                     "@context": [
-                         "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
-                     ]
+                     }
                  }""";
 
     private static String getEntityJsonScorpioString(MVEntity4DataNegotiation mvEntity4DataNegotiation) throws JSONException {
@@ -278,6 +246,32 @@ public final class EntityMother {
     private static String compressJson(String json) throws JsonProcessingException {
         JsonNode jsonNode = objectMapper.readTree(json);
         return objectMapper.writeValueAsString(jsonNode);
+    }
+
+    public static String scorpioFullJsonList() throws JSONException, JsonProcessingException {
+        var scorpioJsonNode1 = objectMapper.readTree(scorpioJson1());
+        var scorpioJsonNode2 = objectMapper.readTree(scorpioJson2());
+        var scorpioJsonNode3 = objectMapper.readTree(scorpioJson3());
+        var scorpioJsonNode4 = objectMapper.readTree(scorpioJson4());
+
+        ArrayNode jsonArray = objectMapper.createArrayNode();
+        jsonArray.add(scorpioJsonNode1);
+        jsonArray.add(scorpioJsonNode2);
+        jsonArray.add(scorpioJsonNode3);
+        jsonArray.add(scorpioJsonNode4);
+
+        return objectMapper.writeValueAsString(jsonArray);
+    }
+
+    public static String scorpioJson2And4() throws JSONException, JsonProcessingException {
+        var scorpioJsonNode2 = objectMapper.readTree(scorpioJson2());
+        var scorpioJsonNode4 = objectMapper.readTree(scorpioJson4());
+
+        ArrayNode jsonArray = objectMapper.createArrayNode();
+        jsonArray.add(scorpioJsonNode2);
+        jsonArray.add(scorpioJsonNode4);
+
+        return objectMapper.writeValueAsString(jsonArray);
     }
 
     public static String scorpioJson1() throws JSONException {

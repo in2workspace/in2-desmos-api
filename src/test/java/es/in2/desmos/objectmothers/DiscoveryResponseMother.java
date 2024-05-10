@@ -13,16 +13,16 @@ public final class DiscoveryResponseMother {
     private DiscoveryResponseMother() {
     }
 
-    public static String json2List() throws JsonProcessingException {
-        var mvEntity4DataNegotiations = List.of(MVEntity4DataNegotiationMother.sample2());
+    public static String scorpioJson2List() throws JsonProcessingException {
+        var mvEntity4DataNegotiations = List.of(MVEntity4DataNegotiationMother.sampleScorpio2());
 
         DiscoverySyncResponse discoverySyncResponse = new DiscoverySyncResponse("http://external-domain.org", mvEntity4DataNegotiations);
 
         return objectMapper.writeValueAsString(discoverySyncResponse);
     }
 
-    public static String json4List() throws JsonProcessingException {
-        var mvEntity4DataNegotiations = List.of(MVEntity4DataNegotiationMother.sample4());
+    public static String scorpioJson4List() throws JsonProcessingException {
+        var mvEntity4DataNegotiations = List.of(MVEntity4DataNegotiationMother.sampleScorpio4());
 
         DiscoverySyncResponse discoverySyncResponse = new DiscoverySyncResponse("http://external-domain.org", mvEntity4DataNegotiations);
 

@@ -13,6 +13,7 @@ import es.in2.desmos.domain.services.sync.EntitySyncWebClient;
 import es.in2.desmos.objectmothers.DataNegotiationResultMother;
 import es.in2.desmos.objectmothers.EntitySyncRequestMother;
 import es.in2.desmos.objectmothers.EntitySyncResponseMother;
+import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
@@ -56,9 +57,10 @@ class DataTransferJobTest {
     private static int objectMapperReadTreeCounter = 0;
 
     @Test
-    void itShouldRequestEntitiesToExternalAccessNodeFromMultipleIssuers() throws IOException {
+    void itShouldRequestEntitiesToExternalAccessNodeFromMultipleIssuers() throws IOException, JSONException {
         String issuer1 = "https://example1.org";
         String issuer2 = "https://example2.org";
+
         List<DataNegotiationResult> dataNegotiationResults = DataNegotiationResultMother.listNewToSync4AndExistingToSync2(issuer1, issuer2);
 
         Id[] entitySyncRequest1 = EntitySyncRequestMother.createFromDataNegotiationResult(dataNegotiationResults.get(0));
@@ -123,7 +125,7 @@ class DataTransferJobTest {
 
 
     @Test
-    void itShouldRequestEntitiesToExternalAccessNode() throws IOException {
+    void itShouldRequestEntitiesToExternalAccessNode() throws IOException, JSONException {
         DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
         Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
 
@@ -165,7 +167,7 @@ class DataTransferJobTest {
     }
 
     @Test
-    void itShouldReturnInvalidIntegrityExceptionWhenHashIsIncorrect() throws IOException {
+    void itShouldReturnInvalidIntegrityExceptionWhenHashIsIncorrect() throws IOException, JSONException {
         DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.badHash();
         Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
 
@@ -277,7 +279,7 @@ class DataTransferJobTest {
     }
 
     @Test
-    void itShouldReturnJsonProcessingExceptionWhenBadJsonSortingEntities() throws IOException {
+    void itShouldReturnJsonProcessingExceptionWhenBadJsonSortingEntities() throws IOException, JSONException {
         DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
         Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
 
@@ -300,7 +302,7 @@ class DataTransferJobTest {
     }
 
     @Test
-    void itShouldBuildAllMVEntities4DataNegotiation() throws IOException {
+    void itShouldBuildAllMVEntities4DataNegotiation() throws IOException, JSONException {
         DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
         Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
 

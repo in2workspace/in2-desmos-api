@@ -2,6 +2,7 @@ package es.in2.desmos.objectmothers;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.json.JSONException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,35 +15,35 @@ public final class EntitySyncResponseMother {
     private EntitySyncResponseMother() {
     }
 
-    public static String getSampleBase64() throws IOException {
-        String sampleString = objectMapper.readTree(EntityMother.getFullJsonList()).get(0).toString();
+    public static String getSampleBase64() throws IOException, JSONException {
+        String sampleString = objectMapper.readTree(EntityMother.scorpioFullJsonList()).get(0).toString();
         String sampleBase64 = Base64.getEncoder().encodeToString(sampleString.getBytes());
         List<String> sampleList = new ArrayList<>();
         sampleList.add(sampleBase64);
         return objectMapper.writeValueAsString(sampleList);
     }
 
-    public static String getSample2Base64() throws IOException {
-        String sampleString = objectMapper.readTree(EntityMother.getJson2()).toString();
+    public static String getSample2Base64() throws IOException, JSONException {
+        String sampleString = objectMapper.readTree(EntityMother.scorpioJson2()).toString();
         String sampleBase64 = Base64.getEncoder().encodeToString(sampleString.getBytes());
         List<String> sampleList = new ArrayList<>();
         sampleList.add(sampleBase64);
         return objectMapper.writeValueAsString(sampleList);
     }
 
-    public static String getSample4Base64() throws IOException {
-        String sampleString = objectMapper.readTree(EntityMother.getJson4()).toString();
+    public static String getSample4Base64() throws IOException, JSONException {
+        String sampleString = objectMapper.readTree(EntityMother.scorpioJson4()).toString();
         String sampleBase64 = Base64.getEncoder().encodeToString(sampleString.getBytes());
         List<String> sampleList = new ArrayList<>();
         sampleList.add(sampleBase64);
         return objectMapper.writeValueAsString(sampleList);
     }
 
-    public static String getSample2And4Base64() throws IOException {
-        String sample2String = objectMapper.readTree(EntityMother.getJson2()).toString();
+    public static String getSample2And4Base64() throws IOException, JSONException {
+        String sample2String = objectMapper.readTree(EntityMother.scorpioJson2()).toString();
         String sample2Base64 = Base64.getEncoder().encodeToString(sample2String.getBytes());
 
-        String sample4String = objectMapper.readTree(EntityMother.getJson4()).toString();
+        String sample4String = objectMapper.readTree(EntityMother.scorpioJson4()).toString();
         String sample4Base64 = Base64.getEncoder().encodeToString(sample4String.getBytes());
 
         List<String> sampleList = new ArrayList<>();

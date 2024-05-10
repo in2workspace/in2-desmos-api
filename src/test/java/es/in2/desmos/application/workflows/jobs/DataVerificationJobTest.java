@@ -10,6 +10,7 @@ import es.in2.desmos.domain.services.broker.BrokerPublisherService;
 import es.in2.desmos.objectmothers.DataNegotiationResultMother;
 import es.in2.desmos.objectmothers.EntityMother;
 import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
+import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
@@ -44,14 +45,14 @@ class DataVerificationJobTest {
     private ArgumentCaptor<Mono<Id[]>> entitySyncRequestCaptor;
 
     @Test
-    void itShouldBuildAnSaveAuditRecord() throws JsonProcessingException {
+    void itShouldBuildAnSaveAuditRecord() throws JsonProcessingException, JSONException {
         DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.newToSync4AndExistingToSync2();
 
-        Mono<String> entitySyncResponseMono = Mono.just(EntityMother.getListJson2And4());
+        Mono<String> entitySyncResponseMono = Mono.just(EntityMother.scorpioJson2And4());
 
         String processId = "0";
 
-        when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sample2().id())).thenReturn(Mono.just(AuditRecord.builder().entityHashLink("fa54").build()));
+        when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sampleScorpio2().id())).thenReturn(Mono.just(AuditRecord.builder().entityHashLink("fa54").build()));
 
         when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any())).thenReturn(Mono.empty());
 
@@ -60,15 +61,15 @@ class DataVerificationJobTest {
         Mono<String> issuer = Mono.just("http://example.org");
 
         Map<Id, Entity> entitiesById = new HashMap<>();
-        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sample2().id()), new Entity(EntityMother.getJson2()));
-        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sample4().id()), new Entity(EntityMother.getJson4()));
+        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sampleScorpio2().id()), new Entity(EntityMother.scorpioJson2()));
+        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sampleScorpio4().id()), new Entity(EntityMother.scorpioJson4()));
 
         List<MVEntity4DataNegotiation> allMVEntity4DataNegotiation = new ArrayList<>();
-        allMVEntity4DataNegotiation.add(MVEntity4DataNegotiationMother.sample2());
-        allMVEntity4DataNegotiation.add(MVEntity4DataNegotiationMother.sample4());
+        allMVEntity4DataNegotiation.add(MVEntity4DataNegotiationMother.sampleScorpio2());
+        allMVEntity4DataNegotiation.add(MVEntity4DataNegotiationMother.sampleScorpio4());
 
         Map<Id, HashAndHashLink> existingEntitiesOriginalValidationDataById = new HashMap<>();
-        existingEntitiesOriginalValidationDataById.put(new Id(MVEntity4DataNegotiationMother.sample2().id()), new HashAndHashLink(MVEntity4DataNegotiationMother.sample2().hash(), MVEntity4DataNegotiationMother.sample2().hashlink()));
+        existingEntitiesOriginalValidationDataById.put(new Id(MVEntity4DataNegotiationMother.sampleScorpio2().id()), new HashAndHashLink(MVEntity4DataNegotiationMother.sampleScorpio2().hash(), MVEntity4DataNegotiationMother.sampleScorpio2().hashlink()));
 
         Mono<Void> result = dataVerificationJob.verifyData(processId, issuer, Mono.just(entitiesById), Mono.just(allMVEntity4DataNegotiation), entitySyncResponseMono, Mono.just(existingEntitiesOriginalValidationDataById));
 
@@ -114,12 +115,12 @@ class DataVerificationJobTest {
     }
 
     @Test
-    void itShouldUpsertEntities() throws JsonProcessingException {
-        String entitySyncResponse = EntityMother.getListJson2And4();
+    void itShouldUpsertEntities() throws JsonProcessingException, JSONException {
+        String entitySyncResponse = EntityMother.scorpioJson2And4();
 
         String processId = "0";
 
-        when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sample2().id())).thenReturn(Mono.just(AuditRecord.builder().entityHashLink("fa54").build()));
+        when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sampleScorpio2().id())).thenReturn(Mono.just(AuditRecord.builder().entityHashLink("fa54").build()));
 
         when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any())).thenReturn(Mono.empty());
 
@@ -128,15 +129,15 @@ class DataVerificationJobTest {
         Mono<String> issuer = Mono.just("http://example.org");
 
         Map<Id, Entity> entitiesById = new HashMap<>();
-        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sample2().id()), new Entity(EntityMother.getJson2()));
-        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sample4().id()), new Entity(EntityMother.getJson4()));
+        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sampleScorpio2().id()), new Entity(EntityMother.scorpioJson2()));
+        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sampleScorpio4().id()), new Entity(EntityMother.scorpioJson4()));
 
         List<MVEntity4DataNegotiation> allMVEntity4DataNegotiation = new ArrayList<>();
-        allMVEntity4DataNegotiation.add(MVEntity4DataNegotiationMother.sample2());
-        allMVEntity4DataNegotiation.add(MVEntity4DataNegotiationMother.sample4());
+        allMVEntity4DataNegotiation.add(MVEntity4DataNegotiationMother.sampleScorpio2());
+        allMVEntity4DataNegotiation.add(MVEntity4DataNegotiationMother.sampleScorpio4());
 
         Map<Id, HashAndHashLink> existingEntitiesOriginalValidationDataById = new HashMap<>();
-        existingEntitiesOriginalValidationDataById.put(new Id(MVEntity4DataNegotiationMother.sample2().id()), new HashAndHashLink(MVEntity4DataNegotiationMother.sample2().hash(), MVEntity4DataNegotiationMother.sample2().hashlink()));
+        existingEntitiesOriginalValidationDataById.put(new Id(MVEntity4DataNegotiationMother.sampleScorpio2().id()), new HashAndHashLink(MVEntity4DataNegotiationMother.sampleScorpio2().hash(), MVEntity4DataNegotiationMother.sampleScorpio2().hashlink()));
 
         Mono<Void> result = dataVerificationJob.verifyData(processId, issuer, Mono.just(entitiesById), Mono.just(allMVEntity4DataNegotiation), Mono.just(entitySyncResponse), Mono.just(existingEntitiesOriginalValidationDataById));
 

@@ -45,10 +45,15 @@ class DataNegotiationJobTests {
 
         Map<Issuer, List<MVEntity4DataNegotiation>> externalMVENtities4DataNegotiationByIssuer = new HashMap<>();
         Issuer issuer1 = new Issuer("http://example1.org");
-        var externalMVEntitiesIssuer1 = MVEntity4DataNegotiationMother.list1And2();
+        var externalMVEntitiesIssuer1 =
+                List.of(MVEntity4DataNegotiationMother.sampleScorpio1(),
+                        MVEntity4DataNegotiationMother.sampleScorpio2());
         externalMVENtities4DataNegotiationByIssuer.put(issuer1, externalMVEntitiesIssuer1);
         Issuer issuer2 = new Issuer("http://example2.org");
-        var externalMVEntitiesIssuer2 = MVEntity4DataNegotiationMother.list3And4();
+        var externalMVEntitiesIssuer2 =
+                List.of(MVEntity4DataNegotiationMother.sampleScorpio3(),
+                        MVEntity4DataNegotiationMother.sampleScorpio4());
+
         externalMVENtities4DataNegotiationByIssuer.put(issuer2, externalMVEntitiesIssuer2);
 
         Mono<List<MVEntity4DataNegotiation>> localEntityIdsMono = Mono.just(MVEntity4DataNegotiationMother.list1And2OldAnd3());

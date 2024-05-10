@@ -93,12 +93,12 @@ class DataSyncServiceIT {
              MockWebServer mockWebServer3 = new MockWebServer()) {
 
             mockWebServer2.start(49152);
-            var json2List = DiscoveryResponseMother.json2List();
+            var json2List = DiscoveryResponseMother.scorpioJson2List();
             var entitySyncResponse2 = EntitySyncResponseMother.getSample2Base64();
             mockWebServer2.setDispatcher(getDiscoverySyncMockWebServerDispatcher(json2List, entitySyncResponse2));
 
             mockWebServer3.start(49153);
-            var json4List = DiscoveryResponseMother.json4List();
+            var json4List = DiscoveryResponseMother.scorpioJson4List();
             var entitySyncResponse4 = EntitySyncResponseMother.getSample4Base64();
             mockWebServer3.setDispatcher(getDiscoverySyncMockWebServerDispatcher(json4List, entitySyncResponse4));
 
@@ -116,10 +116,10 @@ class DataSyncServiceIT {
                     .verifyComplete();
         }
 
-        assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sample1().id(), EntityMother.scorpioJson1());
-        assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sample2().id(), EntityMother.scorpioJson2());
-        assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sample3().id(), EntityMother.scorpioJson3());
-        assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sample4().id(), EntityMother.scorpioJson4());
+        assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio1().id(), EntityMother.scorpioJson1());
+        assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio2().id(), EntityMother.scorpioJson2());
+        assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio3().id(), EntityMother.scorpioJson3());
+        assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio4().id(), EntityMother.scorpioJson4());
     }
 
     @Test
@@ -152,14 +152,14 @@ class DataSyncServiceIT {
     }
 
     @Test
-    void itShouldUpsertExternalEntities() throws IOException, InterruptedException {
+    void itShouldUpsertExternalEntities() throws IOException, InterruptedException, JSONException {
         var entitySyncResponse = EntitySyncResponseMother.getSample2And4Base64();
         mockWebServer.enqueue(new MockResponse()
                 .setBody(entitySyncResponse));
 
         String issuer = "http://localhost:" + mockWebServer.getPort();
 
-        DiscoverySyncRequest discoverySyncRequest = DiscoverySyncRequestMother.fullList(issuer);
+        DiscoverySyncRequest discoverySyncRequest = DiscoverySyncRequestMother.scorpioFullList(issuer);
         Mono<DiscoverySyncRequest> discoverySyncRequestMono = Mono.just(discoverySyncRequest);
 
         String discoverySyncRequestJson = objectMapper.writeValueAsString(discoverySyncRequest);
@@ -187,10 +187,10 @@ class DataSyncServiceIT {
                 .verifyComplete();
 
         try {
-            assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sample1().id(), EntityMother.scorpioJson1());
-            assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sample2().id(), EntityMother.scorpioJson2());
-            assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sample3().id(), EntityMother.scorpioJson3());
-            assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sample4().id(), EntityMother.scorpioJson4());
+            assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio1().id(), EntityMother.scorpioJson1());
+            assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio2().id(), EntityMother.scorpioJson2());
+            assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio3().id(), EntityMother.scorpioJson3());
+            assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio4().id(), EntityMother.scorpioJson4());
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -203,14 +203,14 @@ class DataSyncServiceIT {
     }
 
     @Test
-    void itShouldCreateAuditRecord() throws IOException, InterruptedException {
+    void itShouldCreateAuditRecord() throws IOException, InterruptedException, JSONException {
         var entitySyncResponse = EntitySyncResponseMother.getSample2And4Base64();
         mockWebServer.enqueue(new MockResponse()
                 .setBody(entitySyncResponse));
 
         String issuer = "http://localhost:" + mockWebServer.getPort();
 
-        DiscoverySyncRequest discoverySyncRequest = DiscoverySyncRequestMother.fullList(issuer);
+        DiscoverySyncRequest discoverySyncRequest = DiscoverySyncRequestMother.scorpioFullList(issuer);
         Mono<DiscoverySyncRequest> discoverySyncRequestMono = Mono.just(discoverySyncRequest);
 
         String discoverySyncRequestJson = objectMapper.writeValueAsString(discoverySyncRequest);
@@ -237,10 +237,10 @@ class DataSyncServiceIT {
                 .expectNext(expectedDiscoverySyncResponseJson)
                 .verifyComplete();
 
-        assertAuditRecordEntityIsExpected(MVEntity4DataNegotiationMother.sample1().id(), MVEntity4DataNegotiationMother.sample1(), "http://example.org");
-        assertAuditRecordEntityIsExpected(MVEntity4DataNegotiationMother.sample2().id(), MVEntity4DataNegotiationMother.sample2(), issuer);
-        assertAuditRecordEntityIsExpected(MVEntity4DataNegotiationMother.sample3().id(), MVEntity4DataNegotiationMother.sample3(), "http://example.org");
-        assertAuditRecordEntityIsExpected(MVEntity4DataNegotiationMother.sample4().id(), MVEntity4DataNegotiationMother.sample4(), issuer);
+        assertAuditRecordEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio1().id(), MVEntity4DataNegotiationMother.sampleScorpio1(), "http://example.org");
+        assertAuditRecordEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio2().id(), MVEntity4DataNegotiationMother.sampleScorpio2(), issuer);
+        assertAuditRecordEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio3().id(), MVEntity4DataNegotiationMother.sampleScorpio3(), "http://example.org");
+        assertAuditRecordEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio4().id(), MVEntity4DataNegotiationMother.sampleScorpio4(), issuer);
 
 
         RecordedRequest request = mockWebServer.takeRequest();
@@ -363,9 +363,13 @@ class DataSyncServiceIT {
     private @NotNull List<MVEntity4DataNegotiation> createInitialEntitiesInScorpio() throws JsonProcessingException {
         String brokerUrl = ContainerManager.getBaseUriForScorpioA();
         String responseEntities = EntityMother.getJsonList1And2OldAnd3();
+
         ScorpioInflator.addInitialEntitiesToContextBroker(brokerUrl, responseEntities);
 
-        return MVEntity4DataNegotiationMother.list1And2OldAnd3();
+        return List.of(
+                MVEntity4DataNegotiationMother.sampleScorpio1(),
+                MVEntity4DataNegotiationMother.sampleScorpio2Old(),
+                MVEntity4DataNegotiationMother.sampleScorpio3());
     }
 
     private void removeInitialEntitiesInScorpio() {
