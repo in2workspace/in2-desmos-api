@@ -1,6 +1,6 @@
-package es.in2.desmos.e2e;
+package es.in2.desmos.it.application;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.AuditRecordStatus;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
@@ -47,6 +47,9 @@ class P2PSyncDataE2ETests {
     @Autowired
     private ScorpioAdapter scorpioAdapter;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @LocalServerPort
     private int localServerPort;
 
@@ -62,16 +65,18 @@ class P2PSyncDataE2ETests {
     }
 
     @BeforeEach
-    void setUp() throws IOException, JSONException {
+    void setUp() throws IOException {
         initialMvEntity4DataNegotiationList = createInitialEntitiesInScorpio(
                 ContainerManager.getBaseUriForScorpioA(),
                 EntityMother.getJsonList1And2OldAnd3(),
-                MVEntity4DataNegotiationMother.list1And2OldAnd3());
+                List.of(
+                        MVEntity4DataNegotiationMother.sampleScorpio1(),
+                        MVEntity4DataNegotiationMother.sampleBase2Old(),
+                        MVEntity4DataNegotiationMother.sampleScorpio3()));
 
         createInitialEntitiesInScorpio(
                 ContainerManager.getBaseUriForScorpioB(),
-                EntityMother.getListJson2And4(),
-                MVEntity4DataNegotiationMother.list2And4());
+                EntityMother.getListJson2And4(), List.of());
 
         createInitialEntitiesInAuditRecord(auditRecordService, initialMvEntity4DataNegotiationList);
     }
@@ -100,21 +105,19 @@ class P2PSyncDataE2ETests {
                 .create(response)
                 .verifyComplete();
 
-        assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sample1().id(), EntityMother.scorpioJson1());
-        assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sample2().id(), EntityMother.scorpioJson2());
-        assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sample3().id(), EntityMother.scorpioJson3());
-        assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sample4().id(), EntityMother.scorpioJson4());
+        assertScorpioAEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio1().id(), EntityMother.scorpioJson1());
+        assertScorpioAEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio2().id(), EntityMother.scorpioJson2());
+        assertScorpioAEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio3().id(), EntityMother.scorpioJson3());
+        assertScorpioAEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio4().id(), EntityMother.scorpioJson4());
 
-        String externalDomain = "http://example.org";
-        assertAuditRecordEntityIsExpected(MVEntity4DataNegotiationMother.sample1().id(), MVEntity4DataNegotiationMother.sample1(), externalDomain);
-        assertAuditRecordEntityIsExpected(MVEntity4DataNegotiationMother.sample2().id(), MVEntity4DataNegotiationMother.sample2(), LOCAL_ISSUER);
-        assertAuditRecordEntityIsExpected(MVEntity4DataNegotiationMother.sample3().id(), MVEntity4DataNegotiationMother.sample3(), externalDomain);
-        assertAuditRecordEntityIsExpected(MVEntity4DataNegotiationMother.sample4().id(), MVEntity4DataNegotiationMother.sample4(), LOCAL_ISSUER);
-
-
+        String externalDomain = ContainerManager.getBaseUriDesmosB();
+        assertAuditRecordAEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio1().id(), MVEntity4DataNegotiationMother.sampleScorpio1(), LOCAL_ISSUER);
+        assertAuditRecordAEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio2().id(), MVEntity4DataNegotiationMother.sampleBase2(), externalDomain);
+        assertAuditRecordAEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio3().id(), MVEntity4DataNegotiationMother.sampleScorpio3(), LOCAL_ISSUER);
+        assertAuditRecordAEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio4().id(), MVEntity4DataNegotiationMother.sampleBase4(), externalDomain);
     }
 
-    private void assertScorpioEntityIsExpected(String entityId, String expectedEntityResponse) {
+    private void assertScorpioAEntityIsExpected(String entityId, String expectedEntityResponse) {
         await().atMost(5, TimeUnit.SECONDS).ignoreExceptions().until(() -> {
             String processId = "0";
             Mono<String> entityresponseMono = scorpioAdapter.getEntityById(processId, entityId);
@@ -135,8 +138,8 @@ class P2PSyncDataE2ETests {
         });
     }
 
-    private void assertAuditRecordEntityIsExpected(String entityId, MVEntity4DataNegotiation expectedMVEntity4DataNegotiation, String baseUri) {
-        await().atMost(10, TimeUnit.SECONDS).ignoreExceptions().until(() -> {
+    private void assertAuditRecordAEntityIsExpected(String entityId, MVEntity4DataNegotiation expectedMVEntity4DataNegotiation, String baseUri) {
+        await().atMost(10, TimeUnit.SECONDS).until(() -> {
             String processId = "0";
             Mono<AuditRecord> auditRecordMono = auditRecordService.findLatestAuditRecordForEntity(processId, entityId);
 
@@ -159,7 +162,7 @@ class P2PSyncDataE2ETests {
         });
     }
 
-    private @NotNull List<MVEntity4DataNegotiation> createInitialEntitiesInScorpio(String scorpioUri, String responseEntities, @NotNull List<MVEntity4DataNegotiation> mvEntity4DataNegotiations) throws JSONException, JsonProcessingException {
+    private @NotNull List<MVEntity4DataNegotiation> createInitialEntitiesInScorpio(String scorpioUri, String responseEntities, @NotNull List<MVEntity4DataNegotiation> mvEntity4DataNegotiations) {
         ScorpioInflator.addInitialEntitiesToContextBroker(scorpioUri, responseEntities);
 
         return mvEntity4DataNegotiations;

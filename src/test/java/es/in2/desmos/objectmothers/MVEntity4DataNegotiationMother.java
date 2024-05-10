@@ -50,15 +50,35 @@ public final class MVEntity4DataNegotiationMother {
     }
 
     public static @NotNull MVEntity4DataNegotiation sampleScorpio2Old() {
-        return getSampleScorpio(sample2VersionOld(), "", "fa54");
+        return getSampleScorpio(sample2VersionOld(), "86a86ae657608e86529dce432932710b65cf8f62cda4ade599b0904fa0ba5dd9", "fa54");
     }
 
     public static @NotNull MVEntity4DataNegotiation sampleScorpio3() {
-        return getSampleScorpio(sample3(), "", "");
+        return getSampleScorpio(sample3(), "86a86ae657608e86529dce432932710b65cf8f62cda4ade599b0904fa0ba5dd9", "fa54");
     }
 
     public static @NotNull MVEntity4DataNegotiation sampleScorpio4() {
         return getSampleScorpio(sample4(), "8d49b6143bbd40735d85fac87ee482162919ee51a01d7ed89dbd10f950ac6b6a", "fa548d49b6143bbd40735d85fac87ee482162919ee51a01d7ed89dbd10f950ac6b6a");
+    }
+
+    public static @NotNull MVEntity4DataNegotiation sampleBase1() {
+        return getSampleScorpio(sample1(), "12942ce704728235e0c09be2219ddc9e0ee56e22c2732e7c130d4ad2b50faa47", "fa54");
+    }
+
+    public static @NotNull MVEntity4DataNegotiation sampleBase2() {
+        return getSampleScorpio(sample2(), "eb2a3f823a26b77562ed81e9a6d1e8f9cbd5c9dd5f89b39923dfae7fd47ac818", "fa544b34af6221ea9fd2f306c8d90e7a04e5020fd9a137180702e23f694281b8bc4eeb2a3f823a26b77562ed81e9a6d1e8f9cbd5c9dd5f89b39923dfae7fd47ac818");
+    }
+
+    public static @NotNull MVEntity4DataNegotiation sampleBase2Old() {
+        return getSampleScorpio(sample2VersionOld(), "4b34af6221ea9fd2f306c8d90e7a04e5020fd9a137180702e23f694281b8bc4e", "fa544b34af6221ea9fd2f306c8d90e7a04e5020fd9a137180702e23f694281b8bc4e");
+    }
+
+    public static @NotNull MVEntity4DataNegotiation sampleBase3() {
+        return getSampleScorpio(sample3(), "9beee5c2504931c42d84850b6ff08ef7c2d171fe2ed4579f3947e7b060b7c0a2", "fa54");
+    }
+
+    public static @NotNull MVEntity4DataNegotiation sampleBase4() {
+        return getSampleScorpio(sample4(), "f7e776655017d297dbf4a845db5d12595ba927460023c14bff1215acef95ec12", "fa54f7e776655017d297dbf4a845db5d12595ba927460023c14bff1215acef95ec12");
     }
 
     public static @NotNull MVEntity4DataNegotiation randomIdAndVersion() {
