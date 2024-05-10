@@ -4,11 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import es.in2.desmos.it.ContainerManager;
 import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.AuditRecordStatus;
 import es.in2.desmos.domain.models.AuditRecordTrader;
 import es.in2.desmos.domain.repositories.AuditRecordRepository;
+import es.in2.desmos.it.ContainerManager;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,17 +33,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class AuditRecordRepositoryIT {
 
-    @Autowired
-    private AuditRecordRepository auditRecordRepository;
-
-    @DynamicPropertySource
-    static void setDynamicProperties(DynamicPropertyRegistry registry) {
-        ContainerManager.postgresqlProperties(registry);
-    }
-
+    private static boolean isCleanupDone = false;
     private final ObjectMapper objectMapper = JsonMapper.builder()
             .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES).build();
-
     private final AuditRecord auditRecordRoot = AuditRecord.builder()
             .id(UUID.fromString("5d72b588-5257-46a0-8636-cf9226c8ebc6"))
             .processId("f3a387e5-c862-4b93-b5f8-d80f83b0e400")
@@ -61,7 +53,6 @@ class AuditRecordRepositoryIT {
             .hashLink("")
             .newTransaction(true)
             .build();
-
     private final AuditRecord auditRecord = AuditRecord.builder()
             .id(UUID.fromString("ae277aa0-7677-4038-acf6-52a8e70c4d04"))
             .processId("14f121af-d720-4a53-bc08-fc00bdbbbebe")
@@ -79,8 +70,13 @@ class AuditRecordRepositoryIT {
             .hashLink("")
             .newTransaction(true)
             .build();
+    @Autowired
+    private AuditRecordRepository auditRecordRepository;
 
-    private static boolean isCleanupDone = false;
+    @DynamicPropertySource
+    static void setDynamicProperties(DynamicPropertyRegistry registry) {
+        ContainerManager.postgresqlProperties(registry);
+    }
 
     @BeforeEach
     void cleanup() {
@@ -94,7 +90,7 @@ class AuditRecordRepositoryIT {
     @Test
     void shouldSaveAuditRecordRoot() throws JsonProcessingException, NoSuchAlgorithmException {
         // Arrange
-        String expectedAuditRecordRootHash = "f291c0096b7c3e10a52db72ada76676ed2a928b7fd9e91ab9f1ccb7614d8bd08";
+        String expectedAuditRecordRootHash = "64d2d3a4dfcc11a1db2eaec09c90e8f6635ec09ca89137d2b5b3f984648c62ff";
         // Calculate the hash of the AuditRecordRoot and set them.
         // The hashLink is the hash of the AuditRecordRoot because it is the first record
         String auditRecordRootHash = calculateSHA256(objectMapper.writeValueAsString(auditRecordRoot));
@@ -118,14 +114,14 @@ class AuditRecordRepositoryIT {
     @Test
     void shouldSaveAuditRecordGuaranteeImmutability() throws JsonProcessingException, NoSuchAlgorithmException {
         /*
-         * HashLink set in test 0 = f291c0096b7c3e10a52db72ada76676ed2a928b7fd9e91ab9f1ccb7614d8bd08
-         * Hash calculated for new AuditRecord = d080b4a51d7687c2a4e3a58f88403380c960a8c3a88f4ddc8d971ada08050644
+         * HashLink set in test 0 = 64d2d3a4dfcc11a1db2eaec09c90e8f6635ec09ca89137d2b5b3f984648c62ff
+         * Hash calculated for new AuditRecord = c7af45867074d83f11caed2f4292e3bee405ab03a3e2b20a07c111ddd73706a5
          * If you concatenated both hashes, using the web https://emn178.github.io/online-tools/sha256.html,
          * you will get the hashLink of the new AuditRecord ;)
          */
         // Arrange
-        String expectedAuditRecordHash = "d080b4a51d7687c2a4e3a58f88403380c960a8c3a88f4ddc8d971ada08050644";
-        String expectedAuditRecordHashLink = "bac646d0d6c54e11427c67689c2b3dc2ba0a82163c06e86576212a36e1ce6bce";
+        String expectedAuditRecordHash = "c7af45867074d83f11caed2f4292e3bee405ab03a3e2b20a07c111ddd73706a5";
+        String expectedAuditRecordHashLink = "7911e4591382dc4f1014248fb54b7500d31e292f89a064d31d6dbd3bb4a9825d";
         // Get the most recent AuditRecord from the database
         AuditRecord auditRecordFound = auditRecordRepository.findMostRecentAuditRecord().block();
         assert auditRecordFound != null;

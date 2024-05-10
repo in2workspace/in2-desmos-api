@@ -200,7 +200,7 @@ public class AuditRecordServiceImpl implements AuditRecordService {
     }
 
     private String setAuditRecordHashLink(AuditRecord lastAuditRecordRegistered, String auditRecordHash)
-            throws NoSuchAlgorithmException {
+            throws NoSuchAlgorithmException, JsonProcessingException {
         return lastAuditRecordRegistered.getHashLink() == null ? auditRecordHash
                 : calculateHashLink(lastAuditRecordRegistered.getHashLink(), auditRecordHash);
     }

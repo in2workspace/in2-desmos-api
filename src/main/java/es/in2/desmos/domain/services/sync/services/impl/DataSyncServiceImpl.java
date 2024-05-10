@@ -1,13 +1,9 @@
 package es.in2.desmos.domain.services.sync.services.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import es.in2.desmos.domain.exceptions.BrokerEntityRetrievalException;
 import es.in2.desmos.domain.exceptions.HashLinkException;
-import es.in2.desmos.domain.exceptions.JsonReadingException;
 import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.BlockchainNotification;
 import es.in2.desmos.domain.services.api.AuditRecordService;
@@ -21,9 +17,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.TreeMap;
 
 import static es.in2.desmos.domain.utils.ApplicationUtils.*;
 
@@ -102,7 +95,7 @@ public class DataSyncServiceImpl implements DataSyncService {
         log.debug("ProcessID: {} - Verifying the data integrity of the retrieved entity...", processId);
         try {
             // Get the hash of the retrieved entity
-            String retrievedEntityHash = calculateSHA256(sortAttributesAlphabetically(retrievedBrokerEntity));
+            String retrievedEntityHash = calculateSHA256(retrievedBrokerEntity);
             // To verify the data integrity: hash(previousEntityHash + retrievedEntityHash) = dataLocationHashLink
             String previousEntityHash = blockchainNotification.previousEntityHash().substring(2);
             String dataLocationHashLink = extractHashLinkFromDataLocation(blockchainNotification.dataLocation());
@@ -124,7 +117,7 @@ public class DataSyncServiceImpl implements DataSyncService {
                 }
             }
             return Mono.just(retrievedBrokerEntity);
-        } catch (JsonProcessingException | NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException | JsonProcessingException e) {
             log.warn("ProcessID: {} - Error occurred while sorting the attributes of the retrieved entity: {}", processId, e.getMessage());
             return Mono.error(new HashLinkException("Integrity of the retrieved entity verification failed"));
         }
@@ -158,39 +151,6 @@ public class DataSyncServiceImpl implements DataSyncService {
         } else {
             log.warn("ProcessID: {} - Error occurred while verifying the data consistency of the retrieved entity: Data consistency verification failed", processId);
             return Mono.error(new HashLinkException("Data consistency verification failed"));
-        }
-    }
-
-    private String sortAttributesAlphabetically(String retrievedBrokerEntity) throws JsonProcessingException {
-        JsonNode retrievedBrokerEntityJson = objectMapper.readTree(retrievedBrokerEntity);
-        if (retrievedBrokerEntityJson.isObject()) {
-            TreeMap<String, JsonNode> sortedMap = new TreeMap<>();
-            Iterator<Map.Entry<String, JsonNode>> jsonNodeFields = retrievedBrokerEntityJson.fields();
-            while (jsonNodeFields.hasNext()) {
-                Map.Entry<String, JsonNode> entry = jsonNodeFields.next();
-                sortedMap.put(entry.getKey(), entry.getValue());
-            }
-            ObjectNode sortedObjectNode = objectMapper.createObjectNode();
-            sortedMap.forEach(sortedObjectNode::set);
-            return objectMapper.writeValueAsString(sortedObjectNode);
-        } else if (retrievedBrokerEntityJson.isArray()) {
-            ArrayNode arrayNode = (ArrayNode) retrievedBrokerEntityJson;
-            ArrayNode sortedArrayNode = objectMapper.createArrayNode();
-            arrayNode.forEach(node -> {
-                try {
-                    if (node.isObject()) {
-                        sortedArrayNode.add(objectMapper.readTree(sortAttributesAlphabetically(node.toString())));
-                    } else {
-                        sortedArrayNode.add(node);
-                    }
-                } catch (JsonProcessingException e) {
-//                    log.warn("ProcessID: {} - Error occurred while sorting the attributes of the retrieved entity: {}", processId, e.getMessage());
-                    throw new JsonReadingException("Error occurred while parsing JSON: " + e.getMessage());
-                }
-            });
-            return objectMapper.writeValueAsString(sortedArrayNode);
-        } else {
-            return objectMapper.writeValueAsString(retrievedBrokerEntityJson);
         }
     }
 

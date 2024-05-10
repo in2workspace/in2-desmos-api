@@ -2,11 +2,10 @@ package es.in2.desmos.domain.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import es.in2.desmos.infrastructure.configs.ApiConfig;
-import es.in2.desmos.infrastructure.configs.BrokerConfig;
 import es.in2.desmos.domain.exceptions.HashLinkException;
 import es.in2.desmos.domain.models.BlockchainTxPayload;
-import org.junit.jupiter.api.Assertions;
+import es.in2.desmos.infrastructure.configs.ApiConfig;
+import es.in2.desmos.infrastructure.configs.BrokerConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,26 +26,21 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class BlockchainTxPayloadFactoryTests {
 
-    @Mock
-    private ObjectMapper objectMapper;
-
-    @Mock
-    private ApiConfig apiConfig;
-
-    @Mock
-    private BrokerConfig brokerConfig;
-
-    @InjectMocks
-    private BlockchainTxPayloadFactory blockchainTxPayloadFactory;
-
     private final Map<String, Object> dataMap = Map.of(
             "id", "entity123",
             "type", "productOffering",
             "name", "Cloud Services Suite",
             "description", "Example of a Product offering for cloud services suite"
     );
-
     private final String processId = UUID.randomUUID().toString();
+    @Mock
+    private ObjectMapper objectMapper;
+    @Mock
+    private ApiConfig apiConfig;
+    @Mock
+    private BrokerConfig brokerConfig;
+    @InjectMocks
+    private BlockchainTxPayloadFactory blockchainTxPayloadFactory;
 
     @Test
     void testBuildBlockchainTxPayload_validData_firstHash_Success() throws Exception {
@@ -61,7 +55,7 @@ class BlockchainTxPayloadFactoryTests {
         // Assert
         // Check that the previous hash is the same as the hash of the data, because it is the first hash
         StepVerifier.create(resultMono).assertNext(blockchainTxPayload ->
-                assertEquals(previousHash, extractHashLinkFromDataLocation(blockchainTxPayload.dataLocation())))
+                        assertEquals(previousHash, extractHashLinkFromDataLocation(blockchainTxPayload.dataLocation())))
                 .verifyComplete();
     }
 
@@ -82,7 +76,7 @@ class BlockchainTxPayloadFactoryTests {
                     try {
                         assertEquals(calculateHashLink(previousHash, calculateSHA256("dataMapString")),
                                 extractHashLinkFromDataLocation(blockchainTxPayload.dataLocation()));
-                    } catch (NoSuchAlgorithmException e) {
+                    } catch (NoSuchAlgorithmException | JsonProcessingException e) {
                         throw new HashLinkException("Error while calculating hash link on test");
                     }
                 }).verifyComplete();
@@ -114,7 +108,7 @@ class BlockchainTxPayloadFactoryTests {
                 .assertNext(previousHash -> {
                     try {
                         assertEquals(calculateSHA256("dataMapString"), previousHash);
-                    } catch (NoSuchAlgorithmException e) {
+                    } catch (NoSuchAlgorithmException | JsonProcessingException e) {
                         throw new HashLinkException("Error while calculating hash link on test");
                     }
                 }).verifyComplete();
@@ -123,7 +117,8 @@ class BlockchainTxPayloadFactoryTests {
     @Test
     void testCalculatePreviousHashIfEmpty_invalidData_Failure() throws JsonProcessingException {
         // Arrange
-        when(objectMapper.writeValueAsString(dataMap)).thenThrow(new JsonProcessingException("Error") {});
+        when(objectMapper.writeValueAsString(dataMap)).thenThrow(new JsonProcessingException("Error") {
+        });
         // Act
         Mono<String> resultMono = blockchainTxPayloadFactory.calculatePreviousHashIfEmpty(processId, dataMap);
         // Assert

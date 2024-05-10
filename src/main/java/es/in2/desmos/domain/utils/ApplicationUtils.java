@@ -1,13 +1,17 @@
 package es.in2.desmos.domain.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import es.in2.desmos.domain.exceptions.JsonReadingException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.HexFormat;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,13 +22,22 @@ public class ApplicationUtils {
         throw new IllegalStateException("Utility class");
     }
 
-    public static String calculateSHA256(String data) throws NoSuchAlgorithmException {
+    public static String calculateSHA256(String data) throws NoSuchAlgorithmException, JsonProcessingException {
         MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-        byte[] result = messageDigest.digest(data.getBytes(StandardCharsets.UTF_8));
-        return HexFormat.of().formatHex(result);
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            objectMapper.readTree(data);
+            String sortedData = sortAttributesAlphabetically(data);
+            byte[] result = messageDigest.digest(sortedData.getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(result);
+        } catch (JsonProcessingException e) {
+            byte[] result = messageDigest.digest(data.getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(result);
+        }
     }
 
-    public static String calculateHashLink(String previousHash, String entityHash) throws NoSuchAlgorithmException {
+
+    public static String calculateHashLink(String previousHash, String entityHash) throws NoSuchAlgorithmException, JsonProcessingException {
         String hashConcatenated = previousHash + entityHash;
         log.debug("Previous Hash 1 : {}", previousHash);
         log.debug("Entity Hash 2 : {}", entityHash);
@@ -94,6 +107,51 @@ public class ApplicationUtils {
             case "prod" -> "prd";
             default -> throw new IllegalArgumentException("Unsupported profile: " + activeProfile);
         };
+    }
+
+    private static String sortAttributesAlphabetically(String retrievedBrokerEntity) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode retrievedBrokerEntityJson = objectMapper.readTree(retrievedBrokerEntity);
+        if (retrievedBrokerEntityJson.isObject()) {
+            return sortJsonObject(objectMapper, retrievedBrokerEntityJson);
+        } else if (retrievedBrokerEntityJson.isArray()) {
+            return sortJsonArray(objectMapper, retrievedBrokerEntityJson);
+        } else {
+            return objectMapper.writeValueAsString(retrievedBrokerEntityJson);
+        }
+    }
+
+    private static String sortJsonObject(ObjectMapper objectMapper, JsonNode jsonObject) throws JsonProcessingException {
+        TreeMap<String, JsonNode> sortedMap = new TreeMap<>();
+        Iterator<Map.Entry<String, JsonNode>> jsonNodeFields = jsonObject.fields();
+        while (jsonNodeFields.hasNext()) {
+            Map.Entry<String, JsonNode> entry = jsonNodeFields.next();
+            if (entry.getValue().isObject() || entry.getValue().isArray()) {
+                sortedMap.put(entry.getKey(), objectMapper.readTree(sortAttributesAlphabetically(entry.getValue().toString())));
+            } else {
+                sortedMap.put(entry.getKey(), entry.getValue());
+            }
+        }
+        ObjectNode sortedObjectNode = objectMapper.createObjectNode();
+        sortedMap.forEach(sortedObjectNode::set);
+        return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sortedObjectNode);
+    }
+
+    private static String sortJsonArray(ObjectMapper objectMapper, JsonNode jsonArray) throws JsonProcessingException {
+        ArrayNode arrayNode = (ArrayNode) jsonArray;
+        ArrayNode sortedArrayNode = objectMapper.createArrayNode();
+        arrayNode.forEach(node -> {
+            try {
+                if (node.isObject()) {
+                    sortedArrayNode.add(objectMapper.readTree(sortAttributesAlphabetically(node.toString())));
+                } else {
+                    sortedArrayNode.add(node);
+                }
+            } catch (JsonProcessingException e) {
+                throw new JsonReadingException("Error occurred while parsing JSON: " + e.getMessage());
+            }
+        });
+        return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sortedArrayNode);
     }
 
 }

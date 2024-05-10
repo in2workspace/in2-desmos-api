@@ -1,8 +1,9 @@
 package es.in2.desmos.infrastructure.configs;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import es.in2.desmos.domain.exceptions.HashCreationException;
 import es.in2.desmos.infrastructure.configs.properties.OpenApiProperties;
 import es.in2.desmos.infrastructure.configs.properties.OperatorProperties;
-import es.in2.desmos.domain.exceptions.HashCreationException;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
@@ -33,7 +34,7 @@ public class ApiConfig {
     public String organizationIdHash() {
         try {
             return calculateSHA256(operatorProperties.organizationIdentifier());
-        } catch (NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException | JsonProcessingException e) {
             throw new HashCreationException("Error creating organizationIdentifier hash: " + e.getMessage());
         }
     }
