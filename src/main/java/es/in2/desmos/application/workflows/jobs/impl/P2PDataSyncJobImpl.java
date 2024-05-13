@@ -87,7 +87,7 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                     var dataNegotiationEvent = new DataNegotiationEvent(processId, issuer, externalMvEntities4DataNegotiationMono, localMvEntities4DataNegotiationMono);
                     dataNegotiationEventPublisher.publishEvent(dataNegotiationEvent);
 
-                    return localMvEntities4DataNegotiation.stream().filter(x -> x.type().equals(BROKER_TYPE)).toList();
+                    return localMvEntities4DataNegotiation;
                 })
                 .doOnSuccess(success -> log.info("ProcessID: {} - P2P Data Synchronization Discovery Workflow successfully.", processId))
                 .doOnError(error -> log.error("ProcessID: {} - Error occurred while processing the P2P Data Synchronization Discovery Workflow: {}", processId, error.getMessage()));
