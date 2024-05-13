@@ -1,6 +1,8 @@
 package es.in2.desmos.domain.services.broker.adapter.impl;
 
+import es.in2.desmos.domain.models.BrokerEntityWithIdAndType;
 import es.in2.desmos.domain.models.BrokerSubscription;
+import es.in2.desmos.domain.models.Id;
 import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
@@ -56,11 +58,16 @@ public class OrionLdAdapter implements BrokerAdapterService {
     }
 
     @Override
-    public <T> Mono<T[]> findAllIdTypeFirstAttributeAndSecondAttribute(String processId, String type, String firstAttribute, String secondAttribute, Class<T[]> responseClass) {
+    public <T extends BrokerEntityWithIdAndType> Mono<T[]> findAllIdTypeFirstAttributeAndSecondAttributeByType(String processId, String type, String firstAttribute, String secondAttribute, Class<T[]> responseClass) {
         return null;
     }
 
     @Override
     public Mono<Void> batchUpsertEntities(String processId, String requestBody) { return null; }
+
+    @Override
+    public <T extends BrokerEntityWithIdAndType> Mono<T> findIdTypeFirstAttributeAndSecondAttributeById(String processId, Id entityId, String firstAttribute, String secondAttribute, Class<T> responseClass) {
+        return null;
+    }
 
 }

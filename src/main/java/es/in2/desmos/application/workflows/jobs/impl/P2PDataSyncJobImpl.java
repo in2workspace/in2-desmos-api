@@ -99,8 +99,12 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                 .map(Base64Converter::convertStringListToBase64List);
     }
 
+    private static Mono<List<String>> getEntities4DataNegotiationIds(Mono<List<BrokerEntityWithIdTypeLastUpdateAndVersion>> mvBrokerEntities4DataNegotiationMono) {
+        return mvBrokerEntities4DataNegotiationMono.map(x -> x.stream().map(BrokerEntityWithIdTypeLastUpdateAndVersion::getId).toList());
+    }
+
     private Mono<List<MVEntity4DataNegotiation>> createLocalMvEntities4DataNegotiation(String processId) {
-        return brokerPublisherService.findAllIdTypeFirstAttributeAndSecondAttribute(processId, BROKER_TYPE, "lastUpdate", "version", BrokerEntityWithIdTypeLastUpdateAndVersion[].class)
+        return brokerPublisherService.findAllIdTypeFirstAttributeAndSecondAttributeByType(processId, BROKER_TYPE, "lastUpdate", "version", BrokerEntityWithIdTypeLastUpdateAndVersion[].class, BrokerEntityWithIdTypeLastUpdateAndVersion.class)
                 .flatMap(mvBrokerEntities4DataNegotiation -> {
                     log.debug("ProcessID: {} - MV Broker Entities 4 Data Negotiation: {}", processId, mvBrokerEntities4DataNegotiation);
 
@@ -115,12 +119,12 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
 
                                 return mvBrokerEntities4DataNegotiation.stream()
                                         .map(brokerEntity -> {
-                                            MVAuditServiceEntity4DataNegotiation auditServiceEntity = auditServiceEntityMap.get(brokerEntity.id());
+                                            MVAuditServiceEntity4DataNegotiation auditServiceEntity = auditServiceEntityMap.get(brokerEntity.getId());
                                             return new MVEntity4DataNegotiation(
-                                                    brokerEntity.id(),
-                                                    brokerEntity.type(),
-                                                    brokerEntity.version(),
-                                                    brokerEntity.lastUpdate(),
+                                                    brokerEntity.getId(),
+                                                    brokerEntity.getType(),
+                                                    brokerEntity.getVersion(),
+                                                    brokerEntity.getLastUpdate(),
                                                     auditServiceEntity.hash(),
                                                     auditServiceEntity.hashlink());
                                         })
@@ -129,19 +133,17 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                 });
     }
 
-    private static Mono<List<String>> getEntities4DataNegotiationIds(Mono<List<BrokerEntityWithIdTypeLastUpdateAndVersion>> mvBrokerEntities4DataNegotiationMono) {
-        return mvBrokerEntities4DataNegotiationMono.map(x -> x.stream().map(BrokerEntityWithIdTypeLastUpdateAndVersion::id).toList());
-    }
-
     private Mono<List<MVAuditServiceEntity4DataNegotiation>> getMvAuditServiceEntities4DataNegotiation(String processId, Mono<List<String>> entities4DataNegotiationIdsMono) {
         return entities4DataNegotiationIdsMono.flatMap(entities4DataNegotiationIds ->
                 Flux.fromIterable(entities4DataNegotiationIds)
-                        .flatMap(id -> auditRecordService.findLatestAuditRecordForEntity(processId, id)
-                                .map(auditRecord -> new MVAuditServiceEntity4DataNegotiation(
-                                                auditRecord.getEntityId(),
-                                                auditRecord.getEntityHash(),
-                                                auditRecord.getEntityHashLink()
-                                        )
+                        .flatMap(id ->
+                                auditRecordService.findLatestAuditRecordForEntity(processId, id)
+                                        .map(auditRecord ->
+                                                new MVAuditServiceEntity4DataNegotiation(
+                                                        auditRecord.getEntityId(),
+                                                        auditRecord.getEntityHash(),
+                                                        auditRecord.getEntityHashLink()
+                                                )
                                 )
                         )
                         .collectList()

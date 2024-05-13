@@ -79,7 +79,7 @@ class ScorpioAdapterIT {
                 .create(entity1Mono)
                 .consumeNextWith(entity1 -> {
                     try {
-                        JSONAssert.assertEquals(EntityMother.scorpioJson1(), entity1, true);
+                        JSONAssert.assertEquals(EntityMother.scorpioDefaultJson1(), entity1, true);
                     } catch (JSONException e) {
                         throw new RuntimeException(e);
                     }
@@ -91,7 +91,7 @@ class ScorpioAdapterIT {
                 .create(entity2Mono)
                 .consumeNextWith(entity2 -> {
                     try {
-                        JSONAssert.assertEquals(EntityMother.scorpioJson2(), entity2, true);
+                        JSONAssert.assertEquals(EntityMother.scorpioDefaultJson2(), entity2, true);
                     } catch (JSONException e) {
                         throw new RuntimeException(e);
                     }
@@ -103,7 +103,7 @@ class ScorpioAdapterIT {
                 .create(entity3Mono)
                 .consumeNextWith(entity3 -> {
                     try {
-                        JSONAssert.assertEquals(EntityMother.scorpioJson3(), entity3, true);
+                        JSONAssert.assertEquals(EntityMother.scorpioDefaultJson3(), entity3, true);
                     } catch (JSONException e) {
                         throw new RuntimeException(e);
                     }
@@ -115,7 +115,7 @@ class ScorpioAdapterIT {
                 .create(entity4Mono)
                 .consumeNextWith(entity4 -> {
                     try {
-                        JSONAssert.assertEquals(EntityMother.scorpioJson4(), entity4, true);
+                        JSONAssert.assertEquals(EntityMother.scorpioDefaultJson4(), entity4, true);
                     } catch (JSONException e) {
                         throw new RuntimeException(e);
                     }
@@ -126,7 +126,7 @@ class ScorpioAdapterIT {
     @Test
     void itShouldReturnEntityIds() {
         String processId = "0";
-        Mono<BrokerEntityWithIdTypeLastUpdateAndVersion[]> resultMono = scorpioAdapter.findAllIdTypeFirstAttributeAndSecondAttribute(processId, "ProductOffering", "lastUpdate", "version", BrokerEntityWithIdTypeLastUpdateAndVersion[].class);
+        Mono<BrokerEntityWithIdTypeLastUpdateAndVersion[]> resultMono = scorpioAdapter.findAllIdTypeFirstAttributeAndSecondAttributeByType(processId, "ProductOffering", "lastUpdate", "version", BrokerEntityWithIdTypeLastUpdateAndVersion[].class);
 
         StepVerifier.create(resultMono)
                 .consumeNextWith(result -> assertEquals(Arrays.stream(initialMvEntity4DataNegotiationList).toList(), Arrays.stream(result).toList()))
@@ -139,7 +139,7 @@ class ScorpioAdapterIT {
         List<String> ids = MVEntity4DataNegotiationMother.fullList().stream().map(MVEntity4DataNegotiation::id).toList();
         ScorpioInflator.deleteInitialEntitiesFromContextBroker(brokerUrl, ids);
 
-        ids = Arrays.stream(initialMvEntity4DataNegotiationList).toList().stream().map(BrokerEntityWithIdTypeLastUpdateAndVersion::id).toList();
+        ids = Arrays.stream(initialMvEntity4DataNegotiationList).toList().stream().map(BrokerEntityWithIdTypeLastUpdateAndVersion::getId).toList();
         ScorpioInflator.deleteInitialEntitiesFromContextBroker(brokerUrl, ids);
 
     }

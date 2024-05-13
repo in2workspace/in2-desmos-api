@@ -20,6 +20,8 @@ import reactor.test.StepVerifier;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -54,7 +56,7 @@ class BrokerPublisherServiceIT {
     @AfterAll
     static void tearDown(){
         String brokerUrl = ContainerManager.getBaseUriForScorpioA();
-        List<String> ids = initialEntities.stream().map(BrokerEntityWithIdTypeLastUpdateAndVersion::id).toList();
+        List<String> ids = initialEntities.stream().map(BrokerEntityWithIdTypeLastUpdateAndVersion::getId).toList();
         ScorpioInflator.deleteInitialEntitiesFromContextBroker(brokerUrl, ids);
     }
 
@@ -62,10 +64,10 @@ class BrokerPublisherServiceIT {
     @Test
     void itShouldReturnEntityIds() {
         String processId = "0";
-        var result = brokerPublisherService.findAllIdTypeFirstAttributeAndSecondAttribute(processId, "ProductOffering", "lastUpdate", "version", BrokerEntityWithIdTypeLastUpdateAndVersion[].class);
+        var resultMono = brokerPublisherService.findAllIdTypeFirstAttributeAndSecondAttributeByType(processId, "ProductOffering", "lastUpdate", "version", BrokerEntityWithIdTypeLastUpdateAndVersion[].class, BrokerEntityWithIdTypeLastUpdateAndVersion.class);
 
-        StepVerifier.create(result)
-                .expectNext(initialEntities)
+        StepVerifier.create(resultMono)
+                .assertNext(result -> assertThat(result).hasSameElementsAs(initialEntities))
                 .verifyComplete();
     }
 }

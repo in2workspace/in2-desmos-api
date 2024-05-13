@@ -6,7 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.domain.exceptions.JsonReadingException;
 import es.in2.desmos.domain.exceptions.RequestErrorException;
 import es.in2.desmos.domain.exceptions.SubscriptionCreationException;
+import es.in2.desmos.domain.models.BrokerEntityWithIdAndType;
 import es.in2.desmos.domain.models.BrokerSubscription;
+import es.in2.desmos.domain.models.Id;
 import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import es.in2.desmos.infrastructure.configs.BrokerConfig;
 import jakarta.annotation.PostConstruct;
@@ -78,7 +80,7 @@ public class ScorpioAdapter implements BrokerAdapterService {
                 .retrieve()
                 .onStatus(status -> status.isSameCodeAs(HttpStatusCode.valueOf(404)),
                         response -> {
-                            log.debug("ProcessId: {}, Entity not found", processId);
+                            log.debug("ProcessId: {}, Entity not found: {}", processId, entityId);
                             return response.bodyToMono(String.class).flatMap(body -> Mono.empty());
                         }
                 )
@@ -198,10 +200,25 @@ public class ScorpioAdapter implements BrokerAdapterService {
     }
 
     @Override
-    public <T> Mono<T[]> findAllIdTypeFirstAttributeAndSecondAttribute(String processId, String type, String firstAttribute, String secondAttribute, Class<T[]> responseClass) {
+    public <T extends BrokerEntityWithIdAndType> Mono<T[]> findAllIdTypeFirstAttributeAndSecondAttributeByType(String processId, String type, String firstAttribute, String secondAttribute, Class<T[]> responseClass) {
         log.info("ProcessID: {} - Getting Entities With Version And Last Update", processId);
 
         String uri = brokerConfig.getEntitiesPath() + "/" + String.format("?type=%s&attrs=%s,%s&options=keyValues", type, firstAttribute, secondAttribute);
+
+        return webClient
+                .get()
+                .uri(uri)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(responseClass)
+                .retry(3);
+    }
+
+    @Override
+    public <T extends BrokerEntityWithIdAndType> Mono<T> findIdTypeFirstAttributeAndSecondAttributeById(String processId, Id entityId, String firstAttribute, String secondAttribute, Class<T> responseClass) {
+        log.info("ProcessID: {} - Getting Entity With Version And Last Update", processId);
+
+        String uri = brokerConfig.getEntitiesPath() + "/" + String.format("%s/?attrs=%s,%s&options=keyValues", entityId.id(), firstAttribute, secondAttribute);
 
         return webClient
                 .get()

@@ -38,7 +38,6 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
@@ -116,14 +115,14 @@ class DataSyncServiceIT {
                     .verifyComplete();
         }
 
-        assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio1().id(), EntityMother.scorpioJson1());
-        assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio2().id(), EntityMother.scorpioJson2());
-        assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio3().id(), EntityMother.scorpioJson3());
-        assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio4().id(), EntityMother.scorpioJson4());
+        assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio1().id(), EntityMother.scorpioJson1WithoutRelationship());
+        assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio2().id(), EntityMother.scorpioJson2WithoutRelationship());
+        assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio3().id(), EntityMother.scorpioJson3WithoutRelationship());
+        assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio4().id(), EntityMother.scorpioJson4WithoutRelationship());
     }
 
     @Test
-    void itShouldReturnMissingExternalEntities() throws JsonProcessingException {
+    void itShouldReturnMissingExternalEntities() throws JsonProcessingException, JSONException {
         DiscoverySyncRequest discoverySyncRequest = DiscoverySyncRequestMother.list1And2();
         Mono<DiscoverySyncRequest> discoverySyncRequestMono = Mono.just(discoverySyncRequest);
 
@@ -148,7 +147,7 @@ class DataSyncServiceIT {
 
         System.out.println("Integration Test Actual Response: " + response);
 
-        assertEquals(expectedDiscoverySyncResponseJson, response);
+        JSONAssert.assertEquals(expectedDiscoverySyncResponseJson, response, false);
     }
 
     @Test
@@ -183,14 +182,21 @@ class DataSyncServiceIT {
 
         StepVerifier
                 .create(responseMono)
-                .expectNext(expectedDiscoverySyncResponseJson)
+
+                .assertNext(response -> {
+                    try {
+                        JSONAssert.assertEquals(expectedDiscoverySyncResponseJson, response, false);
+                    } catch (JSONException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
                 .verifyComplete();
 
         try {
-            assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio1().id(), EntityMother.scorpioJson1());
-            assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio2().id(), EntityMother.scorpioJson2());
-            assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio3().id(), EntityMother.scorpioJson3());
-            assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio4().id(), EntityMother.scorpioJson4());
+            assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio1().id(), EntityMother.scorpioJson1WithoutRelationship());
+            assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio2().id(), EntityMother.scorpioJson2WithoutRelationship());
+            assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio3().id(), EntityMother.scorpioJson3WithoutRelationship());
+            assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio4().id(), EntityMother.scorpioJson4WithoutRelationship());
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -234,7 +240,13 @@ class DataSyncServiceIT {
 
         StepVerifier
                 .create(responseMono)
-                .expectNext(expectedDiscoverySyncResponseJson)
+                .assertNext(response -> {
+                    try {
+                        JSONAssert.assertEquals(expectedDiscoverySyncResponseJson, response, false);
+                    } catch (JSONException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
                 .verifyComplete();
 
         assertAuditRecordEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio1().id(), MVEntity4DataNegotiationMother.sampleScorpio1(), "http://example.org");
@@ -367,9 +379,9 @@ class DataSyncServiceIT {
         ScorpioInflator.addInitialEntitiesToContextBroker(brokerUrl, responseEntities);
 
         return List.of(
-                MVEntity4DataNegotiationMother.sampleScorpio1(),
-                MVEntity4DataNegotiationMother.sampleScorpio2Old(),
-                MVEntity4DataNegotiationMother.sampleScorpio3());
+                MVEntity4DataNegotiationMother.sampleDataSyncService1(),
+                MVEntity4DataNegotiationMother.sampleDataSyncService2Old(),
+                MVEntity4DataNegotiationMother.sampleDataSyncService3());
     }
 
     private void removeInitialEntitiesInScorpio() {

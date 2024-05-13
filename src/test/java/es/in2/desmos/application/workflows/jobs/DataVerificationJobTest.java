@@ -23,8 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -61,8 +59,8 @@ class DataVerificationJobTest {
         Mono<String> issuer = Mono.just("http://example.org");
 
         Map<Id, Entity> entitiesById = new HashMap<>();
-        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sampleScorpio2().id()), new Entity(EntityMother.scorpioJson2()));
-        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sampleScorpio4().id()), new Entity(EntityMother.scorpioJson4()));
+        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sampleScorpio2().id()), new Entity(EntityMother.scorpioDefaultJson2()));
+        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sampleScorpio4().id()), new Entity(EntityMother.scorpioDefaultJson4()));
 
         List<MVEntity4DataNegotiation> allMVEntity4DataNegotiation = new ArrayList<>();
         allMVEntity4DataNegotiation.add(MVEntity4DataNegotiationMother.sampleScorpio2());
@@ -129,8 +127,8 @@ class DataVerificationJobTest {
         Mono<String> issuer = Mono.just("http://example.org");
 
         Map<Id, Entity> entitiesById = new HashMap<>();
-        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sampleScorpio2().id()), new Entity(EntityMother.scorpioJson2()));
-        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sampleScorpio4().id()), new Entity(EntityMother.scorpioJson4()));
+        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sampleScorpio2().id()), new Entity(EntityMother.scorpioDefaultJson2()));
+        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sampleScorpio4().id()), new Entity(EntityMother.scorpioDefaultJson4()));
 
         List<MVEntity4DataNegotiation> allMVEntity4DataNegotiation = new ArrayList<>();
         allMVEntity4DataNegotiation.add(MVEntity4DataNegotiationMother.sampleScorpio2());
