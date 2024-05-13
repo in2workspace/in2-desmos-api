@@ -59,6 +59,7 @@ public class DataVerificationJobImpl implements DataVerificationJob {
                                             if ((auditRecord.getEntityHashLink() + currentEntityHash).equals(existingHashLink)) {
                                                 return Mono.empty();
                                             } else {
+                                                log.debug("ProcessID: {} - Starting Data Verification Job\nId: {}\nEntity: {}\n Hashlink: {}\n Calcualte hash: {}\n Calculate hashlink: {}", processId, id.id(), entityData, existingHashLink, currentEntityHash, auditRecord.getEntityHashLink() + currentEntityHash);
                                                 return Mono.error(new InvalidConsistencyException("The hashlink received does not correspond to that of the entity."));
                                             }
                                         });
