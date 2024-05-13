@@ -3,6 +3,7 @@ package es.in2.desmos.it.domain.services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.domain.models.BrokerEntityWithIdTypeLastUpdateAndVersion;
+import es.in2.desmos.domain.models.Id;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.domain.services.broker.adapter.impl.ScorpioAdapter;
 import es.in2.desmos.inflators.ScorpioInflator;
@@ -130,6 +131,16 @@ class ScorpioAdapterIT {
 
         StepVerifier.create(resultMono)
                 .consumeNextWith(result -> assertEquals(Arrays.stream(initialMvEntity4DataNegotiationList).toList(), Arrays.stream(result).toList()))
+                .verifyComplete();
+    }
+
+    @Test
+    void itShouldReturnEntityId() {
+        String processId = "0";
+        Mono<BrokerEntityWithIdTypeLastUpdateAndVersion> resultMono = scorpioAdapter.findIdTypeFirstAttributeAndSecondAttributeById(processId, new Id(initialMvEntity4DataNegotiationList[0].getId()), "lastUpdate", "version", BrokerEntityWithIdTypeLastUpdateAndVersion.class);
+
+        StepVerifier.create(resultMono)
+                .expectNext(initialMvEntity4DataNegotiationList[0])
                 .verifyComplete();
     }
 
