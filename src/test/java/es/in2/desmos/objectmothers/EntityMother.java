@@ -362,19 +362,13 @@ public final class EntityMother {
         return objectMapper.writeValueAsString(jsonNode);
     }
 
-    public static String scorpioFullJsonList() throws JSONException, JsonProcessingException {
-        var scorpioJsonNode1 = objectMapper.readTree(scorpioDefaultJson1());
-        var scorpioJsonNode2 = objectMapper.readTree(scorpioDefaultJson2());
-        var scorpioJsonNode3 = objectMapper.readTree(scorpioDefaultJson3());
-        var scorpioJsonNode4 = objectMapper.readTree(scorpioDefaultJson4());
-
-        ArrayNode jsonArray = objectMapper.createArrayNode();
-        jsonArray.add(scorpioJsonNode1);
-        jsonArray.add(scorpioJsonNode2);
-        jsonArray.add(scorpioJsonNode3);
-        jsonArray.add(scorpioJsonNode4);
-
-        return objectMapper.writeValueAsString(jsonArray);
+    public static String[] scorpioFullJsonArray() throws JSONException {
+       return new String[]{
+                scorpioDefaultJson1(),
+                scorpioDefaultJson2(),
+                scorpioDefaultJson3(),
+                scorpioDefaultJson4()
+        };
     }
 
     public static String scorpioJson2And4() throws JSONException, JsonProcessingException {

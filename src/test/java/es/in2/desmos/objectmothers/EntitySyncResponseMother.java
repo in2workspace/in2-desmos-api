@@ -2,6 +2,7 @@ package es.in2.desmos.objectmothers;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.json.JSONException;
 
 import java.io.IOException;
@@ -16,11 +17,15 @@ public final class EntitySyncResponseMother {
     }
 
     public static String getSampleBase64() throws IOException, JSONException {
-        String sampleString = objectMapper.readTree(EntityMother.scorpioFullJsonList()).get(0).toString();
-        String sampleBase64 = Base64.getEncoder().encodeToString(sampleString.getBytes());
-        List<String> sampleList = new ArrayList<>();
-        sampleList.add(sampleBase64);
-        return objectMapper.writeValueAsString(sampleList);
+        ArrayNode jsonArray = objectMapper.createArrayNode();
+
+        for (var item : EntityMother.scorpioFullJsonArray()) {
+            String sampleBase64 = Base64.getEncoder().encodeToString(item.getBytes());
+
+            jsonArray.add(sampleBase64);
+        }
+
+        return objectMapper.writeValueAsString(jsonArray);
     }
 
     public static String getSample2Base64() throws IOException, JSONException {

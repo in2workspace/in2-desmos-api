@@ -180,24 +180,23 @@ public class DataTransferJobImpl implements DataTransferJob {
     }
 
     private Mono<Void> validateIntegrity(Mono<Map<Id, Entity>> entitiesByIdMono, Mono<Map<Id, HashAndHashLink>> allEntitiesExistingValidationDataById) {
-        return entitiesByIdMono
+        return allEntitiesExistingValidationDataById
                 .flatMapIterable(Map::entrySet)
                 .flatMap(entry -> {
-                    Mono<String> entity = Mono.just(entry.getValue().value());
                     Id id = entry.getKey();
-                    Mono<String> entityRcvdHash = allEntitiesExistingValidationDataById.map(x -> x.get(id).hash());
-                    Mono<String> calculatedHashMono = calculateHash(entity);
-                    return calculatedHashMono.flatMap(calculatedHash ->
-                            entityRcvdHash.flatMap(hashValue -> {
-                                if (calculatedHash.equals(hashValue)) {
-                                    return Mono.empty();
-                                } else {
-                                    log.error("expected hash: {}\ncurrent hash: {}", calculatedHash, hashValue);
-
-                                    return Mono.error(new InvalidIntegrityException("The hash received at the origin is different from the actual hash of the entity."));
-                                }
-                            }));
-
+                    HashAndHashLink hashAndHashLink = entry.getValue();
+                    Mono<String> entityRcvdHash = Mono.just(hashAndHashLink.hash());
+                    Mono<String> entityMono = entitiesByIdMono.map(x -> x.get(id).value());
+                    return calculateHash(entityMono)
+                            .flatMap(calculatedHash ->
+                                    entityRcvdHash.flatMap(hashValue -> {
+                                        if (calculatedHash.equals(hashValue)) {
+                                            return Mono.empty();
+                                        } else {
+                                            log.error("expected hash: {}\ncurrent hash: {}", hashValue, calculatedHash);
+                                            return Mono.error(new InvalidIntegrityException("The hash received at the origin is different from the actual hash of the entity."));
+                                        }
+                                    }));
                 })
                 .collectList()
                 .then();

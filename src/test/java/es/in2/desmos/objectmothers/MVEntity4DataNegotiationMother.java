@@ -50,7 +50,7 @@ public final class MVEntity4DataNegotiationMother {
     }
 
     public static @NotNull MVEntity4DataNegotiation sampleScorpio3() {
-        return getSampleScorpio(sample3(), "86a86ae657608e86529dce432932710b65cf8f62cda4ade599b0904fa0ba5dd9", "fa54");
+        return getSampleScorpio(sample3(), "dfa70625b5867c364625ded428469b34861c03bafd75e1243c0cf2ac68d7f212", "fa54");
     }
 
     public static @NotNull MVEntity4DataNegotiation sampleScorpio4() {
@@ -66,7 +66,7 @@ public final class MVEntity4DataNegotiationMother {
     }
 
     public static @NotNull MVEntity4DataNegotiation sampleDataSyncService3() {
-        return getSampleScorpio(sample3(), "86a86ae657608e86529dce432932710b65cf8f62cda4ade599b0904fa0ba5dd9", "fa54");
+        return getSampleScorpio(sample3(), "dfa70625b5867c364625ded428469b34861c03bafd75e1243c0cf2ac68d7f212", "fa54");
     }
 
     public static @NotNull MVEntity4DataNegotiation sampleBase1() {
