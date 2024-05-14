@@ -91,7 +91,7 @@ class P2PSyncDataIT {
     }
 
     @Test
-    void itShould() throws JSONException {
+    void WhenOneExternalAccessNode() throws JSONException {
         Mono<Void> response = WebClient.builder()
                 .baseUrl("http://localhost:" + localServerPort)
                 .build()
