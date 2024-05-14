@@ -57,7 +57,7 @@ class P2PDataSyncJobTests {
         String processId = "0";
 
         List<BrokerEntityWithIdTypeLastUpdateAndVersion> brokerEntities = MVBrokerEntity4DataNegotiationMother.list3And4();
-        when(brokerPublisherService.findAllIdTypeFirstAttributeAndSecondAttributeByType(processId, "ProductOffering", "lastUpdate", "version", BrokerEntityWithIdTypeLastUpdateAndVersion[].class, BrokerEntityWithIdTypeLastUpdateAndVersion.class)).thenReturn(Mono.just(brokerEntities));
+        when(brokerPublisherService.findAllIdTypeFirstAttributeAndSecondAttributeByType(processId, "ProductOffering", "lastUpdate", "version", BrokerEntityWithIdTypeLastUpdateAndVersion[].class)).thenReturn(Mono.just(brokerEntities));
 
 
         List<AuditRecord> auditRecordEntities = AuditRecordMother.list3And4();
@@ -95,7 +95,7 @@ class P2PDataSyncJobTests {
         verify(discoverySyncWebClient, times(2)).makeRequest(eq(processId), any(), any());
         verifyNoMoreInteractions(discoverySyncWebClient);
 
-        verify(brokerPublisherService, times(1)).findAllIdTypeFirstAttributeAndSecondAttributeByType(processId, "ProductOffering", "lastUpdate", "version", BrokerEntityWithIdTypeLastUpdateAndVersion[].class, BrokerEntityWithIdTypeLastUpdateAndVersion.class);
+        verify(brokerPublisherService, times(1)).findAllIdTypeFirstAttributeAndSecondAttributeByType(processId, "ProductOffering", "lastUpdate", "version", BrokerEntityWithIdTypeLastUpdateAndVersion[].class);
         verifyNoMoreInteractions(brokerPublisherService);
 
         verify(auditRecordService, times(2)).findLatestAuditRecordForEntity(eq(processId), any());
@@ -121,7 +121,7 @@ class P2PDataSyncJobTests {
         List<AuditRecord> auditRecordEntities = AuditRecordMother.list3And4();
 
         String processId = "0";
-        when(brokerPublisherService.findAllIdTypeFirstAttributeAndSecondAttributeByType(processId, "ProductOffering", "lastUpdate", "version", BrokerEntityWithIdTypeLastUpdateAndVersion[].class, BrokerEntityWithIdTypeLastUpdateAndVersion.class)).thenReturn(Mono.just(brokerEntities));
+        when(brokerPublisherService.findAllIdTypeFirstAttributeAndSecondAttributeByType(processId, "ProductOffering", "lastUpdate", "version", BrokerEntityWithIdTypeLastUpdateAndVersion[].class)).thenReturn(Mono.just(brokerEntities));
         when(auditRecordService.findLatestAuditRecordForEntity(processId, auditRecordEntities.get(0).getEntityId())).thenReturn(Mono.just(auditRecordEntities.get(0)));
         when(auditRecordService.findLatestAuditRecordForEntity(processId, auditRecordEntities.get(1).getEntityId())).thenReturn(Mono.just(auditRecordEntities.get(1)));
 
@@ -134,7 +134,7 @@ class P2PDataSyncJobTests {
                 .expectNext(expectedInternalEntities)
                 .verifyComplete();
 
-        verify(brokerPublisherService, times(1)).findAllIdTypeFirstAttributeAndSecondAttributeByType(processId, "ProductOffering", "lastUpdate", "version", BrokerEntityWithIdTypeLastUpdateAndVersion[].class, BrokerEntityWithIdTypeLastUpdateAndVersion.class);
+        verify(brokerPublisherService, times(1)).findAllIdTypeFirstAttributeAndSecondAttributeByType(processId, "ProductOffering", "lastUpdate", "version", BrokerEntityWithIdTypeLastUpdateAndVersion[].class);
         verifyNoMoreInteractions(brokerPublisherService);
     }
 

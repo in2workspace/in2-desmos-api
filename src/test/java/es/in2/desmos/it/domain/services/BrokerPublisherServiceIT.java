@@ -64,7 +64,7 @@ class BrokerPublisherServiceIT {
     @Test
     void itShouldReturnEntityIds() {
         String processId = "0";
-        var resultMono = brokerPublisherService.findAllIdTypeFirstAttributeAndSecondAttributeByType(processId, "ProductOffering", "lastUpdate", "version", BrokerEntityWithIdTypeLastUpdateAndVersion[].class, BrokerEntityWithIdTypeLastUpdateAndVersion.class);
+        var resultMono = brokerPublisherService.findAllIdTypeFirstAttributeAndSecondAttributeByType(processId, "ProductOffering", "lastUpdate", "version", BrokerEntityWithIdTypeLastUpdateAndVersion[].class);
 
         StepVerifier.create(resultMono)
                 .assertNext(result -> assertThat(result).hasSameElementsAs(initialEntities))

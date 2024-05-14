@@ -55,52 +55,9 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
     }
 
     @Override
-    public <T extends BrokerEntityWithIdAndType> Mono<List<T>> findAllIdTypeFirstAttributeAndSecondAttributeByType(String processId, String type, String firstAttribute, String secondAttribute, Class<T[]> responseClassArray, Class<T> responseClass) {
+    public <T extends BrokerEntityWithIdAndType> Mono<List<T>> findAllIdTypeFirstAttributeAndSecondAttributeByType(String processId, String type, String firstAttribute, String secondAttribute, Class<T[]> responseClassArray) {
         return brokerAdapterService.findAllIdTypeFirstAttributeAndSecondAttributeByType(processId, type, firstAttribute, secondAttribute, responseClassArray)
-                .map(Arrays::asList)
-                .flatMapIterable(brokerEntityWithIdAndTypeList -> brokerEntityWithIdAndTypeList)
-                .flatMap(brokerEntityWithIdAndType -> {
-                    Id entityId = new Id(brokerEntityWithIdAndType.getId());
-
-                    return findAllIdTypeFirstAttributeAndSecondAttributeByIds(processId, List.of(entityId), firstAttribute, secondAttribute, responseClass);
-                })
-                .collectList()
-                .flatMap(listsList -> {
-                    List<T> resultList = new ArrayList<>();
-                    for (List<T> list : listsList) {
-                        resultList.addAll(list);
-                    }
-                    return Mono.just(resultList);
-                });
-    }
-
-    private <T extends BrokerEntityWithIdAndType> Mono<List<T>> findAllIdTypeFirstAttributeAndSecondAttributeByIds(String processId, List<Id> entityIds, String firstAttribute, String secondAttribute, Class<T> responseClass) {
-        return Mono.just(entityIds)
-                .flatMapIterable(entityIdsList -> entityIdsList)
-                .flatMap(entityId ->
-                        brokerAdapterService.findIdTypeFirstAttributeAndSecondAttributeById(processId, entityId, firstAttribute, secondAttribute, responseClass)
-                                .flatMap(brokerEntityWithIdAndType ->
-                                        brokerAdapterService.getEntityById(processId, brokerEntityWithIdAndType.getId())
-                                                .flatMap(entity ->
-                                                        getEntityRelationshipIds(Mono.just(entity))
-                                                                .flatMap(entityRelationshipIds ->
-                                                                        findAllIdTypeFirstAttributeAndSecondAttributeByIds(processId, entityRelationshipIds, firstAttribute, secondAttribute, responseClass)
-                                                                                .map(allIdTypeFirstAttributeAndSecondAttributeByIds -> {
-                                                                                    List<T> brokerEntityWithIdAndTypeWithSubEntities = new ArrayList<>();
-
-                                                                                    brokerEntityWithIdAndTypeWithSubEntities.add(brokerEntityWithIdAndType);
-                                                                                    brokerEntityWithIdAndTypeWithSubEntities.addAll(allIdTypeFirstAttributeAndSecondAttributeByIds);
-
-                                                                                    return brokerEntityWithIdAndTypeWithSubEntities;
-                                                                                })))))
-                .collectList()
-                .flatMap(listsList -> {
-                    List<T> resultList = new ArrayList<>();
-                    for (List<T> list : listsList) {
-                        resultList.addAll(list);
-                    }
-                    return Mono.just(resultList);
-                });
+                .map(array -> Arrays.stream(array).toList());
     }
 
     @Override

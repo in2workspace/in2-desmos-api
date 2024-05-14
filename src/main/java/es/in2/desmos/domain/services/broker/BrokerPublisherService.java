@@ -11,7 +11,7 @@ public interface BrokerPublisherService {
 
     Mono<Void> publishDataToBroker(String processId, BlockchainNotification blockchainNotification, String retrievedBrokerEntity);
 
-    <T extends BrokerEntityWithIdAndType> Mono<List<T>> findAllIdTypeFirstAttributeAndSecondAttributeByType(String processId, String type, String firstAttribute, String secondAttribute, Class<T[]> responseClassArray, Class<T> responseClass);
+    <T extends BrokerEntityWithIdAndType> Mono<List<T>> findAllIdTypeFirstAttributeAndSecondAttributeByType(String processId, String type, String firstAttribute, String secondAttribute, Class<T[]> responseClassArray);
 
     Mono<Void> batchUpsertEntitiesToContextBroker(String processId, String retrievedBrokerEntities);
 

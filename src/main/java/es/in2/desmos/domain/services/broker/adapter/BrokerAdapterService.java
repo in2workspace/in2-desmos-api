@@ -2,7 +2,6 @@ package es.in2.desmos.domain.services.broker.adapter;
 
 import es.in2.desmos.domain.models.BrokerEntityWithIdAndType;
 import es.in2.desmos.domain.models.BrokerSubscription;
-import es.in2.desmos.domain.models.Id;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -22,7 +21,5 @@ public interface BrokerAdapterService {
     <T extends BrokerEntityWithIdAndType> Mono<T[]> findAllIdTypeFirstAttributeAndSecondAttributeByType(String processId, String type, String firstAttribute, String secondAttribute, Class<T[]> responseClass);
 
     Mono<Void> batchUpsertEntities(String processId, String requestBody);
-
-    <T extends BrokerEntityWithIdAndType> Mono<T> findIdTypeFirstAttributeAndSecondAttributeById(String processId, Id entityId, String firstAttribute, String secondAttribute, Class<T> responseClass);
 }
 
