@@ -39,7 +39,7 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
 
     private final DiscoverySyncWebClient discoverySyncWebClient;
 
-    private static final String BROKER_TYPE = "ProductOffering";
+    private static final String BROKER_ENTITY_TYPE = "ProductOffering";
 
     @Override
     public Mono<Void> synchronizeData(String processId) {
@@ -104,7 +104,7 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
     }
 
     private Mono<List<MVEntity4DataNegotiation>> createLocalMvEntities4DataNegotiation(String processId) {
-        return brokerPublisherService.findAllIdTypeFirstAttributeAndSecondAttributeByType(processId, BROKER_TYPE, "lastUpdate", "version", BrokerEntityWithIdTypeLastUpdateAndVersion[].class)
+        return brokerPublisherService.findAllIdTypeFirstAttributeAndSecondAttributeByType(processId, BROKER_ENTITY_TYPE, "lastUpdate", "version", BrokerEntityWithIdTypeLastUpdateAndVersion[].class)
                 .flatMap(mvBrokerEntities4DataNegotiation -> {
                     log.debug("ProcessID: {} - MV Broker Entities 4 Data Negotiation: {}", processId, mvBrokerEntities4DataNegotiation);
 
