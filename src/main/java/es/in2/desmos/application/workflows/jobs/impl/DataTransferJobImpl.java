@@ -206,7 +206,7 @@ public class DataTransferJobImpl implements DataTransferJob {
         return retrievedBrokerEntityMono.flatMap(sortedAttributesBrokerEntity -> {
             try {
                 return Mono.just(ApplicationUtils.calculateSHA256(sortedAttributesBrokerEntity));
-            } catch (NoSuchAlgorithmException e) {
+            } catch (NoSuchAlgorithmException | JsonProcessingException e) {
                 return Mono.error(e);
             }
         });
