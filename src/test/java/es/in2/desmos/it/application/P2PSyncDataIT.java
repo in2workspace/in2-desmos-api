@@ -120,15 +120,15 @@ class P2PSyncDataIT {
         assertAuditRecordAEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio2().id(), MVEntity4DataNegotiationMother.sampleBase2(), externalDomain);
         assertAuditRecordAEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio3().id(), MVEntity4DataNegotiationMother.sampleBase3(), LOCAL_ISSUER);
         assertAuditRecordAEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio4().id(), MVEntity4DataNegotiationMother.sampleBase4(), externalDomain);
-        assertAuditRecordAEntityIsExpected(MVEntity4DataNegotiationMother.samplePop1().id(), MVEntity4DataNegotiationMother.samplePop1(), LOCAL_ISSUER);
-        assertAuditRecordAEntityIsExpected(MVEntity4DataNegotiationMother.samplePop2().id(), MVEntity4DataNegotiationMother.samplePop2(), externalDomain);
+        assertAuditRecordAEntityIsExpected(MVEntity4DataNegotiationMother. samplePop1().id(), MVEntity4DataNegotiationMother.samplePop1(), LOCAL_ISSUER);
+        assertAuditRecordAEntityIsExpected(MVEntity4DataNegotiationMother.samplePop2().id(), MVEntity4DataNegotiationMother.samplePop2HashlinkHash(), externalDomain);
         assertAuditRecordAEntityIsExpected(MVEntity4DataNegotiationMother.samplePop3().id(), MVEntity4DataNegotiationMother.samplePop3(), LOCAL_ISSUER);
-        assertAuditRecordAEntityIsExpected(MVEntity4DataNegotiationMother.samplePop4().id(), MVEntity4DataNegotiationMother.samplePop4(), externalDomain);
-        assertAuditRecordAEntityIsExpected(MVEntity4DataNegotiationMother.samplePrice().id(), MVEntity4DataNegotiationMother.samplePrice(), externalDomain);
+        assertAuditRecordAEntityIsExpected(MVEntity4DataNegotiationMother.samplePop4().id(), MVEntity4DataNegotiationMother.samplePop4HashlinkHash(), externalDomain);
+        assertAuditRecordAEntityIsExpected(MVEntity4DataNegotiationMother.samplePrice().id(), MVEntity4DataNegotiationMother.samplePriceHashlinkHash(), externalDomain);
     }
 
     private void assertScorpioAEntityIsExpected(String entityId, String expectedEntityResponse) {
-        await().atMost(2, TimeUnit.SECONDS).until(() -> {
+        await().atMost(2, TimeUnit.SECONDS).ignoreExceptions().until(() -> {
             String processId = "0";
             Mono<String> entityresponseMono = scorpioAdapter.getEntityById(processId, entityId);
             StepVerifier
