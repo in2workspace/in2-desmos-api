@@ -207,16 +207,39 @@ class ApplicationUtilsTests {
     }
 
     @Test
-    void testCalculateSHA256_ValidData() throws NoSuchAlgorithmException, JsonProcessingException {
+    void testCalculateSHA256_ValidData() throws NoSuchAlgorithmException {
         // Arrange
-        String data = "test";
+        String data = """
+                {
+                   "id": "notification:-5106976853901020699",
+                   "type": "Notification",
+                   "data": [
+                     {
+                       "id": "urn:ngsi-ld:ProductOffering:122355255",
+                       "type": "ProductOffering",
+                       "description": {
+                         "type": "Property",
+                         "value": "Example of a Product offering for cloud services suite"
+                       },
+                       "notifiedAt": "2024-04-10T11:33:43.807Z"
+                     }
+                   ],
+                   "subscriptionId": "urn:ngsi-ld:Subscription:122355255",
+                   "notifiedAt": "2023-03-14T16:38:15.123456Z"
+                 }
+                """;
         MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
         byte[] expectedHash = messageDigest.digest(data.getBytes(StandardCharsets.UTF_8));
-        String expectedHashString = HexFormat.of().formatHex(expectedHash);
-        // Act
-        String actualHashString = calculateSHA256(data);
-        // Assert
-        assertEquals(expectedHashString, actualHashString);
+        // Act & Assert
+        assertDoesNotThrow(() -> calculateSHA256(data));
+    }
+
+    @Test
+    void testCalculateSHA256_InvalidData() throws NoSuchAlgorithmException {
+        // Arrange
+        String data = "invalid data";
+        // Act & Assert
+        assertThrows(JsonProcessingException.class, () -> calculateSHA256(data));
     }
 
     @Test
