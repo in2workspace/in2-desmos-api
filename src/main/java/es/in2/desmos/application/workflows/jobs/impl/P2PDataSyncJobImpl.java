@@ -68,6 +68,8 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
 
                     return discoverySyncWebClient.makeRequest(processId, Mono.just(externalAccessNode), discoverySyncRequestMono)
                             .map(resultList -> {
+                                log.debug("ProcessID: {} - Get DiscoverySync Response. [issuer={}, response={}]", processId, externalAccessNode, resultList);
+
                                 Issuer issuer = new Issuer(externalAccessNode);
                                 return Map.entry(issuer, resultList.entities());
                             });
@@ -94,9 +96,14 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
     }
 
     @Override
-    public Mono<List<String>> getLocalEntitiesById(String processId, Mono<List<Id>> ids) {
-        return brokerPublisherService.findAllById(processId, ids)
-                .map(Base64Converter::convertStringListToBase64List);
+    public Mono<List<String>> getLocalEntitiesByIdInBase64(String processId, Mono<List<Id>> ids) {
+        return brokerPublisherService
+                .findAllById(processId, ids)
+                .doOnSuccess(allEntitiesAndSubEntities ->
+                        log.debug("ProcessID: {} - Found all local entities with sub-entities in Scorpio. [entities={}]", processId, allEntitiesAndSubEntities))
+                .map(Base64Converter::convertStringListToBase64List)
+                .doOnSuccess(base64Entities ->
+                        log.debug("ProcessID: {} - Convert all local entities with sub-entities in Scorpio to Base64. [entities={}]", processId, base64Entities));
     }
 
     private static Mono<List<String>> getEntities4DataNegotiationIds(Mono<List<BrokerEntityWithIdTypeLastUpdateAndVersion>> mvBrokerEntities4DataNegotiationMono) {
@@ -120,6 +127,7 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                                 return mvBrokerEntities4DataNegotiation.stream()
                                         .map(brokerEntity -> {
                                             MVAuditServiceEntity4DataNegotiation auditServiceEntity = auditServiceEntityMap.get(brokerEntity.getId());
+
                                             return new MVEntity4DataNegotiation(
                                                     brokerEntity.getId(),
                                                     brokerEntity.getType(),
