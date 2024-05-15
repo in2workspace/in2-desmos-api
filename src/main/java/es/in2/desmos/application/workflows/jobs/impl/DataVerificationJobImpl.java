@@ -1,5 +1,8 @@
 package es.in2.desmos.application.workflows.jobs.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.application.workflows.jobs.DataVerificationJob;
 import es.in2.desmos.domain.exceptions.InvalidConsistencyException;
 import es.in2.desmos.domain.models.*;
@@ -14,6 +17,7 @@ import reactor.core.publisher.Mono;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -21,6 +25,7 @@ import java.util.Map;
 public class DataVerificationJobImpl implements DataVerificationJob {
     private final AuditRecordService auditRecordService;
     private final BrokerPublisherService brokerPublisherService;
+    private final ObjectMapper objectMapper;
 
     public Mono<Void> verifyData(String processId, Mono<String> issuer, Mono<Map<Id, Entity>> entitiesByIdMono, Mono<List<MVEntity4DataNegotiation>> allMVEntity4DataNegotiation, Mono<String> entitySyncResponseMono, Mono<Map<Id, HashAndHashLink>> existingEntitiesOriginalValidationDataById) {
         log.info("ProcessID: {} - Starting Data Verification Job", processId);
@@ -71,20 +76,63 @@ public class DataVerificationJobImpl implements DataVerificationJob {
 
     private Mono<Void> buildAndSaveAuditRecordFromDataSync(String processId, Mono<String> issuerMono, Mono<Map<Id, Entity>> rcvdEntitiesByIdMono, Mono<List<MVEntity4DataNegotiation>> mvEntity4DataNegotiationListMono, AuditRecordStatus auditRecordStatus) {
         return rcvdEntitiesByIdMono
-                .flatMapIterable(Map::keySet)
+                .flatMapIterable(Map::entrySet)
                 .flatMap(rcvdEntityById -> {
-                    String id = rcvdEntityById.id();
+                    String id = rcvdEntityById.getKey().id();
+
                     return mvEntity4DataNegotiationListMono
-                            .flatMap(list -> Mono.justOrEmpty(
-                                            list.stream()
-                                                    .filter(x -> x.id().equals(id))
-                                                    .findFirst())
-                                    .flatMap(mvEntity4DataNegotiationList -> issuerMono
-                                            .flatMap(issuer -> auditRecordService.buildAndSaveAuditRecordFromDataSync(processId, issuer, mvEntity4DataNegotiationList, auditRecordStatus))));
+                            .flatMap(list -> {
+                                Optional<MVEntity4DataNegotiation> mvEntity4DataNegotiation = list.stream()
+                                        .filter(x -> x.id().equals(id))
+                                        .findFirst();
+                                return mvEntity4DataNegotiation.map(entity4DataNegotiation -> issuerMono
+                                                .flatMap(issuer -> auditRecordService
+                                                        .buildAndSaveAuditRecordFromDataSync(processId, issuer, entity4DataNegotiation, auditRecordStatus)))
+                                        .orElseGet(() -> issuerMono
+                                                .flatMap(issuer -> getMVEntity4DataNegotiationForNewSubEntity(processId, Mono.just(rcvdEntityById), Mono.just(id))
+                                                        .flatMap(newMVEntity4DataNegotiation -> auditRecordService
+                                                                .buildAndSaveAuditRecordFromDataSync(processId, issuer, newMVEntity4DataNegotiation, auditRecordStatus))));
+                            });
 
                 })
                 .collectList()
                 .then();
+    }
+
+    private Mono<MVEntity4DataNegotiation> getMVEntity4DataNegotiationForNewSubEntity(String processId, Mono<Map.Entry<Id, Entity>> rcvdEntityByIdMono, Mono<String> idMono) {
+        return rcvdEntityByIdMono.flatMap(rcvdEntityById -> {
+            String entity = rcvdEntityById.getValue().value();
+            try {
+                JsonNode entityNode = objectMapper.readTree(entity);
+
+                String type = entityNode.get("type").asText();
+                String lastUpdate = entityNode.get("lastUpdate").get("value").asText();
+                String version = entityNode.get("version").get("value").asText();
+
+                Mono<String> calculatedHashMono = calculateHash(Mono.just(entity));
+                Mono<String> hashLinkMono = getHashLinkForNewSubEntity(processId, calculatedHashMono, idMono);
+                return idMono
+                        .zipWith(hashLinkMono)
+                        .flatMap(tuple -> {
+                            String id = tuple.getT1();
+                            String hashLink = tuple.getT2();
+
+                            return calculatedHashMono.map(hash ->
+                                    new MVEntity4DataNegotiation(id, type, version, lastUpdate, hash, hashLink));
+                        });
+            } catch (JsonProcessingException e) {
+                return Mono.error(e);
+            }
+        });
+    }
+
+    private Mono<String> getHashLinkForNewSubEntity(String processId, Mono<String> hashMono, Mono<String> idMono) {
+        return idMono.flatMap(entityId ->
+                auditRecordService.findLatestAuditRecordForEntity(processId, entityId)
+                        .filter(auditRecord -> auditRecord.getEntityId().equals(entityId))
+                        .map(AuditRecord::getEntityHashLink)
+                        .switchIfEmpty(hashMono)
+        );
     }
 
     private Mono<Void> batchUpsertEntitiesToContextBroker(String processId, Mono<String> retrievedBrokerEntitiesMono) {
