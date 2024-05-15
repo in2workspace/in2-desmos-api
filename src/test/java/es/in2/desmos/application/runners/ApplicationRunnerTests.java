@@ -6,7 +6,7 @@ import es.in2.desmos.application.workflows.SubscribeWorkflow;
 import es.in2.desmos.domain.models.BlockchainSubscription;
 import es.in2.desmos.domain.services.blockchain.BlockchainListenerService;
 import es.in2.desmos.domain.services.broker.BrokerListenerService;
-import es.in2.desmos.domain.services.sync.jobs.BlockchainDataSyncJob;
+import es.in2.desmos.application.workflows.jobs.BlockchainDataSyncJob;
 import es.in2.desmos.infrastructure.configs.ApiConfig;
 import es.in2.desmos.infrastructure.configs.BlockchainConfig;
 import es.in2.desmos.infrastructure.configs.BrokerConfig;

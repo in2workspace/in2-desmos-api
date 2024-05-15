@@ -1,8 +1,9 @@
-package es.in2.desmos.domain.services.sync.jobs.impl;
+package es.in2.desmos.application.workflows.jobs.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import es.in2.desmos.application.workflows.jobs.BlockchainDataSyncJob;
 import es.in2.desmos.domain.exceptions.JsonReadingException;
 import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.AuditRecordStatus;
@@ -10,7 +11,6 @@ import es.in2.desmos.domain.models.BlockchainNotification;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.blockchain.adapter.BlockchainAdapterService;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
-import es.in2.desmos.domain.services.sync.jobs.BlockchainDataSyncJob;
 import es.in2.desmos.domain.services.sync.services.DataSyncService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

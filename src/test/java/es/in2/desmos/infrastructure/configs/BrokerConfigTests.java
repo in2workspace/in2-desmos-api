@@ -56,6 +56,7 @@ class BrokerConfigTests {
         when(brokerProperties.externalDomain()).thenReturn(externalDomain);
         when(brokerProperties.paths()).thenReturn(new BrokerProperties.BrokerPathProperties(
                 "/ngsi-ld/v1/entities",
+                "/ngsi-ld/v1/entityOperations",
                 "/ngsi-ld/v1/subscriptions",
                 "/ngsi-ld/v1/temporal/entities"
         ));
@@ -82,6 +83,7 @@ class BrokerConfigTests {
         String expectedPath = "/ngsi-ld/v1/entities";
         when(brokerProperties.paths()).thenReturn(new BrokerProperties.BrokerPathProperties(
                 "/ngsi-ld/v1/entities",
+                "/ngsi-ld/v1/entityOperations",
                 "/ngsi-ld/v1/subscriptions",
                 "/ngsi-ld/v1/temporal/entities"
         ));
@@ -97,6 +99,7 @@ class BrokerConfigTests {
         String expectedPath = "/ngsi-ld/v1/subscriptions";
         when(brokerProperties.paths()).thenReturn(new BrokerProperties.BrokerPathProperties(
                 "/ngsi-ld/v1/entities",
+                "/ngsi-ld/v1/entityOperations",
                 "/ngsi-ld/v1/subscriptions",
                 "/ngsi-ld/v1/temporal/entities"
         ));
@@ -112,6 +115,7 @@ class BrokerConfigTests {
         String expectedPath = "/ngsi-ld/v1/temporal/entities";
         when(brokerProperties.paths()).thenReturn(new BrokerProperties.BrokerPathProperties(
                 "/ngsi-ld/v1/entities",
+                "/ngsi-ld/v1/entityOperations",
                 "/ngsi-ld/v1/subscriptions",
                 "/ngsi-ld/v1/temporal/entities"
         ));

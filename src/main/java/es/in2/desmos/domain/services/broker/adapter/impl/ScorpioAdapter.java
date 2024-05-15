@@ -3,12 +3,13 @@ package es.in2.desmos.domain.services.broker.adapter.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import es.in2.desmos.infrastructure.configs.BrokerConfig;
 import es.in2.desmos.domain.exceptions.JsonReadingException;
 import es.in2.desmos.domain.exceptions.RequestErrorException;
 import es.in2.desmos.domain.exceptions.SubscriptionCreationException;
+import es.in2.desmos.domain.models.BrokerEntityWithIdAndType;
 import es.in2.desmos.domain.models.BrokerSubscription;
 import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
+import es.in2.desmos.infrastructure.configs.BrokerConfig;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -78,7 +79,7 @@ public class ScorpioAdapter implements BrokerAdapterService {
                 .retrieve()
                 .onStatus(status -> status.isSameCodeAs(HttpStatusCode.valueOf(404)),
                         response -> {
-                            log.debug("ProcessId: {}, Entity not found", processId);
+                            log.debug("ProcessId: {}, Entity not found: {}", processId, entityId);
                             return response.bodyToMono(String.class).flatMap(body -> Mono.empty());
                         }
                 )
@@ -197,6 +198,40 @@ public class ScorpioAdapter implements BrokerAdapterService {
         return null;
     }
 
+    @Override
+    public <T extends BrokerEntityWithIdAndType> Mono<T[]> findAllIdTypeFirstAttributeAndSecondAttributeByType(String processId, String type, String firstAttribute, String secondAttribute, Class<T[]> responseClass) {
+        log.info("ProcessID: {} - Getting Entities With Version And Last Update", processId);
+
+        String uri = brokerConfig.getEntitiesPath() + "/" + String.format("?type=%s&attrs=%s,%s&options=keyValues", type, firstAttribute, secondAttribute);
+
+        return webClient
+                .get()
+                .uri(uri)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(responseClass)
+                .retry(3);
+    }
+
+    @Override
+    public Mono<Void> batchUpsertEntities(String processId, String requestBody) {
+        log.info("ProcessID: {} - Upserting entities to Scorpio", processId);
+        log.debug("ProcessID: {} - Upserting entities to Scorpio: {}", processId, requestBody);
+
+        String uri = brokerConfig.getEntityOperationsPath() + "/" + "upsert";
+
+        var acceptContentType = getContentTypeAndAcceptMediaType(requestBody);
+
+        return webClient.post()
+                .uri(uri)
+                .accept(acceptContentType)
+                .contentType(acceptContentType)
+                .bodyValue(requestBody)
+                .retrieve()
+                .bodyToMono(Void.class)
+                .retry(3);
+    }
+
     private Mono<Void> postSubscription(BrokerSubscription brokerSubscription) {
         return webClient.post()
                 .uri(brokerConfig.getSubscriptionsPath())
@@ -239,6 +274,10 @@ public class ScorpioAdapter implements BrokerAdapterService {
     private MediaType getContentTypeAndAcceptMediaType(String requestBody) {
         try {
             JsonNode jsonNode = objectMapper.readTree(requestBody);
+            if (jsonNode.isArray()) {
+                jsonNode = jsonNode.get(0);
+            }
+
             if (jsonNode.has("@context")) {
                 return MediaType.valueOf("application/ld+json");
             } else {

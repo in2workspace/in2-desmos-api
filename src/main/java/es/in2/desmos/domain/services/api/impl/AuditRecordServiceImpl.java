@@ -73,7 +73,13 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                         auditRecord.setHash(auditRecordHash);
                         // Then, we calculate the hashLink of the entity concatenating the previous hashLink
                         // with the hash of the current entity
-                        auditRecord.setHashLink(setAuditRecordHashLink(lastAuditRecordRegistered, auditRecordHash));
+                        String auditRecordHashLink;
+                        if (lastAuditRecordRegistered.getHashLink() != null) {
+                            auditRecordHashLink = calculateHashLink(lastAuditRecordRegistered.getHashLink(), auditRecordHash);
+                        } else {
+                            auditRecordHashLink = auditRecordHash;
+                        }
+                        auditRecord.setHashLink(auditRecordHashLink);
                     } catch (JsonProcessingException | NoSuchAlgorithmException e) {
                         log.warn("ProcessID: {} - Error building and saving audit record: {}", processId, e.getMessage());
                         return Mono.error(e);
@@ -138,6 +144,55 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                         return auditRecordRepository.save(auditRecord)
                                 .doOnSuccess(unused -> log.info("ProcessID: {} - Audit record saved successfully. - Status: {}", processId, status))
                                 .then();
+                    } catch (JsonProcessingException | NoSuchAlgorithmException e) {
+                        return Mono.error(e);
+                    }
+                });
+    }
+
+    /**
+     * Create a new AuditRecord with status RETRIEVED and trader CONSUMER
+     * from the retrieved external sync entity in string format.
+     * If the retrievedBrokerEntity is null or blank, the status will be RECEIVED.
+     */
+    @Override
+    public Mono<Void> buildAndSaveAuditRecordFromDataSync(String processId, String issuer, MVEntity4DataNegotiation mvEntity4DataNegotiation, AuditRecordStatus status) {
+        return fetchMostRecentAuditRecord()
+                .flatMap(lastAuditRecordRegistered -> {
+                    try {
+                        String entityHash = mvEntity4DataNegotiation.hash();
+                        String entityHashLink = mvEntity4DataNegotiation.hashlink();
+                        String dataLocation = issuer +
+                                "/ngsi-ld/v1/entities/" +
+                                mvEntity4DataNegotiation.id() +
+                                "?"
+                                + mvEntity4DataNegotiation.hash();
+
+                        AuditRecord auditRecord =
+                                AuditRecord.builder()
+                                        .id(UUID.randomUUID())
+                                        .processId(processId)
+                                        .createdAt(Timestamp.from(Instant.now()))
+                                        .entityId(mvEntity4DataNegotiation.id())
+                                        .entityType(mvEntity4DataNegotiation.type())
+                                        .entityHash(entityHash)
+                                        .entityHashLink(entityHashLink)
+                                        .dataLocation(dataLocation)
+                                        .status(status)
+                                        .trader(AuditRecordTrader.CONSUMER)
+                                        .hash("")
+                                        .hashLink("")
+                                        .newTransaction(true)
+                                        .build();
+
+                        String auditRecordHash = calculateSHA256(objectMapper.writeValueAsString(auditRecord));
+                        auditRecord.setHash(auditRecordHash);
+                        auditRecord.setHashLink(setAuditRecordHashLink(lastAuditRecordRegistered, auditRecordHash));
+
+                        log.debug("ProcessID: {} - Audit Record to save: {}", processId, auditRecord);
+
+                        return auditRecordRepository.save(auditRecord).then();
+
                     } catch (JsonProcessingException | NoSuchAlgorithmException e) {
                         return Mono.error(e);
                     }

@@ -72,4 +72,9 @@ public class ApiConfig {
         }
     }
 
+    @Bean
+    public String getOperatorExternalDomain(){
+        return operatorProperties.externalDomain();
+    }
+
 }

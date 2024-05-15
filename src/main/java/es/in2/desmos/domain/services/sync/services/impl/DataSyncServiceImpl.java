@@ -2,6 +2,8 @@ package es.in2.desmos.domain.services.sync.services.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import es.in2.desmos.application.workflows.jobs.P2PDataSyncJob;
+import es.in2.desmos.infrastructure.configs.ApiConfig;
 import es.in2.desmos.domain.exceptions.BrokerEntityRetrievalException;
 import es.in2.desmos.domain.exceptions.HashLinkException;
 import es.in2.desmos.domain.models.AuditRecord;
@@ -28,6 +30,7 @@ public class DataSyncServiceImpl implements DataSyncService {
     private final ApiConfig apiConfig;
     private final ObjectMapper objectMapper;
     private final AuditRecordService auditRecordService;
+    private final P2PDataSyncJob p2PDataSyncJob;
 
     /*
      *  Workflow steps:
@@ -41,7 +44,7 @@ public class DataSyncServiceImpl implements DataSyncService {
     @Override
     public Mono<Void> synchronizeData(String processId) {
         log.debug("ProcessID: {} - Synchronizing data...", processId);
-        return Mono.empty();
+        return p2PDataSyncJob.synchronizeData(processId);
     }
 
     /*
