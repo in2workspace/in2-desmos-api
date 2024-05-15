@@ -162,7 +162,7 @@ class P2PDataSyncJobTests {
         String processId = "0";
         when(brokerPublisherService.findAllById(eq(processId), any())).thenReturn(localEntitiesMono);
 
-        Mono<List<String>> result = p2PDataSyncJob.getLocalEntitiesById(processId, idsMono);
+        Mono<List<String>> result = p2PDataSyncJob.getLocalEntitiesByIdInBase64(processId, idsMono);
 
         System.out.println(expectedLocalEntities);
 

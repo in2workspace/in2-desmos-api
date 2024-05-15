@@ -72,7 +72,7 @@ public class DataSyncController {
                     log.debug("ProcessID: {} - Starting P2P Entities Synchronization: {}", processId, ids);
 
                     Mono<List<Id>> idsMono = Mono.just(ids);
-                    return p2PDataSyncJob.getLocalEntitiesById(processId, idsMono);
+                    return p2PDataSyncJob.getLocalEntitiesByIdInBase64(processId, idsMono);
                 })
                 .doOnSuccess(success -> log.info("ProcessID: {} - P2P Entities Synchronization successfully.", processId))
                 .doOnError(error -> log.error("ProcessID: {} - Error occurred while processing the P2P Entities Synchronization Controller: {}", processId, error.getMessage()));

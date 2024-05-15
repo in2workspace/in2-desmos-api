@@ -107,7 +107,7 @@ class DataSyncControllerTests {
         }
 
 
-        when(p2PDataSyncJob.getLocalEntitiesById(any(), any())).thenReturn(Mono.just(base64Entities));
+        when(p2PDataSyncJob.getLocalEntitiesByIdInBase64(any(), any())).thenReturn(Mono.just(base64Entities));
 
         webTestClient.post()
                 .uri("/api/v1/sync/p2p/entities")
@@ -120,7 +120,7 @@ class DataSyncControllerTests {
                 .json(expectedEntities.toString())
                 .consumeWith(System.out::println);
 
-        verify(p2PDataSyncJob, times(1)).getLocalEntitiesById(any(), any());
+        verify(p2PDataSyncJob, times(1)).getLocalEntitiesByIdInBase64(any(), any());
         verifyNoMoreInteractions(p2PDataSyncJob);
     }
 

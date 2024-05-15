@@ -50,7 +50,7 @@ public final class DataNegotiationResultMother {
         return new DataNegotiationResult("http://example.org", newEntitiesToSync, existingEntitiesToSync);
     }
 
-    private static DataNegotiationResult existingToScorpioSync2(String issuer) {
+    public static DataNegotiationResult existingToScorpioSync2(String issuer) {
         List<MVEntity4DataNegotiation> newEntitiesToSync = new ArrayList<>();
         List<MVEntity4DataNegotiation> existingEntitiesToSync = List.of(MVEntity4DataNegotiationMother.sampleScorpio2());
         return new DataNegotiationResult(issuer, newEntitiesToSync, existingEntitiesToSync);

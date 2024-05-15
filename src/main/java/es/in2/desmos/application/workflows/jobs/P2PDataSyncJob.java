@@ -11,5 +11,5 @@ public interface P2PDataSyncJob {
 
     Mono<List<MVEntity4DataNegotiation>> dataDiscovery(String processId, Mono<String> issuer, Mono<List<MVEntity4DataNegotiation>> externalMvEntities4DataNegotiation);
 
-    Mono<List<String>> getLocalEntitiesById(String processId, Mono<List<Id>> ids);
+    Mono<List<String>> getLocalEntitiesByIdInBase64(String processId, Mono<List<Id>> ids);
 }

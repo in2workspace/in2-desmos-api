@@ -18,7 +18,7 @@ public class DiscoverySyncWebClientImpl implements DiscoverySyncWebClient {
 
     @Override
     public Mono<DiscoverySyncResponse> makeRequest(String processId, Mono<String> externalAccessNodeMono, Mono<DiscoverySyncRequest> discoverySyncRequest) {
-        log.debug("ProcessID: {} - Making a Entity Sync Web Client request", processId);
+        log.debug("ProcessID: {} - Making a Discovery Sync Web Client request", processId);
 
         return externalAccessNodeMono.flatMap(externalAccessNode -> webClient
                 .post()
