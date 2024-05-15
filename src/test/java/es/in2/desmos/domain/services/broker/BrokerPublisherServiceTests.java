@@ -3,11 +3,16 @@ package es.in2.desmos.domain.services.broker;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import es.in2.desmos.domain.models.BlockchainNotification;
+import es.in2.desmos.domain.models.Id;
 import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import es.in2.desmos.domain.services.broker.adapter.factory.BrokerAdapterFactory;
 import es.in2.desmos.domain.services.broker.impl.BrokerPublisherServiceImpl;
+import es.in2.desmos.objectmothers.BrokerDataMother;
 import es.in2.desmos.objectmothers.EntityMother;
+import es.in2.desmos.objectmothers.IdMother;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,7 +33,6 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @ExtendWith(MockitoExtension.class)
 class BrokerPublisherServiceTests {
@@ -68,7 +72,7 @@ class BrokerPublisherServiceTests {
     @BeforeEach
     void init() {
         when(brokerAdapterFactory.getBrokerAdapter()).thenReturn(brokerAdapterService);
-        brokerPublisherService = new BrokerPublisherServiceImpl(brokerAdapterFactory);
+        brokerPublisherService = new BrokerPublisherServiceImpl(brokerAdapterFactory, objectMapper);
     }
 
     @Test
@@ -94,21 +98,6 @@ class BrokerPublisherServiceTests {
         when(brokerAdapterService.updateEntity(processId, retrievedBrokerEntity)).thenReturn(Mono.empty());
         //Assert
         StepVerifier.create(brokerPublisherService.publishDataToBroker(processId, blockchainNotification, retrievedBrokerEntity))
-                .verifyComplete();
-    }
-
-    @Test
-    void itShouldBatchUpsertEntitiesToContextBroker() throws JsonProcessingException {
-        String processId = "0";
-
-        String retrievedBrokerEntities = EntityMother.getFullJsonList();
-
-        when(brokerAdapterService.batchUpsertEntities(processId, retrievedBrokerEntities)).thenReturn(Mono.empty());
-
-        Mono<Void> result = brokerPublisherService.batchUpsertEntitiesToContextBroker(processId, retrievedBrokerEntities);
-
-        StepVerifier
-                .create(result)
                 .verifyComplete();
     }
 
@@ -183,7 +172,6 @@ class BrokerPublisherServiceTests {
         ids.add(new Id("urn:productOffering:06f56a54-9be9-4d45-bae7-2a036b721d27"));
         Mono<List<Id>> idsMono = Mono.just(ids);
 
-        // var brokerJson = BrokerDataMother.getEntityRequestBrokerNoTypeJson;
         JSONArray expectedResponseJsonArray = new JSONArray(brokerJson);
         List<String> localEntities = new ArrayList<>();
         for (int i = 0; i < expectedResponseJsonArray.length(); i++) {
