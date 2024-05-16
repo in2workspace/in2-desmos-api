@@ -10,6 +10,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public final class AuditRecordMother {
@@ -32,6 +33,25 @@ public final class AuditRecordMother {
                 .hash("")
                 .hashLink("")
                 .newTransaction(true)
+                .build();
+    }
+
+    public static AuditRecord createAuditRecordFromDataMap(String processId, Map<String, Object> dataMap) {
+
+        return AuditRecord.builder()
+                .id(UUID.randomUUID())
+                .processId(processId)
+                .createdAt(Timestamp.from(Instant.now()))
+                .entityId(dataMap.get("id").toString())
+                .entityType(dataMap.get("type").toString())
+                .entityHash("")
+                .entityHashLink("")
+                .dataLocation("")
+                .status(AuditRecordStatus.RECEIVED)
+                .trader(AuditRecordTrader.PRODUCER)
+                .hash("")
+                .hashLink("")
+                .newTransaction(false)
                 .build();
     }
 

@@ -84,6 +84,7 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                         log.warn("ProcessID: {} - Error building and saving audit record: {}", processId, e.getMessage());
                         return Mono.error(e);
                     }
+
                     return auditRecordRepository.save(auditRecord)
                             .doOnSuccess(unused -> log.info("ProcessID: {} - Audit record saved successfully. - Status: {}", processId, status))
                             .then();
