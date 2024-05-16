@@ -46,7 +46,8 @@ public class BrokerListenerServiceImpl implements BrokerListenerService {
     public Mono<Void> processBrokerNotification(String processId, BrokerNotification brokerNotification) {
         log.info("ProcessID: {} - Processing Broker Notification...", processId);
         // Validate BrokerNotification is not null and has data
-        return getDataFromBrokerNotification(brokerNotification)
+        return Mono.just(brokerNotification.data())
+                .flatMapIterable(dataList -> dataList)
                 // Validate if BrokerNotification is from an external source or self-generated
                 .flatMap(dataMap -> isBrokerNotificationFromExternalSource(processId, dataMap))
                 // Create and AuditRecord with status RECEIVED
@@ -67,12 +68,6 @@ public class BrokerListenerServiceImpl implements BrokerListenerService {
                         log.error("ProcessID: {} - Error processing Broker Notification: {}", processId, throwable.getMessage());
                     }
                 });
-    }
-
-    private Mono<Map<String, Object>> getDataFromBrokerNotification(BrokerNotification brokerNotification) {
-        //Get data from brokerNotification
-        Map<String, Object> dataMap = brokerNotification.data().get(0);
-        return Mono.just(dataMap);
     }
 
     private Mono<Map<String, Object>> isBrokerNotificationFromExternalSource(String processId, Map<String, Object> dataMap) {

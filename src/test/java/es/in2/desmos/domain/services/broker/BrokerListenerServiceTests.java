@@ -14,12 +14,12 @@ import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import es.in2.desmos.domain.services.broker.adapter.factory.BrokerAdapterFactory;
 import es.in2.desmos.domain.services.broker.impl.BrokerListenerServiceImpl;
 import es.in2.desmos.domain.utils.ApplicationUtils;
+import es.in2.desmos.objectmothers.AuditRecordMother;
+import es.in2.desmos.objectmothers.BrokerNotificationMother;
+import es.in2.desmos.objectmothers.EnqueueEventMother;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -32,8 +32,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class BrokerListenerServiceTests {
@@ -52,8 +51,8 @@ class BrokerListenerServiceTests {
 
     @Mock
     private BrokerAdapterFactory brokerAdapterFactory;
-    @Mock
-    private ObjectMapper objectMapper;
+    @Spy
+    private static ObjectMapper objectMapper = new ObjectMapper();
     @Mock
     private AuditRecordService auditRecordService;
     @Mock
@@ -89,7 +88,7 @@ class BrokerListenerServiceTests {
     }
 
     @Test
-    void processBrokerNotificationTest_SecondNotification_sameHash() throws NoSuchAlgorithmException, JsonProcessingException {
+    void processBrokerNotificationTest_SecondNotification_sameHash() throws JsonProcessingException {
         // Arrange
         String processId = UUID.randomUUID().toString();
         BrokerNotification brokerNotification = BrokerNotification.builder()
@@ -130,7 +129,7 @@ class BrokerListenerServiceTests {
     }
 
     @Test
-    void processBrokerNotificationTest_SecondNotification_differentHash() throws NoSuchAlgorithmException, JsonProcessingException {
+    void processBrokerNotificationTest_SecondNotification_differentHash() throws JsonProcessingException {
         // Arrange
         String processId = UUID.randomUUID().toString();
         BrokerNotification brokerNotification = BrokerNotification.builder()
@@ -215,6 +214,54 @@ class BrokerListenerServiceTests {
                     .expectErrorMatches(throwable -> throwable instanceof BrokerNotificationParserException)
                     .verify();
         }
+    }
+
+    @Test
+    void itShouldProcessBrokerNotificationWhenIsAnArrayOfEntities() {
+        String processId = "0";
+        BrokerNotification brokerNotification = BrokerNotificationMother.withDataArray();
+
+        String entityId0 = brokerNotification.data().get(0).get("id").toString();
+        when(auditRecordService.findLatestAuditRecordForEntity(processId, entityId0))
+                .thenReturn(Mono.just(AuditRecordMother.list3And4().get(0)));
+        when(auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(
+                processId,
+                brokerNotification.data().get(0),
+                AuditRecordStatus.RECEIVED,
+                null))
+                .thenReturn(Mono.empty());
+
+        String entityId1 = brokerNotification.data().get(1).get("id").toString();
+        when(auditRecordService.findLatestAuditRecordForEntity(processId, entityId1))
+                .thenReturn(Mono.just(AuditRecordMother.list3And4().get(1)));
+        when(auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(
+                processId,
+                brokerNotification.data().get(1),
+                AuditRecordStatus.RECEIVED,
+                null))
+                .thenReturn(Mono.empty());
+
+        when(queueService.enqueueEvent(EnqueueEventMother.sample(Collections.singletonList(brokerNotification)))).thenReturn(Mono.empty());
+
+        StepVerifier.create(brokerListenerService.processBrokerNotification(processId, brokerNotification))
+                .verifyComplete();
+
+        verify(auditRecordService, times(1)).findLatestAuditRecordForEntity(processId, entityId0);
+        verify(auditRecordService, times(1)).findLatestAuditRecordForEntity(processId, entityId1);
+        verify(auditRecordService, times(1)).buildAndSaveAuditRecordFromBrokerNotification(
+                processId,
+                brokerNotification.data().get(0),
+                AuditRecordStatus.RECEIVED,
+                null);
+        verify(auditRecordService, times(1)).buildAndSaveAuditRecordFromBrokerNotification(
+                processId,
+                brokerNotification.data().get(1),
+                AuditRecordStatus.RECEIVED,
+                null);
+        verifyNoMoreInteractions(auditRecordService);
+
+        verify(queueService, times(1)).enqueueEvent(EnqueueEventMother.sample(Collections.singletonList(brokerNotification)));
+        verifyNoMoreInteractions(queueService);
     }
 
 }
