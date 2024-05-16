@@ -35,17 +35,17 @@ class DataSyncServiceImplTests {
             .publisherAddress("0x40b0ab9dfd960064fb7e9fdf77f889c71569e349055ff563e8d699d8fa97fa90")
             .eventType("ProductOffering")
             .timestamp(1712753824)
-            .dataLocation("http://scorpio:9090/ngsi-ld/v1/entities/urn:ngsi-ld:ProductOffering:122355255?hl=4c867b69e424cc53e92d1bbeab57c5a3ac478493938324bdb345194aeb2bc8ff")
+            .dataLocation("http://scorpio:9090/ngsi-ld/v1/entities/urn:ngsi-ld:ProductOffering:122355255?hl=6d91b01418c21ccad12072d5f986bab2c99206bb08e65e5a430a35f7e60dcdbf")
             .relevantMetadata(Collections.emptyList())
             .entityId("0x4eb401aa1248b6a95c298d0747eb470b6ba6fc3f54ea630dc6c77f23ad1abe3e")
-            .previousEntityHash("0x4c867b69e424cc53e92d1bbeab57c5a3ac478493938324bdb345194aeb2bc8ff")
+            .previousEntityHash("0x6d91b01418c21ccad12072d5f986bab2c99206bb08e65e5a430a35f7e60dcdbf")
             .build();
     AuditRecord auditRecord = AuditRecord.builder()
             .id(UUID.randomUUID())
             .processId(UUID.randomUUID().toString())
             .entityId(UUID.randomUUID().toString())
             .entityType("ProductOffering")
-            .entityHashLink("4c867b69e424cc53e92d1bbeab57c5a3ac478493938324bdb345194aeb2bc8ff")
+            .entityHashLink("6d91b01418c21ccad12072d5f986bab2c99206bb08e65e5a430a35f7e60dcdbf")
             .status(AuditRecordStatus.PUBLISHED)
             .createdAt(Timestamp.from(Instant.now()))
             .build();
@@ -81,6 +81,7 @@ class DataSyncServiceImplTests {
                     "value": "ProductOffering 1 description"
                 }
             }""";
+
     @Mock
     private ApiConfig apiConfig;
     @Spy

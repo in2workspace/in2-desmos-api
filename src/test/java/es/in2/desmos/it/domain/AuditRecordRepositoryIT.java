@@ -10,6 +10,8 @@ import es.in2.desmos.domain.models.AuditRecordTrader;
 import es.in2.desmos.domain.repositories.AuditRecordRepository;
 import es.in2.desmos.it.ContainerManager;
 import org.junit.jupiter.api.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -33,6 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class AuditRecordRepositoryIT {
 
+    private static final Logger log = LoggerFactory.getLogger(AuditRecordRepositoryIT.class);
     private static boolean isCleanupDone = false;
     private final ObjectMapper objectMapper = JsonMapper.builder()
             .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES).build();
@@ -90,7 +93,7 @@ class AuditRecordRepositoryIT {
     @Test
     void shouldSaveAuditRecordRoot() throws JsonProcessingException, NoSuchAlgorithmException {
         // Arrange
-        String expectedAuditRecordRootHash = "64d2d3a4dfcc11a1db2eaec09c90e8f6635ec09ca89137d2b5b3f984648c62ff";
+        String expectedAuditRecordRootHash = "7173d4c27123da4a3e0f262eee8049a7771e7c0f86dd7410d1a098530cab0cbf";
         // Calculate the hash of the AuditRecordRoot and set them.
         // The hashLink is the hash of the AuditRecordRoot because it is the first record
         String auditRecordRootHash = calculateSHA256(objectMapper.writeValueAsString(auditRecordRoot));
@@ -114,14 +117,14 @@ class AuditRecordRepositoryIT {
     @Test
     void shouldSaveAuditRecordGuaranteeImmutability() throws JsonProcessingException, NoSuchAlgorithmException {
         /*
-         * HashLink set in test 0 = 64d2d3a4dfcc11a1db2eaec09c90e8f6635ec09ca89137d2b5b3f984648c62ff
-         * Hash calculated for new AuditRecord = c7af45867074d83f11caed2f4292e3bee405ab03a3e2b20a07c111ddd73706a5
+         * HashLink set in test 0 = 7173d4c27123da4a3e0f262eee8049a7771e7c0f86dd7410d1a098530cab0cbf
+         * Hash calculated for new AuditRecord = f7448173ac7d6da9abd1d04e738e607cac9ebc526389dae7309b02892b82b5e5
          * If you concatenated both hashes, using the web https://emn178.github.io/online-tools/sha256.html,
          * you will get the hashLink of the new AuditRecord ;)
          */
         // Arrange
-        String expectedAuditRecordHash = "c7af45867074d83f11caed2f4292e3bee405ab03a3e2b20a07c111ddd73706a5";
-        String expectedAuditRecordHashLink = "7911e4591382dc4f1014248fb54b7500d31e292f89a064d31d6dbd3bb4a9825d";
+        String expectedAuditRecordHash = "f7448173ac7d6da9abd1d04e738e607cac9ebc526389dae7309b02892b82b5e5";
+        String expectedAuditRecordHashLink = "6a9a035192b28374c2fa8696e52f72d9092f39895ca98ddb958c27b01966dc97";
         // Get the most recent AuditRecord from the database
         AuditRecord auditRecordFound = auditRecordRepository.findMostRecentAuditRecord().block();
         assert auditRecordFound != null;
