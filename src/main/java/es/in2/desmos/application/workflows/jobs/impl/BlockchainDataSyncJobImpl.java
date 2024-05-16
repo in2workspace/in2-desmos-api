@@ -20,6 +20,8 @@ import reactor.core.publisher.Flux;
 import java.time.Instant;
 import java.util.List;
 
+import static es.in2.desmos.domain.utils.ApplicationUtils.extractEntityIdFromDataLocation;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -80,6 +82,14 @@ public class BlockchainDataSyncJobImpl implements BlockchainDataSyncJob {
         try {
             List<BlockchainNotification> notificationList = objectMapper.readValue(responseList, new TypeReference<>() {
             });
+            if (notificationList.isEmpty()) {
+                log.info("ProcessID: {} - Response list is empty, no notifications were found.", processId);
+            } else {
+                log.info("ProcessID: {} - notifications were found.", processId);
+                for (BlockchainNotification blockchainNotification : notificationList) {
+                    log.info("Notification ID: {}", extractEntityIdFromDataLocation(blockchainNotification.dataLocation()));
+                }
+            }
             return Flux.fromIterable(notificationList);
         } catch (JsonProcessingException e) {
             log.warn("ProcessID: {} - Error processing JSON: {}", processId, responseList, e);

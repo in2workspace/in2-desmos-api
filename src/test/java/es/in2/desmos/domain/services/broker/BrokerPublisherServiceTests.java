@@ -47,6 +47,12 @@ class BrokerPublisherServiceTests {
 
     private BrokerPublisherServiceImpl brokerPublisherService;
 
+    @BeforeEach
+    void init() {
+        when(brokerAdapterFactory.getBrokerAdapter()).thenReturn(brokerAdapterService);
+        brokerPublisherService = new BrokerPublisherServiceImpl(brokerAdapterFactory, objectMapper);
+    }
+
     private final long id = 1234;
     private final String publisherAddress = "http://blockchain-testnode.infra.svc.cluster.local:8545/";
     private final String eventType = "ProductOffering";
@@ -68,12 +74,6 @@ class BrokerPublisherServiceTests {
             .entityId(entityIdHash)
             .previousEntityHash(previousEntityHash)
             .build();
-
-    @BeforeEach
-    void init() {
-        when(brokerAdapterFactory.getBrokerAdapter()).thenReturn(brokerAdapterService);
-        brokerPublisherService = new BrokerPublisherServiceImpl(brokerAdapterFactory, objectMapper);
-    }
 
     @Test
     void testPublishDataToBroker() {
@@ -114,6 +114,7 @@ class BrokerPublisherServiceTests {
         StepVerifier
                 .create(result)
                 .verifyComplete();
+
         verify(brokerAdapterService, times(1)).batchUpsertEntities(processId, retrievedBrokerEntities);
         verifyNoMoreInteractions(brokerAdapterService);
     }

@@ -2,19 +2,13 @@ package es.in2.desmos.domain.services.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import es.in2.desmos.domain.models.AuditRecord;
-import es.in2.desmos.domain.models.AuditRecordStatus;
-import es.in2.desmos.domain.models.BlockchainNotification;
-import es.in2.desmos.domain.models.BlockchainTxPayload;
-import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
+import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.repositories.AuditRecordRepository;
 import es.in2.desmos.domain.services.api.impl.AuditRecordServiceImpl;
 import es.in2.desmos.objectmothers.AuditRecordMother;
 import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
@@ -24,10 +18,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,6 +39,7 @@ class AuditRecordServiceTests {
 
     @InjectMocks
     private AuditRecordServiceImpl auditRecordService;
+
     @Captor
     private ArgumentCaptor<AuditRecord> auditRecordArgumentCaptor;
 
@@ -124,7 +119,6 @@ class AuditRecordServiceTests {
                 .expectError(JsonProcessingException.class)
                 .verify();
     }
-
 
 
     @Test
