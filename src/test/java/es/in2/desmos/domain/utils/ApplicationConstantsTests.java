@@ -5,14 +5,28 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class ApplicationConstantsTests {
 
     @Mock
     private ApplicationConstants applicationConstants;
+
+    @Test
+    void testConstructorThrowsException() throws NoSuchMethodException {
+        Constructor<ApplicationConstants> constructor = ApplicationConstants.class.getDeclaredConstructor();
+        constructor.setAccessible(true);
+        try {
+            constructor.newInstance();
+            fail("Expected an exception to be thrown");
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            assertInstanceOf(IllegalStateException.class, e.getCause());
+        }
+    }
 
     @Test
     void testHashPrefix() {

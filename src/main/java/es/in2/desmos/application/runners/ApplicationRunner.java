@@ -1,16 +1,16 @@
 package es.in2.desmos.application.runners;
 
-import es.in2.desmos.infrastructure.configs.ApiConfig;
-import es.in2.desmos.infrastructure.configs.BlockchainConfig;
-import es.in2.desmos.infrastructure.configs.BrokerConfig;
+import es.in2.desmos.application.workflows.DataSyncWorkflow;
+import es.in2.desmos.application.workflows.PublishWorkflow;
+import es.in2.desmos.application.workflows.SubscribeWorkflow;
 import es.in2.desmos.domain.exceptions.RequestErrorException;
 import es.in2.desmos.domain.models.BlockchainSubscription;
 import es.in2.desmos.domain.models.BrokerSubscription;
 import es.in2.desmos.domain.services.blockchain.BlockchainListenerService;
 import es.in2.desmos.domain.services.broker.BrokerListenerService;
-import es.in2.desmos.application.workflows.DataSyncWorkflow;
-import es.in2.desmos.application.workflows.PublishWorkflow;
-import es.in2.desmos.application.workflows.SubscribeWorkflow;
+import es.in2.desmos.infrastructure.configs.ApiConfig;
+import es.in2.desmos.infrastructure.configs.BlockchainConfig;
+import es.in2.desmos.infrastructure.configs.BrokerConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;

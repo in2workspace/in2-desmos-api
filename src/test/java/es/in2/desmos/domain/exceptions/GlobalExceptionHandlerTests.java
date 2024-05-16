@@ -3,6 +3,7 @@ package es.in2.desmos.domain.exceptions;
 import es.in2.desmos.domain.exceptions.handler.GlobalExceptionHandler;
 import es.in2.desmos.domain.models.GlobalErrorMessage;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -10,6 +11,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.support.WebExchangeBindException;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -114,4 +118,27 @@ class GlobalExceptionHandlerTests {
                 .verifyComplete();
     }
 
+    @Test
+    void testHandleWebExchangeBindException() {
+        // Arrange
+        WebExchangeBindException webExchangeBindException = mock(WebExchangeBindException.class);
+        BindingResult bindingResult = mock(BindingResult.class);
+        FieldError fieldError = new FieldError("objectName", "fieldName", "error message");
+        // Mock
+        when(webExchangeBindException.getBindingResult()).thenReturn(bindingResult);
+        when(request.getPath()).thenReturn(requestPath);
+        when(bindingResult.getAllErrors()).thenReturn(List.of(fieldError));
+        // Act
+        GlobalErrorMessage globalErrorMessage =
+                GlobalErrorMessage.builder()
+                        .title(webExchangeBindException.getClass().getSimpleName())
+                        .message("fieldName: error message")
+                        .path(String.valueOf(requestPath))
+                        .build();
+        Mono<GlobalErrorMessage> result = globalExceptionHandler.handleWebExchangeBindException(webExchangeBindException, request);
+        // Assert
+        StepVerifier.create(result)
+                .expectNext(globalErrorMessage)
+                .verifyComplete();
+    }
 }
