@@ -41,6 +41,9 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
 
+      - name: Build Cache Docker Image
+        run: docker build --file Dockerfile --build-arg SKIP_TESTS=true --tag desmos-api .
+
       - name: Build and analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
