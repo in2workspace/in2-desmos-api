@@ -69,7 +69,7 @@ class ApplicationUtilsTests {
     }
 
     @Test
-    void testCalculateSHA256_ValidData() throws NoSuchAlgorithmException {
+    void testCalculateSHA256_ValidData() {
         // Arrange
         String data = """
                 {
@@ -90,8 +90,6 @@ class ApplicationUtilsTests {
                    "notifiedAt": "2023-03-14T16:38:15.123456Z"
                  }
                 """;
-        MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-        byte[] expectedHash = messageDigest.digest(data.getBytes(StandardCharsets.UTF_8));
         // Act & Assert
         assertDoesNotThrow(() -> calculateSHA256(data));
     }
@@ -164,7 +162,7 @@ class ApplicationUtilsTests {
 
     @ParameterizedTest
     @MethodSource("provideTestData")
-    void testVerifySortAttributesAlphabetically(String input, String expected) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, JsonProcessingException {
+    void testVerifySortAttributesAlphabetically(String input, String expected) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         //Arrange
         ObjectMapper objectMapper = new ObjectMapper();
         Method method = ApplicationUtils.class.getDeclaredMethod("sortAttributesAlphabetically", String.class, ObjectMapper.class);

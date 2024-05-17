@@ -101,7 +101,7 @@ class DataSyncServiceImplTests {
         when(auditRecordService.findLatestConsumerPublishedAuditRecordByEntityId(anyString(), anyString())).thenReturn(Mono.empty());
         //Act & Assert
         StepVerifier.create(dataSyncService.verifyRetrievedEntityData("processId", notification, retrievedBrokerEntity))
-                .assertNext(retrievedBrokerEntity -> {
+                .assertNext(entity -> {
                 })
                 .verifyComplete();
     }
@@ -111,7 +111,7 @@ class DataSyncServiceImplTests {
         when(auditRecordService.findLatestConsumerPublishedAuditRecordByEntityId(anyString(), anyString())).thenReturn(Mono.just(auditRecord));
 
         StepVerifier.create(dataSyncService.verifyRetrievedEntityData("processId", notification, retrievedBrokerEntity))
-                .assertNext(retrievedBrokerEntity -> {
+                .assertNext(entity -> {
                 })
                 .verifyComplete();
 
