@@ -9,6 +9,7 @@ import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.api.QueueService;
 import es.in2.desmos.domain.services.blockchain.BlockchainPublisherService;
 import es.in2.desmos.domain.utils.BlockchainTxPayloadFactory;
+import es.in2.desmos.objectmothers.BrokerNotificationMother;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -87,4 +88,54 @@ class PublishWorkflowTests {
         verify(auditRecordService).buildAndSaveAuditRecordFromBrokerNotification(eq(processId), any(), eq(AuditRecordStatus.PUBLISHED), any());
     }
 
+    @Test
+    void itShouldProcessBrokerNotificationWhenIsAnArrayOfEntities() {
+        EventQueue eventQueueMock = mock(EventQueue.class);
+        when(pendingPublishEventsQueue.getEventStream()).thenReturn(Flux.just(eventQueueMock));
+        BrokerNotification currentBrokerNotification = BrokerNotificationMother.withDataArray();
+        when(eventQueueMock.getEvent()).thenReturn(List.of(currentBrokerNotification));
+
+        String id0 = currentBrokerNotification.data().get(0).get("id").toString();
+        when(auditRecordService.fetchLatestProducerEntityHashByEntityId(processId, id0)).thenReturn(Mono.empty());
+        String id1 = currentBrokerNotification.data().get(1).get("id").toString();
+        when(auditRecordService.fetchLatestProducerEntityHashByEntityId(processId, id1)).thenReturn(Mono.empty());
+
+        String previousHash = "5d41402abc4b2a76b9719d911017c592";
+        when(blockchainTxPayloadFactory.calculatePreviousHashIfEmpty(eq(processId), any())).thenReturn(Mono.just(previousHash));
+
+        BlockchainTxPayload blockchainTxPayload = BlockchainTxPayload.builder().build();
+        when(blockchainTxPayloadFactory.buildBlockchainTxPayload(anyString(), anyMap(), anyString()))
+                .thenReturn(Mono.just(blockchainTxPayload));
+        when(auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(eq(processId), any(), eq(AuditRecordStatus.CREATED), any()))
+                .thenReturn(Mono.empty());
+        when(blockchainPublisherService.publishDataToBlockchain(processId, blockchainTxPayload))
+                .thenReturn(Mono.empty());
+        when(auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(eq(processId), any(), eq(AuditRecordStatus.PUBLISHED), any()))
+                .thenReturn(Mono.empty());
+
+        publishWorkflow.startPublishWorkflow(processId).blockLast();
+
+        verify(pendingPublishEventsQueue).getEventStream();
+        verifyNoMoreInteractions(pendingPublishEventsQueue);
+
+        verify(eventQueueMock).getEvent();
+        verifyNoMoreInteractions(eventQueueMock);
+
+        var dataMap0 = currentBrokerNotification.data().get(0);
+        verify(blockchainTxPayloadFactory).calculatePreviousHashIfEmpty(processId, dataMap0);
+        verify(blockchainTxPayloadFactory).buildBlockchainTxPayload(processId, dataMap0, previousHash);
+        var dataMap1 = currentBrokerNotification.data().get(1);
+        verify(blockchainTxPayloadFactory).calculatePreviousHashIfEmpty(processId, dataMap1);
+        verify(blockchainTxPayloadFactory).buildBlockchainTxPayload(processId, dataMap1, previousHash);
+        verifyNoMoreInteractions(blockchainTxPayloadFactory);
+
+        verify(blockchainPublisherService, times(2)).publishDataToBlockchain(eq(processId), any());
+        verifyNoMoreInteractions(blockchainPublisherService);
+
+        verify(auditRecordService).buildAndSaveAuditRecordFromBrokerNotification(eq(processId), eq(dataMap0), eq(AuditRecordStatus.CREATED), any());
+        verify(auditRecordService).buildAndSaveAuditRecordFromBrokerNotification(eq(processId), eq(dataMap1), eq(AuditRecordStatus.CREATED), any());
+        verify(auditRecordService).buildAndSaveAuditRecordFromBrokerNotification(eq(processId), eq(dataMap0), eq(AuditRecordStatus.PUBLISHED), any());
+        verify(auditRecordService).buildAndSaveAuditRecordFromBrokerNotification(eq(processId), eq(dataMap1), eq(AuditRecordStatus.PUBLISHED), any());
+        verifyNoMoreInteractions(auditRecordService);
+    }
 }

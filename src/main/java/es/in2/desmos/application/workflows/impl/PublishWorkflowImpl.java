@@ -13,8 +13,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Objects;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -40,27 +38,33 @@ public class PublishWorkflowImpl implements PublishWorkflow {
                 // Get the first event from the event stream,
                 // parse it as a BrokerNotification and filter out null values
                 .flatMap(pendingPublishQueueEventStream ->
-                        Mono.just((BrokerNotification) pendingPublishQueueEventStream.getEvent().get(0))
-                                .filter(Objects::nonNull)
+                        Mono.just(pendingPublishQueueEventStream.getEvent().get(0))
+                                .filter(BrokerNotification.class::isInstance)
+                                .cast(BrokerNotification.class)
                                 // Create an event from the BrokerNotification
-                                .flatMap(brokerNotification ->
-                                        // Get the last AuditRecord stored for the same entityId; it is used to calculate the hashLink
-                                        auditRecordService.fetchLatestProducerEntityHashByEntityId(processId, brokerNotification.data().get(0).get("id").toString())
-                                                .switchIfEmpty(blockchainTxPayloadFactory.calculatePreviousHashIfEmpty(processId, brokerNotification.data().get(0)))
-                                                // Build the BlockchainTxPayload object
-                                                .flatMap(previousHash ->
-                                                        blockchainTxPayloadFactory.buildBlockchainTxPayload(processId, brokerNotification.data().get(0), previousHash))
-                                                // Save a new Audit Record with status CREATED
-                                                .flatMap(blockchainTxPayload ->
-                                                        auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(processId, brokerNotification.data().get(0), AuditRecordStatus.CREATED, blockchainTxPayload)
-                                                                // Publish the data event to the Blockchain
-                                                                .then(blockchainPublisherService.publishDataToBlockchain(processId, blockchainTxPayload))
-                                                                .then(auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(processId, brokerNotification.data().get(0), AuditRecordStatus.PUBLISHED, blockchainTxPayload))))
-                                .doOnSuccess(success ->
-                                        log.info("ProcessID: {} - Publish Workflow completed successfully.", processId))
-                                .doOnError(error ->
-                                        log.error("ProcessID: {} - Error occurred while processing the Publish Workflow: {}", processId, error.getMessage()))
-                );
+                                .flatMap(brokerNotification -> Mono.just(brokerNotification.data())
+                                        .flatMapIterable(currentBrokerNotificationDataList -> currentBrokerNotificationDataList)
+                                        .flatMap(currentBrokerNotificationData ->
+                                        {
+                                            String id = currentBrokerNotificationData.get("id").toString();
+                                            return auditRecordService.fetchLatestProducerEntityHashByEntityId(processId, id)
+                                                    .switchIfEmpty(blockchainTxPayloadFactory.calculatePreviousHashIfEmpty(processId, currentBrokerNotificationData))
+                                                    // Build the BlockchainTxPayload object
+                                                    .flatMap(previousHash ->
+                                                            blockchainTxPayloadFactory.buildBlockchainTxPayload(processId, currentBrokerNotificationData, previousHash))
+                                                    // Save a new Audit Record with status CREATED
+                                                    .flatMap(blockchainTxPayload ->
+                                                            auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(processId, currentBrokerNotificationData, AuditRecordStatus.CREATED, blockchainTxPayload)
+                                                                    // Publish the data event to the Blockchain
+                                                                    .then(blockchainPublisherService.publishDataToBlockchain(processId, blockchainTxPayload))
+                                                                    .then(auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(processId, currentBrokerNotificationData, AuditRecordStatus.PUBLISHED, blockchainTxPayload)));
+                                        })
+                                        .collectList()
+                                        .then()
+                                        .doOnSuccess(success ->
+                                                log.info("ProcessID: {} - Publish Workflow completed successfully.", processId))
+                                        .doOnError(error ->
+                                                log.error("ProcessID: {} - Error occurred while processing the Publish Workflow: {}", processId, error.getMessage()))));
     }
 
 }
