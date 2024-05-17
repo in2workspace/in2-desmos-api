@@ -75,37 +75,6 @@ public class ApplicationUtils {
                 .orElseThrow(IllegalArgumentException::new);
     }
 
-    //    TODO: This method will be deprecated in the future
-//    public static boolean checkIfHashLinkExistInDataLocation(String urlString) {
-//        try {
-//            URL url = URI.create(urlString).toURL();
-//            Map<String, String> queryParams = splitQuery(url);
-//            log.debug("Query params: {}", queryParams);
-//            if (queryParams.containsKey("hl")) {
-//                log.debug("Query param hl: {}", queryParams.get("hl"));
-//                return queryParams.containsKey("hl");
-//            } else {
-//                throw new HashLinkException("Query param hl not found");
-//            }
-//        } catch (IllegalArgumentException | MalformedURLException e) {
-//            throw new HashLinkException("Error parsing dataLocation");
-//        }
-//    }
-
-    //TODO: its use must be analyzed
-//    private static Map<String, String> splitQuery(URL url) {
-//        if (url.getQuery() == null || url.getQuery().isEmpty()) {
-//            return new HashMap<>();
-//        }
-//        Map<String, String> queryPairs = new HashMap<>();
-//        String[] pairs = url.getQuery().split("&");
-//        for (String pair : pairs) {
-//            int idx = pair.indexOf("=");
-//            queryPairs.put(pair.substring(0, idx), idx > 0 && pair.length() > idx + 1 ? pair.substring(idx + 1) : null);
-//        }
-//        return queryPairs;
-//    }
-
     public static String getEnvironmentMetadata(String activeProfile) {
 
         return switch (activeProfile) {
