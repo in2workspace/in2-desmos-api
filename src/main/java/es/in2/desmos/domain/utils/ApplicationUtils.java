@@ -1,5 +1,11 @@
 package es.in2.desmos.domain.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import es.in2.desmos.domain.exceptions.JsonReadingException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.charset.StandardCharsets;
@@ -8,6 +14,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HexFormat;
 import java.util.Optional;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,13 +25,27 @@ public class ApplicationUtils {
         throw new IllegalStateException("Utility class");
     }
 
-    public static String calculateSHA256(String data) throws NoSuchAlgorithmException {
+    public static String calculateSHA256(String inputData) throws NoSuchAlgorithmException, JsonProcessingException {
+        final ObjectMapper objectMapper = new ObjectMapper();
         MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-        byte[] result = messageDigest.digest(data.getBytes(StandardCharsets.UTF_8));
+
+        byte[] result = isValidJSON(inputData, objectMapper) ?
+                messageDigest.digest(sortAttributesAlphabetically(inputData, objectMapper).getBytes(StandardCharsets.UTF_8)) :
+                messageDigest.digest(inputData.getBytes(StandardCharsets.UTF_8));
+
         return HexFormat.of().formatHex(result);
     }
 
-    public static String calculateHashLink(String previousHash, String entityHash) throws NoSuchAlgorithmException {
+    private static boolean isValidJSON(String json, ObjectMapper objectMapper) {
+        try {
+            objectMapper.readTree(json);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public static String calculateHashLink(String previousHash, String entityHash) throws NoSuchAlgorithmException, JsonProcessingException {
         String hashConcatenated = previousHash + entityHash;
         log.debug("Previous Hash 1 : {}", previousHash);
         log.debug("Entity Hash 2 : {}", entityHash);
@@ -54,37 +75,6 @@ public class ApplicationUtils {
                 .orElseThrow(IllegalArgumentException::new);
     }
 
-    //    TODO: This method will be deprecated in the future
-//    public static boolean checkIfHashLinkExistInDataLocation(String urlString) {
-//        try {
-//            URL url = URI.create(urlString).toURL();
-//            Map<String, String> queryParams = splitQuery(url);
-//            log.debug("Query params: {}", queryParams);
-//            if (queryParams.containsKey("hl")) {
-//                log.debug("Query param hl: {}", queryParams.get("hl"));
-//                return queryParams.containsKey("hl");
-//            } else {
-//                throw new HashLinkException("Query param hl not found");
-//            }
-//        } catch (IllegalArgumentException | MalformedURLException e) {
-//            throw new HashLinkException("Error parsing dataLocation");
-//        }
-//    }
-
-    //TODO: its use must be analyzed
-//    private static Map<String, String> splitQuery(URL url) {
-//        if (url.getQuery() == null || url.getQuery().isEmpty()) {
-//            return new HashMap<>();
-//        }
-//        Map<String, String> queryPairs = new HashMap<>();
-//        String[] pairs = url.getQuery().split("&");
-//        for (String pair : pairs) {
-//            int idx = pair.indexOf("=");
-//            queryPairs.put(pair.substring(0, idx), idx > 0 && pair.length() > idx + 1 ? pair.substring(idx + 1) : null);
-//        }
-//        return queryPairs;
-//    }
-
     public static String getEnvironmentMetadata(String activeProfile) {
 
         return switch (activeProfile) {
@@ -94,6 +84,50 @@ public class ApplicationUtils {
             case "prod" -> "prd";
             default -> throw new IllegalArgumentException("Unsupported profile: " + activeProfile);
         };
+    }
+
+    private static String sortAttributesAlphabetically(String retrievedBrokerEntity, ObjectMapper objectMapper) throws JsonProcessingException {
+        JsonNode retrievedBrokerEntityJson = objectMapper.readTree(retrievedBrokerEntity);
+        if (retrievedBrokerEntityJson.isObject()) {
+            return sortJsonObject(objectMapper, retrievedBrokerEntityJson);
+        } else if (retrievedBrokerEntityJson.isArray()) {
+            return sortJsonArray(objectMapper, retrievedBrokerEntityJson);
+        } else {
+            return objectMapper.writeValueAsString(retrievedBrokerEntityJson);
+        }
+    }
+
+    private static String sortJsonObject(ObjectMapper objectMapper, JsonNode jsonNode) throws JsonProcessingException {
+        TreeMap<String, JsonNode> sortedMap = new TreeMap<>();
+        jsonNode.fields().forEachRemaining(entry -> {
+            try {
+                String key = entry.getKey();
+                JsonNode value = entry.getValue();
+                if (value.isObject() || value.isArray()) {
+                    sortedMap.put(key, objectMapper.readTree(sortAttributesAlphabetically(value.toString(), objectMapper)));
+                } else {
+                    sortedMap.put(key, value);
+                }
+            } catch (JsonProcessingException e) {
+                throw new JsonReadingException("Error occurred while parsing JSON: " + e.getMessage());
+            }
+        });
+
+        ObjectNode sortedObjectNode = objectMapper.createObjectNode();
+        sortedMap.forEach(sortedObjectNode::set);
+        return objectMapper.writeValueAsString(sortedObjectNode);
+    }
+
+    private static String sortJsonArray(ObjectMapper objectMapper, JsonNode jsonNode) throws JsonProcessingException {
+        ArrayNode sortedArrayNode = objectMapper.createArrayNode();
+        for (JsonNode subNode : jsonNode) {
+            if (subNode.isObject()) {
+                sortedArrayNode.add(objectMapper.readTree(sortAttributesAlphabetically(subNode.toString(), objectMapper)));
+            } else {
+                sortedArrayNode.add(subNode);
+            }
+        }
+        return objectMapper.writeValueAsString(sortedArrayNode);
     }
 
 }

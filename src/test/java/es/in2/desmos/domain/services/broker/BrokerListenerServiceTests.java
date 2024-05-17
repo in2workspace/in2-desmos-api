@@ -43,8 +43,8 @@ class BrokerListenerServiceTests {
             .processId(UUID.randomUUID().toString())
             .entityId(UUID.randomUUID().toString())
             .entityType("ProductOffering")
-            .entityHash("9b8685970e0de1f72c586bf5176dda04e0e6c891714f0e55a2d7745b77edfbd4")
-            .entityHashLink("9b8685970e0de1f72c586bf5176dda04e0e6c891714f0e55a2d7745b77edfbd4")
+            .entityHash("08aec4a32245954733602f864acfed6a8fe733d387b9bcd4217cdc07ee6198b8")
+            .entityHashLink("08aec4a32245954733602f864acfed6a8fe733d387b9bcd4217cdc07ee6198b8")
             .status(AuditRecordStatus.PUBLISHED)
             .hash("hash")
             .createdAt(Timestamp.from(Instant.now()))
@@ -89,7 +89,7 @@ class BrokerListenerServiceTests {
     }
 
     @Test
-    void processBrokerNotificationTest_SecondNotification_sameHash() throws NoSuchAlgorithmException, JsonProcessingException {
+    void processBrokerNotificationTest_SecondNotification_sameHash() throws JsonProcessingException {
         // Arrange
         String processId = UUID.randomUUID().toString();
         BrokerNotification brokerNotification = BrokerNotification.builder()

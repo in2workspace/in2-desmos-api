@@ -74,32 +74,6 @@ class AuditRecordServiceTests {
     }
 
     @Test
-    void itShouldBuildAndSaveAuditRecordFromDataSync() {
-        String processId = "0";
-        String issuer = "http://example.org";
-        MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample1();
-        AuditRecordStatus status = AuditRecordStatus.RETRIEVED;
-        AuditRecord expectedAuditRecord = AuditRecordMother.createAuditRecordFromMVEntity4DataNegotiation("http://example.org", mvEntity4DataNegotiation, status);
-
-        when(auditRecordRepository.findMostRecentAuditRecord()).thenReturn(Mono.just(new AuditRecord()));
-        when(auditRecordRepository.save(any())).thenReturn(Mono.just(expectedAuditRecord));
-
-        var result = auditRecordService.buildAndSaveAuditRecordFromDataSync(processId, issuer, mvEntity4DataNegotiation, status);
-
-        StepVerifier
-                .create(result)
-                .verifyComplete();
-
-        verify(auditRecordRepository, times(1)).save(auditRecordArgumentCaptor.capture());
-        verifyNoMoreInteractions(auditRecordRepository);
-
-        assertThat(auditRecordArgumentCaptor.getValue())
-                .usingRecursiveComparison()
-                .ignoringFields("id", "createdAt", "hash", "hashLink")
-                .isEqualTo(expectedAuditRecord);
-    }
-
-    @Test
     void testBuildAndSaveAuditRecordFromBrokerNotification_BlockchainTxPayloadNull() throws JsonProcessingException {
         // Arrange
         String processId = "processId";
@@ -146,6 +120,32 @@ class AuditRecordServiceTests {
                 .verify();
     }
 
+
+    @Test
+    void itShouldBuildAndSaveAuditRecordFromDataSync() {
+        String processId = "0";
+        String issuer = "http://example.org";
+        MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample1();
+        AuditRecordStatus status = AuditRecordStatus.RETRIEVED;
+        AuditRecord expectedAuditRecord = AuditRecordMother.createAuditRecordFromMVEntity4DataNegotiation("http://example.org", mvEntity4DataNegotiation, status);
+
+        when(auditRecordRepository.findMostRecentAuditRecord()).thenReturn(Mono.just(new AuditRecord()));
+        when(auditRecordRepository.save(any())).thenReturn(Mono.just(expectedAuditRecord));
+
+        var result = auditRecordService.buildAndSaveAuditRecordFromDataSync(processId, issuer, mvEntity4DataNegotiation, status);
+
+        StepVerifier
+                .create(result)
+                .verifyComplete();
+
+        verify(auditRecordRepository, times(1)).save(auditRecordArgumentCaptor.capture());
+        verifyNoMoreInteractions(auditRecordRepository);
+
+        assertThat(auditRecordArgumentCaptor.getValue())
+                .usingRecursiveComparison()
+                .ignoringFields("id", "createdAt", "hash", "hashLink")
+                .isEqualTo(expectedAuditRecord);
+    }
 
     @Test
     void testBuildAndSaveAuditRecordFromBlockchainNotification() throws Exception {
@@ -311,6 +311,7 @@ class AuditRecordServiceTests {
         // Verify
         verify(auditRecordRepository, times(1)).findMostRecentAuditRecord();
     }
+
 
     @Test
     void itShouldReturnErrorWhenAuditRecordCreatesIncorrectJson() throws JsonProcessingException {

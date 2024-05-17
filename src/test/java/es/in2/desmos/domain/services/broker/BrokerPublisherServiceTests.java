@@ -30,6 +30,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -72,6 +74,32 @@ class BrokerPublisherServiceTests {
             .entityId(entityIdHash)
             .previousEntityHash(previousEntityHash)
             .build();
+
+    @Test
+    void testPublishDataToBroker() {
+        //Arrange
+        String processId = "processId";
+        String retrievedBrokerEntity = "retrievedBrokerEntity";
+        //Act
+        when(brokerAdapterService.getEntityById(eq(processId), anyString())).thenReturn(Mono.just(""));
+        when(brokerAdapterService.postEntity(processId, retrievedBrokerEntity)).thenReturn(Mono.empty());
+        //Assert
+        StepVerifier.create(brokerPublisherService.publishDataToBroker(processId, blockchainNotification, retrievedBrokerEntity))
+                .verifyComplete();
+    }
+
+    @Test
+    void testPublishDataToBrokerWithUpdate() {
+        //Arrange
+        String processId = "processId";
+        String retrievedBrokerEntity = "retrievedBrokerEntity";
+        //Act
+        when(brokerAdapterService.getEntityById(eq(processId), anyString())).thenReturn(Mono.just("entityId"));
+        when(brokerAdapterService.updateEntity(processId, retrievedBrokerEntity)).thenReturn(Mono.empty());
+        //Assert
+        StepVerifier.create(brokerPublisherService.publishDataToBroker(processId, blockchainNotification, retrievedBrokerEntity))
+                .verifyComplete();
+    }
 
     @Test
     void itShouldBatchUpsertEntitiesToContextBroker() throws JsonProcessingException {
@@ -145,7 +173,6 @@ class BrokerPublisherServiceTests {
         ids.add(new Id("urn:productOffering:06f56a54-9be9-4d45-bae7-2a036b721d27"));
         Mono<List<Id>> idsMono = Mono.just(ids);
 
-        // var brokerJson = BrokerDataMother.getEntityRequestBrokerNoTypeJson;
         JSONArray expectedResponseJsonArray = new JSONArray(brokerJson);
         List<String> localEntities = new ArrayList<>();
         for (int i = 0; i < expectedResponseJsonArray.length(); i++) {
@@ -204,32 +231,6 @@ class BrokerPublisherServiceTests {
                 create(resultMono)
                 .expectErrorMatches(throwable -> throwable instanceof JsonProcessingException)
                 .verify();
-    }
-
-    @Test
-    void testPublishDataToBroker() {
-        //Arrange
-        String processId = "processId";
-        String retrievedBrokerEntity = "retrievedBrokerEntity";
-        //Act
-        when(brokerAdapterService.getEntityById(eq(processId), anyString())).thenReturn(Mono.just(""));
-        when(brokerAdapterService.postEntity(processId, retrievedBrokerEntity)).thenReturn(Mono.empty());
-        //Assert
-        StepVerifier.create(brokerPublisherService.publishDataToBroker(processId, blockchainNotification, retrievedBrokerEntity))
-                .verifyComplete();
-    }
-
-    @Test
-    void testPublishDataToBrokerWithUpdate() {
-        //Arrange
-        String processId = "processId";
-        String retrievedBrokerEntity = "retrievedBrokerEntity";
-        //Act
-        when(brokerAdapterService.getEntityById(eq(processId), anyString())).thenReturn(Mono.just("entityId"));
-        when(brokerAdapterService.updateEntity(processId, retrievedBrokerEntity)).thenReturn(Mono.empty());
-        //Assert
-        StepVerifier.create(brokerPublisherService.publishDataToBroker(processId, blockchainNotification, retrievedBrokerEntity))
-                .verifyComplete();
     }
 
     private JsonNode getJsonNodeFromStringsList(List<String> localEntities) throws JsonProcessingException {
