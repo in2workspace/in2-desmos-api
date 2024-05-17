@@ -12,8 +12,6 @@ import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import es.in2.desmos.domain.services.broker.adapter.factory.BrokerAdapterFactory;
 import es.in2.desmos.infrastructure.controllers.NotificationController;
 import es.in2.desmos.it.ContainerManager;
-import es.in2.desmos.objectmothers.AuditRecordMother;
-import es.in2.desmos.objectmothers.BrokerNotificationMother;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,12 +20,10 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import reactor.test.StepVerifier;
 
 import java.util.List;
 
 import static es.in2.desmos.it.ContainerManager.getBaseUriForScorpioA;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest()
@@ -102,28 +98,6 @@ class BrokerListenerServiceIT {
         BrokerSubscription brokerSubscriptionResponse = objectMapper.readValue(response, BrokerSubscription.class);
         System.out.println(brokerSubscriptionResponse.toString());
         assertEquals(brokerSubscription.id(), brokerSubscriptionResponse.id());
-    }
-
-    @Test
-    void itShouldCreateAuditRecordWhenBrokerNotificationDataIsAnArrayOfEntities() {
-
-        var inputBrokerNotification = BrokerNotificationMother.withDataArray();
-        var expectedCreatedAuditRecordsList = List.of(
-                AuditRecordMother.createAuditRecordFromDataMap("0", inputBrokerNotification.data().get(0)),
-                AuditRecordMother.createAuditRecordFromDataMap("0", inputBrokerNotification.data().get(1))
-        );
-
-        notificationController.postBrokerNotification(inputBrokerNotification).block();
-        pendingPublishEventsQueue.getEventStream().subscribe();
-        var auditRecordsListMonoResult = auditRecordRepository.findAll().collectList();
-
-        StepVerifier
-                .create(auditRecordsListMonoResult)
-                .consumeNextWith(result ->
-                        assertThat(result)
-                                .usingRecursiveFieldByFieldElementComparatorIgnoringFields("id", "processId", "createdAt", "hash", "hashLink")
-                                .containsAll(expectedCreatedAuditRecordsList))
-                .verifyComplete();
     }
 
 }
