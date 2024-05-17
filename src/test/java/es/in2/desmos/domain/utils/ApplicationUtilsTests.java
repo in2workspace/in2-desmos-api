@@ -2,7 +2,7 @@ package es.in2.desmos.domain.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import es.in2.desmos.domain.utils.testdata.ObjectMother;
+import es.in2.desmos.objectmothers.JsonNotificationMother;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -27,10 +27,10 @@ class ApplicationUtilsTests {
 
     private static Stream<Arguments> provideTestData() {
         return Stream.of(
-                Arguments.of(ObjectMother.getObjectInput(), ObjectMother.getObjectInputExpected()),
-                Arguments.of(ObjectMother.getArrayInput(), ObjectMother.getArrayInputExpected()),
-                Arguments.of(ObjectMother.getPrimitiveInput(), ObjectMother.getPrimitiveInputExpected()),
-                Arguments.of(ObjectMother.getArrayInput2(), ObjectMother.getArrayInput2Expected())
+                Arguments.of(JsonNotificationMother.getObjectInput(), JsonNotificationMother.getObjectInputExpected()),
+                Arguments.of(JsonNotificationMother.getArrayInput(), JsonNotificationMother.getArrayInputExpected()),
+                Arguments.of(JsonNotificationMother.getPrimitiveInput(), JsonNotificationMother.getPrimitiveInputExpected()),
+                Arguments.of(JsonNotificationMother.getArrayInput2(), JsonNotificationMother.getArrayInput2Expected())
         );
     }
 

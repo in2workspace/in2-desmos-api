@@ -1,6 +1,9 @@
-package es.in2.desmos.domain.utils.testdata;
+package es.in2.desmos.objectmothers;
 
-public class ObjectMother {
+public final class JsonNotificationMother {
+
+    private JsonNotificationMother() {
+    }
 
     public static String getObjectInput() {
         return """
