@@ -1,5 +1,6 @@
 package es.in2.desmos.domain.services.blockchain.adapter.impl;
 
+import es.in2.desmos.infrastructure.configs.ApiConfig;
 import es.in2.desmos.infrastructure.configs.properties.DLTAdapterProperties;
 import es.in2.desmos.domain.models.BlockchainSubscription;
 import es.in2.desmos.domain.models.BlockchainTxPayload;
@@ -16,6 +17,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import static es.in2.desmos.domain.utils.ApplicationUtils.getEnvironmentMetadata;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -23,6 +26,7 @@ import reactor.core.publisher.Mono;
 public class BlockchainAdapterServiceImpl implements BlockchainAdapterService {
 
     private final DLTAdapterProperties dltAdapterProperties;
+    private final ApiConfig apiConfig;
 
     private WebClient webClient;
 
@@ -60,12 +64,13 @@ public class BlockchainAdapterServiceImpl implements BlockchainAdapterService {
                 .onErrorResume(e -> recover(processId, blockchainTxPayload));
     }
 
-    @Deprecated(since = "0.5.0", forRemoval = true)
     @Override
-    public Flux<String> getEventsFromRangeOfTime(String processId, long from, long to) {
+    public Flux<String> getEventsFromRangeOfTime(String processId, long startDate, long endDate) {
         return webClient.get()
-                .uri(dltAdapterProperties.paths()
-                        .events() + "?startDate=" + from + "&endDate=" + to)
+                .uri(dltAdapterProperties.paths().events()
+                        + "?startDate=" + startDate
+                        + "&endDate=" + endDate
+                        + "&envM=" + getEnvironmentMetadata(apiConfig.getCurrentEnvironment()))
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToFlux(String.class);

@@ -29,7 +29,7 @@ public class QueueServiceImpl implements QueueService {
         return Mono.empty();
     }
 
-    private void emitNext() {
+    private synchronized void emitNext() {
         EventQueue eventQueue = queue.poll();
         if (eventQueue != null) {
             log.debug(eventQueue.toString());

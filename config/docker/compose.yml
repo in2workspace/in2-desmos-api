@@ -85,7 +85,8 @@ services:
       POSTGRES_DB: dbtest
 
   dlt-adapter-node-a:
-    image: quay.io/digitelts/dlt-adapter:1.4
+#    image: quay.io/digitelts/dlt-adapter:1.4
+    image: dlt-adapter:latest
     environment:
       PRIVATE_KEY: 0x304d170fb355df65cc17ef7934404fe9baee73a1244380076436dec6fafb1e1f
       DOME_EVENTS_CONTRACT_ADDRESS: 0x37532a3dbf29942d10fb8ba57dc35d2134fe494d
@@ -120,7 +121,7 @@ services:
 #    image: in2workspace/desmos-api:v0.6.0-SNAPSHOT
     image: desmos-api:latest
     environment:
-      SPRING_PROFILES_ACTIVE: test
+      SPRING_PROFILES_ACTIVE: dev
       LOGGING_LEVEL_ES_IN2_DESMOS: INFO
       SPRING_R2DBC_URL: r2dbc:postgresql://postgres-node-b:5432/dbtest
       SPRING_R2DBC_USERNAME: postgres
@@ -154,7 +155,8 @@ services:
       POSTGRES_DB: dbtest
 
   dlt-adapter-node-b:
-    image: quay.io/digitelts/dlt-adapter:1.4
+#    image: quay.io/digitelts/dlt-adapter:1.4
+    image: dlt-adapter:latest
     environment:
       PRIVATE_KEY: 0x304d170fb355df65cc17ef7934404fe9baee73a1244380076436dec6fafb1e1f
       DOME_EVENTS_CONTRACT_ADDRESS: 0x37532a3dbf29942d10fb8ba57dc35d2134fe494d
