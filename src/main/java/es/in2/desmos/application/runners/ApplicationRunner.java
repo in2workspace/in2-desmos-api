@@ -108,12 +108,10 @@ public class ApplicationRunner {
         log.info("ProcessID: {} - Initializing Data Synchronization Workflow...", processId);
         // Start data synchronization process
         return dataSyncWorkflow.startDataSyncWorkflow(processId)
-                .doOnComplete(() -> {
+                .doOnTerminate(() -> {
                     log.info("ProcessID: {} - Data Synchronization Workflow has finished.", processId);
                     log.info("ProcessID: {} - Authorizing queues for Pub-Sub Workflows...", processId);
                     isQueueAuthorizedForEmit.set(true);
-                })
-                .doOnTerminate(() -> {
                     initializeQueueProcessing(processId);
                     log.info("ProcessID: {} - Queues have been authorized and enabled.", processId);
                 });
