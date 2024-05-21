@@ -86,7 +86,6 @@ public class ApplicationUtils {
 //    }
 
     public static String getEnvironmentMetadata(String activeProfile) {
-
         return switch (activeProfile) {
             case "default" -> "local";
             case "dev" -> "sbx";
