@@ -121,6 +121,11 @@ class ScorpioAdapterIT {
                     }
                 })
                 .verifyComplete();
+
+        scorpioAdapter.deleteEntityById("0", MVEntity4DataNegotiationMother.sampleScorpio1().id());
+        scorpioAdapter.deleteEntityById("0", MVEntity4DataNegotiationMother.sampleScorpio2().id());
+        scorpioAdapter.deleteEntityById("0", MVEntity4DataNegotiationMother.sampleScorpio3().id());
+        scorpioAdapter.deleteEntityById("0", MVEntity4DataNegotiationMother.sampleScorpio4().id());
     }
 
     @Test
