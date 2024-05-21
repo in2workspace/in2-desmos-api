@@ -3,7 +3,6 @@ package es.in2.desmos.it.domain.services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.domain.models.BrokerEntityWithIdTypeLastUpdateAndVersion;
-import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.domain.services.broker.adapter.impl.ScorpioAdapter;
 import es.in2.desmos.inflators.ScorpioInflator;
 import es.in2.desmos.it.ContainerManager;
@@ -11,7 +10,9 @@ import es.in2.desmos.objectmothers.EntityMother;
 import es.in2.desmos.objectmothers.MVBrokerEntity4DataNegotiationMother;
 import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
 import org.json.JSONException;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,25 +44,6 @@ class ScorpioAdapterIT {
     @DynamicPropertySource
     static void setDynamicProperties(DynamicPropertyRegistry registry) {
         ContainerManager.postgresqlProperties(registry);
-    }
-
-    private static BrokerEntityWithIdTypeLastUpdateAndVersion[] initialMvEntity4DataNegotiationList;
-
-    @BeforeAll
-    static void setUp() throws JSONException, JsonProcessingException {
-        initialMvEntity4DataNegotiationList = createInitialMVEntity4DataNegotiation();
-    }
-
-    @AfterAll
-    static void setDown() {
-        removeInitialMVEntity4DataNegotiation();
-    }
-
-    private static BrokerEntityWithIdTypeLastUpdateAndVersion[] createInitialMVEntity4DataNegotiation() throws JSONException, JsonProcessingException {
-        String brokerUrl = ContainerManager.getBaseUriForScorpioA();
-        var entities = MVBrokerEntity4DataNegotiationMother.randomList(2);
-        ScorpioInflator.addInitialEntitiesToContextBroker(brokerUrl, entities);
-        return entities.toArray(BrokerEntityWithIdTypeLastUpdateAndVersion[]::new);
     }
 
     @Test
@@ -128,24 +110,32 @@ class ScorpioAdapterIT {
         scorpioAdapter.deleteEntityById("0", MVEntity4DataNegotiationMother.sampleScorpio4().id());
     }
 
+    private static BrokerEntityWithIdTypeLastUpdateAndVersion[] createInitialMVEntity4DataNegotiation() throws JSONException, JsonProcessingException {
+        String brokerUrl = ContainerManager.getBaseUriForScorpioA();
+        var entities = MVBrokerEntity4DataNegotiationMother.randomList(2);
+        ScorpioInflator.addInitialEntitiesToContextBroker(brokerUrl, entities);
+        return entities.toArray(BrokerEntityWithIdTypeLastUpdateAndVersion[]::new);
+    }
+
+    private static void removeInitialMVEntity4DataNegotiation(BrokerEntityWithIdTypeLastUpdateAndVersion[] mvEntity4DataNegotiationArray) {
+        String brokerUrl = ContainerManager.getBaseUriForScorpioA();
+
+        List<String> ids = Arrays.stream(mvEntity4DataNegotiationArray).toList().stream().map(BrokerEntityWithIdTypeLastUpdateAndVersion::getId).toList();
+        ScorpioInflator.deleteInitialEntitiesFromContextBroker(brokerUrl, ids);
+
+    }
+
     @Test
-    void itShouldReturnEntityIds() {
+    void itShouldReturnEntityIds() throws JSONException, JsonProcessingException {
+        BrokerEntityWithIdTypeLastUpdateAndVersion[] initialMvEntity4DataNegotiationList = createInitialMVEntity4DataNegotiation();
+
         String processId = "0";
         Mono<BrokerEntityWithIdTypeLastUpdateAndVersion[]> resultMono = scorpioAdapter.findAllIdTypeFirstAttributeAndSecondAttributeByType(processId, "ProductOffering", "lastUpdate", "version", BrokerEntityWithIdTypeLastUpdateAndVersion[].class);
 
         StepVerifier.create(resultMono)
                 .consumeNextWith(result -> assertEquals(Arrays.stream(initialMvEntity4DataNegotiationList).toList(), Arrays.stream(result).toList()))
                 .verifyComplete();
-    }
 
-    private static void removeInitialMVEntity4DataNegotiation() {
-        String brokerUrl = ContainerManager.getBaseUriForScorpioA();
-
-        List<String> ids = MVEntity4DataNegotiationMother.fullList().stream().map(MVEntity4DataNegotiation::id).toList();
-        ScorpioInflator.deleteInitialEntitiesFromContextBroker(brokerUrl, ids);
-
-        ids = Arrays.stream(initialMvEntity4DataNegotiationList).toList().stream().map(BrokerEntityWithIdTypeLastUpdateAndVersion::getId).toList();
-        ScorpioInflator.deleteInitialEntitiesFromContextBroker(brokerUrl, ids);
-
+        removeInitialMVEntity4DataNegotiation(initialMvEntity4DataNegotiationList);
     }
 }
