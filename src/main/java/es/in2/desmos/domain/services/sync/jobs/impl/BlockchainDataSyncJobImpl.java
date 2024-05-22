@@ -84,12 +84,6 @@ public class BlockchainDataSyncJobImpl implements BlockchainDataSyncJob {
             });
             if (notificationList.isEmpty()) {
                 log.info("ProcessID: {} - Response list is empty, no notifications were found.", processId);
-            } else {
-                log.info("ProcessID: {} - notifications were found.", processId);
-                for (BlockchainNotification blockchainNotification : notificationList) {
-                    log.info("Notification ID: {}", extractEntityIdFromDataLocation(blockchainNotification.dataLocation()));
-                }
-            }
             return Flux.fromIterable(notificationList);
         } catch (JsonProcessingException e) {
             log.warn("ProcessID: {} - Error processing JSON: {}", processId, responseList, e);
