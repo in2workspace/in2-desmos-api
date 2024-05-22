@@ -1,0 +1,17 @@
+@startuml
+'https://plantuml.com/activity-diagram-beta
+
+@startuml
+start
+:Service starts;
+:Listen for ApplicationReadyEvent.class;
+fork
+  :Create broker_subscription\nbased on configuration;
+  :Publish broker_subscription\nto local Context Broker;
+fork again
+  :Create dlt_subscription\nbased on configuration;
+  :Publish dlt_subscription\nto DLT Adapter/API;
+end fork
+: Sync Data Process starts;
+stop
+@enduml

@@ -1,0 +1,33 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+skinparam BoxPadding 10
+
+participant "Context Broker" as context_broker
+
+box "Blockchain Connector" #LightBlue
+    participant "Entity Publish Service" as entity_publish_service
+    participant "Audit Service" as audit_service
+    database "Postgres" as local_db
+end box
+
+activate entity_publish_service
+entity_publish_service -> context_broker++: GET /entities/{entityId}
+
+alt Entity exists
+    context_broker --> entity_publish_service: 200 OK Payload: Entity
+    entity_publish_service -> context_broker: PATCH /entities/{entityId} Payload: Entity
+    context_broker --> entity_publish_service: 204 No Content
+else Entity does not exist
+    context_broker --> entity_publish_service: 404 Not Found
+    entity_publish_service -> context_broker: POST /entities Payload: Entity
+    context_broker --> entity_publish_service: 201 Created
+end
+
+entity_publish_service -> audit_service++: BuildTransaction(DltNotification)
+    audit_service -> local_db++: SaveTransaction(Transaction)
+    return
+return
+
+@enduml

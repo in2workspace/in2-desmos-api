@@ -1,0 +1,32 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+skinparam BoxPadding 10
+
+boundary "DLT Adapter/API" as dlt_adapter
+
+box "Blockchain Connector" #LightBlue
+    control "Notification Controller" as notification_controller
+    participant "Notification Service" as notification_service
+    participant "Audit Service" as audit_service
+    queue "DLT Notification Queue" as dlt_queue
+    database "Postgres" as local_db
+end box
+
+dlt_adapter -> notification_controller++: POST /notifications/dlt\nPayload: DltNotification
+    notification_controller -> notification_service++: ProcessNotification(DltNotification)
+        notification_service -> notification_service: ValidateNotification(DltNotification)
+        notification_service -> notification_service: SetNotificationPriority(DltNotification)
+        notification_service -> audit_service++: BuildTransaction(DltNotification)
+            audit_service -> local_db++: SaveTransaction(Transaction)
+            return
+        return
+        notification_service -> dlt_queue++: EnqueueDltNotification(DltNotification)
+        return
+    return
+return 202 Accepted
+
+@enduml
+
+

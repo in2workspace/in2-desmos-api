@@ -1,94 +1,168 @@
 services:
 
-  # Access Node
+  # INFRASTRUCTURE
 
-  # Context Broker
-  scorpio:
+  ganache:
+    image: trufflesuite/ganache-cli:latest
+    command:
+      - "-l"
+      - "800000"
+      - "--account"
+      - '0x041de193683f117a4b0f0b94f8e3e98d9dcf233010a538c6662c41a18188e038,100000000000000000000'
+      - "--account"
+      - '0x304d170fb355df65cc17ef7934404fe9baee73a1244380076436dec6fafb1e1f,100000000000000000000'
+      - "--account"
+      - '0x09bac90daf84adc6ca0e3161e3a67c80e4a2ab79d7f55bf9b82f566e6d62ad87,100000000000000000000'
+    ports:
+      - "8545:8545"
+
+  contract-create:
+    image: quay.io/digitelts/dome-contract-deploy:1.0.0
+    environment:
+      PRIVATE_KEY: 0x304d170fb355df65cc17ef7934404fe9baee73a1244380076436dec6fafb1e1f
+      NODE_ENDPOINT: http://ganache:8545/
+      T_NET_CHAIN_ID: 83584648538
+      B_NET_CHAIN_ID: 2020
+    restart: on-failure
+    depends_on:
+      - ganache
+
+  # ACCESS NODE A
+
+  scorpio-node-a:
     image: scorpiobroker/all-in-one-runner:java-latest
     environment:
-      DBHOST: postgis
+      DBHOST: postgis-node-a
     ports:
       - "9090:9090"
-    depends_on:
-      - postgis
+    links:
+      - postgis-node-a
 
-  postgis:
+  postgis-node-a:
     image: postgis/postgis
     ports:
-      - "5432:5432"
+      - "5432"
     environment:
       POSTGRES_USER: ngb
       POSTGRES_PASSWORD: ngb
       POSTGRES_DB: ngb
-    volumes:
-      - postgis:/var/lib/postgresql/data
 
-  # Blockchain Connector
-  desmos:
-    image: desmos:latest
+  desmos-node-a:
+#    image: in2workspace/desmos-api:v0.6.0-SNAPSHOT
+    image: desmos-api:latest
     environment:
-      SPRING_R2DBC_URL: r2dbc:postgresql://localhost:5432/mktdb
+      SPRING_PROFILES_ACTIVE: dev
+      LOGGING_LEVEL_ES_IN2_DESMOS: INFO
+      SPRING_R2DBC_URL: r2dbc:postgresql://postgres-node-a:5432/dbtest
       SPRING_R2DBC_USERNAME: postgres
       SPRING_R2DBC_PASSWORD: postgres
-      SPRING_FLYWAY_URL: jdbc:postgresql://localhost:5432/mktdb
-      LOGGING_LEVEL_ES_IN2_DESMOS: DEBUG
-      OPENAPI_SERVER_URL: https://localhost:9091
-      OPENAPI_SERVER_DESCRIPTION: Blockchain Connector Test Server
-      OPENAPI_INFO_TITLE: Blockchain Connector
-      OPENAPI_INFO_DESCRIPTION: Blockchain Connector Component
-      OPENAPI_INFO_VERSION: 1.0.0-SNAPSHOT
-      OPENAPI_INFO_TERMS_OF_SERVICE: https://localhost/terms
-      OPENAPI_INFO_LICENSE_NAME: Apache 2.0
-      OPENAPI_INFO_LICENSE_URL: https://www.apache.org/licenses/LICENSE-2.0.html
-      OPENAPI_INFO_CONTACT_NAME: IN2, Ingeniería de la Información
-      OPENAPI_INFO_CONTACT_URL: https://www.in2.es
-      OPENAPI_INFO_CONTACT_EMAIL: contacto@in2.es
-      CLIENT_ORGANIZATIONID: VATFR-00869734
-      BLOCKCHAIN_ADAPTER_INTERNAL_DOMAIN: http://localhost:8080
-      BLOCKCHAIN_ADAPTER_EXTERNAL_DOMAIN: http://localhost:8080
-      BLOCKCHAIN_ADAPTER_PROVIDER: digitelts
-      DLT_ADAPTER_PATHS_CONFIGURE_NODE: /api/v1/configureNode
-      DLT_ADAPTER_PATHS_PUBLISH: /api/v1/publishEvent
-      DLT_ADAPTER_PATHS_SUBSCRIBE: /api/v1/subscribe
-      DLT_ADAPTER_PATHS_EVENTS: /api/v1/events
-      BLOCKCHAIN_RPC_ADDRESS: https://localhost/v0/9461d9f4292b41230527d57ee90652a6
-      BLOCKCHAIN_USER_ETHEREUM_ADDRESS: 0xb794f5ea0ba39494ce839613fffba74279579268
-      BLOCKCHAIN_SUBSCRIPTION_ACTIVE: true
-      BLOCKCHAIN_SUBSCRIPTION_NOTIFICATION_ENDPOINT: http://localhost:8080/notifications/dlt
-      BLOCKCHAIN_SUBSCRIPTION_EVENT_TYPES: ProductOffering,ProductOrder
+      SPRING_FLYWAY_URL: jdbc:postgresql://postgres-node-a:5432/dbtest
+      OPERATOR_ORGANIZATION_IDENTIFIER: VATES-S0000000E
+      DLT_ADAPTER_PROVIDER: digitelts
+      DLT_ADAPTER_INTERNAL_DOMAIN: http://dlt-adapter-node-a:8080
+      DLT_ADAPTER_EXTERNAL_DOMAIN: http://dlt-adapter-node-a:8080
+      TX_SUBSCRIPTION_NOTIFICATION_ENDPOINT: http://desmos-node-a:8080/api/v1/notifications/dlt
+      TX_SUBSCRIPTION_ENTITY_TYPES: ProductOffering,Category,Catalogue
       BROKER_PROVIDER: scorpio
-      BROKER_EXTERNAL_DOMAIN: http://localhost:9090
-      BROKER_INTERNAL_DOMAIN: http://localhost:9090
-      NGSI_SUBSCRIPTION_NOTIFICATION_ENDPOINT: http://localhost:8080/notifications/broker
-      NGSI_SUBSCRIPTION_ENTITY_TYPES: ProductOffering,ProductOrder
-    ports:
-      - "9091:8080"
-    depends_on:
-      - blockchain-adapter
-      - postgres
-
-
-  postgres:
-    image: postgres:16.1
-    ports:
-      - "5433:5432"
-    environment:
-      POSTGRES_PASSWORD: "guest"
-      POSTGRES_USER: "guest"
-      POSTGRES_DB: "postgres"
-    volumes:
-      - postgres:/var/lib/postgresql/data
-
-  # Blockchain Adapter
-  blockchain-adapter:
-    image: quay.io/digitelts/dlt-adapter:1.3
-    environment:
-      - "PRIVATE_KEY=0xe2afef2c880b138d741995ba56936e389b0b5dd2943e21e4363cc70d81c89346"
-      - "RPC_ADDRESS=https://red-t.alastria.io/v0/9461d9f4292b41230527d57ee90652a6"
-      - "ISS=0x983c5a1eb59ea6861c3e27b64dd3f1fd50233c3229149b8d139798a17b4cb0ec"
+      BROKER_INTERNAL_DOMAIN: http://scorpio-node-a:9090
+      BROKER_EXTERNAL_DOMAIN: http://scorpio-node-a:9090
+      NGSI_SUBSCRIPTION_NOTIFICATION_ENDPOINT: http://desmos-node-a:8080/api/v1/notifications/broker
+      NGSI_SUBSCRIPTION_ENTITY_TYPES: ProductOffering,Category,Catalogue
     ports:
       - "9092:8080"
+    depends_on:
+      - dlt-adapter-node-a
+      - scorpio-node-a
+      - postgres-node-a
 
-volumes:
-  postgis:
-  postgres:
+  postgres-node-a:
+    image: postgres:16.1
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: dbtest
+
+  dlt-adapter-node-a:
+#    image: quay.io/digitelts/dlt-adapter:1.4
+    image: dlt-adapter:latest
+    environment:
+      PRIVATE_KEY: 0x304d170fb355df65cc17ef7934404fe9baee73a1244380076436dec6fafb1e1f
+      DOME_EVENTS_CONTRACT_ADDRESS: 0x37532a3dbf29942d10fb8ba57dc35d2134fe494d
+      RPC_ADDRESS: http://ganache:8545
+#      RPC_ADDRESS: https://red-t.alastria.io/v0/9461d9f4292b41230527d57ee90652a6
+      DOME_PRODUCTION_BLOCK_NUMBER: 0
+      ISS: 0x8723da6199704b971030dc1838c443ffa9c67f27788ab4a92bce20ecd4c6402e #VATES-S0000000E
+    ports:
+      - "9094:8080"
+
+  # Access Node B
+
+  scorpio-node-b:
+    image: scorpiobroker/all-in-one-runner:java-latest
+    environment:
+      DBHOST: postgis-node-b
+    ports:
+      - "9091:9090"
+    depends_on:
+      - postgis-node-b
+
+  postgis-node-b:
+    image: postgis/postgis
+    ports:
+      - "5432"
+    environment:
+      POSTGRES_USER: ngb
+      POSTGRES_PASSWORD: ngb
+      POSTGRES_DB: ngb
+
+  desmos-node-b:
+#    image: in2workspace/desmos-api:v0.6.0-SNAPSHOT
+    image: desmos-api:latest
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      LOGGING_LEVEL_ES_IN2_DESMOS: INFO
+      SPRING_R2DBC_URL: r2dbc:postgresql://postgres-node-b:5432/dbtest
+      SPRING_R2DBC_USERNAME: postgres
+      SPRING_R2DBC_PASSWORD: postgres
+      SPRING_FLYWAY_URL: jdbc:postgresql://postgres-node-b:5432/dbtest
+      OPERATOR_ORGANIZATION_IDENTIFIER: VATES-S9999999E
+      DLT_ADAPTER_PROVIDER: digitelts
+      DLT_ADAPTER_INTERNAL_DOMAIN: http://dlt-adapter-node-b:8080
+      DLT_ADAPTER_EXTERNAL_DOMAIN: http://dlt-adapter-node-b:8080
+      TX_SUBSCRIPTION_NOTIFICATION_ENDPOINT: http://desmos-node-b:8080/api/v1/notifications/dlt
+      TX_SUBSCRIPTION_ENTITY_TYPES: ProductOffering,Category,Catalogue
+      BROKER_PROVIDER: scorpio
+      BROKER_INTERNAL_DOMAIN: http://scorpio-node-b:9090
+      BROKER_EXTERNAL_DOMAIN: http://scorpio-node-b:9090
+      NGSI_SUBSCRIPTION_NOTIFICATION_ENDPOINT: http://desmos-node-b:8080/api/v1/notifications/broker
+      NGSI_SUBSCRIPTION_ENTITY_TYPES: ProductOffering,Category,Catalogue
+    ports:
+      - "9093:8080"
+    depends_on:
+      - dlt-adapter-node-b
+      - scorpio-node-b
+      - postgres-node-b
+
+  postgres-node-b:
+    image: postgres:16.1
+    ports:
+      - "5435:5432"
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: dbtest
+
+  dlt-adapter-node-b:
+#    image: quay.io/digitelts/dlt-adapter:1.4
+    image: dlt-adapter:latest
+    environment:
+      PRIVATE_KEY: 0x304d170fb355df65cc17ef7934404fe9baee73a1244380076436dec6fafb1e1f
+      DOME_EVENTS_CONTRACT_ADDRESS: 0x37532a3dbf29942d10fb8ba57dc35d2134fe494d
+      RPC_ADDRESS: http://ganache:8545
+#      RPC_ADDRESS: https://red-t.alastria.io/v0/9461d9f4292b41230527d57ee90652a6
+      DOME_PRODUCTION_BLOCK_NUMBER: 0
+      ISS: 0x40b0ab9dfd960064fb7e9fdf77f889c71569e349055ff563e8d699d8fa97fa90 #VATES-S9999999E
+    ports:
+      - "9095:8080"
