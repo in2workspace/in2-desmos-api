@@ -1,8 +1,11 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
 scrape_configs:
-  - job_name: 'MyAppMetrics'
+  - job_name: 'DesmosMetrics'
     metrics_path: '/prometheus'
-    scrape_interval: 3s
     static_configs:
-      - targets: [ 'host.docker.internal:8080' ]
+      - targets: [ 'desmos-node-a:8080' ]
         labels:
           application: 'Desmos-Api'

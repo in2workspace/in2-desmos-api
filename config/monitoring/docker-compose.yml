@@ -1,14 +1,21 @@
 version: '3.8'
 
+networks:
+  desmos:
+    name: desmos-network
+    driver: bridge
+
 services:
 
   prometheus:
     image: prom/prometheus:v2.52.0
     container_name: prometheus
     ports:
-      - "9090:9090"
+      - "9091:9090"
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - desmos
 
   grafana:
     image: grafana/grafana:10.1.10
@@ -18,3 +25,5 @@ services:
     restart: unless-stopped
     volumes:
       - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      - desmos
