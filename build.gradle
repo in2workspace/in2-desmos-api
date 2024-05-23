@@ -1,17 +1,17 @@
 plugins {
     id 'java'
     id 'org.springframework.boot' version '3.2.5'
-    id 'io.spring.dependency-management' version '1.1.4'
+    id 'io.spring.dependency-management' version '1.1.5'
     id 'jacoco'
     id 'org.sonarqube' version '5.0.0.4638'
     id 'checkstyle'
-    id 'org.owasp.dependencycheck' version '9.1.0'
+    id 'org.owasp.dependencycheck' version '9.2.0'
     id 'com.github.ben-manes.versions' version "0.51.0"
     id 'se.patrikerdes.use-latest-versions' version '0.2.18'
 }
 
 group = 'es.in2'
-version = '0.6.0'
+version = '1.0.0'
 
 java {
     sourceCompatibility = '17'
@@ -68,8 +68,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
     // JSON
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.0'
-    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.0'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.1'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.1'
 
     // Data
     implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
@@ -89,24 +89,24 @@ dependencies {
     implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
 
     // Monitoring
-    runtimeOnly 'io.micrometer:micrometer-registry-prometheus:1.12.5'
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus:1.13.0'
 
     // Resilience
     implementation 'org.springframework.retry:spring-retry'
-    implementation 'org.springframework:spring-aspects:6.1.6'
-    implementation 'org.aspectj:aspectjrt:1.9.22'
-    implementation 'org.aspectj:aspectjweaver:1.9.22'
+    implementation 'org.springframework:spring-aspects:6.1.8'
+    implementation 'org.aspectj:aspectjrt:1.9.22.1'
+    implementation 'org.aspectj:aspectjweaver:1.9.22.1'
 
     // Unit Testing
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'io.projectreactor:reactor-test:3.6.5'
+    testImplementation 'io.projectreactor:reactor-test:3.6.6'
     testImplementation 'org.testng:testng:7.10.2'
 
     // Integration Test
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
-    testImplementation 'org.testcontainers:junit-jupiter:1.19.7'
-    testImplementation 'org.testcontainers:r2dbc:1.19.7'
-    testImplementation 'org.testcontainers:postgresql:1.19.7'
+    testImplementation 'org.testcontainers:junit-jupiter:1.19.8'
+    testImplementation 'org.testcontainers:r2dbc:1.19.8'
+    testImplementation 'org.testcontainers:postgresql:1.19.8'
 }
 
 tasks.named('compileJava') {
