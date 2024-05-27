@@ -90,6 +90,7 @@ dependencies {
 
     // Monitoring
     runtimeOnly 'io.micrometer:micrometer-registry-prometheus-simpleclient:1.13.0'
+    runtimeOnly 'io.github.mweirauch:micrometer-jvm-extras:0.2.2'
 
     // Resilience
     implementation 'org.springframework.retry:spring-retry'

@@ -1,6 +1,6 @@
 global:
-  scrape_interval: 5s
-  evaluation_interval: 5s
+  scrape_interval: 15s
+  evaluation_interval: 15s
 
 scrape_configs:
   - job_name: 'DesmosMetrics'
@@ -8,4 +8,10 @@ scrape_configs:
     static_configs:
       - targets: [ 'desmos-node-a:8080' ]
         labels:
-          application: 'Desmos-Api'
+          application: 'desmos-blockchain-connector'
+  - job_name: 'HealthMetrics'
+    metrics_path: '/health'
+    static_configs:
+      - targets: [ 'desmos-node-a:8080' ]
+        labels:
+          application: 'desmos-blockchain-connector'
