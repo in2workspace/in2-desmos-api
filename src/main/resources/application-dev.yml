@@ -44,6 +44,9 @@ management:
       enabled: true
     prometheus:
       enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
 
 # SpringDoc Configuration - OpenAPI 3.0 Documentation & Swagger UI
 springdoc:
