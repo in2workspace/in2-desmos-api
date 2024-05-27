@@ -68,6 +68,12 @@ class SubscribeWorkflowBehaviorTest {
                 }
             }""";
 
+    /*
+        Given a BlockchainNotification, we will send a POST request emulating the broker behavior.
+        When the POST request is received, the application will retrieve a BrokerEntity from the external broker,
+        and then it will send a POST request to the local broker.
+        Finally, the application will create an AuditRecord with the status of the operation.
+    */
     @Order(0)
     @Test
     void subscribeWorkflowBehaviorTest() {
@@ -81,16 +87,8 @@ class SubscribeWorkflowBehaviorTest {
                 .retrieve()
                 .onStatus(status -> status.isSameCodeAs(HttpStatusCode.valueOf(409)), response -> Mono.empty())
                 .bodyToMono(String.class).block();
-        /*
-            Given a BlockchainNotification, we will send a POST request emulating the broker behavior.
-            When the POST request is received, the application will retrieve a BrokerEntity from the external broker,
-            and then it will send a POST request to the local broker.
-            Finally, the application will create an AuditRecord with the status of the operation.
-        */
 
         String url = ContainerManager.getBaseUriForScorpioA();
-
-
         //todo: change the BlockchainNotificationJson to match the expected format
         String blockchainNotificationJson = String.format("""
                 {
@@ -103,8 +101,6 @@ class SubscribeWorkflowBehaviorTest {
                     "entityId": "0x4eb401aa1248b6a95c298d0747eb470b6ba6fc3f54ea630dc6c77f23ad1abe3e",
                     "previousEntityHash": "0xabbc168236d38354add74d65698f37941947127290cd40a90b4dbe7eb68d25c0"
                 }""", url);
-
-
         // When
         try {
             log.info("1. Create a BlockchainNotification and send a POST request to the application");

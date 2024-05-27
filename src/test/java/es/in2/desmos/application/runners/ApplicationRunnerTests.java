@@ -85,11 +85,11 @@ class ApplicationRunnerTests {
     void whenDisposeIsActive() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         // Arrange
         String getCurrentEnvironment = "dev";
-        ApplicationRunner applicationRunner = new ApplicationRunner(apiConfig, brokerConfig, blockchainConfig, brokerListenerService, blockchainListenerService, dataSyncWorkflow, publishWorkflow, subscribeWorkflow, getCurrentEnvironment);
+        ApplicationRunner applicationRunnerTest = new ApplicationRunner(apiConfig, brokerConfig, blockchainConfig, brokerListenerService, blockchainListenerService, dataSyncWorkflow, publishWorkflow, subscribeWorkflow, getCurrentEnvironment);
         Method disposeIfActive = ApplicationRunner.class.getDeclaredMethod("disposeIfActive", Disposable.class);
         disposeIfActive.setAccessible(true);
         Disposable disposable = mock(Disposable.class);
-        disposeIfActive.invoke(applicationRunner, disposable);
+        disposeIfActive.invoke(applicationRunnerTest, disposable);
         when(brokerListenerService.createSubscription(anyString(), any())).thenReturn(Mono.empty());
         when(blockchainListenerService.createSubscription(anyString(), any(BlockchainSubscription.class))).thenReturn(Mono.empty());
         when(dataSyncWorkflow.startDataSyncWorkflow(anyString())).thenReturn(Flux.empty());
@@ -99,7 +99,7 @@ class ApplicationRunnerTests {
         // Act
         mock(ApplicationReadyEvent.class);
         //Assert
-        StepVerifier.create(applicationRunner.onApplicationReady()).verifyComplete();
+        StepVerifier.create(applicationRunnerTest.onApplicationReady()).verifyComplete();
     }
 
     // Fixme: Retry and recover does not work with MockitoExtension

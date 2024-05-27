@@ -1,11 +1,10 @@
 package es.in2.desmos.domain.services.blockchain.adapter.impl;
 
-import es.in2.desmos.infrastructure.configs.ApiConfig;
-import es.in2.desmos.infrastructure.configs.properties.DLTAdapterProperties;
 import es.in2.desmos.domain.models.BlockchainSubscription;
 import es.in2.desmos.domain.models.BlockchainTxPayload;
-import es.in2.desmos.domain.models.EventQueuePriority;
 import es.in2.desmos.domain.services.blockchain.adapter.BlockchainAdapterService;
+import es.in2.desmos.infrastructure.configs.ApiConfig;
+import es.in2.desmos.infrastructure.configs.properties.DLTAdapterProperties;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -79,8 +78,9 @@ public class BlockchainAdapterServiceImpl implements BlockchainAdapterService {
     @Recover
     public Mono<Void> recover(String processId, BlockchainTxPayload blockchainTxPayload) {
         log.debug("Recovering after 3 retries");
-        EventQueuePriority eventQueuePriority = EventQueuePriority.CRITICAL;
+        return Mono.empty();
         // todo: set recover business logic
+//        EventQueuePriority eventQueuePriority = EventQueuePriority.CRITICAL;
 //        if (!checkIfHashLinkExistInDataLocation(blockchainData.dataLocation())) {
 //            eventQueuePriority = EventQueuePriority.RECOVER_DELETE;
 //        } else if (!Objects.equals(blockchainData.previousEntityHash(), "0x0000000000000000000000000000000000000000000000000000000000000000")){
@@ -99,7 +99,6 @@ public class BlockchainAdapterServiceImpl implements BlockchainAdapterService {
 //                        .newTransaction(true)
 //                        .build())
 //                .then(Mono.empty());
-        return Mono.empty();
     }
 
 }

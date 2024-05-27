@@ -80,7 +80,6 @@ class BrokerListenerServiceIT {
                 .block();
         BrokerSubscription brokerSubscriptionResponse = objectMapper.readValue(response, BrokerSubscription.class);
         System.out.println(brokerSubscriptionResponse.toString());
-//        assertEquals(brokerSubscription.id(), brokerSubscriptionResponse.id());
     }
 
 }

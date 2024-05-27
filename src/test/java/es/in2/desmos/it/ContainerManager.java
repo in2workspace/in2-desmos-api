@@ -75,9 +75,6 @@ public class ContainerManager {
         registry.add("spring.flyway.url", postgresContainerA::getJdbcUrl);
         registry.add("broker.externalDomain", ContainerManager::getBaseUriForScorpioA);
         registry.add("dlt-adapter.externalDomain", ContainerManager::getBaseUriBlockchainAdapterA);
-//        registry.add("dlt-adapter.externalDomain", () -> String.format("http://%s:%s",
-//                blockchainAdapterContainerA.getHost(),
-//                blockchainAdapterContainerA.getFirstMappedPort()));
     }
 
     public static String getBaseUriForScorpioA() {
