@@ -11,7 +11,7 @@ services:
     image: prom/prometheus:v2.52.0
     container_name: prometheus
     ports:
-      - "9091:9090"
+      - "9096:9090"
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     networks:

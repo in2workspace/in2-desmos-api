@@ -6,5 +6,5 @@ providers:
     disableDeletion: false
     updateIntervalSeconds: 10
     options:
-      path: /etc/grafana/provisioning/dashboards/dashboards_files
+      path: /etc/grafana/provisioning/dashboards/dashboard_files
       foldersFromFilesStructure: true
