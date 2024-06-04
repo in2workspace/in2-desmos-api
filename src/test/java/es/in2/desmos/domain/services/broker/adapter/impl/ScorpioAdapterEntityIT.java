@@ -7,14 +7,21 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
@@ -46,7 +53,7 @@ class ScorpioAdapterEntityIT {
 
     @Autowired
     private WebClient webClient;
-
+    
     @LocalServerPort
     private int localServerPort;
 
@@ -104,8 +111,29 @@ class ScorpioAdapterEntityIT {
 
     @Test
     @Order(3)
-    void updateEntityTestWithJsonLd() {
+    void getEntityByIdNotFoundTest() {
+        String entityId = "urn:ngsi-ld:ProductOffering:DoesNotExist";
 
+        WebClient mockWebClient = mock(WebClient.class);
+        WebClient.RequestHeadersUriSpec mockRequestHeadersUriSpec = mock(WebClient.RequestHeadersUriSpec.class);
+        WebClient.RequestHeadersSpec mockRequestHeadersSpec = mock(WebClient.RequestHeadersSpec.class);
+        WebClient.ResponseSpec mockResponseSpec = mock(WebClient.ResponseSpec.class);
+
+        when(mockWebClient.get()).thenReturn(mockRequestHeadersUriSpec);
+        when(mockRequestHeadersUriSpec.uri(anyString())).thenReturn(mockRequestHeadersSpec);
+        when(mockRequestHeadersSpec.accept(any())).thenReturn(mockRequestHeadersSpec);
+        when(mockRequestHeadersSpec.retrieve()).thenReturn(mockResponseSpec);
+        when(mockResponseSpec.bodyToMono(String.class)).thenReturn(Mono.error(new WebClientResponseException("Not Found", 404, "Not Found", HttpHeaders.EMPTY, null, null)));
+
+        Mono<String> result = scorpioAdapter.getEntityById("processId", entityId);
+
+        StepVerifier.create(result)
+                .verifyComplete();
+    }
+
+    @Test
+    @Order(4)
+    void updateEntityTestWithJsonLd() {
         String requestBodyWithContext = """
                 {
                     "@context": "https://schema.org",
@@ -136,7 +164,7 @@ class ScorpioAdapterEntityIT {
     }
 
     @Test
-    @Order(4)
+    @Order(5)
     void updateEntityTestWithJson() {
         webClient.patch()
                 .uri(brokerConfig.getEntitiesPath() + "/urn:ngsi-ld:ProductOffering:122355255/attrs")
@@ -153,7 +181,7 @@ class ScorpioAdapterEntityIT {
     }
 
     @Test
-    @Order(5)
+    @Order(6)
     void deleteEntityByIdTest() {
         String entityId = "urn:ngsi-ld:ProductOffering:122355255";
 
