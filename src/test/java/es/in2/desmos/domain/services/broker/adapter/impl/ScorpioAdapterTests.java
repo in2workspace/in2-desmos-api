@@ -1,0 +1,95 @@
+package es.in2.desmos.domain.services.broker.adapter.impl;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import es.in2.desmos.domain.models.BrokerSubscription;
+import es.in2.desmos.infrastructure.configs.ApiConfig;
+import es.in2.desmos.infrastructure.configs.BrokerConfig;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.MediaType;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
+import reactor.test.StepVerifier;
+
+import java.lang.reflect.Field;
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class ScorpioAdapterTests {
+
+    BrokerSubscription brokerSubscription = BrokerSubscription.builder()
+            .id("urn:subscription:b74a701a-9a3b-4eff-982e-744652fc2abf")
+            .type("Subscription")
+            .entities(List.of(
+                    BrokerSubscription.Entity.builder().type("ProductOffering").build(),
+                    BrokerSubscription.Entity.builder().type("Category").build(),
+                    BrokerSubscription.Entity.builder().type("Catalogue").build()))
+            .notification(BrokerSubscription.SubscriptionNotification.builder()
+                    .subscriptionEndpoint(BrokerSubscription.SubscriptionNotification.SubscriptionEndpoint.builder()
+                            .uri("http://localhost:8080/api/v1/notifications/broker")
+                            .accept("application/json")
+                            .receiverInfo(List.of(
+                                    BrokerSubscription.SubscriptionNotification.SubscriptionEndpoint.RetrievalInfoContentType.builder()
+                                            .contentType("application/json")
+                                            .build()))
+                            .build())
+                    .build())
+            .build();
+
+    @Mock
+    private ObjectMapper objectMapper;
+
+    @Mock
+    private BrokerConfig brokerConfig;
+
+    @Mock
+    private ApiConfig apiConfig;
+
+    @Mock
+    private WebClient webClientMock;
+
+    @Mock
+    private WebClient.RequestHeadersUriSpec requestHeadersUriMock;
+
+    @Mock
+    private WebClient.RequestHeadersSpec requestHeadersMock;
+
+    @Mock
+    private WebClient.ResponseSpec responseMock;
+
+    @InjectMocks
+    private ScorpioAdapter scorpioAdapter;
+
+    @Test
+    void getEntitiesByTimeRangeTest() throws IllegalAccessException, NoSuchFieldException {
+        //Arrange
+        Field field = ScorpioAdapter.class.getDeclaredField("webClient");
+        field.setAccessible(true);
+        field.set(scorpioAdapter, webClientMock);
+        String mockResponse = "[{ \"id\": \"urn:ngsi-ld:ProductOffering:122355255\" }]";
+        Flux<String> fluxMockResponse = Flux.just(mockResponse);
+
+        when(responseMock.bodyToFlux(String.class)).thenReturn(fluxMockResponse);
+        when(webClientMock.get()).thenReturn(requestHeadersUriMock);
+        when(requestHeadersUriMock.uri(anyString())).thenReturn(requestHeadersMock);
+        when(requestHeadersMock.accept(any(MediaType.class))).thenReturn(requestHeadersMock);
+        when(requestHeadersMock.retrieve()).thenReturn(responseMock);
+
+        //Act
+        Flux<String> result = scorpioAdapter.getEntitiesByTimeRange("processId", "timestamp");
+
+        //Assert
+        StepVerifier.create(result)
+                .expectNextMatches(entity -> {
+                    return entity.contains("urn:ngsi-ld:ProductOffering:122355255");
+                })
+                .verifyComplete();
+    }
+}

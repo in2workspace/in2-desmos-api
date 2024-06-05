@@ -106,12 +106,13 @@ class DataSyncServiceImplTests {
 
     @Test
     void testVerifyDataIntegrity_Success_FirstEntity() throws JsonProcessingException {
+        //Arrange
         JsonNode mockJsonNode = mock(JsonNode.class);
         when(objectMapper.readTree(anyString())).thenReturn(mockJsonNode);
         when(objectMapper.writeValueAsString(mockJsonNode)).thenReturn(retrievedBrokerEntityMock);
         when(auditRecordService.findLatestConsumerPublishedAuditRecordByEntityId(anyString(), anyString())).thenReturn(Mono.empty());
 
-
+        //Act & Assert
         StepVerifier.create(dataSyncService.verifyRetrievedEntityData("processId", notification, retrievedBrokerEntityMock))
                 .assertNext(retrievedBrokerEntity -> {
                 })
@@ -120,11 +121,13 @@ class DataSyncServiceImplTests {
 
     @Test
     void testVerifyDataIntegrityAndDataConsistency_Success() throws JsonProcessingException {
+        //Arrange
         JsonNode mockJsonNode = mock(JsonNode.class);
         when(objectMapper.readTree(anyString())).thenReturn(mockJsonNode);
         when(objectMapper.writeValueAsString(mockJsonNode)).thenReturn(retrievedBrokerEntityMock);
         when(auditRecordService.findLatestConsumerPublishedAuditRecordByEntityId(anyString(), anyString())).thenReturn(Mono.just(auditRecord));
 
+        //Act & Assert
         StepVerifier.create(dataSyncService.verifyRetrievedEntityData("processId", notification, retrievedBrokerEntityMock))
                 .assertNext(retrievedBrokerEntity -> {
                 })
@@ -134,11 +137,13 @@ class DataSyncServiceImplTests {
 
     @Test
     void testVerifyDataIntegrityAndDataConsistency_Failure() throws JsonProcessingException {
+        //Arrange
         JsonNode mockJsonNode = mock(JsonNode.class);
         when(objectMapper.readTree(anyString())).thenReturn(mockJsonNode);
         when(objectMapper.writeValueAsString(mockJsonNode)).thenReturn(retrievedBrokerEntityMock);
         when(auditRecordService.findLatestConsumerPublishedAuditRecordByEntityId(anyString(), anyString())).thenReturn(Mono.just(errorAuditRecord));
 
+        //Act & Assert
         StepVerifier.create(dataSyncService.verifyRetrievedEntityData("processId", notification, retrievedBrokerEntityMock))
                 .expectError(HashLinkException.class)
                 .verify();
@@ -147,12 +152,13 @@ class DataSyncServiceImplTests {
 
     @Test
     void testVerifyDataIntegrity_Failure_HashMismatch() throws JsonProcessingException {
+        //Arrange
         JsonNode mockJsonNode = mock(JsonNode.class);
         when(objectMapper.readTree(anyString())).thenReturn(mockJsonNode);
         when(objectMapper.writeValueAsString(mockJsonNode)).thenReturn(retrievedBrokerEntityMock);
         when(auditRecordService.findLatestConsumerPublishedAuditRecordByEntityId(anyString(), anyString())).thenReturn(Mono.empty());
 
-
+        //Act & Assert
         StepVerifier.create(dataSyncService.verifyRetrievedEntityData("processId", errorNotification, retrievedBrokerEntityMock))
                 .expectError(HashLinkException.class)
                 .verify();
@@ -160,12 +166,13 @@ class DataSyncServiceImplTests {
 
     @Test
     void testVerifyDataIntegrity_Failure_JsonProcessingExceptionError() throws JsonProcessingException {
+        //Arrange
         JsonNode mockJsonNode = mock(JsonNode.class);
         when(objectMapper.readTree(anyString())).thenReturn(mockJsonNode);
         when(objectMapper.writeValueAsString(mockJsonNode)).thenThrow(JsonProcessingException.class);
         when(auditRecordService.findLatestConsumerPublishedAuditRecordByEntityId(anyString(), anyString())).thenReturn(Mono.empty());
 
-
+        //Act & Assert
         StepVerifier.create(dataSyncService.verifyRetrievedEntityData("processId", errorNotification, retrievedBrokerEntityMock))
                 .expectError(HashLinkException.class)
                 .verify();
@@ -173,6 +180,7 @@ class DataSyncServiceImplTests {
 
     @Test
     void getEntityFromExternalSource() {
+        //Arrange
         String mockResponse = "{ \"id\": \"urn:ngsi-ld:ProductOffering:38088145-aef3-440e-ab93-a33bc9bfce69\" }";
         Mono<String> monoMockResponse = Mono.just(mockResponse);
 
@@ -185,8 +193,10 @@ class DataSyncServiceImplTests {
         when(webClientResponseSpecMock.onStatus(any(), any())).thenReturn(webClientResponseSpecMock);
         when(webClientResponseSpecMock.bodyToMono(String.class)).thenReturn(monoMockResponse);
 
+        //Act
         Mono<String> result = dataSyncService.getEntityFromExternalSource("processId", notification);
 
+        //Assert
         StepVerifier.create(result)
                 .expectNextMatches(entity -> {
                     return entity.contains("urn:ngsi-ld:ProductOffering:38088145-aef3-440e-ab93-a33bc9bfce69");
@@ -196,6 +206,7 @@ class DataSyncServiceImplTests {
 
     @Test
     void getEntityFromExternalSource_WhenStatusIs200() {
+        //Arrange
         String mockResponse = "{ \"id\": \"urn:ngsi-ld:ProductOffering:38088145-aef3-440e-ab93-a33bc9bfce69\" }";
         Mono<String> monoMockResponse = Mono.just(mockResponse);
 
@@ -216,8 +227,10 @@ class DataSyncServiceImplTests {
             return webClientResponseSpecMock;
         });
 
+        //Act
         Mono<String> result = dataSyncService.getEntityFromExternalSource("processId", notification);
 
+        //Assert
         StepVerifier.create(result)
                 .expectNext(mockResponse)
                 .verifyComplete();
@@ -227,6 +240,7 @@ class DataSyncServiceImplTests {
 
     @Test
     void getEntityFromExternalSource_WhenStatusIs4xx() {
+        //Arrange
         when(apiConfig.webClient()).thenReturn(webClientMock);
         when(webClientMock.get()).thenReturn(webClientRequestHeadersUriSpecMock);
         when(webClientRequestHeadersUriSpecMock.uri(anyString())).thenReturn(webClientRequestHeadersSpecMock);
@@ -244,6 +258,7 @@ class DataSyncServiceImplTests {
 
         when(webClientResponseSpecMock.bodyToMono(String.class)).thenThrow(new BrokerEntityRetrievalException("Error occurred while retrieving entity from the external broker"));
 
+        //Act & Assert
         assertThrows(BrokerEntityRetrievalException.class, () -> {
             dataSyncService.getEntityFromExternalSource("processId", notification);
         });
@@ -251,6 +266,7 @@ class DataSyncServiceImplTests {
 
     @Test
     void getEntityFromExternalSource_WhenStatusIs5xx() {
+        //Arrange
         when(apiConfig.webClient()).thenReturn(webClientMock);
         when(webClientMock.get()).thenReturn(webClientRequestHeadersUriSpecMock);
         when(webClientRequestHeadersUriSpecMock.uri(anyString())).thenReturn(webClientRequestHeadersSpecMock);
@@ -268,6 +284,7 @@ class DataSyncServiceImplTests {
 
         when(webClientResponseSpecMock.bodyToMono(String.class)).thenThrow(new BrokerEntityRetrievalException("Error occurred while retrieving entity from the external broker"));
 
+        //Act & Assert
         assertThrows(BrokerEntityRetrievalException.class, () -> {
             dataSyncService.getEntityFromExternalSource("processId", notification);
         });
