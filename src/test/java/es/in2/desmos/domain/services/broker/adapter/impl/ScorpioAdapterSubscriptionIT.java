@@ -139,35 +139,4 @@ class ScorpioAdapterSubscriptionIT {
                 .verifyComplete();
     }
 
-//    @Test
-//    @Order(4)//TODO: test with 2 same subscriptions
-//    void createOrUpdateSubscriptionWhenEntitiesAreDifferentTest() {
-//        WebClient mockWebClient = mock(WebClient.class);
-//        WebClient.RequestHeadersUriSpec mockRequestHeadersUriSpec = mock(WebClient.RequestHeadersUriSpec.class);
-//        WebClient.RequestHeadersSpec mockRequestHeadersSpec = mock(WebClient.RequestHeadersSpec.class);
-//        WebClient.ResponseSpec mockResponseSpec = mock(WebClient.ResponseSpec.class);
-//
-//        when(mockWebClient.get()).thenReturn(mockRequestHeadersUriSpec);
-//        when(mockRequestHeadersUriSpec.uri(anyString())).thenReturn(mockRequestHeadersSpec);
-//        when(mockRequestHeadersSpec.accept(any())).thenReturn(mockRequestHeadersSpec);
-//        when(mockRequestHeadersSpec.retrieve()).thenReturn(mockResponseSpec);
-//
-//        // Crear una suscripción con entidades diferentes
-//        BrokerSubscription differentBrokerSubscription = BrokerSubscription.builder()
-//                .id(brokerSubscription.id())
-//                .type(brokerSubscription.type())
-//                .entities(List.of(
-//                        BrokerSubscription.Entity.builder().type("DifferentEntity").build()))
-//                .notification(brokerSubscription.notification())
-//                .build();
-//
-//        // Devolver la suscripción con entidades diferentes cuando se llama al método bodyToMono(BrokerSubscription.class)
-//        when(mockResponseSpec.bodyToMono(BrokerSubscription.class)).thenReturn(Mono.just(differentBrokerSubscription));
-//
-//        Mono<Void> result = scorpioAdapter.createSubscription("processId", differentBrokerSubscription);
-//
-//        StepVerifier.create(result)
-//                .verifyComplete();
-//    }
-
 }
