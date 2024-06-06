@@ -4,8 +4,6 @@ ARG SKIP_TESTS=false
 COPY build.gradle settings.gradle /home/gradle/src/
 COPY src /home/gradle/src/src
 COPY config /home/gradle/src/config
-COPY config/monitoring /home/gradle/src/monitoring
-COPY docs /home/gradle/src/docs
 COPY gradle /home/gradle/src/gradle
 WORKDIR /home/gradle/src
 RUN if [ "$SKIP_TESTS" = "true" ]; then \
@@ -15,10 +13,15 @@ RUN if [ "$SKIP_TESTS" = "true" ]; then \
   fi
 
 # build image
-FROM openjdk:17-alpine
+# Windows
+#FROM openjdk:17-alpine
+# MacOs M1
+FROM bellsoft/liberica-openjdk-alpine-musl:17
 RUN addgroup -S nonroot \
     && adduser -S nonroot -G nonroot
 USER nonroot
 WORKDIR /app
-COPY --from=TEMP_BUILD /home/gradle/src/build/libs/*.jar /app/desmos.jar
-ENTRYPOINT ["java", "-jar", "/app/desmos.jar"]
+COPY --from=TEMP_BUILD /home/gradle/src/build/libs/*.jar /app/desmos-api.jar
+ENTRYPOINT ["java", "-jar", "/app/desmos-api.jar"]
+
+# docker build --build-arg SKIP_TESTS=true -t image-name .

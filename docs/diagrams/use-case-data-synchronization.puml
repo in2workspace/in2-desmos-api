@@ -1,0 +1,104 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+skinparam BoxPadding 10
+
+' -------------------- Headers -------------------- '
+
+actor "Operator" as operator
+
+box "Local Access Node" #LightBlue
+    control "DataSyncController" as data_sync_controller
+    control "Scheduler" as scheduler
+    control "Bootstrapping" as bootstrapping
+    participant "DataSyncService" as data_sync_service
+    boundary "Context Broker" as context_broker
+end box
+
+boundary "External Access Node" as external_access_node
+
+' -------------------- Diagram -------------------- '
+
+note over operator, external_access_node
+    Trigger data sync
+end note
+
+alt "Bootstrapping"
+    bootstrapping -> bootstrapping++: Application starts/restarts
+    bootstrapping -> data_sync_service++: SyncData()
+else "Scheduler"
+    scheduler -> scheduler++: Cron job triggers
+    scheduler -> data_sync_service: SyncData()
+else "DataSyncController"
+    operator -> data_sync_controller++: GET /sync/data
+    data_sync_controller -> data_sync_service: SyncData()
+end
+
+note over operator, external_access_node
+    Discovery
+end note
+
+data_sync_service -> context_broker++: GET /ngsi-ld/v1/entities/\n         ?type=<type>&attrs=id
+    note right of context_broker
+      [
+        { "id": "urn:ngsi-ld:ProductOffering:<uuid>"},
+        { "id": "urn:ngsi-ld:ProductOffering:<uuid>"},
+        ...
+      ]
+    end note
+return 200 OK Payload: local_entities_id_list
+
+data_sync_service -> external_access_node++: POST /sync/discovery
+    note right of external_access_node
+        This process is defined in the
+        data_sync_discovery diagram.
+
+        This process creates a sync job
+        between the external and local
+        as well as the local and external.
+    end note
+return 202 Accepted Payload: external_entities_id_list
+
+note over operator, external_access_node
+    Sync
+end note
+
+data_sync_service -> data_sync_service: Compare local_entities_id_list\n with external_entities_id_list
+data_sync_service -> external_access_node++: POST /sync/entities Payload: diff_entities_id_list
+    note right of external_access_node
+        This process is defined in
+        the data_sync_retrieval
+        diagram.
+    end note
+return 202 Accepted Payload: entities_list
+
+loop for each entity in entities_list
+    data_sync_service -> context_broker++: GET /ngsi-ld/v1/entities/<entity_id>
+    context_broker --> data_sync_service: response
+    alt "Entity exists"
+        data_sync_service -> context_broker: PATCH /ngsi-ld/v1/entities/<entity_id>
+        context_broker --> data_sync_service: 204 No Content
+    else "Entity does not exist"
+        data_sync_service -> context_broker: POST /ngsi-ld/v1/entities
+        return 201 Created
+    end
+end
+
+note over operator, external_access_node
+    Done
+end note
+
+data_sync_service --> bootstrapping: Done
+deactivate bootstrapping
+
+data_sync_service --> scheduler: Done
+deactivate scheduler
+
+data_sync_service --> data_sync_controller: Done
+deactivate data_sync_service
+data_sync_controller --> operator: 200 OK
+deactivate data_sync_controller
+
+
+@enduml

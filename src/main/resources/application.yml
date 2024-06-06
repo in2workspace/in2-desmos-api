@@ -5,13 +5,13 @@ spring:
   main:
     web-application-type: reactive
   r2dbc:
-    url: "r2dbc:postgresql://localhost:5433/desmos"
-    username: "guest"
-    password: "guest"
+    url: "r2dbc:postgresql://localhost:5433/it_db"
+    username: "postgres"
+    password: "postgres"
     generate-unique-name: true
   flyway:
-    url: "jdbc:postgresql://localhost:5433/desmos"
-    locations: classpath:db/migrations
+    url: "jdbc:postgresql://localhost:5433/it_db"
+    locations: classpath:db/migration
 
 # Spring Logging Configuration
 logging:
@@ -44,6 +44,9 @@ management:
       enabled: true
     prometheus:
       enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
 
 # SpringDoc Configuration - OpenAPI 3.0 Documentation & Swagger UI
 springdoc:
@@ -61,8 +64,8 @@ server:
 # Application Configuration
 openapi:
   server:
-    url: "https://localhost:9091"
-    description: "Blockchain Connector Test Server"
+    url: "https://localhost:8081"
+    description: "Server Description"
   info:
     title: "Blockchain Connector"
     version: "2.0.0-SNAPSHOT"
@@ -72,19 +75,19 @@ openapi:
       name: "Apache 2.0"
       url: "https://www.apache.org/licenses/LICENSE-2.0.html"
     contact:
-      email: "info@example.com"
-      name: "john doe"
+      email: "test@example.com"
+      name: "Test Name"
       url: "https://example.com"
 
 # Operator Configuration
-client:
-  organizationId: "VATES-99999999"
+operator:
+  organizationIdentifier: "VATES-S9999999E"
 
 # Context Broker Configuration
 broker:
   provider: "scorpio"
+  internalDomain: "http://scorpio:9090"
   externalDomain: "http://localhost:9090"
-  internalDomain: "http://localhost:9090"
   paths:
     entities: "/ngsi-ld/v1/entities"
     subscriptions: "/ngsi-ld/v1/subscriptions"
@@ -92,13 +95,13 @@ broker:
 
 # NGSI Subscription Configuration
 ngsi-subscription:
-  notificationEndpoint: "http://localhost:8080/notifications/broker"
-  entityTypes: "ProductOffering,ProductOrder"
+  notificationEndpoint: "http://localhost:8081/api/v1/notifications/broker"
+  entityTypes: "ProductOffering,Category,Catalogue"
 
 # DLT Adapter Configuration
 dlt-adapter:
   provider: "digitelts"
-  internalDomain: "http://localhost:8080"
+  internalDomain: "http://dlt-adapter:8080"
   externalDomain: "http://localhost:8080"
   paths:
     publication: "/api/v1/publishEvent"
@@ -106,6 +109,6 @@ dlt-adapter:
     events: "/api/v1/events"
 
 # Event Subscription Configuration
-event-subscription:
-  notificationEndpoint: "http://localhost:8080/notifications/evm"
-  eventTypes: "ProductOffering,ProductOrder"
+tx-subscription:
+  notificationEndpoint: "http://localhost:8081/api/v1/notifications/dlt"
+  entityTypes: "ProductOffering,Category,Catalogue"

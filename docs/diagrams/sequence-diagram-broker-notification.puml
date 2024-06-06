@@ -1,0 +1,33 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+skinparam BoxPadding 10
+
+boundary "Context Broker" as context_broker
+
+box "Blockchain Connector" #LightBlue
+    control "Notification Controller" as notification_controller
+    participant "Notification Service" as notification_service
+    participant "Audit Service" as audit_service
+    queue "Broker Queue" as broker_queue
+    database "Postgres" as local_db
+end box
+
+context_broker -> notification_controller++: POST /notifications/broker\nPayload: BrokerNotification
+    notification_controller -> notification_service++: ProcessNotification(BrokerNotification)
+        notification_service -> notification_service: IsNotificationFromExternalSource(BrokerNotification)
+        notification_service -> notification_service: ValidateNotification(BrokerNotification)
+        notification_service -> notification_service: SetNotificationPriority(BrokerNotification)
+        notification_service -> audit_service++: BuildTransaction(BrokerNotification)
+            audit_service -> local_db++: SaveTransaction(Transaction)
+            return
+        return
+        notification_service -> broker_queue++: Enqueue(BrokerNotification)
+        return
+    return
+return 202 Accepted
+
+@enduml
+
+

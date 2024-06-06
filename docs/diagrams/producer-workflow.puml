@@ -1,0 +1,53 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+'---------- Configuration ----------'
+
+autonumber
+skinparam boxPadding 20
+skinparam shadowing true
+
+'------------- Headers -------------'
+
+boundary "Context Broker" as context_broker
+
+box "Blockchain Connector"
+    control "NotificationController" as controller
+    participant "BrokerListener" as broker_listener
+    participant "BlockchainPublisher" as blockchain_publisher
+    participant "AuditRecordService" as audit_record_service
+    database "AuditRecordRepository" as audit_record_repository
+    queue "BrokerQueue" as broker_queue
+end box
+
+boundary "Blockchain" as blockchain
+
+'------------- Diagram -------------'
+
+context_broker -> controller++: POST /api/v1/notifications/broker \nPayload: BrokerNotification
+    controller -> broker_listener++: processBrokerNotification(BrokerNotification)
+        broker_listener -> audit_record_service++: createAuditRecord(BrokerNotification)
+            audit_record_service -> audit_record_repository++: save(AuditRecord)
+            return
+        return
+        broker_listener -> broker_queue++: enqueueEvent(BrokerNotification)
+        return
+    return
+return 202 Accepted
+
+blockchain_publisher -> broker_queue++: getEvent()
+activate blockchain_publisher
+return BrokerNotification
+
+blockchain_publisher -> blockchain_publisher: createBlockchainData(BrokerNotification)
+blockchain_publisher -> audit_record_service++: createAuditRecord(BrokerNotification)
+    audit_record_service -> audit_record_repository++: save(AuditRecord)
+    return
+return
+blockchain_publisher -> blockchain++: POST /api/v1/publishEvent \nPayload: BlockchainData
+return 201 Created
+deactivate blockchain_publisher
+
+
+
+@enduml

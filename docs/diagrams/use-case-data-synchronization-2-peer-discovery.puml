@@ -1,0 +1,28 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+skinparam BoxPadding 10
+
+' -------------------- Headers -------------------- '
+
+box "Local Access Node" #LightBlue
+    participant "AppConfig" as app_config
+    participant "P2PDataSyncWorkflow" as p2p_data_sync_workflow
+end box
+
+' -------------------- Diagram -------------------- '
+
+note over p2p_data_sync_workflow, p2p_data_sync_workflow
+    Peer Discovery
+end note
+
+activate p2p_data_sync_workflow
+
+p2p_data_sync_workflow -> app_config++: getAccessNodePeers()
+return List<AccessNodePeer>
+
+
+
+
+@enduml
