@@ -1,6 +1,5 @@
 package es.in2.desmos.domain.models;
 
-import es.in2.desmos.domain.models.GlobalErrorMessage;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

@@ -10,11 +10,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -64,6 +67,15 @@ class ScorpioAdapterTests {
     @Mock
     private WebClient.ResponseSpec responseMock;
 
+    @Mock
+    private WebClient.RequestBodyUriSpec requestBodyUriMock;
+
+    @Mock
+    private WebClient.RequestBodySpec PatchRequestBodyMock;
+
+    @Mock
+    private WebClient.RequestBodySpec AcceptedRequestBodyMock;
+
     @InjectMocks
     private ScorpioAdapter scorpioAdapter;
 
@@ -90,6 +102,30 @@ class ScorpioAdapterTests {
                 .expectNextMatches(entity -> {
                     return entity.contains("urn:ngsi-ld:ProductOffering:122355255");
                 })
+                .verifyComplete();
+    }
+
+    @Test
+    void testUpdateSubscription() throws Exception {
+        // Arrange
+        when(PatchRequestBodyMock.accept(any(MediaType.class))).thenReturn(AcceptedRequestBodyMock);
+        when(AcceptedRequestBodyMock.contentType(any(MediaType.class))).thenReturn(PatchRequestBodyMock);
+        when(webClientMock.patch()).thenReturn(requestBodyUriMock);
+        when(requestBodyUriMock.uri(anyString())).thenReturn(PatchRequestBodyMock);
+        when(PatchRequestBodyMock.bodyValue(any())).thenReturn(requestHeadersMock);
+        when(requestHeadersMock.retrieve()).thenReturn(responseMock);
+        when(responseMock.bodyToMono(Void.class)).thenReturn(Mono.empty());
+
+        ReflectionTestUtils.setField(scorpioAdapter, "webClient", webClientMock);
+
+        Method method = ScorpioAdapter.class.getDeclaredMethod("updateSubscription", BrokerSubscription.class);
+
+        method.setAccessible(true);
+
+        Mono<Void> result = (Mono<Void>) method.invoke(scorpioAdapter, brokerSubscription);
+
+        // Act & Assert
+        StepVerifier.create(result)
                 .verifyComplete();
     }
 }

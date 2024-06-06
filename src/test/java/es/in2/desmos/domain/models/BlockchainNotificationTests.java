@@ -1,6 +1,5 @@
 package es.in2.desmos.domain.models;
 
-import es.in2.desmos.domain.models.BlockchainNotification;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
