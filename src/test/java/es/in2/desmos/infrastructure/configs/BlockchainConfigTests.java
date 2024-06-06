@@ -1,6 +1,5 @@
 package es.in2.desmos.infrastructure.configs;
 
-import es.in2.desmos.infrastructure.configs.BlockchainConfig;
 import es.in2.desmos.infrastructure.configs.properties.TxSubscriptionProperties;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

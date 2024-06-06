@@ -89,7 +89,7 @@ class BrokerListenerServiceTests {
     }
 
     @Test
-    void processBrokerNotificationTest_SecondNotification_sameHash() throws NoSuchAlgorithmException, JsonProcessingException {
+    void processBrokerNotificationTest_SecondNotification_sameHash() throws JsonProcessingException {
         // Arrange
         String processId = UUID.randomUUID().toString();
         BrokerNotification brokerNotification = BrokerNotification.builder()
@@ -130,7 +130,7 @@ class BrokerListenerServiceTests {
     }
 
     @Test
-    void processBrokerNotificationTest_SecondNotification_differentHash() throws NoSuchAlgorithmException, JsonProcessingException {
+    void processBrokerNotificationTest_SecondNotification_differentHash() throws JsonProcessingException {
         // Arrange
         String processId = UUID.randomUUID().toString();
         BrokerNotification brokerNotification = BrokerNotification.builder()

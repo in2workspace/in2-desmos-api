@@ -3,12 +3,12 @@ package es.in2.desmos.it.application;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import es.in2.desmos.it.ContainerManager;
 import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.BlockchainNotification;
 import es.in2.desmos.domain.repositories.AuditRecordRepository;
 import es.in2.desmos.domain.services.api.QueueService;
 import es.in2.desmos.infrastructure.controllers.NotificationController;
+import es.in2.desmos.it.ContainerManager;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -39,21 +39,6 @@ class SubscribeWorkflowBehaviorTest {
             JsonMapper.builder()
                     .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true)
                     .build();
-
-    @Autowired
-    private NotificationController notificationController;
-
-    @Autowired
-    private AuditRecordRepository auditRecordRepository;
-
-    @Autowired
-    private QueueService pendingSubscribeEventsQueue;
-
-    @DynamicPropertySource
-    static void setDynamicProperties(DynamicPropertyRegistry registry) {
-        ContainerManager.postgresqlProperties(registry);
-    }
-
     String request = """
             {
                 "id": "urn:ngsi-ld:ProductOffering:122355255",
@@ -67,7 +52,6 @@ class SubscribeWorkflowBehaviorTest {
                     "value": "ProductOffering 1 description"
                 }
             }""";
-
     String updateRequest = """
             {
                 "id": "urn:ngsi-ld:ProductOffering:122355255",
@@ -81,6 +65,48 @@ class SubscribeWorkflowBehaviorTest {
                     "value": "ProductOffering 2 description"
                 }
             }""";
+    @Autowired
+    private NotificationController notificationController;
+    @Autowired
+    private AuditRecordRepository auditRecordRepository;
+    @Autowired
+    private QueueService pendingSubscribeEventsQueue;
+
+    @DynamicPropertySource
+    static void setDynamicProperties(DynamicPropertyRegistry registry) {
+        ContainerManager.postgresqlProperties(registry);
+    }
+
+    private static String getString() {
+        String url = ContainerManager.getBaseUriForScorpioA();
+        //todo: change the BlockchainNotificationJson to match the expected format
+        return String.format("""
+                {
+                    "id": 2240,
+                    "publisherAddress": "0x40b0ab9dfd960064fb7e9fdf77f889c71569e349055ff563e8d699d8fa97fa90",
+                    "eventType": "ProductOffering",
+                    "timestamp": 1712753824,
+                    "dataLocation": "%s/ngsi-ld/v1/entities/urn:ngsi-ld:ProductOffering:122355255?hl=abbc168236d38354add74d65698f37941947127290cd40a90b4dbe7eb68d25c0",
+                    "relevantMetadata": [],
+                    "entityId": "0x4eb401aa1248b6a95c298d0747eb470b6ba6fc3f54ea630dc6c77f23ad1abe3e",
+                    "previousEntityHash": "0xabbc168236d38354add74d65698f37941947127290cd40a90b4dbe7eb68d25c0"
+                }""", url);
+    }
+
+    private static String getBlockchainNotificationJson() {
+        String url = ContainerManager.getBaseUriForScorpioA();
+        return String.format("""
+                {
+                    "id": 2240,
+                    "publisherAddress": "0x40b0ab9dfd960064fb7e9fdf77f889c71569e349055ff563e8d699d8fa97fa90",
+                    "eventType": "ProductOffering",
+                    "timestamp": 1712753824,
+                    "dataLocation": "%s/ngsi-ld/v1/entities/urn:ngsi-ld:ProductOffering:122355255?hl=64f516030ab35b7f18d8d06054079e85070ea04f1c0dab5291be8184a28025fa",
+                    "relevantMetadata": [],
+                    "entityId": "0x4eb401aa1248b6a95c298d0747eb470b6ba6fc3f54ea630dc6c77f23ad1abe3e",
+                    "previousEntityHash": "0xabbc168236d38354add74d65698f37941947127290cd40a90b4dbe7eb68d25c0"
+                }""", url);
+    }
 
     /*
         Given a BlockchainNotification, we will send a POST request emulating the broker behavior.
@@ -102,19 +128,7 @@ class SubscribeWorkflowBehaviorTest {
                 .onStatus(status -> status.isSameCodeAs(HttpStatusCode.valueOf(409)), response -> Mono.empty())
                 .bodyToMono(String.class).block();
 
-        String url = ContainerManager.getBaseUriForScorpioA();
-        //todo: change the BlockchainNotificationJson to match the expected format
-        String blockchainNotificationJson = String.format("""
-                {
-                    "id": 2240,
-                    "publisherAddress": "0x40b0ab9dfd960064fb7e9fdf77f889c71569e349055ff563e8d699d8fa97fa90",
-                    "eventType": "ProductOffering",
-                    "timestamp": 1712753824,
-                    "dataLocation": "%s/ngsi-ld/v1/entities/urn:ngsi-ld:ProductOffering:122355255?hl=abbc168236d38354add74d65698f37941947127290cd40a90b4dbe7eb68d25c0",
-                    "relevantMetadata": [],
-                    "entityId": "0x4eb401aa1248b6a95c298d0747eb470b6ba6fc3f54ea630dc6c77f23ad1abe3e",
-                    "previousEntityHash": "0xabbc168236d38354add74d65698f37941947127290cd40a90b4dbe7eb68d25c0"
-                }""", url);
+        String blockchainNotificationJson = getString();
         // When
         try {
             log.info("1. Create a BlockchainNotification and send a POST request to the application");
@@ -137,7 +151,7 @@ class SubscribeWorkflowBehaviorTest {
         log.info("Starting Subscribe Workflow Behavior Test...");
         log.info("2. Send a POST request to the external broker in order to retrieve the entity later");
         WebClient.create().patch()
-                .uri(ContainerManager.getBaseUriForScorpioA() + "/ngsi-ld/v1/entities")
+                .uri(ContainerManager.getBaseUriForScorpioA() + "/ngsi-ld/v1/entities" + "/urn:ngsi-ld:ProductOffering:122355255/attrs")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(updateRequest)
@@ -145,18 +159,7 @@ class SubscribeWorkflowBehaviorTest {
                 .onStatus(status -> status.isSameCodeAs(HttpStatusCode.valueOf(409)), response -> Mono.empty())
                 .bodyToMono(String.class).block();
 
-        String url = ContainerManager.getBaseUriForScorpioA();
-        String blockchainNotificationJson = String.format("""
-                {
-                    "id": 2240,
-                    "publisherAddress": "0x40b0ab9dfd960064fb7e9fdf77f889c71569e349055ff563e8d699d8fa97fa90",
-                    "eventType": "ProductOffering",
-                    "timestamp": 1712753824,
-                    "dataLocation": "%s/ngsi-ld/v1/entities/urn:ngsi-ld:ProductOffering:122355255?hl=64f516030ab35b7f18d8d06054079e85070ea04f1c0dab5291be8184a28025fa",
-                    "relevantMetadata": [],
-                    "entityId": "0x4eb401aa1248b6a95c298d0747eb470b6ba6fc3f54ea630dc6c77f23ad1abe3e",
-                    "previousEntityHash": "0xabbc168236d38354add74d65698f37941947127290cd40a90b4dbe7eb68d25c0"
-                }""", url);
+        String blockchainNotificationJson = getBlockchainNotificationJson();
         // When
         try {
             log.info("1. Create a BlockchainNotification and send a POST request to the application");
@@ -172,6 +175,5 @@ class SubscribeWorkflowBehaviorTest {
             log.error("Error while sending the BlockchainNotification: {}", e.getMessage());
         }
     }
-
 
 }
