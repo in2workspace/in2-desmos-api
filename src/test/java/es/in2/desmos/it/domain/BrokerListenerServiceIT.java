@@ -79,7 +79,7 @@ class BrokerListenerServiceIT {
                 .exchangeToMono(clientResponse -> clientResponse.bodyToMono(String.class))
                 .block();
         BrokerSubscription brokerSubscriptionResponse = objectMapper.readValue(response, BrokerSubscription.class);
-        System.out.println(brokerSubscriptionResponse.toString());
+        Assertions.assertEquals(brokerSubscription, brokerSubscriptionResponse);
     }
 
 }

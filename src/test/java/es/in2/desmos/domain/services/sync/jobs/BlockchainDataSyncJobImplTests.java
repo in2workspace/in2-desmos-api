@@ -9,6 +9,7 @@ import es.in2.desmos.domain.models.AuditRecordStatus;
 import es.in2.desmos.domain.models.AuditRecordTrader;
 import es.in2.desmos.domain.models.BlockchainNotification;
 import es.in2.desmos.domain.services.api.AuditRecordService;
+import es.in2.desmos.domain.services.api.DomeParticipantService;
 import es.in2.desmos.domain.services.blockchain.adapter.BlockchainAdapterService;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
 import es.in2.desmos.domain.services.sync.jobs.impl.BlockchainDataSyncJobImpl;
@@ -45,6 +46,7 @@ class BlockchainDataSyncJobImplTests {
                     "value": "ProductOffering 1 description"
                 }
             }""";
+
     String blockchainNotificationJson = """
             {
                 "id": 2240,
@@ -56,16 +58,25 @@ class BlockchainDataSyncJobImplTests {
                 "entityId": "0x4eb401aa1248b6a95c298d0747eb470b6ba6fc3f54ea630dc6c77f23ad1abe3e",
                 "previousEntityHash": "0xabbc168236d38354add74d65698f37941947127290cd40a90b4dbe7eb68d25c0"
             }""";
+
     @Mock
     private AuditRecordService auditRecordService;
+
     @Mock
     private BlockchainAdapterService blockchainAdapterService;
+
     @Mock
     private ObjectMapper objectMapper;
+
     @Mock
     private BrokerPublisherService brokerPublisherService;
+
     @Mock
     private DataSyncService dataSyncService;
+
+    @Mock
+    private DomeParticipantService domeParticipantService;
+
     @InjectMocks
     private BlockchainDataSyncJobImpl workflow;
 
@@ -114,6 +125,7 @@ class BlockchainDataSyncJobImplTests {
                 .relevantMetadata(List.of())
                 .entityId("0x4eb401aa1248b6a95c298d0747eb470b6ba6fc3f54ea630dc6c77f23ad1abe3e")
                 .previousEntityHash("0xabbc168236d38354add74d65698f37941947127290cd40a90b4dbe7eb68d25c0")
+                .ethereumAddress("0x4eb401aa1248b6a95c298d0747eb470b6ba6fc3f54ea630dc6c77f23ad1abe3e")
                 .build();
         when(objectMapper.readValue(eq(blockchainNotificationJson), any(TypeReference.class))).thenReturn(Collections.singletonList(blockchainNotification));
         when(dataSyncService.getEntityFromExternalSource(processId, blockchainNotification)).thenReturn(Mono.just(brokerEntity));
@@ -122,6 +134,7 @@ class BlockchainDataSyncJobImplTests {
         when(auditRecordService.buildAndSaveAuditRecordFromBlockchainNotification(eq("process123"), any(BlockchainNotification.class), eq(brokerEntity), eq(AuditRecordStatus.RETRIEVED))).thenReturn(Mono.empty());
         when(brokerPublisherService.publishDataToBroker(eq("process123"), any(BlockchainNotification.class), eq(brokerEntity))).thenReturn(Mono.empty());
         when(auditRecordService.buildAndSaveAuditRecordFromBlockchainNotification(eq("process123"), any(BlockchainNotification.class), eq(brokerEntity), eq(AuditRecordStatus.PUBLISHED))).thenReturn(Mono.empty());
+        when(domeParticipantService.validateDomeParticipant(eq("process123"), anyString())).thenReturn(Mono.empty());
 
         // Mock further dependencies as necessary
 
@@ -154,17 +167,6 @@ class BlockchainDataSyncJobImplTests {
                 .build();
         when(auditRecordService.findLatestConsumerPublishedAuditRecord(processId)).thenReturn(Mono.just(auditRecord));
         when(blockchainAdapterService.getEventsFromRangeOfTime(eq("process123"), anyLong(), anyLong())).thenReturn(Flux.just(blockchainNotificationJson));
-        BlockchainNotification blockchainNotification = BlockchainNotification.builder()
-                .id(2240)
-                .publisherAddress("0x40b0ab9dfd960064fb7e9fdf77f889c71569e349055ff563e8d699d8fa97fa90")
-                .eventType("ProductOffering")
-                .timestamp(1712753824)
-                .dataLocation("http://scorpio:9090/ngsi-ld/v1/entities/urn:ngsi-ld:ProductOffering:122355255?hl=abbc168236d38354add74d65698f37941947127290cd40a90b4dbe7eb68d25c0")
-                .relevantMetadata(List.of())
-                .entityId("0x4eb401aa1248b6a95c298d0747eb470b6ba6fc3f54ea630dc6c77f23ad1abe3e")
-                .previousEntityHash("0xabbc168236d38354add74d65698f37941947127290cd40a90b4dbe7eb68d25c0")
-                .build();
-
         when(objectMapper.readValue(eq(blockchainNotificationJson), any(TypeReference.class))).thenThrow(JsonProcessingException.class);
         StepVerifier.create(workflow.startBlockchainDataSyncJob(processId))
                 .expectErrorMatches(throwable -> throwable instanceof JsonReadingException)

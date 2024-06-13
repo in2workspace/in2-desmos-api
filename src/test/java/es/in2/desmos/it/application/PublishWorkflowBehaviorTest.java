@@ -173,6 +173,7 @@ class PublishWorkflowBehaviorTest {
         } catch (Exception e) {
             log.error("Error: {}", e.getMessage());
         }
+        Assertions.assertEquals(1, auditRecordRepository.count().block());
     }
 
 }

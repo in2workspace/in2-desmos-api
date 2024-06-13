@@ -5,7 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.BlockchainNotification;
+import es.in2.desmos.domain.models.DomeParticipant;
 import es.in2.desmos.domain.repositories.AuditRecordRepository;
+import es.in2.desmos.domain.repositories.DomeParticipantRepository;
 import es.in2.desmos.domain.services.api.QueueService;
 import es.in2.desmos.infrastructure.controllers.NotificationController;
 import es.in2.desmos.it.ContainerManager;
@@ -39,6 +41,7 @@ class SubscribeWorkflowBehaviorTest {
             JsonMapper.builder()
                     .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true)
                     .build();
+
     String request = """
             {
                 "id": "urn:ngsi-ld:ProductOffering:122355255",
@@ -52,6 +55,7 @@ class SubscribeWorkflowBehaviorTest {
                     "value": "ProductOffering 1 description"
                 }
             }""";
+
     String updateRequest = """
             {
                 "id": "urn:ngsi-ld:ProductOffering:122355255",
@@ -65,12 +69,18 @@ class SubscribeWorkflowBehaviorTest {
                     "value": "ProductOffering 2 description"
                 }
             }""";
+
     @Autowired
     private NotificationController notificationController;
+
     @Autowired
     private AuditRecordRepository auditRecordRepository;
+
     @Autowired
     private QueueService pendingSubscribeEventsQueue;
+
+    @Autowired
+    private DomeParticipantRepository domeParticipantRepository;
 
     @DynamicPropertySource
     static void setDynamicProperties(DynamicPropertyRegistry registry) {
@@ -118,6 +128,11 @@ class SubscribeWorkflowBehaviorTest {
     @Order(0)
     @Test
     void subscribeWorkflowBehaviorTest() {
+        // Need to insert a DomeParticipant in the database, if not, the test will fail because of the validation
+        domeParticipantRepository.save(DomeParticipant.builder()
+                .ethereumAddress("0x40b0ab9dfd960064fb7e9fdf77f889c71569e349055ff563e8d699d8fa97fa90")
+                .build()).block();
+
         log.info("Starting Subscribe Workflow Behavior Test...");
         log.info("1. Send a POST request to the external broker in order to retrieve the entity later");
         WebClient.create().post()

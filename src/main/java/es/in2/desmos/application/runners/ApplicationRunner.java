@@ -18,7 +18,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.MediaType;
 import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
@@ -47,7 +46,6 @@ public class ApplicationRunner {
     private final PublishWorkflow publishWorkflow;
     private final SubscribeWorkflow subscribeWorkflow;
     private final AtomicBoolean isQueueAuthorizedForEmit = new AtomicBoolean(false);
-    private final String getCurrentEnvironment;
     private Disposable publishQueueDisposable;
     private Disposable subscribeQueueDisposable;
 
@@ -66,7 +64,8 @@ public class ApplicationRunner {
         log.info("ProcessID: {} - Setting Broker Subscription...", processId);
         // Build Entity Type List to subscribe to
         List<BrokerSubscription.Entity> entities = new ArrayList<>();
-        brokerConfig.getEntityTypes().forEach(entityType -> entities.add(BrokerSubscription.Entity.builder().type(entityType).build()));
+        brokerConfig.getEntityTypes().forEach(entityType -> entities.add(BrokerSubscription.Entity.builder()
+                .type(entityType).build()));
         // Create the Broker Subscription object
         BrokerSubscription brokerSubscription = BrokerSubscription.builder()
                 .id(SUBSCRIPTION_ID_PREFIX + UUID.randomUUID())
@@ -165,12 +164,6 @@ public class ApplicationRunner {
                         error -> log.error("ProcessID: {} - Error occurred during Subscribe Workflow", processId, error),
                         () -> log.info("ProcessID: {} - Subscribe Workflow completed", processId)
                 );
-    }
-
-    // TODO: Implement the recover method
-    @Recover
-    public void recover(RequestErrorException e) {
-        log.error("After retries, subscription failed", e);
     }
 
 }

@@ -6,7 +6,6 @@ import es.in2.desmos.application.workflows.SubscribeWorkflow;
 import es.in2.desmos.domain.models.BlockchainSubscription;
 import es.in2.desmos.domain.services.blockchain.BlockchainListenerService;
 import es.in2.desmos.domain.services.broker.BrokerListenerService;
-import es.in2.desmos.domain.services.sync.jobs.BlockchainDataSyncJob;
 import es.in2.desmos.infrastructure.configs.ApiConfig;
 import es.in2.desmos.infrastructure.configs.BlockchainConfig;
 import es.in2.desmos.infrastructure.configs.BrokerConfig;
@@ -23,7 +22,6 @@ import reactor.test.StepVerifier;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -49,9 +47,6 @@ class ApplicationRunnerTests {
     private PublishWorkflow publishWorkflow;
 
     @Mock
-    private BlockchainDataSyncJob blockchainDataSyncJob;
-
-    @Mock
     private SubscribeWorkflow subscribeWorkflow;
 
     @Mock
@@ -59,9 +54,6 @@ class ApplicationRunnerTests {
 
     @Mock
     private BlockchainListenerService blockchainListenerService;
-
-    @Mock
-    private AtomicBoolean isQueueAuthorizedForEmit;
 
     @InjectMocks
     private ApplicationRunner applicationRunner;
@@ -84,8 +76,7 @@ class ApplicationRunnerTests {
     @Test
     void whenDisposeIsActive() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         // Arrange
-        String getCurrentEnvironment = "dev";
-        ApplicationRunner applicationRunnerTest = new ApplicationRunner(apiConfig, brokerConfig, blockchainConfig, brokerListenerService, blockchainListenerService, dataSyncWorkflow, publishWorkflow, subscribeWorkflow, getCurrentEnvironment);
+        ApplicationRunner applicationRunnerTest = new ApplicationRunner(apiConfig, brokerConfig, blockchainConfig, brokerListenerService, blockchainListenerService, dataSyncWorkflow, publishWorkflow, subscribeWorkflow);
         Method disposeIfActive = ApplicationRunner.class.getDeclaredMethod("disposeIfActive", Disposable.class);
         disposeIfActive.setAccessible(true);
         Disposable disposable = mock(Disposable.class);
@@ -101,38 +92,5 @@ class ApplicationRunnerTests {
         //Assert
         StepVerifier.create(applicationRunnerTest.onApplicationReady()).verifyComplete();
     }
-
-    // Fixme: Retry and recover does not work with MockitoExtension
-//    @Test
-//    void whenBrokerSubscriptionFails_thenRetry() {
-//        // Arrange
-//        when(brokerListenerService.createSubscription(anyString(), any()))
-//                .thenThrow(new RequestErrorException("Simulated failure"))
-//                .thenReturn(Mono.empty()); // Success on a second attempt
-//        // Act
-//        ApplicationReadyEvent event = mock(ApplicationReadyEvent.class);
-//        initialSubscriptionRunner.setBrokerSubscription().block();
-//        // Assert
-//        verify(brokerListenerService, times(2)).createSubscription(anyString(), any());
-//    }
-
-    // Fixme: Retry and recover does not work with MockitoExtension
-//    @Test
-//    void whenBrokerSubscriptionContinuesToFail_thenRecover() {
-//        // Arrange
-//        when(brokerListenerService.createSubscription(anyString(), any()))
-//                .thenThrow(new RequestErrorException("Simulated failure"));
-//        // Act
-//        ApplicationReadyEvent event = mock(ApplicationReadyEvent.class);
-//        try {
-//            initialSubscriptionRunner.setBrokerSubscription().block();
-//        } catch (Exception e) {
-//            // Expected exception
-//        }
-//        // Assert
-//        verify(brokerListenerService, times(4)).createSubscription(anyString(), any());
-//        // Note: In reality, you'd want to capture and assert the invocation of the recover method
-//        // This may require a refactor to your runner to make it more testable in this scenario.
-//    }
 
 }

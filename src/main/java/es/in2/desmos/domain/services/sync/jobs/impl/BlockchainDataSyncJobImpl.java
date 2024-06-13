@@ -8,6 +8,7 @@ import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.AuditRecordStatus;
 import es.in2.desmos.domain.models.BlockchainNotification;
 import es.in2.desmos.domain.services.api.AuditRecordService;
+import es.in2.desmos.domain.services.api.DomeParticipantService;
 import es.in2.desmos.domain.services.blockchain.adapter.BlockchainAdapterService;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
 import es.in2.desmos.domain.services.sync.jobs.BlockchainDataSyncJob;
@@ -30,6 +31,7 @@ public class BlockchainDataSyncJobImpl implements BlockchainDataSyncJob {
     private final ObjectMapper objectMapper;
     private final DataSyncService dataSyncService;
     private final BrokerPublisherService brokerPublisherService;
+    private final DomeParticipantService domeParticipantService;
 
     @Override
     public Flux<Void> startBlockchainDataSyncJob(String processId) {
@@ -43,10 +45,9 @@ public class BlockchainDataSyncJobImpl implements BlockchainDataSyncJob {
                         .filter(notificationList -> !notificationList.isEmpty())
                         .flatMap(notificationList -> Flux.fromIterable(notificationList)
                                 .flatMap(blockchainNotification ->
-                                        // Create an audit record for the received notification, Status: RECEIVED
-                                        auditRecordService.buildAndSaveAuditRecordFromBlockchainNotification(processId, blockchainNotification, null, AuditRecordStatus.RECEIVED)
-                                                // todo: consider to add this blockchainNotification as en event of the queue with High priority.
-                                                //  These lines of code are duplicated from the SubscribeWorkflowImpl(51-62)
+                                        domeParticipantService.validateDomeParticipant(processId, blockchainNotification.ethereumAddress())
+                                                // Create an audit record for the received notification, Status: RECEIVED
+                                                .then(auditRecordService.buildAndSaveAuditRecordFromBlockchainNotification(processId, blockchainNotification, null, AuditRecordStatus.RECEIVED))
                                                 .then(dataSyncService.getEntityFromExternalSource(processId, blockchainNotification)
                                                         .flatMap(retrievedBrokerEntity ->
                                                                 // Verify the integrity and consistency of the retrieved entity
