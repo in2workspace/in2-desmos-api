@@ -85,6 +85,7 @@ class BlockchainNotificationTests {
     @Test
     void testBlockchainNotificationBuilderToString() {
         // Arrange
+        String ethereumAddress = "0x1234567890abcdef1234567890abcdef12345678";
         String expectedToString = "BlockchainNotification.BlockchainNotificationBuilder(id=" + id
                 + ", publisherAddress=" + publisherAddress
                 + ", eventType=" + eventType
@@ -92,7 +93,8 @@ class BlockchainNotificationTests {
                 + ", dataLocation=" + dataLocation
                 + ", relevantMetadata=" + relevantMetadata
                 + ", entityId=" + entityIdHash
-                + ", previousEntityHash=" + previousEntityHash + ")";
+                + ", previousEntityHash=" + previousEntityHash
+                + ", ethereumAddress=" + ethereumAddress + ")";
         // Act
         BlockchainNotification.BlockchainNotificationBuilder blockchainNotificationBuilder = BlockchainNotification.builder()
                 .id(id)
@@ -102,7 +104,8 @@ class BlockchainNotificationTests {
                 .dataLocation(dataLocation)
                 .relevantMetadata(relevantMetadata)
                 .entityId(entityIdHash)
-                .previousEntityHash(previousEntityHash);
+                .previousEntityHash(previousEntityHash)
+                .ethereumAddress(ethereumAddress);
         // Assert
         assertEquals(expectedToString, blockchainNotificationBuilder.toString());
     }

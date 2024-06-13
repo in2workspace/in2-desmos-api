@@ -79,7 +79,6 @@ class SubscribeWorkflowBehaviorTest {
 
     private static String getString() {
         String url = ContainerManager.getBaseUriForScorpioA();
-        //todo: change the BlockchainNotificationJson to match the expected format
         return String.format("""
                 {
                     "id": 2240,
@@ -89,7 +88,8 @@ class SubscribeWorkflowBehaviorTest {
                     "dataLocation": "%s/ngsi-ld/v1/entities/urn:ngsi-ld:ProductOffering:122355255?hl=abbc168236d38354add74d65698f37941947127290cd40a90b4dbe7eb68d25c0",
                     "relevantMetadata": [],
                     "entityId": "0x4eb401aa1248b6a95c298d0747eb470b6ba6fc3f54ea630dc6c77f23ad1abe3e",
-                    "previousEntityHash": "0xabbc168236d38354add74d65698f37941947127290cd40a90b4dbe7eb68d25c0"
+                    "previousEntityHash": "0xabbc168236d38354add74d65698f37941947127290cd40a90b4dbe7eb68d25c0",
+                    "ethereumAddress": "0x40b0ab9dfd960064fb7e9fdf77f889c71569e349055ff563e8d699d8fa97fa90"
                 }""", url);
     }
 
@@ -104,7 +104,8 @@ class SubscribeWorkflowBehaviorTest {
                     "dataLocation": "%s/ngsi-ld/v1/entities/urn:ngsi-ld:ProductOffering:122355255?hl=64f516030ab35b7f18d8d06054079e85070ea04f1c0dab5291be8184a28025fa",
                     "relevantMetadata": [],
                     "entityId": "0x4eb401aa1248b6a95c298d0747eb470b6ba6fc3f54ea630dc6c77f23ad1abe3e",
-                    "previousEntityHash": "0xabbc168236d38354add74d65698f37941947127290cd40a90b4dbe7eb68d25c0"
+                    "previousEntityHash": "0xabbc168236d38354add74d65698f37941947127290cd40a90b4dbe7eb68d25c0",
+                    "ethereumAddress": "0x40b0ab9dfd960064fb7e9fdf77f889c71569e349055ff563e8d699d8fa97fa90"
                 }""", url);
     }
 
