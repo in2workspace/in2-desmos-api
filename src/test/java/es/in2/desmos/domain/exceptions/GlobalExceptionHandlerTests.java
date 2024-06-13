@@ -44,7 +44,8 @@ class GlobalExceptionHandlerTests {
                 AuditRecordCreationException.class,
                 RequestErrorException.class,
                 BrokerEntityRetrievalException.class,
-                BrokerNotificationSelfGeneratedException.class
+                BrokerNotificationSelfGeneratedException.class,
+                UnauthorizedDomeParticipantException.class
         ));
         List<String> messages = new ArrayList<>(List.of(
                 "SubscriptionCreationException",
@@ -55,7 +56,8 @@ class GlobalExceptionHandlerTests {
                 "AuditRecordCreation",
                 "RequestErrorException",
                 "BrokerEntityRetrievalException",
-                "BrokerNotificationSelfGeneratedException"
+                "BrokerNotificationSelfGeneratedException",
+                "UnauthorizedDomeParticipantException"
         ));
         List<Throwable> nullCauseThrowableList = new ArrayList<>();
         List<Throwable> exceptionCauseThrowableList = new ArrayList<>();
@@ -77,7 +79,8 @@ class GlobalExceptionHandlerTests {
                 (ex, req) -> globalExceptionHandler.handleAuditRecordCreationException((AuditRecordCreationException) ex, req),
                 (ex, req) -> globalExceptionHandler.handleRequestErrorException((RequestErrorException) ex, req),
                 (ex, req) -> globalExceptionHandler.handleBrokerEntityRetrievalException((BrokerEntityRetrievalException) ex, req),
-                (ex, req) -> globalExceptionHandler.handleBrokerNotificationSelfGeneratedException((BrokerNotificationSelfGeneratedException) ex, req)
+                (ex, req) -> globalExceptionHandler.handleBrokerNotificationSelfGeneratedException((BrokerNotificationSelfGeneratedException) ex, req),
+                (ex, req) -> globalExceptionHandler.handleUnauthorizedDomeParticipantException((UnauthorizedDomeParticipantException) ex, req)
         ));
         classes.addAll(new ArrayList<>(classes));
         messages.addAll(new ArrayList<>(messages));
@@ -141,4 +144,5 @@ class GlobalExceptionHandlerTests {
                 .expectNext(globalErrorMessage)
                 .verifyComplete();
     }
+
 }
