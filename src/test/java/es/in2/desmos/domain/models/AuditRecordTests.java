@@ -1,6 +1,5 @@
 package es.in2.desmos.domain.models;
 
-
 import org.junit.jupiter.api.Test;
 
 import java.sql.Timestamp;

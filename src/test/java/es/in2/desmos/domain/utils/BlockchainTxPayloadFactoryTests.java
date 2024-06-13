@@ -35,10 +35,13 @@ class BlockchainTxPayloadFactoryTests {
     private final String processId = UUID.randomUUID().toString();
     @Mock
     private ObjectMapper objectMapper;
+
     @Mock
     private ApiConfig apiConfig;
+
     @Mock
     private BrokerConfig brokerConfig;
+
     @InjectMocks
     private BlockchainTxPayloadFactory blockchainTxPayloadFactory;
 
