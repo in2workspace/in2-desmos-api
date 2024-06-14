@@ -4,7 +4,6 @@ import es.in2.desmos.domain.models.BlockchainNotification;
 import es.in2.desmos.domain.models.BrokerNotification;
 import es.in2.desmos.domain.services.blockchain.BlockchainListenerService;
 import es.in2.desmos.domain.services.broker.BrokerListenerService;
-import es.in2.desmos.infrastructure.controllers.NotificationController;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -71,6 +70,7 @@ class NotificationControllerTests {
                         "0x947cccb1a978e374a4b36550389768d405bf5b81817175ab9023b5e3d96ab966"))
                 .entityId("0x6f6468ded8276d009ab1b6c578c2b922053acd6b5a507f36d408d3f7c9ae91d0")
                 .previousEntityHash("0x98d9658d98764dbe135b316f52a98116b4b02f9d7e57212aa86335c42a58539a")
+                .ethereumAddress("0x1234567890abcdef1234567890abcdef12345678")
                 .build();
         when(blockchainListenerService.processBlockchainNotification(anyString(), any(BlockchainNotification.class)))
                 .thenReturn(Mono.empty());

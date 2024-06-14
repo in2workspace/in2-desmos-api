@@ -1,6 +1,5 @@
 package es.in2.desmos.domain.models;
 
-import es.in2.desmos.domain.models.BrokerNotification;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;

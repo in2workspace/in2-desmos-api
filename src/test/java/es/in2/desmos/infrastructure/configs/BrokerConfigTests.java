@@ -1,6 +1,5 @@
 package es.in2.desmos.infrastructure.configs;
 
-import es.in2.desmos.infrastructure.configs.BrokerConfig;
 import es.in2.desmos.infrastructure.configs.properties.BrokerProperties;
 import es.in2.desmos.infrastructure.configs.properties.NgsiLdSubscriptionProperties;
 import org.junit.jupiter.api.Test;
