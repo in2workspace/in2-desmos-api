@@ -29,7 +29,4 @@ public record BrokerProperties(String provider, String externalDomain, String in
     public record BrokerPathProperties(String entities, String entityOperations, String subscriptions, String temporal) {
     }
 
-    public record BrokerPathProperties(String entities, String subscriptions, String temporal) {
-    }
-
 }
