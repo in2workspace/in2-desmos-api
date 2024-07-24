@@ -94,7 +94,7 @@ class AuditRecordRepositoryIT {
     @Test
     void shouldSaveAuditRecordRoot() throws JsonProcessingException, NoSuchAlgorithmException {
         // Arrange
-        String expectedAuditRecordRootHash = "f291c0096b7c3e10a52db72ada76676ed2a928b7fd9e91ab9f1ccb7614d8bd08";
+        String expectedAuditRecordRootHash = "7173d4c27123da4a3e0f262eee8049a7771e7c0f86dd7410d1a098530cab0cbf";
         // Calculate the hash of the AuditRecordRoot and set them.
         // The hashLink is the hash of the AuditRecordRoot because it is the first record
         String auditRecordRootHash = calculateSHA256(objectMapper.writeValueAsString(auditRecordRoot));
@@ -124,8 +124,8 @@ class AuditRecordRepositoryIT {
          * you will get the hashLink of the new AuditRecord ;)
          */
         // Arrange
-        String expectedAuditRecordHash = "d080b4a51d7687c2a4e3a58f88403380c960a8c3a88f4ddc8d971ada08050644";
-        String expectedAuditRecordHashLink = "bac646d0d6c54e11427c67689c2b3dc2ba0a82163c06e86576212a36e1ce6bce";
+        String expectedAuditRecordHash = "f7448173ac7d6da9abd1d04e738e607cac9ebc526389dae7309b02892b82b5e5";
+        String expectedAuditRecordHashLink = "6a9a035192b28374c2fa8696e52f72d9092f39895ca98ddb958c27b01966dc97";
         // Get the most recent AuditRecord from the database
         AuditRecord auditRecordFound = auditRecordRepository.findMostRecentAuditRecord().block();
         assert auditRecordFound != null;
