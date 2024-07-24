@@ -73,13 +73,7 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                         auditRecord.setHash(auditRecordHash);
                         // Then, we calculate the hashLink of the entity concatenating the previous hashLink
                         // with the hash of the current entity
-                        String auditRecordHashLink;
-                        if (lastAuditRecordRegistered.getHashLink() != null) {
-                            auditRecordHashLink = calculateHashLink(lastAuditRecordRegistered.getHashLink(), auditRecordHash);
-                        } else {
-                            auditRecordHashLink = auditRecordHash;
-                        }
-                        auditRecord.setHashLink(auditRecordHashLink);
+                        auditRecord.setHashLink(setAuditRecordHashLink(lastAuditRecordRegistered, auditRecordHash));
                     } catch (JsonProcessingException | NoSuchAlgorithmException e) {
                         log.warn("ProcessID: {} - Error building and saving audit record: {}", processId, e.getMessage());
                         return Mono.error(e);

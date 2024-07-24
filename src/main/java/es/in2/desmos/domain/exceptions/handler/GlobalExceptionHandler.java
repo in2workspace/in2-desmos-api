@@ -119,4 +119,13 @@ public class GlobalExceptionHandler {
                 .title("WebExchangeBindException").message(globalErrorMessage).path(path).build());
     }
 
+    @ExceptionHandler(UnauthorizedDomeParticipantException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ResponseBody
+    public Mono<GlobalErrorMessage> handleUnauthorizedDomeParticipantException(UnauthorizedDomeParticipantException unauthorizedDomeParticipantException, ServerHttpRequest request) {
+        log.error("UnauthorizedDomeParticipantException: {}", unauthorizedDomeParticipantException.getMessage());
+        String path = String.valueOf(request.getPath());
+        return Mono.just(GlobalErrorMessage.builder().title("UnauthorizedDomeParticipantException").message(unauthorizedDomeParticipantException.getMessage()).path(path).build());
+    }
+
 }

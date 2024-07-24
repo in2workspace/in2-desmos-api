@@ -195,7 +195,10 @@ public class ScorpioAdapter implements BrokerAdapterService {
 
     @Override
     public Mono<Void> deleteSubscription(String processId, String subscriptionId) {
-        return null;
+        return webClient.delete()
+                .uri(brokerConfig.getSubscriptionsPath() + "/" + subscriptionId)
+                .retrieve()
+                .bodyToMono(Void.class);
     }
 
     @Override

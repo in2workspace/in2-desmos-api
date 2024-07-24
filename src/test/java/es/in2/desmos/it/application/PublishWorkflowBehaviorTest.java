@@ -174,8 +174,9 @@ class PublishWorkflowBehaviorTest {
             List<AuditRecord> auditRecordList = auditRecordRepository.findAll().collectList().block();
             log.info("Result: {}", auditRecordList);
         } catch (Exception e) {
-            log.error("Error: " + e.getMessage());
+            log.error("Error: {}", e.getMessage());
         }
+        Assertions.assertEquals(1, auditRecordRepository.count().block());
     }
 
 }
