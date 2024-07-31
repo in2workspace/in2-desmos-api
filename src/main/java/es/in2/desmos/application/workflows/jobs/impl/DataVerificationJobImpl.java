@@ -61,11 +61,19 @@ public class DataVerificationJobImpl implements DataVerificationJob {
                                         return currentEntityHashMono.flatMap(currentEntityHash -> {
                                             String existingHashLink = existingEntitiesValidationDataById.get(id).hashLink();
 
-                                            if ((auditRecord.getEntityHashLink() + currentEntityHash).equals(existingHashLink)) {
-                                                return Mono.empty();
-                                            } else {
-                                                log.debug("ProcessID: {} - Starting Data Verification Job\nId: {}\nEntity: {}\n Hashlink: {}\n Calcualte hash: {}\n Calculate hashlink: {}", processId, id.id(), entityData, existingHashLink, currentEntityHash, auditRecord.getEntityHashLink() + currentEntityHash);
-                                                return Mono.error(new InvalidConsistencyException("The hashlink received does not correspond to that of the entity."));
+                                            try {
+                                                String calculatedHashLink = ApplicationUtils.calculateHashLink(auditRecord.getEntityHashLink(), currentEntityHash);
+
+                                                if (calculatedHashLink.equals(existingHashLink)) {
+                                                    return Mono.empty();
+                                                } else {
+                                                    log.debug("ProcessID: {} - Starting Data Verification Job\nId: {}\nEntity: {}\n OldHashlink: {}\n New Hashlink: {}\n Calculated hashlink: {}\n Expected hashlink: {}", processId, id.id(), entityData, auditRecord.getEntityHashLink(), currentEntityHash, calculatedHashLink, existingHashLink);
+                                                    return Mono.error(new InvalidConsistencyException("The hashlink received does not correspond to that of the entity."));
+                                                }
+                                            } catch (NoSuchAlgorithmException | JsonProcessingException e) {
+                                                log.warn("ProcessID: {} - Error Calculating hashlink: {}", processId, e.getMessage());
+                                                log.debug("ProcessID: {} - Error Calculating hashlink:\nId: {}\nEntity: {}\n OldHashlink: {}\n New Hashlink: {}\n Expected hashlink: {}", processId, id.id(), entityData, auditRecord.getEntityHashLink(), currentEntityHash, existingHashLink);
+                                                return Mono.error(e);
                                             }
                                         });
                                     }))

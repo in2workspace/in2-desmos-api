@@ -46,7 +46,7 @@ public final class MVEntity4DataNegotiationMother {
     }
 
     public static @NotNull MVEntity4DataNegotiation sampleScorpio2() {
-        return getSampleScorpio(sample2(), "d9d910ba4ec60f7a3fcfd73c9696d45b02a884d71b5ffd0ea0fae7b01ab5e0b7", "fa54d9d910ba4ec60f7a3fcfd73c9696d45b02a884d71b5ffd0ea0fae7b01ab5e0b7");
+        return getSampleScorpio(sample2(), "d9d910ba4ec60f7a3fcfd73c9696d45b02a884d71b5ffd0ea0fae7b01ab5e0b7", "ac7b02549fc43a2e18cfbb5cb1be55fcfceb3a313efa4653419877df837a8913");
     }
 
     public static @NotNull MVEntity4DataNegotiation sampleScorpio3() {
