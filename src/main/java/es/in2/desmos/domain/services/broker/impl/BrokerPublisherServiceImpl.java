@@ -55,8 +55,8 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
     }
 
     @Override
-    public <T extends BrokerEntityWithIdAndType> Mono<List<T>> findAllIdTypeFirstAttributeAndSecondAttributeByType(String processId, String type, String firstAttribute, String secondAttribute, Class<T[]> responseClassArray) {
-        return brokerAdapterService.findAllIdTypeFirstAttributeAndSecondAttributeByType(processId, type, firstAttribute, secondAttribute, responseClassArray)
+    public <T extends BrokerEntityWithIdAndType> Mono<List<T>> findAllIdTypeAndAttributesByType(String processId, String type, String firstAttribute, String secondAttribute, String thirdAttribute, String forthAttribute, Class<T[]> responseClassArray) {
+        return brokerAdapterService.findAllIdTypeAndAttributesByType(processId, type, firstAttribute, secondAttribute, thirdAttribute, forthAttribute, responseClassArray)
                 .map(array -> Arrays.stream(array).toList());
     }
 

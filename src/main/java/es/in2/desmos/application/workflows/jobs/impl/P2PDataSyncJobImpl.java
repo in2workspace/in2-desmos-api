@@ -111,7 +111,7 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
     }
 
     private Mono<List<MVEntity4DataNegotiation>> createLocalMvEntities4DataNegotiation(String processId) {
-        return brokerPublisherService.findAllIdTypeFirstAttributeAndSecondAttributeByType(processId, BROKER_ENTITY_TYPE, "lastUpdate", "version", BrokerEntityWithIdTypeLastUpdateAndVersion[].class)
+        return brokerPublisherService.findAllIdTypeAndAttributesByType(processId, BROKER_ENTITY_TYPE, "lastUpdate", "version", "lifecycleStatus", "validFor", BrokerEntityWithIdTypeLastUpdateAndVersion[].class)
                 .flatMap(mvBrokerEntities4DataNegotiation -> {
                     log.debug("ProcessID: {} - MV Broker Entities 4 Data Negotiation: {}", processId, mvBrokerEntities4DataNegotiation);
 
@@ -133,6 +133,8 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                                                     brokerEntity.getType(),
                                                     brokerEntity.getVersion(),
                                                     brokerEntity.getLastUpdate(),
+                                                    brokerEntity.getLifecycleStatus(),
+                                                    brokerEntity.getValidFor().startDateTime(),
                                                     auditServiceEntity.hash(),
                                                     auditServiceEntity.hashlink());
                                         })

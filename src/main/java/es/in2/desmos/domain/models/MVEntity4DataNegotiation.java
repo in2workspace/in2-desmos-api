@@ -11,6 +11,8 @@ public record MVEntity4DataNegotiation(
         @JsonProperty("type") @NotBlank String type,
         @JsonProperty("version") @NotBlank String version,
         @JsonProperty("lastUpdate") @NotBlank String lastUpdate,
+        @JsonProperty("lifecycleStatus") @NotBlank String lifecycleStatus,
+        @JsonProperty("validFor") @NotBlank String validFor,
         @JsonProperty("hash") @NotBlank String hash,
         @JsonProperty("hashlink") @NotBlank String hashlink) {
 

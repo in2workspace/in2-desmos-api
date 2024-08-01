@@ -18,7 +18,7 @@ public interface BrokerAdapterService {
     Mono<Void> updateSubscription(String processId, BrokerSubscription brokerSubscription);
     Mono<Void> deleteSubscription(String processId, String subscriptionId);
 
-    <T extends BrokerEntityWithIdAndType> Mono<T[]> findAllIdTypeFirstAttributeAndSecondAttributeByType(String processId, String type, String firstAttribute, String secondAttribute, Class<T[]> responseClass);
+    <T extends BrokerEntityWithIdAndType> Mono<T[]> findAllIdTypeAndAttributesByType(String processId, String type, String firstAttribute, String secondAttribute, String thirdAttribute, String forthAttribute, Class<T[]> responseClass);
 
     Mono<Void> batchUpsertEntities(String processId, String requestBody);
 }

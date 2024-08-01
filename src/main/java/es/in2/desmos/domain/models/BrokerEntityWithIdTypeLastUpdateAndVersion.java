@@ -16,9 +16,17 @@ public final class BrokerEntityWithIdTypeLastUpdateAndVersion extends BrokerEnti
     @JsonProperty("lastUpdate")
     private final @NotBlank String lastUpdate;
 
-    public BrokerEntityWithIdTypeLastUpdateAndVersion(String id, String type, String version, String lastUpdate) {
+    @JsonProperty("lifecycleStatus")
+    private final @NotBlank String lifecycleStatus;
+
+    @JsonProperty("validFor")
+    private final @NotBlank BrokerEntityValidFor validFor;
+
+    public BrokerEntityWithIdTypeLastUpdateAndVersion(String id, String type, String version, String lastUpdate, String lifecycleStatus, BrokerEntityValidFor validFor) {
         super(id, type);
         this.version = version;
         this.lastUpdate = lastUpdate;
+        this.lifecycleStatus = lifecycleStatus;
+        this.validFor = validFor;
     }
 }

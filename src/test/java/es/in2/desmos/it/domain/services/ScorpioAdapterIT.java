@@ -126,7 +126,7 @@ class ScorpioAdapterIT {
     @Test
     void itShouldReturnEntityIds() {
         String processId = "0";
-        Mono<BrokerEntityWithIdTypeLastUpdateAndVersion[]> resultMono = scorpioAdapter.findAllIdTypeFirstAttributeAndSecondAttributeByType(processId, "ProductOffering", "lastUpdate", "version", BrokerEntityWithIdTypeLastUpdateAndVersion[].class);
+        Mono<BrokerEntityWithIdTypeLastUpdateAndVersion[]> resultMono = scorpioAdapter.findAllIdTypeAndAttributesByType(processId, "ProductOffering", "lastUpdate", "version", "lifecycleStatus", "validFor", BrokerEntityWithIdTypeLastUpdateAndVersion[].class);
 
         StepVerifier.create(resultMono)
                 .consumeNextWith(result -> assertEquals(Arrays.stream(initialMvEntity4DataNegotiationList).toList(), Arrays.stream(result).toList()))

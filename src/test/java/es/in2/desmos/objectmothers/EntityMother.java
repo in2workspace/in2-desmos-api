@@ -42,6 +42,10 @@ public final class EntityMother {
                      "id": "urn:ProductOffering:d86735a6-0faa-463d-a872-00b97affa1cb",
                      "type": "ProductOffering",
                      "version": "1.2",
+                     "lifecycleStatus": "Launched",
+                     "validFor": {
+                         "startDateTime": "2024-01-01T00:00:00.000Z"
+                     },
                      "lastUpdate": "2024-09-05T12:00:00Z",
                      "productSpecification": {
                          "id": "spec-broadband-001",
@@ -56,6 +60,10 @@ public final class EntityMother {
                      "id": "urn:ProductOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87",
                      "type": "ProductOffering",
                      "version": "2.5",
+                     "lifecycleStatus": "Launched",
+                     "validFor": {
+                         "startDateTime": "2024-01-01T00:00:00.000Z"
+                     },
                      "lastUpdate": "2024-07-09T12:00:00Z",
                      "productSpecification": {
                          "id": "spec-broadband-001",
@@ -70,6 +78,10 @@ public final class EntityMother {
                      "id": "urn:ProductOffering:537e1ee3-0556-4fff-875f-e55bb97e7ab0",
                      "type": "ProductOffering",
                      "version": "4.3",
+                     "lifecycleStatus": "Launched",
+                     "validFor": {
+                         "startDateTime": "2024-01-01T00:00:00.000Z"
+                     },
                      "lastUpdate": "2024-04-03T12:00:00Z",
                      "productSpecification": {
                          "id": "spec-broadband-001",
@@ -85,6 +97,10 @@ public final class EntityMother {
                      "type": "ProductOffering",
                      "version": "1.9",
                      "lastUpdate": "2024-06-02T12:00:00Z",
+                     "lifecycleStatus": "Launched",
+                     "validFor": {
+                         "startDateTime": "2024-01-01T00:00:00.000Z"
+                     },
                      "productSpecification": {
                          "id": "spec-broadband-001",
                          "name": "1Gbps Broadband Spec"
@@ -103,6 +119,10 @@ public final class EntityMother {
                          "type": "ProductOffering",
                          "version": "1.2",
                          "lastUpdate": "2024-09-05T12:00:00Z",
+                         "lifecycleStatus": "Launched",
+                         "validFor": {
+                             "startDateTime": "2024-01-01T00:00:00.000Z"
+                         },
                          "productSpecification": {
                              "id": "spec-broadband-001",
                              "name": "1Gbps Broadband Spec"
@@ -113,6 +133,10 @@ public final class EntityMother {
                          "type": "ProductOffering",
                          "version": "2.1",
                          "lastUpdate": "2024-07-09T12:00:00Z",
+                         "lifecycleStatus": "Launched",
+                         "validFor": {
+                             "startDateTime": "2024-01-01T00:00:00.000Z"
+                         },
                          "productSpecification": {
                              "id": "spec-broadband-001",
                              "name": "1Gbps Broadband Spec"
@@ -123,6 +147,10 @@ public final class EntityMother {
                          "type": "ProductOffering",
                          "version": "4.3",
                          "lastUpdate": "2024-04-03T12:00:00Z",
+                         "lifecycleStatus": "Launched",
+                         "validFor": {
+                             "startDateTime": "2024-01-01T00:00:00.000Z"
+                         },
                          "productSpecification": {
                              "id": "spec-broadband-001",
                              "name": "1Gbps Broadband Spec"
@@ -137,6 +165,10 @@ public final class EntityMother {
                          "type": "ProductOffering",
                          "version": "1.2",
                          "lastUpdate": "2024-09-05T12:00:00Z",
+                         "lifecycleStatus": "Launched",
+                         "validFor": {
+                             "startDateTime": "2024-01-01T00:00:00.000Z"
+                         },
                          "productSpecification": {
                              "id": "spec-broadband-001",
                              "name": "1Gbps Broadband Spec"
@@ -158,6 +190,10 @@ public final class EntityMother {
                          "type": "ProductOffering",
                          "version": "2.1",
                          "lastUpdate": "2024-07-09T12:00:00Z",
+                         "lifecycleStatus": "Launched",
+                         "validFor": {
+                             "startDateTime": "2024-01-01T00:00:00.000Z"
+                         },
                          "productSpecification": {
                              "id": "spec-broadband-001",
                              "name": "1Gbps Broadband Spec"
@@ -179,6 +215,10 @@ public final class EntityMother {
                          "type": "ProductOffering",
                          "version": "4.3",
                          "lastUpdate": "2024-04-03T12:00:00Z",
+                         "lifecycleStatus": "Launched",
+                         "validFor": {
+                             "startDateTime": "2024-01-01T00:00:00.000Z"
+                         },
                          "productSpecification": {
                              "id": "spec-broadband-001",
                              "name": "1Gbps Broadband Spec"
@@ -204,6 +244,10 @@ public final class EntityMother {
                      "type": "ProductOffering",
                      "version": "2.5",
                      "lastUpdate": "2024-07-09T12:00:00Z",
+                     "lifecycleStatus": "Launched",
+                     "validFor": {
+                         "startDateTime": "2024-01-01T00:00:00.000Z"
+                     },
                      "productSpecification": {
                          "id": "spec-broadband-001",
                          "name": "1Gbps Broadband Spec"
@@ -225,6 +269,10 @@ public final class EntityMother {
                      "type": "ProductOffering",
                      "version": "1.9",
                      "lastUpdate": "2024-06-02T12:00:00Z",
+                     "lifecycleStatus": "Launched",
+                     "validFor": {
+                         "startDateTime": "2024-01-01T00:00:00.000Z"
+                     },
                      "productSpecification": {
                          "id": "spec-broadband-001",
                          "name": "1Gbps Broadband Spec"
@@ -306,6 +354,20 @@ public final class EntityMother {
         var lastUpdateProperty = getScorpioProperty(mvEntity4DataNegotiation.lastUpdate());
         productOffering.put("lastUpdate", lastUpdateProperty);
 
+        var lifecycleStatus = new JSONObject();
+        lifecycleStatus.put("type", "Property");
+        lifecycleStatus.put("value", "Launched");
+
+        productOffering.put("lifecycleStatus", lifecycleStatus);
+
+        JSONObject validForObject = new JSONObject();
+        validForObject.put("type", "Property");
+        JSONObject valueObject = new JSONObject();
+        valueObject.put("startDateTime", "2024-01-01T00:00:00.000Z");
+        validForObject.put("value", valueObject);
+
+        productOffering.put("validFor", validForObject);
+
         JSONObject productSpecificationValue = new JSONObject();
         productSpecificationValue.put("id", "spec-broadband-001");
         productSpecificationValue.put("name", "1Gbps Broadband Spec");
@@ -363,7 +425,7 @@ public final class EntityMother {
     }
 
     public static String[] scorpioFullJsonArray() throws JSONException {
-       return new String[]{
+        return new String[]{
                 scorpioDefaultJson1(),
                 scorpioDefaultJson2(),
                 scorpioDefaultJson3(),

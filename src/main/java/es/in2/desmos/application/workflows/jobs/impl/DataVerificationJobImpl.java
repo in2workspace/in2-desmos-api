@@ -63,7 +63,6 @@ public class DataVerificationJobImpl implements DataVerificationJob {
 
                                             try {
                                                 String calculatedHashLink = ApplicationUtils.calculateHashLink(auditRecord.getEntityHashLink(), currentEntityHash);
-
                                                 if (calculatedHashLink.equals(existingHashLink)) {
                                                     return Mono.empty();
                                                 } else {
@@ -114,8 +113,11 @@ public class DataVerificationJobImpl implements DataVerificationJob {
                 JsonNode entityNode = objectMapper.readTree(entity);
 
                 String type = entityNode.get("type").asText();
-                String lastUpdate = entityNode.get("lastUpdate").get("value").asText();
-                String version = entityNode.get("version").get("value").asText();
+                String value = "value";
+                String lastUpdate = entityNode.get("lastUpdate").get(value).asText();
+                String version = entityNode.get("version").get(value).asText();
+                String lifecycleStatus = entityNode.get("lifecycleStatus").get(value).asText();
+                String validFor = entityNode.get("validFor").get(value).get("startDateTime").asText();
 
                 Mono<String> calculatedHashMono = calculateHash(Mono.just(entity));
                 Mono<String> hashLinkMono = getHashLinkForNewSubEntity(processId, calculatedHashMono, idMono);
@@ -126,7 +128,7 @@ public class DataVerificationJobImpl implements DataVerificationJob {
                             String hashLink = tuple.getT2();
 
                             return calculatedHashMono.map(hash ->
-                                    new MVEntity4DataNegotiation(id, type, version, lastUpdate, hash, hashLink));
+                                    new MVEntity4DataNegotiation(id, type, version, lastUpdate, lifecycleStatus, validFor, hash, hashLink));
                         });
             } catch (JsonProcessingException e) {
                 return Mono.error(e);

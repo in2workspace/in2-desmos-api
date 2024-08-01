@@ -115,6 +115,8 @@ class DataVerificationJobTest {
                         MVEntity4DataNegotiationMother.sampleScorpio2().type(),
                         MVEntity4DataNegotiationMother.sampleScorpio2().version(),
                         MVEntity4DataNegotiationMother.sampleScorpio2().lastUpdate(),
+                        MVEntity4DataNegotiationMother.sampleScorpio2().lifecycleStatus(),
+                        MVEntity4DataNegotiationMother.sampleScorpio2().validFor(),
                         MVEntity4DataNegotiationMother.sampleScorpio2().hash(),
                         "fa54");
 
@@ -166,6 +168,8 @@ class DataVerificationJobTest {
                         MVEntity4DataNegotiationMother.sampleScorpio2().type(),
                         MVEntity4DataNegotiationMother.sampleScorpio2().version(),
                         MVEntity4DataNegotiationMother.sampleScorpio2().lastUpdate(),
+                        MVEntity4DataNegotiationMother.sampleScorpio2().lifecycleStatus(),
+                        MVEntity4DataNegotiationMother.sampleScorpio2().validFor(),
                         MVEntity4DataNegotiationMother.sampleScorpio2().hash(),
                         MVEntity4DataNegotiationMother.sampleScorpio2().hash());
 
