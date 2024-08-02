@@ -183,6 +183,10 @@ public final class EntityMother {
                       "type": "ProductOfferingPrice",
                       "version": "1.3",
                       "lastUpdate": "2024-09-11T14:50:00Z",
+                      "lifecycleStatus": "Launched",
+                      "validFor": {
+                         "startDateTime": "2024-01-01T00:00:00.000Z"
+                      },
                       "value": "5"
                  },
                      {
@@ -208,6 +212,10 @@ public final class EntityMother {
                       "type": "ProductOfferingPrice",
                       "version": "1.3",
                       "lastUpdate": "2024-09-11T14:50:00Z",
+                      "lifecycleStatus": "Launched",
+                      "validFor": {
+                         "startDateTime": "2024-01-01T00:00:00.000Z"
+                      },
                       "value": "5"
                  },
                      {
@@ -233,6 +241,10 @@ public final class EntityMother {
                       "type": "ProductOfferingPrice",
                       "version": "1.3",
                       "lastUpdate": "2024-09-11T14:50:00Z",
+                      "lifecycleStatus": "Launched",
+                      "validFor": {
+                         "startDateTime": "2024-01-01T00:00:00.000Z"
+                      },
                       "value": "5"
                  }
             ]""";
@@ -262,6 +274,10 @@ public final class EntityMother {
                       "type": "ProductOfferingPrice",
                       "version": "1.3",
                       "lastUpdate": "2024-09-11T14:50:00Z",
+                      "lifecycleStatus": "Launched",
+                      "validFor": {
+                         "startDateTime": "2024-01-01T00:00:00.000Z"
+                      },
                       "value": "5"
                  },
                  {
@@ -296,13 +312,21 @@ public final class EntityMother {
                       "version": {
                           "type": "Property",
                           "value": "1.3"
+                      },
+                      "lifecycleStatus": "Launched",
+                      "validFor": {
+                         "startDateTime": "2024-01-01T00:00:00.000Z"
                       }
                   },
                  {
                       "id": "urn:Price:2d5f3c16-4e77-45b3-8915-3da36b714e7b",
                       "type": "Price",
                       "version": "2.1",
-                      "lastUpdate": "2024-06-03T12:00:00Z"
+                      "lastUpdate": "2024-06-03T12:00:00Z",
+                      "lifecycleStatus": "Launched",
+                      "validFor": {
+                         "startDateTime": "2024-01-01T00:00:00.000Z"
+                      }
                  }
              ]""";
 
