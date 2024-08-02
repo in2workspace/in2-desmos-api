@@ -6,6 +6,7 @@ import es.in2.desmos.domain.models.DiscoverySyncResponse;
 import es.in2.desmos.domain.models.Id;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.domain.services.sync.services.DataSyncService;
+import es.in2.desmos.infrastructure.configs.ApiConfig;
 import es.in2.desmos.infrastructure.configs.BrokerConfig;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -28,6 +29,7 @@ public class DataSyncController {
     private final DataSyncService dataSyncService;
     private final P2PDataSyncJob p2PDataSyncJob;
     private final BrokerConfig brokerConfig;
+    private final ApiConfig apiConfig;
 
     @GetMapping("/data")
     public Mono<Void> synchronizeData() {
@@ -53,7 +55,7 @@ public class DataSyncController {
                                 Mono<List<MVEntity4DataNegotiation>> localMvEntities4DataNegotiationMono = Mono.just(localMvEntities4DataNegotiation);
 
                                 return localMvEntities4DataNegotiationMono.map(mvEntities4DataNegotiation ->
-                                        new DiscoverySyncResponse(brokerConfig.getExternalDomain(), mvEntities4DataNegotiation));
+                                        new DiscoverySyncResponse(apiConfig.getExternalDomain(), mvEntities4DataNegotiation));
                             });
                 })
                 .doOnSuccess(success -> log.info("ProcessID: {} - P2P Data Synchronization Discovery successfully.", processId))

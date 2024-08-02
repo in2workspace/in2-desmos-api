@@ -40,7 +40,7 @@ public class ScorpioAdapter implements BrokerAdapterService {
 
     @PostConstruct
     public void init() {
-        this.webClient = WebClient.builder().baseUrl(brokerConfig.getExternalDomain()).build();
+        this.webClient = WebClient.builder().baseUrl(brokerConfig.getInternalDomain()).build();
     }
 
     @Override

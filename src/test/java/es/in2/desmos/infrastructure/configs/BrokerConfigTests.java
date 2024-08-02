@@ -1,6 +1,5 @@
 package es.in2.desmos.infrastructure.configs;
 
-import es.in2.desmos.infrastructure.configs.BrokerConfig;
 import es.in2.desmos.infrastructure.configs.properties.BrokerProperties;
 import es.in2.desmos.infrastructure.configs.properties.NgsiLdSubscriptionProperties;
 import org.junit.jupiter.api.Test;
@@ -53,7 +52,7 @@ class BrokerConfigTests {
         // Arrange
         String externalDomain = "https://example.com";
         String entitiesPath = "/ngsi-ld/v1/entities";
-        when(brokerProperties.externalDomain()).thenReturn(externalDomain);
+        when(brokerProperties.internalDomain()).thenReturn(externalDomain);
         when(brokerProperties.paths()).thenReturn(new BrokerProperties.BrokerPathProperties(
                 "/ngsi-ld/v1/entities",
                 "/ngsi-ld/v1/entityOperations",
@@ -70,9 +69,9 @@ class BrokerConfigTests {
     void getExternalDomainReturnsCorrectDomain() {
         // Arrange
         String expectedDomain = "https://example.com";
-        when(brokerProperties.externalDomain()).thenReturn(expectedDomain);
+        when(brokerProperties.internalDomain()).thenReturn(expectedDomain);
         // Act
-        String actualDomain = brokerConfig.getExternalDomain();
+        String actualDomain = brokerConfig.getInternalDomain();
         // Assert
         assertEquals(expectedDomain, actualDomain);
     }

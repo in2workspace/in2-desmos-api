@@ -2,6 +2,7 @@ package es.in2.desmos.infrastructure.configs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import es.in2.desmos.domain.exceptions.HashCreationException;
+import es.in2.desmos.infrastructure.configs.properties.ApiProperties;
 import es.in2.desmos.infrastructure.configs.properties.OpenApiProperties;
 import es.in2.desmos.infrastructure.configs.properties.OperatorProperties;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -29,6 +30,7 @@ public class ApiConfig {
     private final OpenApiProperties openApiProperties;
     private final OperatorProperties operatorProperties;
     private final Environment environment;
+    private final ApiProperties apiProperties;
 
     @Bean
     public String organizationIdHash() {
@@ -75,6 +77,10 @@ public class ApiConfig {
     @Bean
     public String getOperatorExternalDomain(){
         return operatorProperties.externalDomain();
+    }
+
+    public String getExternalDomain() {
+        return apiProperties.externalDomain();
     }
 
 }

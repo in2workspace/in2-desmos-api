@@ -83,11 +83,14 @@ openapi:
 operator:
   organizationIdentifier: "VATES-S9999999E"
 
+# Desmos Configuration
+api:
+  externalDomain: "http://localhost:8080"
+
 # Context Broker Configuration
 broker:
   provider: "scorpio"
   internalDomain: "http://scorpio:9090"
-  externalDomain: "http://localhost:9090"
   paths:
     entities: "/ngsi-ld/v1/entities"
     entityOperations: "/ngsi-ld/v1/entityOperations"

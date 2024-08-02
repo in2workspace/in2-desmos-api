@@ -96,6 +96,8 @@ public class JwtTokenProvider {
         return jwt.serialize();
     }
 
+
+    // Use public keys from Access Node Directory in memory
     public Mono<SignedJWT> validateSignedJwt(String jwtString) {
         try {
             SignedJWT jwt = SignedJWT.parse(jwtString);
@@ -108,5 +110,8 @@ public class JwtTokenProvider {
             return Mono.error(new InvalidKeyException());
         }
     }
+
+    // todo: Get public keys from Access Node Directory
+
 
 }
