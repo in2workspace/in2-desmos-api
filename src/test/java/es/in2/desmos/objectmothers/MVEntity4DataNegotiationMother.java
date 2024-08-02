@@ -45,6 +45,26 @@ public final class MVEntity4DataNegotiationMother {
         return new MVEntity4DataNegotiation("urn:ProductOffering:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c", "ProductOffering", "1.9", "2024-06-02T12:00:00Z", LAUNCHED, VALID_FOR, "f7e776655017d297dbf4a845db5d12595ba927460023c14bff1215acef95ec12", "fa54f7e776655017d297dbf4a845db5d12595ba927460023c14bff1215acef95ec12y");
     }
 
+    public static @NotNull MVEntity4DataNegotiation sampleLaunched() {
+        return new MVEntity4DataNegotiation("urn:ProductOffering:1", "ProductOffering", "1.9", "2024-06-02T12:00:00Z", LAUNCHED, VALID_FOR, "f7e776655017d297dbf4a845db5d12595ba927460023c14bff1215acef95ec12", "fa54f7e776655017d297dbf4a845db5d12595ba927460023c14bff1215acef95ec12y");
+    }
+
+    public static @NotNull MVEntity4DataNegotiation sampleRetired() {
+        return new MVEntity4DataNegotiation("urn:ProductOffering:2", "ProductOffering", "1.9", "2024-06-02T12:00:00Z", "Retired", VALID_FOR, "f7e776655017d297dbf4a845db5d12595ba927460023c14bff1215acef95ec12", "fa54f7e776655017d297dbf4a845db5d12595ba927460023c14bff1215acef95ec12y");
+    }
+
+    public static @NotNull MVEntity4DataNegotiation sampleActive() {
+        return new MVEntity4DataNegotiation("urn:ProductOffering:2", "ProductOffering", "1.9", "2024-06-02T12:00:00Z", "Active", VALID_FOR, "f7e776655017d297dbf4a845db5d12595ba927460023c14bff1215acef95ec12", "fa54f7e776655017d297dbf4a845db5d12595ba927460023c14bff1215acef95ec12y");
+    }
+
+    public static @NotNull MVEntity4DataNegotiation sampleCorrectValidFor() {
+        return new MVEntity4DataNegotiation("urn:ProductOffering:1", "ProductOffering", "1.9", "2024-06-02T12:00:00Z", LAUNCHED, VALID_FOR, "f7e776655017d297dbf4a845db5d12595ba927460023c14bff1215acef95ec12", "fa54f7e776655017d297dbf4a845db5d12595ba927460023c14bff1215acef95ec12y");
+    }
+
+    public static @NotNull MVEntity4DataNegotiation sampleIncorrectValidFor() {
+        return new MVEntity4DataNegotiation("urn:ProductOffering:1", "ProductOffering", "1.9", "2024-06-02T12:00:00Z", LAUNCHED, "2100-01-01T00:00:00.000Z", "f7e776655017d297dbf4a845db5d12595ba927460023c14bff1215acef95ec12", "fa54f7e776655017d297dbf4a845db5d12595ba927460023c14bff1215acef95ec12y");
+    }
+
     public static @NotNull MVEntity4DataNegotiation sampleScorpio1() {
         return getSampleScorpio(sample1(), "5ee5336326e2e49c09f08981891e3600d089c7210089efa0809493a01de15cba", "fa547074ad3789791877a4429d478a57a91c34ec709719fb61211540a5786fb65cf6");
     }
@@ -172,6 +192,10 @@ public final class MVEntity4DataNegotiationMother {
         MVEntity4DataNegotiationList.add(sample3());
         MVEntity4DataNegotiationList.add(sample4());
         return MVEntity4DataNegotiationList;
+    }
+
+    public static @NotNull List<MVEntity4DataNegotiation> listLaunchedAndRetired() {
+        return List.of(sampleLaunched(), sampleRetired());
     }
 
     public static @NotNull List<MVEntity4DataNegotiation> fullList() {
