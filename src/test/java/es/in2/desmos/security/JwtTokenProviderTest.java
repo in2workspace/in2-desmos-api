@@ -15,7 +15,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
@@ -34,7 +33,7 @@ class JwtTokenProviderTest {
     private SecurityProperties securityProperties;
 
     @BeforeEach
-    void setUp() throws InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
+    void setUp() throws InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException {
         MockitoAnnotations.openMocks(this);
         when(securityProperties.privateKey())
                 .thenReturn("0x1aff50dca1ac463a5af99a858c2eef7517b8e46d3bf84723ff6dcfead7dc8db6");
