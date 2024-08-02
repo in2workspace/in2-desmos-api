@@ -54,11 +54,11 @@ class JwtTokenProviderTest {
     }
 
     @Test
-    void testValidateSignedJwt() throws JOSEException, ParseException {
+    void testValidateSignedJwt() throws JOSEException {
         String jwtString = jwtTokenProvider.generateToken(resourceURI);
         System.out.println(jwtString);
-        boolean result = jwtTokenProvider.validateSignedJwt(jwtString);
-        Assertions.assertTrue(result);
+        Boolean result = jwtTokenProvider.validateSignedJwt(jwtString).block();
+        Assertions.assertEquals(Boolean.TRUE, result);
     }
 
     @Test

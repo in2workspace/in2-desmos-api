@@ -19,12 +19,10 @@ import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
 
 import java.math.BigInteger;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Security;
+import java.security.*;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECPublicKeySpec;
@@ -98,11 +96,17 @@ public class JwtTokenProvider {
         return jwt.serialize();
     }
 
-    public boolean validateSignedJwt(String jwtString) throws ParseException, JOSEException {
-        SignedJWT jwt = SignedJWT.parse(jwtString);
-        ECDSAVerifier verifier = new ECDSAVerifier(ecJWK.toPublicJWK());
-        verifier.getJCAContext().setProvider(BouncyCastleProviderSingleton.getInstance());
-        return jwt.verify(verifier);
+    public Mono<SignedJWT> validateSignedJwt(String jwtString) {
+        try {
+            SignedJWT jwt = SignedJWT.parse(jwtString);
+            ECDSAVerifier verifier = new ECDSAVerifier(ecJWK.toPublicJWK());
+            verifier.getJCAContext().setProvider(BouncyCastleProviderSingleton.getInstance());
+            jwt.verify(verifier);
+            return Mono.just(jwt);
+        } catch (Exception e) {
+            log.warn("Error parsing JWT", e);
+            return Mono.error(new InvalidKeyException());
+        }
     }
 
 }
