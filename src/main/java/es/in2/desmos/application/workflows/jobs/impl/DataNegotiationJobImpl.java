@@ -1,7 +1,5 @@
 package es.in2.desmos.application.workflows.jobs.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.application.workflows.jobs.DataNegotiationJob;
 import es.in2.desmos.application.workflows.jobs.DataTransferJob;
@@ -39,25 +37,7 @@ public class DataNegotiationJobImpl implements DataNegotiationJob {
                 externalMVEntities4DataNegotiationByIssuerMono
                         .flatMapIterable(Map::entrySet)
                         .flatMap(externalMVEntities4DataNegotiationByIssuer ->
-                                getCorrectLifecycleStatusMVEntities(Mono.just(externalMVEntities4DataNegotiationByIssuer.getValue()))
-                                        .flatMap(externalMvEntities4DataNegotiation ->
-                                                getCorrectValidForMVEntities(Mono.just(externalMvEntities4DataNegotiation))
-                                                        .flatMap(validExternalMvEntities4DataNegotiation -> {
-                                                            Mono<List<MVEntity4DataNegotiation>> externalMVEntities4DataNegotiationMono = Mono.just(validExternalMvEntities4DataNegotiation);
-                                                            return checkWithExternalDataIsMissing(externalMVEntities4DataNegotiationMono, localMVEntities4DataNegotiationMono)
-                                                                    .zipWith(checkVersionsAndLastUpdateFromEntityIdMatched(externalMVEntities4DataNegotiationMono, localMVEntities4DataNegotiationMono))
-                                                                    .flatMap(tuple -> {
-                                                                        List<MVEntity4DataNegotiation> newEntitiesToSync = tuple.getT1();
-                                                                        List<MVEntity4DataNegotiation> existingEntitiesToSync = tuple.getT2();
-
-                                                                        log.debug("ProcessID: {} - New entities to sync: {}", processId, newEntitiesToSync);
-                                                                        log.debug("ProcessID: {} - Existing entities to sync: {}", processId, existingEntitiesToSync);
-
-                                                                        Mono<String> issuerMono = Mono.just(externalMVEntities4DataNegotiationByIssuer.getKey().value());
-                                                                        return createDataNegotiationResult(issuerMono, Mono.just(newEntitiesToSync), Mono.just(existingEntitiesToSync));
-                                                                    });
-
-                                                        })))
+                                getDataNegotiationResultMono(processId, localMVEntities4DataNegotiationMono, Mono.just(externalMVEntities4DataNegotiationByIssuer.getKey().value()), Mono.just(externalMVEntities4DataNegotiationByIssuer.getValue())))
                         .collectList()
                         .flatMap(dataNegotiationResults -> dataTransferJob.syncDataFromList(processId, Mono.just(dataNegotiationResults))));
     }
@@ -71,21 +51,33 @@ public class DataNegotiationJobImpl implements DataNegotiationJob {
         Mono<List<MVEntity4DataNegotiation>> externalMVEntities4DataNegotiationMono = dataNegotiationEvent.externalMVEntities4DataNegotiation();
         Mono<List<MVEntity4DataNegotiation>> localMVEntities4DataNegotiationMono = dataNegotiationEvent.localMVEntities4DataNegotiation();
 
-        return checkWithExternalDataIsMissing(externalMVEntities4DataNegotiationMono, localMVEntities4DataNegotiationMono)
-                .zipWith(checkVersionsAndLastUpdateFromEntityIdMatched(externalMVEntities4DataNegotiationMono, localMVEntities4DataNegotiationMono))
-                .flatMap(tuple -> {
-                    List<MVEntity4DataNegotiation> externalMVEntities4DataNegotiation = tuple.getT1();
-                    List<MVEntity4DataNegotiation> localMVEntities4DataNegotiation = tuple.getT2();
+        return getDataNegotiationResultMono(processId, localMVEntities4DataNegotiationMono, dataNegotiationEvent.issuer(), externalMVEntities4DataNegotiationMono)
+                .flatMap(dataNegotiationResults -> dataTransferJob.syncData(processId, Mono.just(dataNegotiationResults)));
+    }
 
-                    log.debug("ProcessID: {} - External MV Entities 4 Data Negotiation: {}", processId, externalMVEntities4DataNegotiation);
-                    log.debug("ProcessID: {} - Local MV Entities 4 Data Negotiation: {}", processId, localMVEntities4DataNegotiation);
+    private Mono<DataNegotiationResult> getDataNegotiationResultMono(String processId, Mono<List<MVEntity4DataNegotiation>> localMVEntities4DataNegotiationMono, Mono<String> externalIssuerMono, Mono<List<MVEntity4DataNegotiation>> externalMVEntities4DataNegotiation) {
+        return getCorrectLifecycleStatusMVEntities(externalMVEntities4DataNegotiation)
+                .flatMap(externalMvEntities4DataNegotiation ->
+                        getCorrectValidForMVEntities(Mono.just(externalMvEntities4DataNegotiation))
+                                .flatMap(validExternalMvEntities4DataNegotiation -> {
+                                    Mono<List<MVEntity4DataNegotiation>> externalMVEntities4DataNegotiationMono = Mono.just(validExternalMvEntities4DataNegotiation);
+                                    return checkWithExternalDataIsMissing(externalMVEntities4DataNegotiationMono, localMVEntities4DataNegotiationMono)
+                                            .zipWith(checkVersionsAndLastUpdateFromEntityIdMatched(externalMVEntities4DataNegotiationMono, localMVEntities4DataNegotiationMono))
+                                            .flatMap(tuple -> {
+                                                List<MVEntity4DataNegotiation> newEntitiesToSync = tuple.getT1();
+                                                List<MVEntity4DataNegotiation> existingEntitiesToSync = tuple.getT2();
 
-                    return createDataNegotiationResult(dataNegotiationEvent, Mono.just(externalMVEntities4DataNegotiation), Mono.just(localMVEntities4DataNegotiation));
-                })
-                .flatMap(dataNegotiationResult -> {
-                    log.debug("ProcessID: {} - Data Negotiation Result: {}", dataNegotiationEvent.processId(), dataNegotiationResult);
-                    return dataTransferJob.syncData(dataNegotiationEvent.processId(), Mono.just(dataNegotiationResult));
-                });
+                                                log.debug("ProcessID: {} - New entities to sync: {}", processId, newEntitiesToSync);
+                                                log.debug("ProcessID: {} - Existing entities to sync: {}", processId, existingEntitiesToSync);
+
+                                                return externalIssuerMono.
+                                                        flatMap(externalIssuer -> {
+                                                            Mono<String> issuerMono = Mono.just(externalIssuer);
+                                                            return createDataNegotiationResult(issuerMono, Mono.just(newEntitiesToSync), Mono.just(existingEntitiesToSync));
+                                                        });
+                                            });
+
+                                }));
     }
 
     private Mono<List<MVEntity4DataNegotiation>> checkWithExternalDataIsMissing(
@@ -178,18 +170,6 @@ public class DataNegotiationJobImpl implements DataNegotiationJob {
 
     private boolean isExternalEntityLastUpdateNewer(Instant externalEntityLastUpdate, Instant sameLocalEntityLastUpdate) {
         return externalEntityLastUpdate.isAfter(sameLocalEntityLastUpdate);
-    }
-
-    private Mono<DataNegotiationResult> createDataNegotiationResult(DataNegotiationEvent dataNegotiationEvent, Mono<List<MVEntity4DataNegotiation>> newEntitiesToSync, Mono<List<MVEntity4DataNegotiation>> existingEntitiesToSync) {
-        return Mono.zip(dataNegotiationEvent.issuer(), newEntitiesToSync, existingEntitiesToSync).map(
-                tuple -> {
-                    String issuer = tuple.getT1();
-                    List<MVEntity4DataNegotiation> newEntitiesToSyncValue = tuple.getT2();
-                    List<MVEntity4DataNegotiation> existingEntitiesToSyncValue = tuple.getT3();
-
-                    return new DataNegotiationResult(issuer, newEntitiesToSyncValue, existingEntitiesToSyncValue);
-                }
-        );
     }
 
     private Mono<DataNegotiationResult> createDataNegotiationResult(Mono<String> issuerMono, Mono<List<MVEntity4DataNegotiation>> newEntitiesToSync, Mono<List<MVEntity4DataNegotiation>> existingEntitiesToSync) {
