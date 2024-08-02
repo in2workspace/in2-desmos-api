@@ -4,6 +4,7 @@ import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
 import com.nimbusds.jose.jca.JCASupport;
+import com.nimbusds.jwt.SignedJWT;
 import es.in2.desmos.infrastructure.security.JwtTokenProvider;
 import es.in2.desmos.infrastructure.security.SecurityProperties;
 import org.junit.jupiter.api.Assertions;
@@ -19,7 +20,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
 import java.security.spec.InvalidKeySpecException;
-import java.text.ParseException;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
@@ -57,14 +57,15 @@ class JwtTokenProviderTest {
     void testValidateSignedJwt() throws JOSEException {
         String jwtString = jwtTokenProvider.generateToken(resourceURI);
         System.out.println(jwtString);
-        Boolean result = jwtTokenProvider.validateSignedJwt(jwtString).block();
-        Assertions.assertEquals(Boolean.TRUE, result);
+        SignedJWT result = jwtTokenProvider.validateSignedJwt(jwtString).block();
+        assert result != null;
+        Assertions.assertEquals(jwtString, result.serialize());
     }
 
     @Test
     void testInvalidJwt() {
         String invalidJwt = "invalid.jwt.token";
-        assertThrows(ParseException.class, () -> jwtTokenProvider.validateSignedJwt(invalidJwt));
+        assertThrows(Exception.class, () -> jwtTokenProvider.validateSignedJwt(invalidJwt).block());
     }
 
 }
