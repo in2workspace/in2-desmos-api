@@ -77,7 +77,7 @@ public class JwtTokenProvider {
         // Sample JWT claims
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
                 .jwtID(UUID.randomUUID().toString())
-                .claim("htm", HttpMethod.POST)
+                .claim("htm", HttpMethod.POST.name())
                 .claim("htu", resourceURI)
                 .issueTime(new Date())
                 .build();

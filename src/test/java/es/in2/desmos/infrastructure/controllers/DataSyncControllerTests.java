@@ -8,6 +8,7 @@ import es.in2.desmos.domain.models.Id;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.application.workflows.jobs.P2PDataSyncJob;
 import es.in2.desmos.domain.services.sync.services.DataSyncService;
+import es.in2.desmos.infrastructure.configs.ApiConfig;
 import es.in2.desmos.infrastructure.configs.BrokerConfig;
 import es.in2.desmos.objectmothers.BrokerDataMother;
 import es.in2.desmos.objectmothers.DiscoverySyncRequestMother;
@@ -50,6 +51,8 @@ class DataSyncControllerTests {
     @MockBean
     private BrokerConfig brokerConfig;
 
+    @MockBean
+    private ApiConfig apiConfig;
 
     @Test
     void testSyncData() {
@@ -72,7 +75,7 @@ class DataSyncControllerTests {
         Mono<List<MVEntity4DataNegotiation>> localEntityIds = Mono.just(DiscoverySyncResponseMother.list3And4(contextBrokerExternalDomain).entities());
         when(p2PDataSyncJob.dataDiscovery(anyString(), any(), any())).thenReturn(localEntityIds);
 
-        when(brokerConfig.getExternalDomain()).thenReturn(contextBrokerExternalDomain);
+        when(apiConfig.getExternalDomain()).thenReturn(contextBrokerExternalDomain);
 
         webTestClient.post()
                 .uri("/api/v1/sync/p2p/discovery")
