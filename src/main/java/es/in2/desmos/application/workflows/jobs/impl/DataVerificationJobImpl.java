@@ -84,7 +84,7 @@ public class DataVerificationJobImpl implements DataVerificationJob {
     private Mono<Void> buildAndSaveAuditRecordFromDataSync(String processId, Mono<String> issuerMono, Mono<Map<Id, Entity>> rcvdEntitiesByIdMono, Mono<List<MVEntity4DataNegotiation>> mvEntity4DataNegotiationListMono, AuditRecordStatus auditRecordStatus) {
         return rcvdEntitiesByIdMono
                 .flatMapIterable(Map::entrySet)
-                .flatMap(rcvdEntityById -> {
+                .concatMap(rcvdEntityById -> {
                     String id = rcvdEntityById.getKey().id();
 
                     return mvEntity4DataNegotiationListMono
