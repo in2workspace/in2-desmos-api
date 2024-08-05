@@ -19,6 +19,7 @@ import reactor.core.publisher.Mono;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -90,15 +91,23 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
         return Flux.fromIterable(Arrays.asList(BROKER_ENTITY_TYPES))
                 .concatMap(entityType ->
                         createLocalMvEntities4DataNegotiationByEntityType(processId, entityType)
-                                .map(localMvEntities4DataNegotiation -> {
+                                .flatMap(localMvEntities4DataNegotiation -> {
                                     log.debug("ProcessID: {} - Local MV Entities 4 Data Negotiation: {}", processId, localMvEntities4DataNegotiation);
 
-                                    var localMvEntities4DataNegotiationMono = Mono.just(localMvEntities4DataNegotiation);
+                                    return externalMvEntities4DataNegotiationMono
+                                            .flatMap(externalMvEntities4DataNegotiation -> {
+                                                List<MVEntity4DataNegotiation> externalMvEntities4DataNegotiationOfType = externalMvEntities4DataNegotiation
+                                                        .stream()
+                                                        .filter(mvEntity4DataNegotiation -> Objects.equals(mvEntity4DataNegotiation.type(), entityType))
+                                                        .toList();
 
-                                    var dataNegotiationEvent = new DataNegotiationEvent(processId, issuer, externalMvEntities4DataNegotiationMono, localMvEntities4DataNegotiationMono);
-                                    dataNegotiationEventPublisher.publishEvent(dataNegotiationEvent);
+                                                var localMvEntities4DataNegotiationMono = Mono.just(localMvEntities4DataNegotiation);
 
-                                    return localMvEntities4DataNegotiation;
+                                                var dataNegotiationEvent = new DataNegotiationEvent(processId, issuer, Mono.just(externalMvEntities4DataNegotiationOfType), localMvEntities4DataNegotiationMono);
+                                                dataNegotiationEventPublisher.publishEvent(dataNegotiationEvent);
+
+                                                return Mono.just(localMvEntities4DataNegotiation);
+                                            });
                                 })
                                 .doOnSuccess(success -> log.info("ProcessID: {} - P2P Data Synchronization Discovery Workflow successfully.", processId))
                                 .doOnError(error -> log.error("ProcessID: {} - Error occurred while processing the P2P Data Synchronization Discovery Workflow: {}", processId, error.getMessage())))
