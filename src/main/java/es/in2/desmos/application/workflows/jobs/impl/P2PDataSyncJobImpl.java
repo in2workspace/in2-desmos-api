@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -39,7 +40,7 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
 
     private final DiscoverySyncWebClient discoverySyncWebClient;
 
-    private static final String BROKER_ENTITY_TYPE = "ProductOffering";
+    private static final String[] BROKER_ENTITY_TYPES = {"ProductOffering", "category", "catalog"};
 
     @Override
     public Mono<Void> synchronizeData(String processId) {
@@ -111,7 +112,14 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
     }
 
     private Mono<List<MVEntity4DataNegotiation>> createLocalMvEntities4DataNegotiation(String processId) {
-        return brokerPublisherService.findAllIdTypeAndAttributesByType(processId, BROKER_ENTITY_TYPE, "lastUpdate", "version", "lifecycleStatus", "validFor", BrokerEntityWithIdTypeLastUpdateAndVersion[].class)
+        return Flux.fromIterable(Arrays.asList(BROKER_ENTITY_TYPES))
+                .flatMap(entityType -> createLocalMvEntities4DataNegotiationByEntityType(processId, entityType))
+                .flatMap(Flux::fromIterable)
+                .collectList();
+    }
+
+    private Mono<List<MVEntity4DataNegotiation>> createLocalMvEntities4DataNegotiationByEntityType(String processId, String brokerEntityType) {
+        return brokerPublisherService.findAllIdTypeAndAttributesByType(processId, brokerEntityType, "lastUpdate", "version", "lifecycleStatus", "validFor", BrokerEntityWithIdTypeLastUpdateAndVersion[].class)
                 .flatMap(mvBrokerEntities4DataNegotiation -> {
                     log.debug("ProcessID: {} - MV Broker Entities 4 Data Negotiation: {}", processId, mvBrokerEntities4DataNegotiation);
 

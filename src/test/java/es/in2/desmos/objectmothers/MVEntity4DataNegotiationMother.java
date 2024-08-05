@@ -149,6 +149,22 @@ public final class MVEntity4DataNegotiationMother {
         return new MVEntity4DataNegotiation("urn:Price:2d5f3c16-4e77-45b3-8915-3da36b714e7b", "Price", "1.3", "2024-09-11T14:50:00Z", LAUNCHED, VALID_FOR, "16187e78cde007c8113ab2231c6aabe92d3e133ad634db4ef59d711533cc0fde", "16187e78cde007c8113ab2231c6aabe92d3e133ad634db4ef59d711533cc0fde");
     }
 
+    public static @NotNull MVEntity4DataNegotiation category1() {
+        return new MVEntity4DataNegotiation("urn:category:1", "category", "1.2", "2024-09-05T12:00:00Z", LAUNCHED, VALID_FOR, "prova", "prova");
+    }
+
+    public static @NotNull MVEntity4DataNegotiation category2() {
+        return new MVEntity4DataNegotiation("urn:category:2", "category", "1.2", "2024-09-05T12:00:00Z", LAUNCHED, VALID_FOR, "prova", "prova");
+    }
+
+    public static @NotNull MVEntity4DataNegotiation catalog1() {
+        return new MVEntity4DataNegotiation("urn:catalog:1", "catalog", "1.2", "2024-09-05T12:00:00Z", LAUNCHED, VALID_FOR, "prova", "prova");
+    }
+
+    public static @NotNull MVEntity4DataNegotiation catalog2() {
+        return new MVEntity4DataNegotiation("urn:catalog:2", "catalog", "1.2", "2024-09-05T12:00:00Z", LAUNCHED, VALID_FOR, "prova", "prova");
+    }
+
     public static @NotNull MVEntity4DataNegotiation randomIdAndVersion() {
         String id = "urn:ProductOffering:" + UUID.randomUUID();
         Random random = new Random();
@@ -192,6 +208,14 @@ public final class MVEntity4DataNegotiationMother {
         MVEntity4DataNegotiationList.add(sample3());
         MVEntity4DataNegotiationList.add(sample4());
         return MVEntity4DataNegotiationList;
+    }
+
+    public static @NotNull List<MVEntity4DataNegotiation> listCategories() {
+        return List.of(category1(), category2());
+    }
+
+    public static @NotNull List<MVEntity4DataNegotiation> listCatalogs() {
+        return List.of(catalog1(), catalog2());
     }
 
     public static @NotNull List<MVEntity4DataNegotiation> listLaunchedAndRetired() {

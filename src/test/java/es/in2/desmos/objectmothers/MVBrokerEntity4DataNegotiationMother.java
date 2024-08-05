@@ -21,6 +21,24 @@ public final class MVBrokerEntity4DataNegotiationMother {
         return MVEntity4DataNegotiationList;
     }
 
+    public static @NotNull List<BrokerEntityWithIdTypeLastUpdateAndVersion> listCategories() {
+        var category1 = MVEntity4DataNegotiationMother.category1();
+        var category2 = MVEntity4DataNegotiationMother.category2();
+        return List.of(
+                new BrokerEntityWithIdTypeLastUpdateAndVersion(category1.id(), category1.type(), category1.version(), category1.lastUpdate(), category1.lifecycleStatus(), new BrokerEntityValidFor(category1.validFor())),
+                new BrokerEntityWithIdTypeLastUpdateAndVersion(category2.id(), category2.type(), category2.version(), category2.lastUpdate(), category2.lifecycleStatus(), new BrokerEntityValidFor(category2.validFor()))
+        );
+    }
+
+    public static @NotNull List<BrokerEntityWithIdTypeLastUpdateAndVersion> listCatalogs() {
+        var catalog1 = MVEntity4DataNegotiationMother.catalog1();
+        var catalog2 = MVEntity4DataNegotiationMother.catalog2();
+        return List.of(
+                new BrokerEntityWithIdTypeLastUpdateAndVersion(catalog1.id(), catalog1.type(), catalog1.version(), catalog1.lastUpdate(), catalog1.lifecycleStatus(), new BrokerEntityValidFor(catalog1.validFor())),
+                new BrokerEntityWithIdTypeLastUpdateAndVersion(catalog2.id(), catalog2.type(), catalog2.version(), catalog2.lastUpdate(), catalog2.lifecycleStatus(), new BrokerEntityValidFor(catalog2.validFor()))
+        );
+    }
+
     public static @NotNull List<BrokerEntityWithIdTypeLastUpdateAndVersion> randomList(int size){
         return mvEntitytoBrokerEntity(MVEntity4DataNegotiationMother.randomList(size));
     }
