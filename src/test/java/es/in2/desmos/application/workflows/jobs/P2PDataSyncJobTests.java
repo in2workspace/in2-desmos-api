@@ -53,7 +53,7 @@ class P2PDataSyncJobTests {
     private DataNegotiationJob dataNegotiationJob;
 
     @Test
-    void itShouldUpsertEntitiesFromOtherAccessNodes(){
+    void itShouldUpsertEntitiesFromOtherTwoAccessNodes(){
         String processId = "0";
 
         List<BrokerEntityWithIdTypeLastUpdateAndVersion> brokerEntities = MVBrokerEntity4DataNegotiationMother.list3And4();
@@ -109,10 +109,10 @@ class P2PDataSyncJobTests {
                 .create(result)
                 .verifyComplete();
 
-        verify(apiConfig, times(2)).getOperatorExternalDomain();
+        verify(apiConfig, times(6)).getOperatorExternalDomain();
         verifyNoMoreInteractions(apiConfig);
 
-        verify(discoverySyncWebClient, times(2)).makeRequest(eq(processId), any(), any());
+        verify(discoverySyncWebClient, times(6)).makeRequest(eq(processId), any(), any());
         verifyNoMoreInteractions(discoverySyncWebClient);
 
         verify(brokerPublisherService, times(1)).findAllIdTypeAndAttributesByType(processId, "ProductOffering", "lastUpdate", "version", "lifecycleStatus", "validFor", BrokerEntityWithIdTypeLastUpdateAndVersion[].class);
@@ -121,13 +121,13 @@ class P2PDataSyncJobTests {
         verify(auditRecordService, times(6)).findLatestAuditRecordForEntity(eq(processId), any());
         verifyNoMoreInteractions(auditRecordService);
 
-        verify(discoverySyncWebClient, times(2)).makeRequest(eq(processId), any(), any());
+        verify(discoverySyncWebClient, times(6)).makeRequest(eq(processId), any(), any());
         verifyNoMoreInteractions(discoverySyncWebClient);
 
-        verify(externalAccessNodesConfig, times(1)).getExternalAccessNodesUrls();
+        verify(externalAccessNodesConfig, times(3)).getExternalAccessNodesUrls();
         verifyNoMoreInteractions(externalAccessNodesConfig);
 
-        verify(dataNegotiationJob, times(1)).negotiateDataSyncWithMultipleIssuers(eq(processId), any(), any());
+        verify(dataNegotiationJob, times(3)).negotiateDataSyncWithMultipleIssuers(eq(processId), any(), any());
         verifyNoMoreInteractions(dataNegotiationJob);
     }
 

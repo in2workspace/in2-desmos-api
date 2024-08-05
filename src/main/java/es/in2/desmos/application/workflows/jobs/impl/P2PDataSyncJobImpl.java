@@ -46,17 +46,22 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
     public Mono<Void> synchronizeData(String processId) {
         log.info("ProcessID: {} - Starting P2P Data Synchronization Workflow", processId);
 
-        return createLocalMvEntities4DataNegotiation(processId).flatMap(localMvEntities4DataNegotiation -> {
-            log.debug("ProcessID: {} - Local MV Entities 4 Data Negotiation synchronizing data: {}", processId, localMvEntities4DataNegotiation);
+        return Flux.fromIterable(Arrays.asList(BROKER_ENTITY_TYPES))
+                .concatMap(entityType ->
+                        createLocalMvEntities4DataNegotiationByEntityType(processId, entityType)
+                                .flatMap(localMvEntities4DataNegotiation -> {
+                                    log.debug("ProcessID: {} - Local MV Entities 4 Data Negotiation synchronizing data: {}", processId, localMvEntities4DataNegotiation);
 
-            return getExternalMVEntities4DataNegotiationByIssuer(processId, localMvEntities4DataNegotiation)
-                    .flatMap(mvEntities4DataNegotiationByIssuer -> {
-                        Mono<Map<Issuer, List<MVEntity4DataNegotiation>>> externalMVEntities4DataNegotiationByIssuerMono = Mono.just(mvEntities4DataNegotiationByIssuer);
-                        Mono<List<MVEntity4DataNegotiation>> localMVEntities4DataNegotiationMono = Mono.just(localMvEntities4DataNegotiation);
+                                    return getExternalMVEntities4DataNegotiationByIssuer(processId, localMvEntities4DataNegotiation)
+                                            .flatMap(mvEntities4DataNegotiationByIssuer -> {
+                                                Mono<Map<Issuer, List<MVEntity4DataNegotiation>>> externalMVEntities4DataNegotiationByIssuerMono = Mono.just(mvEntities4DataNegotiationByIssuer);
+                                                Mono<List<MVEntity4DataNegotiation>> localMVEntities4DataNegotiationMono = Mono.just(localMvEntities4DataNegotiation);
 
-                        return dataNegotiationJob.negotiateDataSyncWithMultipleIssuers(processId, externalMVEntities4DataNegotiationByIssuerMono, localMVEntities4DataNegotiationMono);
-                    });
-        });
+                                                return dataNegotiationJob.negotiateDataSyncWithMultipleIssuers(processId, externalMVEntities4DataNegotiationByIssuerMono, localMVEntities4DataNegotiationMono);
+                                            });
+                                }))
+                .collectList()
+                .then();
     }
 
     private Mono<Map<Issuer, List<MVEntity4DataNegotiation>>> getExternalMVEntities4DataNegotiationByIssuer(String processId, List<MVEntity4DataNegotiation> localMvEntities4DataNegotiation) {
@@ -82,18 +87,23 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
     public Mono<List<MVEntity4DataNegotiation>> dataDiscovery(String processId, Mono<String> issuer, Mono<List<MVEntity4DataNegotiation>> externalMvEntities4DataNegotiationMono) {
         log.info("ProcessID: {} - Starting P2P Data Synchronization Discovery Workflow", processId);
 
-        return createLocalMvEntities4DataNegotiation(processId).map(localMvEntities4DataNegotiation -> {
-                    log.debug("ProcessID: {} - Local MV Entities 4 Data Negotiation: {}", processId, localMvEntities4DataNegotiation);
+        return Flux.fromIterable(Arrays.asList(BROKER_ENTITY_TYPES))
+                .concatMap(entityType ->
+                        createLocalMvEntities4DataNegotiationByEntityType(processId, entityType)
+                                .map(localMvEntities4DataNegotiation -> {
+                                    log.debug("ProcessID: {} - Local MV Entities 4 Data Negotiation: {}", processId, localMvEntities4DataNegotiation);
 
-                    var localMvEntities4DataNegotiationMono = Mono.just(localMvEntities4DataNegotiation);
+                                    var localMvEntities4DataNegotiationMono = Mono.just(localMvEntities4DataNegotiation);
 
-                    var dataNegotiationEvent = new DataNegotiationEvent(processId, issuer, externalMvEntities4DataNegotiationMono, localMvEntities4DataNegotiationMono);
-                    dataNegotiationEventPublisher.publishEvent(dataNegotiationEvent);
+                                    var dataNegotiationEvent = new DataNegotiationEvent(processId, issuer, externalMvEntities4DataNegotiationMono, localMvEntities4DataNegotiationMono);
+                                    dataNegotiationEventPublisher.publishEvent(dataNegotiationEvent);
 
-                    return localMvEntities4DataNegotiation;
-                })
-                .doOnSuccess(success -> log.info("ProcessID: {} - P2P Data Synchronization Discovery Workflow successfully.", processId))
-                .doOnError(error -> log.error("ProcessID: {} - Error occurred while processing the P2P Data Synchronization Discovery Workflow: {}", processId, error.getMessage()));
+                                    return localMvEntities4DataNegotiation;
+                                })
+                                .doOnSuccess(success -> log.info("ProcessID: {} - P2P Data Synchronization Discovery Workflow successfully.", processId))
+                                .doOnError(error -> log.error("ProcessID: {} - Error occurred while processing the P2P Data Synchronization Discovery Workflow: {}", processId, error.getMessage())))
+                .flatMap(Flux::fromIterable)
+                .collectList();
     }
 
     @Override
@@ -109,13 +119,6 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
 
     private static Mono<List<String>> getEntities4DataNegotiationIds(Mono<List<BrokerEntityWithIdTypeLastUpdateAndVersion>> mvBrokerEntities4DataNegotiationMono) {
         return mvBrokerEntities4DataNegotiationMono.map(x -> x.stream().map(BrokerEntityWithIdTypeLastUpdateAndVersion::getId).toList());
-    }
-
-    private Mono<List<MVEntity4DataNegotiation>> createLocalMvEntities4DataNegotiation(String processId) {
-        return Flux.fromIterable(Arrays.asList(BROKER_ENTITY_TYPES))
-                .flatMap(entityType -> createLocalMvEntities4DataNegotiationByEntityType(processId, entityType))
-                .flatMap(Flux::fromIterable)
-                .collectList();
     }
 
     private Mono<List<MVEntity4DataNegotiation>> createLocalMvEntities4DataNegotiationByEntityType(String processId, String brokerEntityType) {
@@ -162,7 +165,7 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                                                         auditRecord.getEntityHash(),
                                                         auditRecord.getEntityHashLink()
                                                 )
-                                )
+                                        )
                         )
                         .collectList()
         );
