@@ -18,10 +18,10 @@ public final class EntityMother {
 
     public static @NotNull String getFullJsonList() throws JsonProcessingException, JSONException {
         var jsonArray = new JSONArray();
-        jsonArray.put(new JSONObject(json1));
-        jsonArray.put(new JSONObject(json2));
-        jsonArray.put(new JSONObject(json3));
-        jsonArray.put(new JSONObject(json4));
+        jsonArray.put(new JSONObject(productOffering1));
+        jsonArray.put(new JSONObject(productOffering2));
+        jsonArray.put(new JSONObject(productOffering3));
+        jsonArray.put(new JSONObject(productOffering4));
 
         String fullJsonList = jsonArray.toString();
 
@@ -30,9 +30,9 @@ public final class EntityMother {
 
     public static String getJsonList1And2OldAnd3() throws JsonProcessingException, JSONException {
         var jsonArray = new JSONArray();
-        jsonArray.put(new JSONObject(json1));
-        jsonArray.put(new JSONObject(json2Old));
-        jsonArray.put(new JSONObject(json3));
+        jsonArray.put(new JSONObject(productOffering1));
+        jsonArray.put(new JSONObject(productOffering2Old));
+        jsonArray.put(new JSONObject(productOffering3));
 
         String fullJsonList = jsonArray.toString();
 
@@ -44,14 +44,14 @@ public final class EntityMother {
     }
 
     public static String getJson2() throws JsonProcessingException {
-        return compressJson(json2);
+        return compressJson(productOffering2);
     }
 
     public static String getJson4() throws JsonProcessingException {
-        return compressJson(json4);
+        return compressJson(productOffering4);
     }
 
-    private static final String json1 = """
+    private static final String productOffering1 = """
         {
             "id": "urn:ProductOffering:d86735a6-0faa-463d-a872-00b97affa1cb",
             "type": "ProductOffering",
@@ -71,7 +71,7 @@ public final class EntityMother {
             }
         }""";
 
-    private static final String json2 = """
+    private static final String productOffering2 = """
         {
             "id": "urn:ProductOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87",
             "type": "ProductOffering",
@@ -91,7 +91,7 @@ public final class EntityMother {
             }
         }""";
 
-    private static final String json2Old = """
+    private static final String productOffering2Old = """
         {
             "id": "urn:ProductOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87",
             "type": "ProductOffering",
@@ -111,7 +111,7 @@ public final class EntityMother {
             }
         }""";
 
-    private static final String json3 = """
+    private static final String productOffering3 = """
         {
             "id": "urn:ProductOffering:537e1ee3-0556-4fff-875f-e55bb97e7ab0",
             "type": "ProductOffering",
@@ -131,7 +131,7 @@ public final class EntityMother {
             }
         }""";
 
-    private static final String json4 = """
+    private static final String productOffering4 = """
         {
             "id": "urn:ProductOffering:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c",
             "type": "ProductOffering",
