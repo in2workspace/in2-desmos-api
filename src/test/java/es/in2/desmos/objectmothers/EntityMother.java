@@ -39,8 +39,18 @@ public final class EntityMother {
         return compressJson(fullJsonList);
     }
 
-    public static String getJsonList1And2OldAnd3AndSubOfferings() throws JsonProcessingException {
-        return compressJson(jsonList1And2OldAnd3AndSubOfferings);
+    public static String getJsonList1And2OldAnd3AndSubOfferings() throws JsonProcessingException, JSONException {
+        var jsonArray = new JSONArray();
+        jsonArray.put(new JSONObject(productOffering1));
+        jsonArray.put(new JSONObject(productOffering2Old));
+        jsonArray.put(new JSONObject(productOffering3));
+        jsonArray.put(new JSONObject(productOfferingPrice1));
+        jsonArray.put(new JSONObject(productOfferingPrice2));
+        jsonArray.put(new JSONObject(productOfferingPrice3));
+
+        String fullJsonList = jsonArray.toString();
+
+        return compressJson(fullJsonList);
     }
 
     public static String getJson2() throws JsonProcessingException {
@@ -67,7 +77,7 @@ public final class EntityMother {
             },
             "productOfferingPrice": {
                 "type": "Relationship",
-                "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
+                "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c51"
             }
         }""";
 
@@ -87,7 +97,7 @@ public final class EntityMother {
             },
             "productOfferingPrice": {
                 "type": "Relationship",
-                "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
+                "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c52"
             }
         }""";
 
@@ -107,7 +117,7 @@ public final class EntityMother {
             },
             "productOfferingPrice": {
                 "type": "Relationship",
-                "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
+                "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c52"
             }
         }""";
 
@@ -127,7 +137,7 @@ public final class EntityMother {
             },
             "productOfferingPrice": {
                 "type": "Relationship",
-                "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
+                "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c53"
             }
         }""";
 
@@ -147,100 +157,48 @@ public final class EntityMother {
             },
             "productOfferingPrice": {
                 "type": "Relationship",
-                "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
+                "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c54"
             }
         }""";
 
-    private static final String jsonList1And2OldAnd3AndSubOfferings = """
-            [
-                {
-                         "id": "urn:ProductOffering:d86735a6-0faa-463d-a872-00b97affa1cb",
-                         "type": "ProductOffering",
-                         "version": "1.2",
-                         "lastUpdate": "2024-09-05T12:00:00Z",
-                         "lifecycleStatus": "Launched",
-                         "validFor": {
-                             "startDateTime": "2024-01-01T00:00:00.000Z"
-                         },
-                         "productSpecification": {
-                             "id": "spec-broadband-001",
-                             "name": "1Gbps Broadband Spec"
-                         },
-                         "productOfferingPrice": {
-                             "type": "Relationship",
-                             "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c51"
-                         }
-                     },
-                     {
-                      "id": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c51",
-                      "type": "ProductOfferingPrice",
-                      "version": "1.3",
-                      "lastUpdate": "2024-09-11T14:50:00Z",
-                      "lifecycleStatus": "Launched",
-                      "validFor": {
-                         "startDateTime": "2024-01-01T00:00:00.000Z"
-                      },
-                      "value": "5"
-                 },
-                     {
-                         "id": "urn:ProductOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87",
-                         "type": "ProductOffering",
-                         "version": "2.1",
-                         "lastUpdate": "2024-07-09T12:00:00Z",
-                         "lifecycleStatus": "Launched",
-                         "validFor": {
-                             "startDateTime": "2024-01-01T00:00:00.000Z"
-                         },
-                         "productSpecification": {
-                             "id": "spec-broadband-001",
-                             "name": "1Gbps Broadband Spec"
-                         },
-                         "productOfferingPrice": {
-                             "type": "Relationship",
-                             "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c52"
-                         }
-                     },
-                     {
-                      "id": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c52",
-                      "type": "ProductOfferingPrice",
-                      "version": "1.3",
-                      "lastUpdate": "2024-09-11T14:50:00Z",
-                      "lifecycleStatus": "Launched",
-                      "validFor": {
-                         "startDateTime": "2024-01-01T00:00:00.000Z"
-                      },
-                      "value": "5"
-                 },
-                     {
-                         "id": "urn:ProductOffering:537e1ee3-0556-4fff-875f-e55bb97e7ab0",
-                         "type": "ProductOffering",
-                         "version": "4.3",
-                         "lastUpdate": "2024-04-03T12:00:00Z",
-                         "lifecycleStatus": "Launched",
-                         "validFor": {
-                             "startDateTime": "2024-01-01T00:00:00.000Z"
-                         },
-                         "productSpecification": {
-                             "id": "spec-broadband-001",
-                             "name": "1Gbps Broadband Spec"
-                         },
-                         "productOfferingPrice": {
-                             "type": "Relationship",
-                             "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c53"
-                         }
-                     },
-                     {
-                      "id": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c53",
-                      "type": "ProductOfferingPrice",
-                      "version": "1.3",
-                      "lastUpdate": "2024-09-11T14:50:00Z",
-                      "lifecycleStatus": "Launched",
-                      "validFor": {
-                         "startDateTime": "2024-01-01T00:00:00.000Z"
-                      },
-                      "value": "5"
-                 }
-            ]""";
+    private static final String productOfferingPrice1 = """
+        {
+            "id": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c51",
+            "type": "ProductOfferingPrice",
+            "version": "1.3",
+            "lastUpdate": "2024-09-11T14:50:00Z",
+            "lifecycleStatus": "Launched",
+            "validFor": {
+                "startDateTime": "2024-01-01T00:00:00.000Z"
+            },
+            "value": "5"
+        }""";
+
+    private static final String productOfferingPrice2 = """
+        {
+            "id": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c52",
+            "type": "ProductOfferingPrice",
+            "version": "1.3",
+            "lastUpdate": "2024-09-11T14:50:00Z",
+            "lifecycleStatus": "Launched",
+            "validFor": {
+                "startDateTime": "2024-01-01T00:00:00.000Z"
+            },
+            "value": "5"
+        }""";
+
+    private static final String productOfferingPrice3 = """
+        {
+            "id": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c53",
+            "type": "ProductOfferingPrice",
+            "version": "1.3",
+            "lastUpdate": "2024-09-11T14:50:00Z",
+            "lifecycleStatus": "Launched",
+            "validFor": {
+                "startDateTime": "2024-01-01T00:00:00.000Z"
+            },
+            "value": "5"
+        }""";
 
     private static final String listJson2And4AndSubOfferings = """
             [

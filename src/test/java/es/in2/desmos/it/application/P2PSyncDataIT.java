@@ -65,7 +65,7 @@ class P2PSyncDataIT {
     }
 
     @BeforeEach
-    void setUp() throws IOException {
+    void setUp() throws IOException, JSONException {
         initialMvEntity4DataNegotiationList = createInitialEntitiesInScorpio(
                 ContainerManager.getBaseUriForScorpioA(),
                 EntityMother.getJsonList1And2OldAnd3AndSubOfferings(),
