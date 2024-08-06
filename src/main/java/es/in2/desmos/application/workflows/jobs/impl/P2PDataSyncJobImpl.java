@@ -53,7 +53,7 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                                 .flatMap(localMvEntities4DataNegotiation -> {
                                     log.debug("ProcessID: {} - Local MV Entities 4 Data Negotiation synchronizing data: {}", processId, localMvEntities4DataNegotiation);
 
-                                    return getExternalMVEntities4DataNegotiationByIssuer(processId, localMvEntities4DataNegotiation)
+                                    return getExternalMVEntities4DataNegotiationByIssuer(processId, localMvEntities4DataNegotiation, entityType)
                                             .flatMap(mvEntities4DataNegotiationByIssuer -> {
                                                 Mono<Map<Issuer, List<MVEntity4DataNegotiation>>> externalMVEntities4DataNegotiationByIssuerMono = Mono.just(mvEntities4DataNegotiationByIssuer);
                                                 Mono<List<MVEntity4DataNegotiation>> localMVEntities4DataNegotiationMono = Mono.just(localMvEntities4DataNegotiation);
@@ -65,7 +65,7 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                 .then();
     }
 
-    private Mono<Map<Issuer, List<MVEntity4DataNegotiation>>> getExternalMVEntities4DataNegotiationByIssuer(String processId, List<MVEntity4DataNegotiation> localMvEntities4DataNegotiation) {
+    private Mono<Map<Issuer, List<MVEntity4DataNegotiation>>> getExternalMVEntities4DataNegotiationByIssuer(String processId, List<MVEntity4DataNegotiation> localMvEntities4DataNegotiation, String entityType) {
         return externalAccessNodesConfig.getExternalAccessNodesUrls()
                 .flatMapIterable(externalAccessNodesList -> externalAccessNodesList)
                 .flatMap(externalAccessNode -> {
@@ -78,7 +78,17 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                                 log.debug("ProcessID: {} - Get DiscoverySync Response. [issuer={}, response={}]", processId, externalAccessNode, resultList);
 
                                 Issuer issuer = new Issuer(externalAccessNode);
-                                return Map.entry(issuer, resultList.entities());
+
+                                var filteredEntitiesByType =
+                                        resultList
+                                                .entities()
+                                                .stream()
+                                                .filter(mvEntity4DataNegotiation -> Objects.equals(mvEntity4DataNegotiation.type(), entityType))
+                                                .toList();
+
+                                log.debug("ProcessID: {} - DiscoverySync Response filtered. [issuer={}, response={}]", processId, externalAccessNode, filteredEntitiesByType);
+
+                                return Map.entry(issuer, filteredEntitiesByType);
                             });
                 })
                 .collectMap(Map.Entry::getKey, Map.Entry::getValue);
