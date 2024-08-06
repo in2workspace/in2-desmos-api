@@ -73,7 +73,7 @@ class DataSyncServiceIT {
     }
 
     @BeforeEach
-    void setUp() throws IOException {
+    void setUp() throws IOException, JSONException {
         initialMvEntity4DataNegotiationList = createInitialEntitiesInScorpio();
         createInitialEntitiesInAuditRecord(auditRecordService, initialMvEntity4DataNegotiationList);
         startMockWebServer();
@@ -372,7 +372,7 @@ class DataSyncServiceIT {
         });
     }
 
-    private @NotNull List<MVEntity4DataNegotiation> createInitialEntitiesInScorpio() throws JsonProcessingException {
+    private @NotNull List<MVEntity4DataNegotiation> createInitialEntitiesInScorpio() throws JsonProcessingException, JSONException {
         String brokerUrl = ContainerManager.getBaseUriForScorpioA();
         String responseEntities = EntityMother.getJsonList1And2OldAnd3();
 

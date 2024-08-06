@@ -28,8 +28,15 @@ public final class EntityMother {
         return compressJson(fullJsonList);
     }
 
-    public static String getJsonList1And2OldAnd3() throws JsonProcessingException {
-        return compressJson(jsonList1And2OldAnd3);
+    public static String getJsonList1And2OldAnd3() throws JsonProcessingException, JSONException {
+        var jsonArray = new JSONArray();
+        jsonArray.put(new JSONObject(json1));
+        jsonArray.put(new JSONObject(json2Old));
+        jsonArray.put(new JSONObject(json3));
+
+        String fullJsonList = jsonArray.toString();
+
+        return compressJson(fullJsonList);
     }
 
     public static String getJsonList1And2OldAnd3AndSubOfferings() throws JsonProcessingException {
@@ -84,6 +91,26 @@ public final class EntityMother {
                      }
                  }""";
 
+    private static final String json2Old = """
+            {
+                     "id": "urn:ProductOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87",
+                     "type": "ProductOffering",
+                     "version": "2.1",
+                     "lifecycleStatus": "Launched",
+                     "validFor": {
+                         "startDateTime": "2024-01-01T00:00:00.000Z"
+                     },
+                     "lastUpdate": "2024-07-09T12:00:00Z",
+                     "productSpecification": {
+                         "id": "spec-broadband-001",
+                         "name": "1Gbps Broadband Spec"
+                     },
+                     "productOfferingPrice": {
+                         "type": "Relationship",
+                         "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
+                     }
+                 }""";
+
     private static final String json3 = """
             {
                      "id": "urn:ProductOffering:537e1ee3-0556-4fff-875f-e55bb97e7ab0",
@@ -123,52 +150,6 @@ public final class EntityMother {
                          "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
                      }
                  }""";
-
-    private static final String jsonList1And2OldAnd3 = """
-            [
-                {
-                         "id": "urn:ProductOffering:d86735a6-0faa-463d-a872-00b97affa1cb",
-                         "type": "ProductOffering",
-                         "version": "1.2",
-                         "lastUpdate": "2024-09-05T12:00:00Z",
-                         "lifecycleStatus": "Launched",
-                         "validFor": {
-                             "startDateTime": "2024-01-01T00:00:00.000Z"
-                         },
-                         "productSpecification": {
-                             "id": "spec-broadband-001",
-                             "name": "1Gbps Broadband Spec"
-                         }
-                     },
-                     {
-                         "id": "urn:ProductOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87",
-                         "type": "ProductOffering",
-                         "version": "2.1",
-                         "lastUpdate": "2024-07-09T12:00:00Z",
-                         "lifecycleStatus": "Launched",
-                         "validFor": {
-                             "startDateTime": "2024-01-01T00:00:00.000Z"
-                         },
-                         "productSpecification": {
-                             "id": "spec-broadband-001",
-                             "name": "1Gbps Broadband Spec"
-                         }
-                     },
-                     {
-                         "id": "urn:ProductOffering:537e1ee3-0556-4fff-875f-e55bb97e7ab0",
-                         "type": "ProductOffering",
-                         "version": "4.3",
-                         "lastUpdate": "2024-04-03T12:00:00Z",
-                         "lifecycleStatus": "Launched",
-                         "validFor": {
-                             "startDateTime": "2024-01-01T00:00:00.000Z"
-                         },
-                         "productSpecification": {
-                             "id": "spec-broadband-001",
-                             "name": "1Gbps Broadband Spec"
-                         }
-                     }
-            ]""";
 
     private static final String jsonList1And2OldAnd3AndSubOfferings = """
             [
