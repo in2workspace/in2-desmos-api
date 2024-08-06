@@ -5,6 +5,7 @@ import es.in2.desmos.domain.models.Id;
 import es.in2.desmos.domain.services.sync.impl.EntitySyncWebClientImpl;
 import es.in2.desmos.objectmothers.EntityMother;
 import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
+import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -45,7 +46,7 @@ class EntitySyncWebClientTests {
     private WebClient.RequestHeadersSpec requestHeadersSpec;
 
     @Test
-    void itShouldReturnEntitySyncResponseWhenMakeRequest() throws JsonProcessingException {
+    void itShouldReturnEntitySyncResponseWhenMakeRequest() throws JsonProcessingException, JSONException {
         String processId = "0";
 
         String issuer = "http://example.org";

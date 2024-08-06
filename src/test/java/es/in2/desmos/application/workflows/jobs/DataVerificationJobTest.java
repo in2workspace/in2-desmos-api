@@ -222,7 +222,7 @@ class DataVerificationJobTest {
     }
 
     @Test
-    void itShouldReturnInvalidConsistencyException() throws JsonProcessingException {
+    void itShouldReturnInvalidConsistencyException() throws JsonProcessingException, JSONException {
         Mono<String> entitySyncResponseMono = Mono.just(EntityMother.getFullJsonList());
 
         String processId = "0";

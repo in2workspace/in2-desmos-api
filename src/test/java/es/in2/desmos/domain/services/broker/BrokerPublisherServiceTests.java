@@ -102,7 +102,7 @@ class BrokerPublisherServiceTests {
     }
 
     @Test
-    void itShouldBatchUpsertEntitiesToContextBroker() throws JsonProcessingException {
+    void itShouldBatchUpsertEntitiesToContextBroker() throws JsonProcessingException, JSONException {
         String processId = "0";
 
         String retrievedBrokerEntities = EntityMother.getFullJsonList();
