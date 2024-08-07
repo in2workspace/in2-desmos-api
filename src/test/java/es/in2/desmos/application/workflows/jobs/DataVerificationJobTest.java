@@ -66,11 +66,11 @@ class DataVerificationJobTest {
 
         Map<Id, Entity> entitiesById = new HashMap<>();
         entitiesById.put(new Id(MVEntity4DataNegotiationMother.sample2().id()), new Entity(EntityMother.PRODUCT_OFFERING_2));
-        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sampleScorpio4().id()), new Entity(EntityMother.PRODUCT_OFFERING_4));
+        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sample4().id()), new Entity(EntityMother.PRODUCT_OFFERING_4));
 
         List<MVEntity4DataNegotiation> allMVEntity4DataNegotiation = new ArrayList<>();
         allMVEntity4DataNegotiation.add(MVEntity4DataNegotiationMother.sample2());
-        allMVEntity4DataNegotiation.add(MVEntity4DataNegotiationMother.sampleScorpio4());
+        allMVEntity4DataNegotiation.add(MVEntity4DataNegotiationMother.sample4());
 
         Map<Id, HashAndHashLink> existingEntitiesOriginalValidationDataById = new HashMap<>();
         existingEntitiesOriginalValidationDataById.put(new Id(MVEntity4DataNegotiationMother.sample2().id()), new HashAndHashLink(MVEntity4DataNegotiationMother.sample2().hash(), MVEntity4DataNegotiationMother.sample2().hashlink()));
@@ -102,10 +102,10 @@ class DataVerificationJobTest {
 
         Map<Id, Entity> entitiesById = new HashMap<>();
         entitiesById.put(new Id(MVEntity4DataNegotiationMother.sample2().id()), new Entity(EntityMother.PRODUCT_OFFERING_2));
-        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sampleScorpio4().id()), new Entity(EntityMother.PRODUCT_OFFERING_4));
+        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sample4().id()), new Entity(EntityMother.PRODUCT_OFFERING_4));
 
         List<MVEntity4DataNegotiation> allMVEntity4DataNegotiation = new ArrayList<>();
-        allMVEntity4DataNegotiation.add(MVEntity4DataNegotiationMother.sampleScorpio4());
+        allMVEntity4DataNegotiation.add(MVEntity4DataNegotiationMother.sample4());
 
         Map<Id, HashAndHashLink> existingEntitiesOriginalValidationDataById = new HashMap<>();
         existingEntitiesOriginalValidationDataById.put(new Id(MVEntity4DataNegotiationMother.sample2().id()), new HashAndHashLink(MVEntity4DataNegotiationMother.sample2().hash(), MVEntity4DataNegotiationMother.sample2().hashlink()));
@@ -133,7 +133,7 @@ class DataVerificationJobTest {
 
         var mvEntity4DataNegotiationSentToAuditRecord = mvEntity4DataNegotiationCaptor.getAllValues();
 
-        assertThat(mvEntity4DataNegotiationSentToAuditRecord.get(0)).isEqualTo(MVEntity4DataNegotiationMother.sampleScorpio4());
+        assertThat(mvEntity4DataNegotiationSentToAuditRecord.get(0)).isEqualTo(MVEntity4DataNegotiationMother.sample4());
         assertThat(mvEntity4DataNegotiationSentToAuditRecord.get(1)).isEqualTo(expectedMVEntity4DataNegotiationSample4);
     }
 
@@ -155,10 +155,10 @@ class DataVerificationJobTest {
 
         Map<Id, Entity> entitiesById = new HashMap<>();
         entitiesById.put(new Id(MVEntity4DataNegotiationMother.sample2().id()), new Entity(EntityMother.PRODUCT_OFFERING_2));
-        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sampleScorpio4().id()), new Entity(EntityMother.PRODUCT_OFFERING_4));
+        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sample4().id()), new Entity(EntityMother.PRODUCT_OFFERING_4));
 
         List<MVEntity4DataNegotiation> allMVEntity4DataNegotiation = new ArrayList<>();
-        allMVEntity4DataNegotiation.add(MVEntity4DataNegotiationMother.sampleScorpio4());
+        allMVEntity4DataNegotiation.add(MVEntity4DataNegotiationMother.sample4());
 
         Map<Id, HashAndHashLink> existingEntitiesOriginalValidationDataById = new HashMap<>();
         existingEntitiesOriginalValidationDataById.put(new Id(MVEntity4DataNegotiationMother.sample2().id()), new HashAndHashLink(MVEntity4DataNegotiationMother.sample2().hash(), MVEntity4DataNegotiationMother.sample2().hashlink()));
@@ -186,7 +186,7 @@ class DataVerificationJobTest {
 
         var mvEntity4DataNegotiationSentToAuditRecord = mvEntity4DataNegotiationCaptor.getAllValues();
 
-        assertThat(mvEntity4DataNegotiationSentToAuditRecord.get(0)).isEqualTo(MVEntity4DataNegotiationMother.sampleScorpio4());
+        assertThat(mvEntity4DataNegotiationSentToAuditRecord.get(0)).isEqualTo(MVEntity4DataNegotiationMother.sample4());
         assertThat(mvEntity4DataNegotiationSentToAuditRecord.get(1)).isEqualTo(expectedMVEntity4DataNegotiationSample4);
     }
 
@@ -206,10 +206,10 @@ class DataVerificationJobTest {
 
         Map<Id, Entity> entitiesById = new HashMap<>();
         entitiesById.put(new Id(MVEntity4DataNegotiationMother.sample2().id()), new Entity(EntityMother.PRODUCT_OFFERING_2));
-        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sampleScorpio4().id()), new Entity(EntityMother.PRODUCT_OFFERING_4));
+        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sample4().id()), new Entity(EntityMother.PRODUCT_OFFERING_4));
 
         List<MVEntity4DataNegotiation> allMVEntity4DataNegotiation = new ArrayList<>();
-        allMVEntity4DataNegotiation.add(MVEntity4DataNegotiationMother.sampleScorpio4());
+        allMVEntity4DataNegotiation.add(MVEntity4DataNegotiationMother.sample4());
 
         Map<Id, HashAndHashLink> existingEntitiesOriginalValidationDataById = new HashMap<>();
         existingEntitiesOriginalValidationDataById.put(new Id(MVEntity4DataNegotiationMother.sample2().id()), new HashAndHashLink(MVEntity4DataNegotiationMother.sample2().hash(), MVEntity4DataNegotiationMother.sample2().hashlink()));
@@ -270,11 +270,11 @@ class DataVerificationJobTest {
 
         Map<Id, Entity> entitiesById = new HashMap<>();
         entitiesById.put(new Id(MVEntity4DataNegotiationMother.sample2().id()), new Entity(EntityMother.PRODUCT_OFFERING_2));
-        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sampleScorpio4().id()), new Entity(EntityMother.PRODUCT_OFFERING_4));
+        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sample4().id()), new Entity(EntityMother.PRODUCT_OFFERING_4));
 
         List<MVEntity4DataNegotiation> allMVEntity4DataNegotiation = new ArrayList<>();
         allMVEntity4DataNegotiation.add(MVEntity4DataNegotiationMother.sample2());
-        allMVEntity4DataNegotiation.add(MVEntity4DataNegotiationMother.sampleScorpio4());
+        allMVEntity4DataNegotiation.add(MVEntity4DataNegotiationMother.sample4());
 
         Map<Id, HashAndHashLink> existingEntitiesOriginalValidationDataById = new HashMap<>();
         existingEntitiesOriginalValidationDataById.put(new Id(MVEntity4DataNegotiationMother.sample2().id()), new HashAndHashLink(MVEntity4DataNegotiationMother.sample2().hash(), MVEntity4DataNegotiationMother.sample2().hashlink()));

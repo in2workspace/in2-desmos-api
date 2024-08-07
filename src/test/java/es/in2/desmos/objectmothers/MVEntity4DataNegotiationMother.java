@@ -19,41 +19,43 @@ public final class MVEntity4DataNegotiationMother {
     public static final String LAUNCHED = "Launched";
     public static final String VALID_FOR = "2024-01-01T00:00:00.000Z";
     private static final String PRODUCT_OFFERING_TYPE_NAME = "ProductOffering";
+    private static final String CATEGORY_TYPE_NAME = "category";
+    private static final String CATALOG_TYPE_NAME = "catalog";
 
     private MVEntity4DataNegotiationMother() {
     }
 
     public static @NotNull MVEntity4DataNegotiation sample1() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
-        return createSampleWithScorpioHashlink(EntityMother.PRODUCT_OFFERING_1);
+        return createSampleWithSameHashAndHashlink(EntityMother.PRODUCT_OFFERING_1);
     }
 
     public static @NotNull MVEntity4DataNegotiation sample1BadHash() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
-        var sample = createSampleWithScorpioHashlink(EntityMother.PRODUCT_OFFERING_1);
+        var sample = createSampleWithSameHashAndHashlink(EntityMother.PRODUCT_OFFERING_1);
         return new MVEntity4DataNegotiation(sample.id(), sample.type(), sample.version(), sample.lastUpdate(), sample.lifecycleStatus(), sample.validFor(), "8ce0461d10e02556d3f16e21c8ac662c037f8b39efd059186b070f9aad8c00f0", null);
     }
 
     public static @NotNull MVEntity4DataNegotiation sample2() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
-        var sample = createSampleWithScorpioHashlink(EntityMother.PRODUCT_OFFERING_2);
+        var sample = createSampleWithSameHashAndHashlink(EntityMother.PRODUCT_OFFERING_2);
         var hashlink = ApplicationUtils.calculateHashLink(sample2VersionOld().hashlink(), sample.hash());
         return new MVEntity4DataNegotiation(sample.id(), sample.type(), sample.version(), sample.lastUpdate(), sample.lifecycleStatus(), sample.validFor(), sample.hash(), hashlink);
     }
 
     public static @NotNull MVEntity4DataNegotiation sample2VersionOld() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
-        return createSampleWithScorpioHashlink(EntityMother.PRODUCT_OFFERING_2_OLD);
+        return createSampleWithSameHashAndHashlink(EntityMother.PRODUCT_OFFERING_2_OLD);
     }
 
     public static @NotNull MVEntity4DataNegotiation sample3() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
-        var sample = createSampleWithScorpioHashlink(EntityMother.PRODUCT_OFFERING_3);
+        var sample = createSampleWithSameHashAndHashlink(EntityMother.PRODUCT_OFFERING_3);
         var hashlink = ApplicationUtils.calculateHashLink(sample3TimestampOld().hashlink(), sample.hash());
         return new MVEntity4DataNegotiation(sample.id(), sample.type(), sample.version(), sample.lastUpdate(), sample.lifecycleStatus(), sample.validFor(), sample.hash(), hashlink);
     }
 
     public static @NotNull MVEntity4DataNegotiation sample3TimestampOld() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
-        return createSampleWithScorpioHashlink(EntityMother.PRODUCT_OFFERING_3_OLD);
+        return createSampleWithSameHashAndHashlink(EntityMother.PRODUCT_OFFERING_3_OLD);
     }
 
     public static @NotNull MVEntity4DataNegotiation sample4() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
-        return createSampleWithScorpioHashlink(EntityMother.PRODUCT_OFFERING_4);
+        return createSampleWithSameHashAndHashlink(EntityMother.PRODUCT_OFFERING_4);
     }
 
     public static @NotNull MVEntity4DataNegotiation sampleLaunched() {
@@ -76,45 +78,20 @@ public final class MVEntity4DataNegotiationMother {
         return new MVEntity4DataNegotiation("urn:" + PRODUCT_OFFERING_TYPE_NAME + ":1", PRODUCT_OFFERING_TYPE_NAME, "1.9", "2024-06-02T12:00:00Z", LAUNCHED, "2100-01-01T00:00:00.000Z", null, null);
     }
 
-    public static @NotNull MVEntity4DataNegotiation sampleScorpio3() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
-//        return getSampleScorpio(sample3(), "8ef9cbb9bd057ab75dac62ee13aca54e1491e6b6c8f64d7ca15050ade0c2bcf5", "fa54");
-        return sample3();
-    }
-
-    public static @NotNull MVEntity4DataNegotiation sampleScorpio4() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
-//        return getSampleScorpio(sample4(), "fbf101c522188d9663882bb0b143539463d2a034bf5622f3c85ffc35e2e15f03", "fa548d49b6143bbd40735d85fac87ee482162919ee51a01d7ed89dbd10f950ac6b6a");
-        return sample4();
-    }
-
-    public static @NotNull MVEntity4DataNegotiation sampleDataSyncService1() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
-//        return getSampleScorpio(sample1(), "5ee5336326e2e49c09f08981891e3600d089c7210089efa0809493a01de15cba", "fa547074ad3789791877a4429d478a57a91c34ec709719fb61211540a5786fb65cf6");
-        return sample1();
-    }
-
-    public static @NotNull MVEntity4DataNegotiation sampleDataSyncService2Old() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
-//        return getSampleScorpio(sample2VersionOld(), "86a86ae657608e86529dce432932710b65cf8f62cda4ade599b0904fa0ba5dd9", "fa54");
-        return sample2VersionOld();
-    }
-
-    public static @NotNull MVEntity4DataNegotiation sampleDataSyncService3() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
-//        return getSampleScorpio(sample3(), "8ef9cbb9bd057ab75dac62ee13aca54e1491e6b6c8f64d7ca15050ade0c2bcf5", "fa54");
-        return sample3();
-    }
-
     public static @NotNull MVEntity4DataNegotiation category1() {
-        return new MVEntity4DataNegotiation("urn:category:1", "category", "1.2", "2024-09-05T12:00:00Z", LAUNCHED, VALID_FOR, "prova", "prova");
+        return new MVEntity4DataNegotiation("urn:" + CATEGORY_TYPE_NAME + ":1", CATEGORY_TYPE_NAME, "1.2", "2024-09-05T12:00:00Z", LAUNCHED, VALID_FOR, "prova", "prova");
     }
 
     public static @NotNull MVEntity4DataNegotiation category2() {
-        return new MVEntity4DataNegotiation("urn:category:2", "category", "1.2", "2024-09-05T12:00:00Z", LAUNCHED, VALID_FOR, "prova", "prova");
+        return new MVEntity4DataNegotiation("urn:" + CATEGORY_TYPE_NAME + ":2", CATEGORY_TYPE_NAME, "1.2", "2024-09-05T12:00:00Z", LAUNCHED, VALID_FOR, "prova", "prova");
     }
 
     public static @NotNull MVEntity4DataNegotiation catalog1() {
-        return new MVEntity4DataNegotiation("urn:catalog:1", "catalog", "1.2", "2024-09-05T12:00:00Z", LAUNCHED, VALID_FOR, "prova", "prova");
+        return new MVEntity4DataNegotiation("urn:" + CATALOG_TYPE_NAME + ":1", CATALOG_TYPE_NAME, "1.2", "2024-09-05T12:00:00Z", LAUNCHED, VALID_FOR, "prova", "prova");
     }
 
     public static @NotNull MVEntity4DataNegotiation catalog2() {
-        return new MVEntity4DataNegotiation("urn:catalog:2", "catalog", "1.2", "2024-09-05T12:00:00Z", LAUNCHED, VALID_FOR, "prova", "prova");
+        return new MVEntity4DataNegotiation("urn:" + CATALOG_TYPE_NAME + ":2", CATALOG_TYPE_NAME, "1.2", "2024-09-05T12:00:00Z", LAUNCHED, VALID_FOR, "prova", "prova");
     }
 
     public static @NotNull MVEntity4DataNegotiation randomIdAndVersion() {
@@ -191,19 +168,7 @@ public final class MVEntity4DataNegotiationMother {
         return initialEntities;
     }
 
-    private static MVEntity4DataNegotiation createSampleWithSameHashlink(String entityMotherJson) throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
-        JSONObject jsonObject = new JSONObject(entityMotherJson);
-        String id = jsonObject.getString("id");
-        String type = jsonObject.getString("type");
-        String version = jsonObject.getString("version");
-        String lastUpdate = jsonObject.getString("lastUpdate");
-        String lifecycleStatus = jsonObject.getString("lifecycleStatus");
-        String validFor = jsonObject.getJSONObject("validFor").getString("startDateTime");
-        String hash = ApplicationUtils.calculateSHA256(entityMotherJson);
-        return new MVEntity4DataNegotiation(id, type, version, lastUpdate, lifecycleStatus, validFor, hash, hash);
-    }
-
-    private static MVEntity4DataNegotiation createSampleWithScorpioHashlink(String entityMotherJson) throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
+    private static MVEntity4DataNegotiation createSampleWithSameHashAndHashlink(String entityMotherJson) throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         JSONObject jsonObject = new JSONObject(entityMotherJson);
         String id = jsonObject.getString("id");
         String type = jsonObject.getString("type");
@@ -213,10 +178,6 @@ public final class MVEntity4DataNegotiationMother {
         String validFor = jsonObject.getJSONObject("validFor").getJSONObject("value").getString("startDateTime");
         String hash = ApplicationUtils.calculateSHA256(entityMotherJson);
         return new MVEntity4DataNegotiation(id, type, version, lastUpdate, lifecycleStatus, validFor, hash, hash);
-    }
-
-    private static MVEntity4DataNegotiation getSampleScorpio(MVEntity4DataNegotiation sample, String hash, String hashLink){
-        return new MVEntity4DataNegotiation(sample.id(), sample.type(), sample.version(), sample.lastUpdate(), sample.lifecycleStatus(), sample.validFor(), hash, hashLink);
     }
 
     private static String generateRandomSha256() {

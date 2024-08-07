@@ -28,8 +28,8 @@ public final class DiscoverySyncRequestMother {
                 List.of(
                         MVEntity4DataNegotiationMother.sample1(),
                         MVEntity4DataNegotiationMother.sample2(),
-                        MVEntity4DataNegotiationMother.sampleScorpio3(),
-                        MVEntity4DataNegotiationMother.sampleScorpio4());
+                        MVEntity4DataNegotiationMother.sample3(),
+                        MVEntity4DataNegotiationMother.sample4());
 
         return new DiscoverySyncRequest(issuer, MVEntity4DataNegotiationIds);
     }

@@ -51,8 +51,8 @@ class DataNegotiationJobTests {
         externalMVENtities4DataNegotiationByIssuer.put(issuer1, externalMVEntitiesIssuer1);
         Issuer issuer2 = new Issuer("http://example2.org");
         var externalMVEntitiesIssuer2 =
-                List.of(MVEntity4DataNegotiationMother.sampleScorpio3(),
-                        MVEntity4DataNegotiationMother.sampleScorpio4());
+                List.of(MVEntity4DataNegotiationMother.sample3(),
+                        MVEntity4DataNegotiationMother.sample4());
 
         externalMVENtities4DataNegotiationByIssuer.put(issuer2, externalMVEntitiesIssuer2);
 

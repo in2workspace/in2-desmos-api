@@ -118,8 +118,8 @@ class DataSyncServiceIT {
 
         assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sample1().id(), EntityMother.scorpioJson1WithoutRelationship());
         assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sample2().id(), EntityMother.scorpioJson2WithoutRelationship());
-        assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio3().id(), EntityMother.scorpioJson3WithoutRelationship());
-        assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio4().id(), EntityMother.scorpioJson4WithoutRelationship());
+        assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sample3().id(), EntityMother.scorpioJson3WithoutRelationship());
+        assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sample4().id(), EntityMother.scorpioJson4WithoutRelationship());
     }
 
     @Test
@@ -196,8 +196,8 @@ class DataSyncServiceIT {
         try {
             assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sample1().id(), EntityMother.scorpioJson1WithoutRelationship());
             assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sample2().id(), EntityMother.scorpioJson2WithoutRelationship());
-            assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio3().id(), EntityMother.scorpioJson3WithoutRelationship());
-            assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio4().id(), EntityMother.scorpioJson4WithoutRelationship());
+            assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sample3().id(), EntityMother.scorpioJson3WithoutRelationship());
+            assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sample4().id(), EntityMother.scorpioJson4WithoutRelationship());
         } catch (JSONException | NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
@@ -252,8 +252,8 @@ class DataSyncServiceIT {
 
         assertAuditRecordEntityIsExpected(MVEntity4DataNegotiationMother.sample1().id(), MVEntity4DataNegotiationMother.sample1(), "http://example.org");
         assertAuditRecordEntityIsExpected(MVEntity4DataNegotiationMother.sample2().id(), MVEntity4DataNegotiationMother.sample2(), issuer);
-        assertAuditRecordEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio3().id(), MVEntity4DataNegotiationMother.sampleScorpio3(), "http://example.org");
-        assertAuditRecordEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio4().id(), MVEntity4DataNegotiationMother.sampleScorpio4(), issuer);
+        assertAuditRecordEntityIsExpected(MVEntity4DataNegotiationMother.sample3().id(), MVEntity4DataNegotiationMother.sample3(), "http://example.org");
+        assertAuditRecordEntityIsExpected(MVEntity4DataNegotiationMother.sample4().id(), MVEntity4DataNegotiationMother.sample4(), issuer);
 
 
         RecordedRequest request = mockWebServer.takeRequest();
@@ -380,9 +380,9 @@ class DataSyncServiceIT {
         ScorpioInflator.addInitialEntitiesToContextBroker(brokerUrl, responseEntities);
 
         return List.of(
-                MVEntity4DataNegotiationMother.sampleDataSyncService1(),
-                MVEntity4DataNegotiationMother.sampleDataSyncService2Old(),
-                MVEntity4DataNegotiationMother.sampleDataSyncService3());
+                MVEntity4DataNegotiationMother.sample1(),
+                MVEntity4DataNegotiationMother.sample2VersionOld(),
+                MVEntity4DataNegotiationMother.sample3());
     }
 
     private void removeInitialEntitiesInScorpio() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
