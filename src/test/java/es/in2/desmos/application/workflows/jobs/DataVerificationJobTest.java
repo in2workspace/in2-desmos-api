@@ -56,7 +56,7 @@ class DataVerificationJobTest {
 
         String processId = "0";
 
-        when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sampleScorpio2().id())).thenReturn(Mono.just(AuditRecord.builder().entityHashLink("fa54").build()));
+        when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sampleScorpio2().id())).thenReturn(Mono.just(AuditRecord.builder().entityHashLink(MVEntity4DataNegotiationMother.sample2VersionOld().hashlink()).build()));
 
         when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any())).thenReturn(Mono.empty());
 
@@ -92,7 +92,7 @@ class DataVerificationJobTest {
 
         String processId = "0";
 
-        when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sampleScorpio2().id())).thenReturn(Mono.just(AuditRecord.builder().entityId(MVEntity4DataNegotiationMother.sampleScorpio2().id()).entityHashLink("fa54").build()));
+        when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sampleScorpio2().id())).thenReturn(Mono.just(AuditRecord.builder().entityId(MVEntity4DataNegotiationMother.sampleScorpio2().id()).entityHashLink(MVEntity4DataNegotiationMother.sample2VersionOld().hashlink()).build()));
 
         when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any())).thenReturn(Mono.empty());
 
@@ -119,7 +119,7 @@ class DataVerificationJobTest {
                         MVEntity4DataNegotiationMother.sampleScorpio2().lifecycleStatus(),
                         MVEntity4DataNegotiationMother.sampleScorpio2().validFor(),
                         MVEntity4DataNegotiationMother.sampleScorpio2().hash(),
-                        "fa54");
+                        MVEntity4DataNegotiationMother.sample2VersionOld().hashlink());
 
         Mono<Void> result = dataVerificationJob.verifyData(processId, issuer, Mono.just(entitiesById), Mono.just(allMVEntity4DataNegotiation), entitySyncResponseMono, Mono.just(existingEntitiesOriginalValidationDataById));
 
@@ -144,8 +144,8 @@ class DataVerificationJobTest {
         String processId = "0";
 
         when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sampleScorpio2().id()))
-                .thenReturn(Mono.just(AuditRecord.builder().entityId(MVEntity4DataNegotiationMother.sampleScorpio2().id()).entityHashLink("fa54").build()))
-                .thenReturn(Mono.just(AuditRecord.builder().entityId(MVEntity4DataNegotiationMother.sampleScorpio2().id()).entityId("").entityHashLink("fa54").build()));
+                .thenReturn(Mono.just(AuditRecord.builder().entityId(MVEntity4DataNegotiationMother.sampleScorpio2().id()).entityHashLink(MVEntity4DataNegotiationMother.sample2VersionOld().hashlink()).build()))
+                .thenReturn(Mono.just(AuditRecord.builder().entityId(MVEntity4DataNegotiationMother.sampleScorpio2().id()).entityId("").entityHashLink(MVEntity4DataNegotiationMother.sample2VersionOld().hashlink()).build()));
 
         when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any())).thenReturn(Mono.empty());
 
@@ -196,7 +196,7 @@ class DataVerificationJobTest {
 
         String processId = "0";
 
-        when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sampleScorpio2().id())).thenReturn(Mono.just(AuditRecord.builder().entityId(MVEntity4DataNegotiationMother.sampleScorpio2().id()).entityHashLink("fa54").build()));
+        when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sampleScorpio2().id())).thenReturn(Mono.just(AuditRecord.builder().entityId(MVEntity4DataNegotiationMother.sampleScorpio2().id()).entityHashLink(MVEntity4DataNegotiationMother.sample2VersionOld().hashlink()).build()));
 
         when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any())).thenReturn(Mono.empty());
 
@@ -260,7 +260,7 @@ class DataVerificationJobTest {
 
         String processId = "0";
 
-        when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sampleScorpio2().id())).thenReturn(Mono.just(AuditRecord.builder().entityHashLink("fa54").build()));
+        when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sampleScorpio2().id())).thenReturn(Mono.just(AuditRecord.builder().entityHashLink(MVEntity4DataNegotiationMother.sample2VersionOld().hashlink()).build()));
 
         when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any())).thenReturn(Mono.empty());
 
