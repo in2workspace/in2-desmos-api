@@ -10,6 +10,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.security.NoSuchAlgorithmException;
+
 public final class EntityMother {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -47,7 +49,7 @@ public final class EntityMother {
         return compressJson(PRODUCT_OFFERING_4);
     }
 
-    private static final String PRODUCT_OFFERING_1 = """
+    public static final String PRODUCT_OFFERING_1 = """
         {
             "id": "urn:ProductOffering:d86735a6-0faa-463d-a872-00b97affa1cb",
             "type": "ProductOffering",
@@ -67,7 +69,7 @@ public final class EntityMother {
             }
         }""";
 
-    private static final String PRODUCT_OFFERING_2 = """
+    public static final String PRODUCT_OFFERING_2 = """
         {
             "id": "urn:ProductOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87",
             "type": "ProductOffering",
@@ -87,7 +89,7 @@ public final class EntityMother {
             }
         }""";
 
-    private static final String PRODUCT_OFFERING_2_OLD = """
+    public static final String PRODUCT_OFFERING_2_OLD = """
         {
             "id": "urn:ProductOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87",
             "type": "ProductOffering",
@@ -107,7 +109,7 @@ public final class EntityMother {
             }
         }""";
 
-    private static final String PRODUCT_OFFERING_3 = """
+    public static final String PRODUCT_OFFERING_3 = """
         {
             "id": "urn:ProductOffering:537e1ee3-0556-4fff-875f-e55bb97e7ab0",
             "type": "ProductOffering",
@@ -127,7 +129,27 @@ public final class EntityMother {
             }
         }""";
 
-    private static final String PRODUCT_OFFERING_4 = """
+    public static final String PRODUCT_OFFERING_3_OLD = """
+        {
+            "id": "urn:ProductOffering:537e1ee3-0556-4fff-875f-e55bb97e7ab0",
+            "type": "ProductOffering",
+            "version": "4.3",
+            "lifecycleStatus": "Launched",
+            "validFor": {
+                "startDateTime": "2024-01-01T00:00:00.000Z"
+            },
+            "lastUpdate": "2020-04-03T12:00:00Z",
+            "productSpecification": {
+                "id": "spec-broadband-001",
+                "name": "1Gbps Broadband Spec"
+            },
+            "productOfferingPrice": {
+                "type": "Relationship",
+                "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c53"
+            }
+        }""";
+
+    public static final String PRODUCT_OFFERING_4 = """
         {
             "id": "urn:ProductOffering:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c",
             "type": "ProductOffering",
@@ -229,7 +251,7 @@ public final class EntityMother {
         return objectMapper.writeValueAsString(jsonNode);
     }
 
-    public static String[] scorpioFullJsonArray() throws JSONException {
+    public static String[] scorpioFullJsonArray() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         return new String[]{
                 scorpioDefaultJson1(),
                 scorpioDefaultJson2(),
@@ -238,7 +260,7 @@ public final class EntityMother {
         };
     }
 
-    public static String scorpioJson2And4() throws JSONException, JsonProcessingException {
+    public static String scorpioJson2And4() throws JSONException, JsonProcessingException, NoSuchAlgorithmException {
         var scorpioJsonNode2 = objectMapper.readTree(scorpioDefaultJson2());
         var scorpioJsonNode4 = objectMapper.readTree(scorpioDefaultJson4());
 
@@ -249,17 +271,17 @@ public final class EntityMother {
         return objectMapper.writeValueAsString(jsonArray);
     }
 
-    public static String scorpioDefaultJson1() throws JSONException {
+    public static String scorpioDefaultJson1() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample1();
         return getScorpioProductOfferingString(mvEntity4DataNegotiation);
     }
 
-    public static String scorpioDefaultJson2() throws JSONException {
+    public static String scorpioDefaultJson2() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample2();
         return getScorpioProductOfferingString(mvEntity4DataNegotiation);
     }
 
-    public static String scorpioDefaultJson3() throws JSONException {
+    public static String scorpioDefaultJson3() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample3();
         return getScorpioProductOfferingString(mvEntity4DataNegotiation);
     }
@@ -269,17 +291,17 @@ public final class EntityMother {
         return getScorpioProductOfferingString(mvEntity4DataNegotiation);
     }
 
-    public static String scorpioJson1WithoutRelationship() throws JSONException {
+    public static String scorpioJson1WithoutRelationship() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample1();
         return getEntityJsonScorpioStringWithoutRelationship(mvEntity4DataNegotiation);
     }
 
-    public static String scorpioJson2WithoutRelationship() throws JSONException {
+    public static String scorpioJson2WithoutRelationship() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample2();
         return getEntityJsonScorpioStringWithoutRelationship(mvEntity4DataNegotiation);
     }
 
-    public static String scorpioJson3WithoutRelationship() throws JSONException {
+    public static String scorpioJson3WithoutRelationship() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample3();
         return getEntityJsonScorpioStringWithoutRelationship(mvEntity4DataNegotiation);
     }

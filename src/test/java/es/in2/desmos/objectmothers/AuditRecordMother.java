@@ -1,11 +1,14 @@
 package es.in2.desmos.objectmothers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.AuditRecordStatus;
 import es.in2.desmos.domain.models.AuditRecordTrader;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONException;
 
+import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -35,7 +38,7 @@ public final class AuditRecordMother {
                 .build();
     }
 
-    public static @NotNull List<AuditRecord> list3And4() {
+    public static @NotNull List<AuditRecord> list3And4() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         List<AuditRecord> auditRecordList = new ArrayList<>();
         var sample3 = MVEntity4DataNegotiationMother.sample3();
         var sample4 = MVEntity4DataNegotiationMother.sample4();

@@ -1,10 +1,13 @@
 package es.in2.desmos.objectmothers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import es.in2.desmos.domain.models.BrokerEntityValidFor;
 import es.in2.desmos.domain.models.BrokerEntityWithIdTypeLastUpdateAndVersion;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONException;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +15,7 @@ public final class MVBrokerEntity4DataNegotiationMother {
     private MVBrokerEntity4DataNegotiationMother() {
     }
 
-    public static @NotNull List<BrokerEntityWithIdTypeLastUpdateAndVersion> list3And4() {
+    public static @NotNull List<BrokerEntityWithIdTypeLastUpdateAndVersion> list3And4() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         List<BrokerEntityWithIdTypeLastUpdateAndVersion> MVEntity4DataNegotiationList = new ArrayList<>();
         var sample3 = MVEntity4DataNegotiationMother.sample3();
         var sample4 = MVEntity4DataNegotiationMother.sample4();

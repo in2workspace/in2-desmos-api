@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -16,7 +17,7 @@ public final class EntitySyncResponseMother {
     private EntitySyncResponseMother() {
     }
 
-    public static String getSampleBase64() throws IOException, JSONException {
+    public static String getSampleBase64() throws IOException, JSONException, NoSuchAlgorithmException {
         ArrayNode jsonArray = objectMapper.createArrayNode();
 
         for (var item : EntityMother.scorpioFullJsonArray()) {
@@ -28,7 +29,7 @@ public final class EntitySyncResponseMother {
         return objectMapper.writeValueAsString(jsonArray);
     }
 
-    public static String getSample2Base64() throws IOException, JSONException {
+    public static String getSample2Base64() throws IOException, JSONException, NoSuchAlgorithmException {
         String sampleString = objectMapper.readTree(EntityMother.scorpioDefaultJson2()).toString();
         String sampleBase64 = Base64.getEncoder().encodeToString(sampleString.getBytes());
         List<String> sampleList = new ArrayList<>();
@@ -44,7 +45,7 @@ public final class EntitySyncResponseMother {
         return objectMapper.writeValueAsString(sampleList);
     }
 
-    public static String getSample2And4Base64() throws IOException, JSONException {
+    public static String getSample2And4Base64() throws IOException, JSONException, NoSuchAlgorithmException {
         String sample2String = objectMapper.readTree(EntityMother.scorpioDefaultJson2()).toString();
         String sample2Base64 = Base64.getEncoder().encodeToString(sample2String.getBytes());
 

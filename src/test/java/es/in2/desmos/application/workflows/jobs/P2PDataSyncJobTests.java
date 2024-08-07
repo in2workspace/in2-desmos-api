@@ -1,5 +1,6 @@
 package es.in2.desmos.application.workflows.jobs;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import es.in2.desmos.application.workflows.jobs.impl.P2PDataSyncJobImpl;
 import es.in2.desmos.domain.events.DataNegotiationEventPublisher;
 import es.in2.desmos.domain.models.*;
@@ -19,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -53,7 +55,7 @@ class P2PDataSyncJobTests {
     private DataNegotiationJob dataNegotiationJob;
 
     @Test
-    void itShouldUpsertEntitiesFromOtherTwoAccessNodes(){
+    void itShouldUpsertEntitiesFromOtherTwoAccessNodes() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         String processId = "0";
 
         List<BrokerEntityWithIdTypeLastUpdateAndVersion> brokerEntities = MVBrokerEntity4DataNegotiationMother.list3And4();
@@ -132,7 +134,7 @@ class P2PDataSyncJobTests {
     }
 
     @Test
-    void itShouldReturnInternalEntities() {
+    void itShouldReturnInternalEntities() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         List<MVEntity4DataNegotiation> internalEntities = MVEntity4DataNegotiationMother.list3And4();
         internalEntities.addAll(MVEntity4DataNegotiationMother.listCatalogs());
         internalEntities.addAll(MVEntity4DataNegotiationMother.listCategories());

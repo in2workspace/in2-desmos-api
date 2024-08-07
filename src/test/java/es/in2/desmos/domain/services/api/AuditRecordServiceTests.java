@@ -11,6 +11,7 @@ import es.in2.desmos.domain.repositories.AuditRecordRepository;
 import es.in2.desmos.domain.services.api.impl.AuditRecordServiceImpl;
 import es.in2.desmos.objectmothers.AuditRecordMother;
 import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
+import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
@@ -20,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -128,7 +130,7 @@ class AuditRecordServiceTests {
 
 
     @Test
-    void itShouldBuildAndSaveAuditRecordFromDataSync() {
+    void itShouldBuildAndSaveAuditRecordFromDataSync() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         String processId = "0";
         String issuer = "http://example.org";
         MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample1();
@@ -320,7 +322,7 @@ class AuditRecordServiceTests {
 
 
     @Test
-    void itShouldReturnErrorWhenAuditRecordCreatesIncorrectJson() throws JsonProcessingException {
+    void itShouldReturnErrorWhenAuditRecordCreatesIncorrectJson() throws JsonProcessingException, JSONException, NoSuchAlgorithmException {
         String processId = "0";
         String issuer = "http://example.org";
         MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample1();

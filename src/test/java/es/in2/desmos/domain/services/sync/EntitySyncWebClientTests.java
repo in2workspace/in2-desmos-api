@@ -16,6 +16,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.security.NoSuchAlgorithmException;
+
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,7 +48,7 @@ class EntitySyncWebClientTests {
     private WebClient.RequestHeadersSpec requestHeadersSpec;
 
     @Test
-    void itShouldReturnEntitySyncResponseWhenMakeRequest() throws JsonProcessingException, JSONException {
+    void itShouldReturnEntitySyncResponseWhenMakeRequest() throws JsonProcessingException, JSONException, NoSuchAlgorithmException {
         String processId = "0";
 
         String issuer = "http://example.org";

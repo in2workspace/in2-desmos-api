@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,7 +49,7 @@ class DataVerificationJobTest {
 
 
     @Test
-    void itShouldBuildAnSaveAuditRecord() throws JsonProcessingException, JSONException {
+    void itShouldBuildAnSaveAuditRecord() throws JsonProcessingException, JSONException, NoSuchAlgorithmException {
         DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.newToSync4AndExistingToSync2();
 
         Mono<String> entitySyncResponseMono = Mono.just(EntityMother.scorpioJson2And4());
@@ -86,7 +87,7 @@ class DataVerificationJobTest {
     }
 
     @Test
-    void itShouldBuildAnSaveAuditRecordForSubEntity() throws JsonProcessingException, JSONException {
+    void itShouldBuildAnSaveAuditRecordForSubEntity() throws JsonProcessingException, JSONException, NoSuchAlgorithmException {
         Mono<String> entitySyncResponseMono = Mono.just(EntityMother.scorpioJson2And4());
 
         String processId = "0";
@@ -137,7 +138,7 @@ class DataVerificationJobTest {
     }
 
     @Test
-    void itShouldBuildAnSaveAuditRecordForSubEntityWhenNotExistsInAuditRecordDB() throws JsonProcessingException, JSONException {
+    void itShouldBuildAnSaveAuditRecordForSubEntityWhenNotExistsInAuditRecordDB() throws JsonProcessingException, JSONException, NoSuchAlgorithmException {
         Mono<String> entitySyncResponseMono = Mono.just(EntityMother.scorpioJson2And4());
 
         String processId = "0";
@@ -190,7 +191,7 @@ class DataVerificationJobTest {
     }
 
     @Test
-    void itShouldReturnInvalidJsonProcessingExceptionWhenEntityIsInvalid() throws JsonProcessingException, JSONException {
+    void itShouldReturnInvalidJsonProcessingExceptionWhenEntityIsInvalid() throws JsonProcessingException, JSONException, NoSuchAlgorithmException {
         Mono<String> entitySyncResponseMono = Mono.just(EntityMother.scorpioJson2And4());
 
         String processId = "0";
@@ -222,7 +223,7 @@ class DataVerificationJobTest {
     }
 
     @Test
-    void itShouldReturnInvalidConsistencyException() throws JsonProcessingException, JSONException {
+    void itShouldReturnInvalidConsistencyException() throws JsonProcessingException, JSONException, NoSuchAlgorithmException {
         Mono<String> entitySyncResponseMono = Mono.just(EntityMother.getFullJsonList());
 
         String processId = "0";
@@ -254,7 +255,7 @@ class DataVerificationJobTest {
     }
 
     @Test
-    void itShouldUpsertEntities() throws JsonProcessingException, JSONException {
+    void itShouldUpsertEntities() throws JsonProcessingException, JSONException, NoSuchAlgorithmException {
         String entitySyncResponse = EntityMother.scorpioJson2And4();
 
         String processId = "0";

@@ -1,8 +1,10 @@
 package es.in2.desmos.domain.events;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import es.in2.desmos.domain.models.DataNegotiationEvent;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
+import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -11,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import reactor.core.publisher.Mono;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
@@ -24,7 +27,7 @@ class DataNegotiationEventPublisherTests {
     private ApplicationEventPublisher applicationEventPublisher;
 
     @Test
-    void itShouldPublicateEvent(){
+    void itShouldPublicateEvent() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
 
         Mono<String> issuer = Mono.just("https://example.org");
         Mono<List<MVEntity4DataNegotiation>> externalEntityIds = Mono.just(MVEntity4DataNegotiationMother.list1And2());

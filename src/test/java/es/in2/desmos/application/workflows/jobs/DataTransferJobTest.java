@@ -22,6 +22,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -57,7 +58,7 @@ class DataTransferJobTest {
     private static int objectMapperReadTreeCounter = 0;
 
     @Test
-    void itShouldRequestEntitiesToExternalAccessNodeFromMultipleIssuers() throws IOException, JSONException {
+    void itShouldRequestEntitiesToExternalAccessNodeFromMultipleIssuers() throws IOException, JSONException, NoSuchAlgorithmException {
         String issuer1 = "https://example1.org";
         String issuer2 = "https://example2.org";
 
@@ -125,7 +126,7 @@ class DataTransferJobTest {
 
 
     @Test
-    void itShouldRequestEntitiesToExternalAccessNode() throws IOException, JSONException {
+    void itShouldRequestEntitiesToExternalAccessNode() throws IOException, JSONException, NoSuchAlgorithmException {
         DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
         Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
 
@@ -167,7 +168,7 @@ class DataTransferJobTest {
     }
 
     @Test
-    void itShouldReturnInvalidIntegrityExceptionWhenHashIsIncorrect() throws IOException, JSONException {
+    void itShouldReturnInvalidIntegrityExceptionWhenHashIsIncorrect() throws IOException, JSONException, NoSuchAlgorithmException {
         DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.badHash();
         Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
 
@@ -189,7 +190,7 @@ class DataTransferJobTest {
     }
 
     @Test
-    void itShouldReturnBadEntitySyncResponseExceptionWhenSyncResponseJsonHasNotArray() throws IOException {
+    void itShouldReturnBadEntitySyncResponseExceptionWhenSyncResponseJsonHasNotArray() throws IOException, JSONException, NoSuchAlgorithmException {
         DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
         Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
 
@@ -209,7 +210,7 @@ class DataTransferJobTest {
     }
 
     @Test
-    void itShouldReturnInvalidSyncResponseExceptionWhenJsonArrayHasNotIdField() {
+    void itShouldReturnInvalidSyncResponseExceptionWhenJsonArrayHasNotIdField() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
         Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
 
@@ -229,7 +230,7 @@ class DataTransferJobTest {
     }
 
     @Test
-    void itShouldReturnJsonProcessingExceptionWhenDecodedJsonArrayIsNotArray() throws JsonProcessingException {
+    void itShouldReturnJsonProcessingExceptionWhenDecodedJsonArrayIsNotArray() throws JsonProcessingException, JSONException, NoSuchAlgorithmException {
         DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
         Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
 
@@ -259,7 +260,7 @@ class DataTransferJobTest {
     }
 
     @Test
-    void itShouldReturnJsonProcessingExceptionWhenBadJsonInEntitySyncResponse() throws JsonProcessingException {
+    void itShouldReturnJsonProcessingExceptionWhenBadJsonInEntitySyncResponse() throws JsonProcessingException, JSONException, NoSuchAlgorithmException {
         DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
         Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
 
@@ -279,7 +280,7 @@ class DataTransferJobTest {
     }
 
     @Test
-    void itShouldReturnJsonProcessingExceptionWhenBadJsonSortingEntities() throws IOException, JSONException {
+    void itShouldReturnJsonProcessingExceptionWhenBadJsonSortingEntities() throws IOException, JSONException, NoSuchAlgorithmException {
         DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
         Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
 
@@ -302,7 +303,7 @@ class DataTransferJobTest {
     }
 
     @Test
-    void itShouldBuildAllMVEntities4DataNegotiation() throws IOException, JSONException {
+    void itShouldBuildAllMVEntities4DataNegotiation() throws IOException, JSONException, NoSuchAlgorithmException {
         DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
         Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
 

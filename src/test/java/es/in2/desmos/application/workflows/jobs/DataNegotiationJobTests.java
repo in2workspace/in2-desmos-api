@@ -1,5 +1,6 @@
 package es.in2.desmos.application.workflows.jobs;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import es.in2.desmos.domain.models.DataNegotiationEvent;
 import es.in2.desmos.domain.models.DataNegotiationResult;
 import es.in2.desmos.domain.models.Issuer;
@@ -7,6 +8,7 @@ import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.application.workflows.jobs.impl.DataNegotiationJobImpl;
 import es.in2.desmos.objectmothers.DataNegotiationResultMother;
 import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
+import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
@@ -14,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +40,7 @@ class DataNegotiationJobTests {
     private ArgumentCaptor<Mono<List<DataNegotiationResult>>> dataNegotiationResultsCaptor;
 
     @Test
-    void itShouldSyncDataWithMultipleIssuers() {
+    void itShouldSyncDataWithMultipleIssuers() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         String processId = "0";
 
         Map<Issuer, List<MVEntity4DataNegotiation>> externalMVENtities4DataNegotiationByIssuer = new HashMap<>();
@@ -77,7 +80,7 @@ class DataNegotiationJobTests {
     }
 
     @Test
-    void itShouldSyncDataWithNewEntitiesToAdd() {
+    void itShouldSyncDataWithNewEntitiesToAdd() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         String issuer = "http://example.org";
         Mono<String> issuerMono = Mono.just(issuer);
 
@@ -115,7 +118,7 @@ class DataNegotiationJobTests {
     }
 
     @Test
-    void itShouldSyncDataWithExistingEntitiesToAddWhenExternalVersionIsAfter() {
+    void itShouldSyncDataWithExistingEntitiesToAddWhenExternalVersionIsAfter() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         String issuer = "http://example.org";
         Mono<String> issuerMono = Mono.just(issuer);
 
@@ -153,7 +156,7 @@ class DataNegotiationJobTests {
     }
 
     @Test
-    void itShouldSyncDataWithExistingEntitiesToAddWhenVersionIsEqualAndExternalLastUpdateIsAfter() {
+    void itShouldSyncDataWithExistingEntitiesToAddWhenVersionIsEqualAndExternalLastUpdateIsAfter() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         String issuer = "http://example.org";
         Mono<String> issuerMono = Mono.just(issuer);
 
@@ -191,7 +194,7 @@ class DataNegotiationJobTests {
     }
 
     @Test
-    void itShouldNotSyncWhenVersionIsNewer() {
+    void itShouldNotSyncWhenVersionIsNewer() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         String issuer = "http://example.org";
         Mono<String> issuerMono = Mono.just(issuer);
 

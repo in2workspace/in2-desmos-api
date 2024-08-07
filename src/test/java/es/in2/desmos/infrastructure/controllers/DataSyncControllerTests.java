@@ -24,6 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -63,7 +64,7 @@ class DataSyncControllerTests {
     }
 
     @Test
-    void itShouldReturnEntityWithIssuer() throws JsonProcessingException {
+    void itShouldReturnEntityWithIssuer() throws JsonProcessingException, JSONException, NoSuchAlgorithmException {
         Mono<DiscoverySyncRequest> discoverySyncRequest = Mono.just(DiscoverySyncRequestMother.list1And2());
         var contextBrokerExternalDomain = "http://example.org";
         DiscoverySyncResponse discoverySyncResponse = DiscoverySyncResponseMother.list3And4(contextBrokerExternalDomain);

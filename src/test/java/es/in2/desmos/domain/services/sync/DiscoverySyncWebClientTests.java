@@ -1,9 +1,11 @@
 package es.in2.desmos.domain.services.sync;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import es.in2.desmos.domain.models.DiscoverySyncRequest;
 import es.in2.desmos.domain.models.DiscoverySyncResponse;
 import es.in2.desmos.domain.services.sync.impl.DiscoverySyncWebClientImpl;
 import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
+import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,6 +15,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import java.security.NoSuchAlgorithmException;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -46,7 +50,7 @@ class DiscoverySyncWebClientTests {
     private WebClient.RequestHeadersSpec requestHeadersSpec;
 
     @Test
-    void itShouldReturnEntitySyncResponseWhenMakeRequest() {
+    void itShouldReturnEntitySyncResponseWhenMakeRequest() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         String processId = "0";
 
         String issuer = "http://example.org";

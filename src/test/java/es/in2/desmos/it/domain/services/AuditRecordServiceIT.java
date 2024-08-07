@@ -1,5 +1,6 @@
 package es.in2.desmos.it.domain.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.AuditRecordStatus;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
@@ -7,6 +8,7 @@ import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.it.ContainerManager;
 import es.in2.desmos.objectmothers.AuditRecordMother;
 import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
+import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -19,6 +21,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,7 +45,7 @@ class AuditRecordServiceIT {
     }
 
     @Test
-    void itShouldBuildAndSaveAuditRecordFromDataSync() {
+    void itShouldBuildAndSaveAuditRecordFromDataSync() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         String processId = "0";
         String issuer = "http://example.org";
         MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample1();

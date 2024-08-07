@@ -31,6 +31,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -73,21 +74,21 @@ class DataSyncServiceIT {
     }
 
     @BeforeEach
-    void setUp() throws IOException, JSONException {
+    void setUp() throws IOException, JSONException, NoSuchAlgorithmException {
         initialMvEntity4DataNegotiationList = createInitialEntitiesInScorpio();
         createInitialEntitiesInAuditRecord(auditRecordService, initialMvEntity4DataNegotiationList);
         startMockWebServer();
     }
 
     @AfterEach
-    void setDown() throws IOException {
+    void setDown() throws IOException, JSONException, NoSuchAlgorithmException {
         removeInitialEntitiesInScorpio();
         removeInitialEntitiesInAuditRecord(auditRecordService, initialMvEntity4DataNegotiationList);
         stopMockWebServer();
     }
 
     @Test
-    void itShouldUpsertEntitiesFromOtherAccessNodesWhenDiscoverySync() throws IOException, JSONException {
+    void itShouldUpsertEntitiesFromOtherAccessNodesWhenDiscoverySync() throws IOException, JSONException, NoSuchAlgorithmException {
         try (MockWebServer mockWebServer2 = new MockWebServer();
              MockWebServer mockWebServer3 = new MockWebServer()) {
 
@@ -122,7 +123,7 @@ class DataSyncServiceIT {
     }
 
     @Test
-    void itShouldReturnMissingExternalEntities() throws JsonProcessingException, JSONException {
+    void itShouldReturnMissingExternalEntities() throws JsonProcessingException, JSONException, NoSuchAlgorithmException {
         DiscoverySyncRequest discoverySyncRequest = DiscoverySyncRequestMother.list1And2();
         Mono<DiscoverySyncRequest> discoverySyncRequestMono = Mono.just(discoverySyncRequest);
 
@@ -151,7 +152,7 @@ class DataSyncServiceIT {
     }
 
     @Test
-    void itShouldUpsertExternalEntities() throws IOException, InterruptedException, JSONException {
+    void itShouldUpsertExternalEntities() throws IOException, InterruptedException, JSONException, NoSuchAlgorithmException {
         var entitySyncResponse = EntitySyncResponseMother.getSample2And4Base64();
         mockWebServer.enqueue(new MockResponse()
                 .setBody(entitySyncResponse));
@@ -197,7 +198,7 @@ class DataSyncServiceIT {
             assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio2().id(), EntityMother.scorpioJson2WithoutRelationship());
             assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio3().id(), EntityMother.scorpioJson3WithoutRelationship());
             assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio4().id(), EntityMother.scorpioJson4WithoutRelationship());
-        } catch (JSONException e) {
+        } catch (JSONException | NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
 
@@ -209,7 +210,7 @@ class DataSyncServiceIT {
     }
 
     @Test
-    void itShouldCreateAuditRecord() throws IOException, InterruptedException, JSONException {
+    void itShouldCreateAuditRecord() throws IOException, InterruptedException, JSONException, NoSuchAlgorithmException {
         var entitySyncResponse = EntitySyncResponseMother.getSample2And4Base64();
         mockWebServer.enqueue(new MockResponse()
                 .setBody(entitySyncResponse));
@@ -372,7 +373,7 @@ class DataSyncServiceIT {
         });
     }
 
-    private @NotNull List<MVEntity4DataNegotiation> createInitialEntitiesInScorpio() throws JsonProcessingException, JSONException {
+    private @NotNull List<MVEntity4DataNegotiation> createInitialEntitiesInScorpio() throws JsonProcessingException, JSONException, NoSuchAlgorithmException {
         String brokerUrl = ContainerManager.getBaseUriForScorpioA();
         String responseEntities = EntityMother.getJsonList1And2OldAnd3();
 
@@ -384,7 +385,7 @@ class DataSyncServiceIT {
                 MVEntity4DataNegotiationMother.sampleDataSyncService3());
     }
 
-    private void removeInitialEntitiesInScorpio() {
+    private void removeInitialEntitiesInScorpio() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         String brokerUrl = ContainerManager.getBaseUriForScorpioA();
         List<String> ids = MVEntity4DataNegotiationMother.fullList().stream().map(MVEntity4DataNegotiation::id).toList();
         ScorpioInflator.deleteInitialEntitiesFromContextBroker(brokerUrl, ids);
