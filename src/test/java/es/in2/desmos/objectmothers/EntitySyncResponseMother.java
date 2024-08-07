@@ -37,7 +37,7 @@ public final class EntitySyncResponseMother {
         return objectMapper.writeValueAsString(sampleList);
     }
 
-    public static String getSample4Base64() throws IOException, JSONException {
+    public static String getSample4Base64() throws IOException, JSONException, NoSuchAlgorithmException {
         String sampleString = objectMapper.readTree(EntityMother.scorpioDefaultJson4()).toString();
         String sampleBase64 = Base64.getEncoder().encodeToString(sampleString.getBytes());
         List<String> sampleList = new ArrayList<>();

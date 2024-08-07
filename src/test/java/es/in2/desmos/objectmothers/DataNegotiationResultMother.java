@@ -59,7 +59,7 @@ public final class DataNegotiationResultMother {
         return new DataNegotiationResult(issuer, newEntitiesToSync, existingEntitiesToSync);
     }
 
-    private static DataNegotiationResult newToScorpioSync4(String issuer) {
+    private static DataNegotiationResult newToScorpioSync4(String issuer) throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         List<MVEntity4DataNegotiation> newEntitiesToSync = List.of(MVEntity4DataNegotiationMother.sampleScorpio4());
         List<MVEntity4DataNegotiation> existingEntitiesToSync = new ArrayList<>();
         return new DataNegotiationResult(issuer, newEntitiesToSync, existingEntitiesToSync);

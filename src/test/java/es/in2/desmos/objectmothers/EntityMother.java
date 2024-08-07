@@ -50,24 +50,39 @@ public final class EntityMother {
     }
 
     public static final String PRODUCT_OFFERING_1 = """
-        {
-            "id": "urn:ProductOffering:d86735a6-0faa-463d-a872-00b97affa1cb",
-            "type": "ProductOffering",
-            "version": "1.2",
-            "lifecycleStatus": "Launched",
-            "validFor": {
-                "startDateTime": "2024-01-01T00:00:00.000Z"
-            },
-            "lastUpdate": "2024-09-05T12:00:00Z",
-            "productSpecification": {
-                "id": "spec-broadband-001",
-                "name": "1Gbps Broadband Spec"
-            },
-            "productOfferingPrice": {
-                "type": "Relationship",
-                "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c51"
+       {
+           "id": "urn:ProductOffering:d86735a6-0faa-463d-a872-00b97affa1cb",
+           "type": "ProductOffering",
+           "version": {
+               "type": "Property",
+               "value": "1.2"
+           },
+           "lifecycleStatus": {
+               "type": "Property",
+               "value": "Launched"
+           },
+           "validFor": {
+               "type": "Property",
+               "value": {
+                   "startDateTime": "2024-01-01T00:00:00.000Z"
+               }
+           },
+           "lastUpdate": {
+               "type": "Property",
+               "value": "2024-09-05T12:00:00Z"
+           },
+           "productOfferingPrice": {
+               "type": "Relationship",
+               "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c51"
+           },
+           "productSpecification": {
+               "type": "Property",
+               "value": {
+                   "name": "1Gbps Broadband Spec",
+                   "id": "spec-broadband-001"
+               }
             }
-        }""";
+       }""";
 
     public static final String PRODUCT_OFFERING_2 = """
         {
@@ -272,8 +287,9 @@ public final class EntityMother {
     }
 
     public static String scorpioDefaultJson1() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
-        MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample1();
-        return getScorpioProductOfferingString(mvEntity4DataNegotiation);
+        /*MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample1();
+        return getScorpioProductOfferingString(mvEntity4DataNegotiation);*/
+        return PRODUCT_OFFERING_1;
     }
 
     public static String scorpioDefaultJson2() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
@@ -286,7 +302,7 @@ public final class EntityMother {
         return getScorpioProductOfferingString(mvEntity4DataNegotiation);
     }
 
-    public static String scorpioDefaultJson4() throws JSONException {
+    public static String scorpioDefaultJson4() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample4();
         return getScorpioProductOfferingString(mvEntity4DataNegotiation);
     }
@@ -306,7 +322,7 @@ public final class EntityMother {
         return getEntityJsonScorpioStringWithoutRelationship(mvEntity4DataNegotiation);
     }
 
-    public static String scorpioJson4WithoutRelationship() throws JSONException {
+    public static String scorpioJson4WithoutRelationship() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample4();
         return getEntityJsonScorpioStringWithoutRelationship(mvEntity4DataNegotiation);
     }
