@@ -26,8 +26,8 @@ public final class DiscoverySyncRequestMother {
     public static @NotNull DiscoverySyncRequest scorpioFullList(String issuer) throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         List<MVEntity4DataNegotiation> MVEntity4DataNegotiationIds =
                 List.of(
-                        MVEntity4DataNegotiationMother.sampleScorpio1(),
-                        MVEntity4DataNegotiationMother.sampleScorpio2(),
+                        MVEntity4DataNegotiationMother.sample1(),
+                        MVEntity4DataNegotiationMother.sample2(),
                         MVEntity4DataNegotiationMother.sampleScorpio3(),
                         MVEntity4DataNegotiationMother.sampleScorpio4());
 

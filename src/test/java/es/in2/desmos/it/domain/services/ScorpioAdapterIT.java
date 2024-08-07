@@ -92,7 +92,7 @@ class ScorpioAdapterIT {
                 .create(entity2Mono)
                 .consumeNextWith(entity2 -> {
                     try {
-                        JSONAssert.assertEquals(EntityMother.scorpioDefaultJson2(), entity2, true);
+                        JSONAssert.assertEquals(EntityMother.PRODUCT_OFFERING_2, entity2, true);
                     } catch (JSONException e) {
                         throw new RuntimeException(e);
                     }
@@ -116,7 +116,7 @@ class ScorpioAdapterIT {
                 .create(entity4Mono)
                 .consumeNextWith(entity4 -> {
                     try {
-                        JSONAssert.assertEquals(EntityMother.scorpioDefaultJson4(), entity4, true);
+                        JSONAssert.assertEquals(EntityMother.PRODUCT_OFFERING_4, entity4, true);
                     } catch (JSONException e) {
                         throw new RuntimeException(e);
                     }

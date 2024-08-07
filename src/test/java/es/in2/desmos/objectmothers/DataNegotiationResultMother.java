@@ -17,8 +17,8 @@ public final class DataNegotiationResultMother {
         String issuer = "http://example.org";
 
         List<MVEntity4DataNegotiation> newEntitiesToSync = List.of(
-                MVEntity4DataNegotiationMother.sampleScorpio1(),
-                MVEntity4DataNegotiationMother.sampleScorpio2());
+                MVEntity4DataNegotiationMother.sample1(),
+                MVEntity4DataNegotiationMother.sample2());
 
         List<MVEntity4DataNegotiation> existingEntitiesToSync =
                 List.of(MVEntity4DataNegotiationMother.sampleScorpio3(),
@@ -43,7 +43,7 @@ public final class DataNegotiationResultMother {
 
     public static DataNegotiationResult newToSync4AndExistingToSync2() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         List<MVEntity4DataNegotiation> newEntitiesToSync = List.of(MVEntity4DataNegotiationMother.sampleScorpio4());
-        List<MVEntity4DataNegotiation> existingEntitiesToSync = List.of(MVEntity4DataNegotiationMother.sampleScorpio2());
+        List<MVEntity4DataNegotiation> existingEntitiesToSync = List.of(MVEntity4DataNegotiationMother.sample2());
         return new DataNegotiationResult("http://example.org", newEntitiesToSync, existingEntitiesToSync);
     }
 
@@ -55,7 +55,7 @@ public final class DataNegotiationResultMother {
 
     public static DataNegotiationResult existingToScorpioSync2(String issuer) throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         List<MVEntity4DataNegotiation> newEntitiesToSync = new ArrayList<>();
-        List<MVEntity4DataNegotiation> existingEntitiesToSync = List.of(MVEntity4DataNegotiationMother.sampleScorpio2());
+        List<MVEntity4DataNegotiation> existingEntitiesToSync = List.of(MVEntity4DataNegotiationMother.sample2());
         return new DataNegotiationResult(issuer, newEntitiesToSync, existingEntitiesToSync);
     }
 

@@ -46,8 +46,8 @@ class DataNegotiationJobTests {
         Map<Issuer, List<MVEntity4DataNegotiation>> externalMVENtities4DataNegotiationByIssuer = new HashMap<>();
         Issuer issuer1 = new Issuer("http://example1.org");
         var externalMVEntitiesIssuer1 =
-                List.of(MVEntity4DataNegotiationMother.sampleScorpio1(),
-                        MVEntity4DataNegotiationMother.sampleScorpio2());
+                List.of(MVEntity4DataNegotiationMother.sample1(),
+                        MVEntity4DataNegotiationMother.sample2());
         externalMVENtities4DataNegotiationByIssuer.put(issuer1, externalMVEntitiesIssuer1);
         Issuer issuer2 = new Issuer("http://example2.org");
         var externalMVEntitiesIssuer2 =

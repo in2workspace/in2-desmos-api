@@ -18,6 +18,7 @@ public final class MVEntity4DataNegotiationMother {
 
     public static final String LAUNCHED = "Launched";
     public static final String VALID_FOR = "2024-01-01T00:00:00.000Z";
+    private static final String PRODUCT_OFFERING_TYPE_NAME = "ProductOffering";
 
     private MVEntity4DataNegotiationMother() {
     }
@@ -56,33 +57,23 @@ public final class MVEntity4DataNegotiationMother {
     }
 
     public static @NotNull MVEntity4DataNegotiation sampleLaunched() {
-        return new MVEntity4DataNegotiation("urn:ProductOffering:1", "ProductOffering", "1.9", "2024-06-02T12:00:00Z", LAUNCHED, VALID_FOR, null, null);
+        return new MVEntity4DataNegotiation("urn:" + PRODUCT_OFFERING_TYPE_NAME + ":1", PRODUCT_OFFERING_TYPE_NAME, "1.9", "2024-06-02T12:00:00Z", LAUNCHED, VALID_FOR, null, null);
     }
 
     public static @NotNull MVEntity4DataNegotiation sampleRetired() {
-        return new MVEntity4DataNegotiation("urn:ProductOffering:2", "ProductOffering", "1.9", "2024-06-02T12:00:00Z", "Retired", VALID_FOR, null, null);
+        return new MVEntity4DataNegotiation("urn:" + PRODUCT_OFFERING_TYPE_NAME + ":2", PRODUCT_OFFERING_TYPE_NAME, "1.9", "2024-06-02T12:00:00Z", "Retired", VALID_FOR, null, null);
     }
 
     public static @NotNull MVEntity4DataNegotiation sampleActive() {
-        return new MVEntity4DataNegotiation("urn:ProductOffering:2", "ProductOffering", "1.9", "2024-06-02T12:00:00Z", "Active", VALID_FOR, null, null);
+        return new MVEntity4DataNegotiation("urn:" + PRODUCT_OFFERING_TYPE_NAME + ":2", PRODUCT_OFFERING_TYPE_NAME, "1.9", "2024-06-02T12:00:00Z", "Active", VALID_FOR, null, null);
     }
 
     public static @NotNull MVEntity4DataNegotiation sampleCorrectValidFor() {
-        return new MVEntity4DataNegotiation("urn:ProductOffering:1", "ProductOffering", "1.9", "2024-06-02T12:00:00Z", LAUNCHED, VALID_FOR, null, null);
+        return new MVEntity4DataNegotiation("urn:" + PRODUCT_OFFERING_TYPE_NAME + ":1", PRODUCT_OFFERING_TYPE_NAME, "1.9", "2024-06-02T12:00:00Z", LAUNCHED, VALID_FOR, null, null);
     }
 
     public static @NotNull MVEntity4DataNegotiation sampleIncorrectValidFor() {
-        return new MVEntity4DataNegotiation("urn:ProductOffering:1", "ProductOffering", "1.9", "2024-06-02T12:00:00Z", LAUNCHED, "2100-01-01T00:00:00.000Z", null, null);
-    }
-
-    public static @NotNull MVEntity4DataNegotiation sampleScorpio1() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
-//        return getSampleScorpio(sample1(), "5ee5336326e2e49c09f08981891e3600d089c7210089efa0809493a01de15cba", "fa547074ad3789791877a4429d478a57a91c34ec709719fb61211540a5786fb65cf6");
-        return sample1();
-    }
-
-    public static @NotNull MVEntity4DataNegotiation sampleScorpio2() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
-//        return getSamplScorpio(sample2(), "11e3066ebf4466ba44ec10c3140197265935f7cdb1cd0b468930017df99ba3e7", "7492b15a2f9bec24193bb193bb3718d25712c426fe21b5d49649d7c30631ff2e");
-        return sample2();
+        return new MVEntity4DataNegotiation("urn:" + PRODUCT_OFFERING_TYPE_NAME + ":1", PRODUCT_OFFERING_TYPE_NAME, "1.9", "2024-06-02T12:00:00Z", LAUNCHED, "2100-01-01T00:00:00.000Z", null, null);
     }
 
     public static @NotNull MVEntity4DataNegotiation sampleScorpio3() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
@@ -127,12 +118,12 @@ public final class MVEntity4DataNegotiationMother {
     }
 
     public static @NotNull MVEntity4DataNegotiation randomIdAndVersion() {
-        String id = "urn:ProductOffering:" + UUID.randomUUID();
+        String id = "urn:" + PRODUCT_OFFERING_TYPE_NAME + ":" + UUID.randomUUID();
         Random random = new Random();
         double randomVersion = random.nextDouble() + 1;
         randomVersion = Math.round(randomVersion * 10.0) / 10.0;
 
-        return new MVEntity4DataNegotiation(id, "ProductOffering", String.valueOf(randomVersion), "2024-04-01T12:00:00Z", LAUNCHED, VALID_FOR, generateRandomSha256(), generateRandomSha256());
+        return new MVEntity4DataNegotiation(id, PRODUCT_OFFERING_TYPE_NAME, String.valueOf(randomVersion), "2024-04-01T12:00:00Z", LAUNCHED, VALID_FOR, generateRandomSha256(), generateRandomSha256());
     }
 
     public static @NotNull List<MVEntity4DataNegotiation> list1And2() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {

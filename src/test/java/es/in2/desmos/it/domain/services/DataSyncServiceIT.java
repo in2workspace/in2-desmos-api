@@ -116,8 +116,8 @@ class DataSyncServiceIT {
                     .verifyComplete();
         }
 
-        assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio1().id(), EntityMother.scorpioJson1WithoutRelationship());
-        assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio2().id(), EntityMother.scorpioJson2WithoutRelationship());
+        assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sample1().id(), EntityMother.scorpioJson1WithoutRelationship());
+        assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sample2().id(), EntityMother.scorpioJson2WithoutRelationship());
         assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio3().id(), EntityMother.scorpioJson3WithoutRelationship());
         assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio4().id(), EntityMother.scorpioJson4WithoutRelationship());
     }
@@ -194,8 +194,8 @@ class DataSyncServiceIT {
                 .verifyComplete();
 
         try {
-            assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio1().id(), EntityMother.scorpioJson1WithoutRelationship());
-            assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio2().id(), EntityMother.scorpioJson2WithoutRelationship());
+            assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sample1().id(), EntityMother.scorpioJson1WithoutRelationship());
+            assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sample2().id(), EntityMother.scorpioJson2WithoutRelationship());
             assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio3().id(), EntityMother.scorpioJson3WithoutRelationship());
             assertScorpioEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio4().id(), EntityMother.scorpioJson4WithoutRelationship());
         } catch (JSONException | NoSuchAlgorithmException e) {
@@ -250,8 +250,8 @@ class DataSyncServiceIT {
                 })
                 .verifyComplete();
 
-        assertAuditRecordEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio1().id(), MVEntity4DataNegotiationMother.sampleScorpio1(), "http://example.org");
-        assertAuditRecordEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio2().id(), MVEntity4DataNegotiationMother.sampleScorpio2(), issuer);
+        assertAuditRecordEntityIsExpected(MVEntity4DataNegotiationMother.sample1().id(), MVEntity4DataNegotiationMother.sample1(), "http://example.org");
+        assertAuditRecordEntityIsExpected(MVEntity4DataNegotiationMother.sample2().id(), MVEntity4DataNegotiationMother.sample2(), issuer);
         assertAuditRecordEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio3().id(), MVEntity4DataNegotiationMother.sampleScorpio3(), "http://example.org");
         assertAuditRecordEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio4().id(), MVEntity4DataNegotiationMother.sampleScorpio4(), issuer);
 

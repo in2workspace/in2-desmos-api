@@ -16,7 +16,7 @@ public final class DiscoveryResponseMother {
     }
 
     public static String scorpioJson2List() throws JsonProcessingException, JSONException, NoSuchAlgorithmException {
-        var mvEntity4DataNegotiations = List.of(MVEntity4DataNegotiationMother.sampleScorpio2());
+        var mvEntity4DataNegotiations = List.of(MVEntity4DataNegotiationMother.sample2());
 
         DiscoverySyncResponse discoverySyncResponse = new DiscoverySyncResponse("http://external-domain.org", mvEntity4DataNegotiations);
 
