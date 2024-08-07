@@ -1,8 +1,13 @@
 package es.in2.desmos.objectmothers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
+import es.in2.desmos.domain.utils.ApplicationUtils;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
@@ -105,16 +110,36 @@ public final class MVEntity4DataNegotiationMother {
         return getSampleScorpio(sample2(), "13fe567ea61edaf196a86a3e6ec514ebaf09a21dfd35700c5b5fdbbb41a7bf0a", "d2f8cccf5d6be19125a8e8eb99a18512c102883d5e8ebe91a0059beef93a67a0");
     }
 
+    public static @NotNull MVEntity4DataNegotiation newSampleBase2FromScorpio() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
+        String json = EntityMother.scorpioJson2();
+        JSONObject jsonObject = new JSONObject(json);
+        String id = jsonObject.getString("id");
+        String type = jsonObject.getString("type");
+        String version = jsonObject.getJSONObject("version").getString("value");
+        String lastUpdate = jsonObject.getJSONObject("lastUpdate").getString("value");
+        String lifecycleStatus = jsonObject.getJSONObject("lifecycleStatus").getString("value");
+        String validFor = jsonObject.getJSONObject("validFor").getString("value");
+        String hash = ApplicationUtils.calculateSHA256(json);
+        return new MVEntity4DataNegotiation(id, type, version, lastUpdate, lifecycleStatus, validFor, hash, "a0f5aba1ec869f49bce6d1f1dbfdb4f222f3d5a45ec7c13320224a88b0221b17");
+    }
+
     public static @NotNull MVEntity4DataNegotiation sampleBase2Old() {
         return getSampleScorpio(sample2VersionOld(), "cc3ea885443502a323113c9fcd703cbcb4b5f3413b47271216dc742a40ea9d87", "fa544b34af6221ea9fd2f306c8d90e7a04e5020fd9a137180702e23f694281b8bc4e");
     }
 
     public static @NotNull MVEntity4DataNegotiation samplePop2() {
-        return new MVEntity4DataNegotiation("urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5b", "ProductOfferingPrice", "1.3", "2024-09-11T14:50:00Z", LAUNCHED, VALID_FOR, "9a69533ae44995f511c926b6f443e9e9738041421cf5ddf0c8f5b31ffde310cf", "fa549a69533ae44995f511c926b6f443e9e9738041421cf5ddf0c8f5b31ffde310cf");
+        return new MVEntity4DataNegotiation("urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c52", "ProductOfferingPrice", "1.3", "2024-09-11T14:50:00Z", LAUNCHED, VALID_FOR, "9a69533ae44995f511c926b6f443e9e9738041421cf5ddf0c8f5b31ffde310cf", "fa549a69533ae44995f511c926b6f443e9e9738041421cf5ddf0c8f5b31ffde310cf");
     }
 
-    public static @NotNull MVEntity4DataNegotiation samplePop2HashlinkHash() {
-        return new MVEntity4DataNegotiation("urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5b", "ProductOfferingPrice", "1.3", "2024-09-11T14:50:00Z", LAUNCHED, VALID_FOR, "63796f7b46d042a912cb778f5696491e45e6915af13b54985607686f21c38ec3", "63796f7b46d042a912cb778f5696491e45e6915af13b54985607686f21c38ec3");
+    public static @NotNull MVEntity4DataNegotiation samplePop2HashlinkHash() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
+        String json = EntityMother.scorpioJsonPop2();
+        JSONObject jsonObject = new JSONObject(json);
+        String id = jsonObject.getString("id");
+        String type = jsonObject.getString("type");
+        String version = jsonObject.getJSONObject("version").getString("value");
+        String lastUpdate = jsonObject.getJSONObject("lastUpdate").getString("value");
+        String hash = ApplicationUtils.calculateSHA256(json);
+        return new MVEntity4DataNegotiation(id, type, version, lastUpdate, null, null, hash, hash);
     }
 
     public static @NotNull MVEntity4DataNegotiation samplePop2Old() {

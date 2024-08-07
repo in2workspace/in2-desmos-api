@@ -201,25 +201,9 @@ public final class EntityMother {
         }""";
 
     private static final String listJson2And4AndSubOfferings = """
-            [
-                 {
-                     "id": "urn:ProductOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87",
-                     "type": "ProductOffering",
-                     "version": "2.5",
-                     "lastUpdate": "2024-07-09T12:00:00Z",
-                     "lifecycleStatus": "Launched",
-                     "validFor": {
-                         "startDateTime": "2024-01-01T00:00:00.000Z"
-                     },
-                     "productSpecification": {
-                         "id": "spec-broadband-001",
-                         "name": "1Gbps Broadband Spec"
-                     },
-                     "productOfferingPrice": {
-                         "type": "Relationship",
-                         "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5b"
-                     }
-                 },
+            [""" + productOffering2 + """
+                 ,""" + productOfferingPrice2 + """
+                 ,
                  {
                       "id": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5b",
                       "type": "ProductOfferingPrice",
@@ -285,7 +269,84 @@ public final class EntityMother {
         return compressJson(listJson2And4AndSubOfferings);
     }
 
-    private static String getEntityJsonScorpioString(MVEntity4DataNegotiation mvEntity4DataNegotiation, String productOfferingPriceValue) throws JSONException {
+    private static String newGetScorpioProductOfferingString(String originalProductOffering) throws JSONException {
+        JSONObject jsonObject = new JSONObject(originalProductOffering);
+        String id = jsonObject.getString("id");
+        String type = jsonObject.getString("type");
+        String version = jsonObject.getString("version");
+        String lastUpdate = jsonObject.getString("lastUpdate");
+
+        JSONObject productOfferingPriceObject = jsonObject.getJSONObject("productOfferingPrice");
+        String productOfferingPriceValue = productOfferingPriceObject.getString("object");
+
+        JSONObject productOffering = new JSONObject();
+
+        productOffering.put("id", id);
+        productOffering.put("type", type);
+
+        var versionProperty = getScorpioProperty(version);
+        productOffering.put("version", versionProperty);
+
+        var lastUpdateProperty = getScorpioProperty(lastUpdate);
+        productOffering.put("lastUpdate", lastUpdateProperty);
+
+        var lifecycleStatus = new JSONObject();
+        lifecycleStatus.put("type", "Property");
+        lifecycleStatus.put("value", "Launched");
+
+        productOffering.put("lifecycleStatus", lifecycleStatus);
+
+        JSONObject validForObject = new JSONObject();
+        validForObject.put("type", "Property");
+        JSONObject valueObject = new JSONObject();
+        valueObject.put("startDateTime", "2024-01-01T00:00:00.000Z");
+        validForObject.put("value", valueObject);
+
+        productOffering.put("validFor", validForObject);
+
+        JSONObject productSpecificationValue = new JSONObject();
+        productSpecificationValue.put("id", "spec-broadband-001");
+        productSpecificationValue.put("name", "1Gbps Broadband Spec");
+
+        JSONObject productSpecification = new JSONObject();
+        productSpecification.put("type", "Property");
+        productSpecification.put("value", productSpecificationValue);
+
+        productOffering.put("productSpecification", productSpecification);
+
+        JSONObject productOfferingPrice = new JSONObject();
+        productOfferingPrice.put("type", "Relationship");
+        productOfferingPrice.put("object", productOfferingPriceValue);
+
+        productOffering.put("productOfferingPrice", productOfferingPrice);
+
+        return productOffering.toString();
+    }
+
+    private static String newGetScorpioProductOfferingPriceString(String originalProductOfferingPrice) throws JSONException {
+        JSONObject jsonObject = new JSONObject(originalProductOfferingPrice);
+        String id = jsonObject.getString("id");
+        String type = jsonObject.getString("type");
+        String version = jsonObject.getString("version");
+        String lastUpdate = jsonObject.getString("lastUpdate");
+
+        JSONObject productOffering = new JSONObject();
+
+        productOffering.put("id", id);
+        productOffering.put("type", type);
+
+        var versionProperty = getScorpioProperty(version);
+        productOffering.put("version", versionProperty);
+
+        var lastUpdateProperty = getScorpioProperty(lastUpdate);
+        productOffering.put("lastUpdate", lastUpdateProperty);
+
+        productOffering.put("value", "5");
+
+        return productOffering.toString();
+    }
+
+    private static String getScorpioProductOfferingString(MVEntity4DataNegotiation mvEntity4DataNegotiation, String productOfferingPriceValue) throws JSONException {
         JSONObject productOffering = new JSONObject();
 
         productOffering.put("id", mvEntity4DataNegotiation.id());
@@ -389,42 +450,40 @@ public final class EntityMother {
 
     public static String scorpioDefaultJson1() throws JSONException {
         MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample1();
-        return getEntityJsonScorpioString(mvEntity4DataNegotiation, "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a");
+        return getScorpioProductOfferingString(mvEntity4DataNegotiation, "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a");
     }
 
     public static String scorpioDefaultJson2() throws JSONException {
         MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample2();
-        return getEntityJsonScorpioString(mvEntity4DataNegotiation, "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a");
+        return getScorpioProductOfferingString(mvEntity4DataNegotiation, "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a");
     }
 
     public static String scorpioDefaultJson3() throws JSONException {
         MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample3();
-        return getEntityJsonScorpioString(mvEntity4DataNegotiation, "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a");
+        return getScorpioProductOfferingString(mvEntity4DataNegotiation, "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a");
     }
 
     public static String scorpioDefaultJson4() throws JSONException {
         MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample4();
-        return getEntityJsonScorpioString(mvEntity4DataNegotiation, "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a");
+        return getScorpioProductOfferingString(mvEntity4DataNegotiation, "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a");
     }
 
-    public static String scorpioJson1(String productOfferingPriceValue) throws JSONException {
-        MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample1();
-        return getEntityJsonScorpioString(mvEntity4DataNegotiation, productOfferingPriceValue);
+    public static String scorpioJson1() throws JSONException {
+        return newGetScorpioProductOfferingString(productOffering1);
     }
 
-    public static String scorpioJson2(String productOfferingPriceValue) throws JSONException {
-        MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample2();
-        return getEntityJsonScorpioString(mvEntity4DataNegotiation, productOfferingPriceValue);
+    public static String scorpioJson2() throws JSONException {
+        return newGetScorpioProductOfferingString(productOffering2);
     }
 
     public static String scorpioJson3(String productOfferingPriceValue) throws JSONException {
         MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample3();
-        return getEntityJsonScorpioString(mvEntity4DataNegotiation, productOfferingPriceValue);
+        return getScorpioProductOfferingString(mvEntity4DataNegotiation, productOfferingPriceValue);
     }
 
     public static String scorpioJson4(String productOfferingPriceValue) throws JSONException {
         MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample4();
-        return getEntityJsonScorpioString(mvEntity4DataNegotiation, productOfferingPriceValue);
+        return getScorpioProductOfferingString(mvEntity4DataNegotiation, productOfferingPriceValue);
     }
 
     public static String scorpioJson1WithoutRelationship() throws JSONException {
@@ -462,20 +521,9 @@ public final class EntityMother {
                 "value": "5"
             }""";
 
-    public static final String scorpioJsonPop2 = """
-            {
-                "id": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5b",
-                "type": "ProductOfferingPrice",
-                "lastUpdate": {
-                    "type": "Property",
-                    "value": "2024-09-11T14:50:00Z"
-                },
-                "version": {
-                    "type": "Property",
-                    "value": "1.3"
-                },
-                "value": "5"
-            }""";
+    public static String scorpioJsonPop2() throws JSONException {
+        return newGetScorpioProductOfferingPriceString(productOfferingPrice2);
+    }
 
     public static final String scorpioJsonPop3 = """
             {
