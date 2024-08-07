@@ -110,7 +110,7 @@ class DataVerificationJobTest {
         Map<Id, HashAndHashLink> existingEntitiesOriginalValidationDataById = new HashMap<>();
         existingEntitiesOriginalValidationDataById.put(new Id(MVEntity4DataNegotiationMother.sample2().id()), new HashAndHashLink(MVEntity4DataNegotiationMother.sample2().hash(), MVEntity4DataNegotiationMother.sample2().hashlink()));
 
-        MVEntity4DataNegotiation expectedMVEntity4DataNegotiationSample4 =
+        MVEntity4DataNegotiation expectedMVEntity4DataNegotiationSample2 =
                 new MVEntity4DataNegotiation(
                         MVEntity4DataNegotiationMother.sample2().id(),
                         MVEntity4DataNegotiationMother.sample2().type(),
@@ -133,8 +133,8 @@ class DataVerificationJobTest {
 
         var mvEntity4DataNegotiationSentToAuditRecord = mvEntity4DataNegotiationCaptor.getAllValues();
 
-        assertThat(mvEntity4DataNegotiationSentToAuditRecord.get(0)).isEqualTo(MVEntity4DataNegotiationMother.sample4());
-        assertThat(mvEntity4DataNegotiationSentToAuditRecord.get(1)).isEqualTo(expectedMVEntity4DataNegotiationSample4);
+        assertThat(mvEntity4DataNegotiationSentToAuditRecord.get(0)).isEqualTo(expectedMVEntity4DataNegotiationSample2);
+        assertThat(mvEntity4DataNegotiationSentToAuditRecord.get(1)).isEqualTo(MVEntity4DataNegotiationMother.sample4());
     }
 
     @Test
@@ -163,7 +163,7 @@ class DataVerificationJobTest {
         Map<Id, HashAndHashLink> existingEntitiesOriginalValidationDataById = new HashMap<>();
         existingEntitiesOriginalValidationDataById.put(new Id(MVEntity4DataNegotiationMother.sample2().id()), new HashAndHashLink(MVEntity4DataNegotiationMother.sample2().hash(), MVEntity4DataNegotiationMother.sample2().hashlink()));
 
-        MVEntity4DataNegotiation expectedMVEntity4DataNegotiationSample4 =
+        MVEntity4DataNegotiation expectedMVEntity4DataNegotiationSample2 =
                 new MVEntity4DataNegotiation(
                         MVEntity4DataNegotiationMother.sample2().id(),
                         MVEntity4DataNegotiationMother.sample2().type(),
@@ -186,8 +186,8 @@ class DataVerificationJobTest {
 
         var mvEntity4DataNegotiationSentToAuditRecord = mvEntity4DataNegotiationCaptor.getAllValues();
 
-        assertThat(mvEntity4DataNegotiationSentToAuditRecord.get(0)).isEqualTo(MVEntity4DataNegotiationMother.sample4());
-        assertThat(mvEntity4DataNegotiationSentToAuditRecord.get(1)).isEqualTo(expectedMVEntity4DataNegotiationSample4);
+        assertThat(mvEntity4DataNegotiationSentToAuditRecord.get(0)).isEqualTo(expectedMVEntity4DataNegotiationSample2);
+        assertThat(mvEntity4DataNegotiationSentToAuditRecord.get(1)).isEqualTo(MVEntity4DataNegotiationMother.sample4());
     }
 
     @Test
@@ -197,8 +197,6 @@ class DataVerificationJobTest {
         String processId = "0";
 
         when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sample2().id())).thenReturn(Mono.just(AuditRecord.builder().entityId(MVEntity4DataNegotiationMother.sample2().id()).entityHashLink(MVEntity4DataNegotiationMother.sample2VersionOld().hashlink()).build()));
-
-        when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any())).thenReturn(Mono.empty());
 
         when(objectMapper.readTree(anyString())).thenThrow(JsonProcessingException.class);
 
@@ -228,7 +226,7 @@ class DataVerificationJobTest {
 
         String processId = "0";
 
-        when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sample4().id())).thenReturn(Mono.just(AuditRecord.builder().entityHashLink("fa54fdsafdsadsfdsa").build()));
+        when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sample2().id())).thenReturn(Mono.just(AuditRecord.builder().entityHashLink("fa54fdsafdsadsfdsa").build()));
 
         Mono<String> issuer = Mono.just("http://example.org");
 

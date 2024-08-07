@@ -51,8 +51,8 @@ public final class EntityMother {
 
     public static final String PRODUCT_OFFERING_1 = """
        {
-           "id": "urn:ProductOffering:d86735a6-0faa-463d-a872-00b97affa1cb",
-           "type": "ProductOffering",
+           "id": "urn:product-offering:d86735a6-0faa-463d-a872-00b97affa1cb",
+           "type": "product-offering",
            "version": {
                "type": "Property",
                "value": "1.2"
@@ -86,8 +86,8 @@ public final class EntityMother {
 
     public static final String PRODUCT_OFFERING_2 = """
     {
-        "id": "urn:ProductOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87",
-        "type": "ProductOffering",
+        "id": "urn:product-offering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87",
+        "type": "product-offering",
         "version": {
             "type": "Property",
             "value": "1.2"
@@ -121,8 +121,8 @@ public final class EntityMother {
 
     public static final String PRODUCT_OFFERING_2_OLD = """
     {
-        "id": "urn:ProductOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87",
-        "type": "ProductOffering",
+        "id": "urn:product-offering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87",
+        "type": "product-offering",
         "version": {
             "type": "Property",
             "value": "1.0"
@@ -156,8 +156,8 @@ public final class EntityMother {
 
     public static final String PRODUCT_OFFERING_3 = """
     {
-        "id": "urn:ProductOffering:537e1ee3-0556-4fff-875f-e55bb97e7ab0",
-        "type": "ProductOffering",
+        "id": "urn:product-offering:537e1ee3-0556-4fff-875f-e55bb97e7ab0",
+        "type": "product-offering",
         "version": {
             "type": "Property",
             "value": "1.2"
@@ -191,8 +191,8 @@ public final class EntityMother {
 
     public static final String PRODUCT_OFFERING_3_OLD = """
     {
-        "id": "urn:ProductOffering:537e1ee3-0556-4fff-875f-e55bb97e7ab0",
-        "type": "ProductOffering",
+        "id": "urn:product-offering:537e1ee3-0556-4fff-875f-e55bb97e7ab0",
+        "type": "product-offering",
         "version": {
             "type": "Property",
             "value": "1.2"
@@ -226,8 +226,8 @@ public final class EntityMother {
 
     public static final String PRODUCT_OFFERING_4 = """
     {
-        "id": "urn:ProductOffering:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c",
-        "type": "ProductOffering",
+        "id": "urn:product-offering:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c",
+        "type": "product-offering",
         "version": {
             "type": "Property",
             "value": "1.2"

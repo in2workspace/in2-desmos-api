@@ -18,9 +18,9 @@ public final class MVEntity4DataNegotiationMother {
 
     public static final String LAUNCHED = "Launched";
     public static final String VALID_FOR = "2024-01-01T00:00:00.000Z";
-    private static final String PRODUCT_OFFERING_TYPE_NAME = "ProductOffering";
-    private static final String CATEGORY_TYPE_NAME = "category";
-    private static final String CATALOG_TYPE_NAME = "catalog";
+    public static final String PRODUCT_OFFERING_TYPE_NAME = "product-offering";
+    public static final String CATEGORY_TYPE_NAME = "category";
+    public static final String CATALOG_TYPE_NAME = "catalog";
 
     private MVEntity4DataNegotiationMother() {
     }

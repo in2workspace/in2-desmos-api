@@ -41,7 +41,7 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
 
     private final DiscoverySyncWebClient discoverySyncWebClient;
 
-    private static final String[] BROKER_ENTITY_TYPES = {"ProductOffering", "category", "catalog"};
+    private static final String[] BROKER_ENTITY_TYPES = {"product-offering", "category", "catalog"};
 
     @Override
     public Mono<Void> synchronizeData(String processId) {
