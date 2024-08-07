@@ -1,13 +1,8 @@
 package es.in2.desmos.objectmothers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
-import es.in2.desmos.domain.utils.ApplicationUtils;
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
@@ -98,82 +93,6 @@ public final class MVEntity4DataNegotiationMother {
         return getSampleScorpio(sample3(), "8ef9cbb9bd057ab75dac62ee13aca54e1491e6b6c8f64d7ca15050ade0c2bcf5", "fa54");
     }
 
-    public static @NotNull MVEntity4DataNegotiation sampleBase1() {
-        return getSampleScorpio(sample1(), "b7de2d6f9017fa91534e4d2dd97744afa43719c5d16e3af21c3ecf7c7c59ad3f", "fa54");
-    }
-
-    public static @NotNull MVEntity4DataNegotiation samplePop1() {
-        return new MVEntity4DataNegotiation("urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c51", "ProductOfferingPrice", "1.3", "2024-09-11T14:50:00Z", LAUNCHED, VALID_FOR, "cc3ea885443502a323113c9fcd703cbcb4b5f3413b47271216dc742a40ea9d87", "fa54");
-    }
-
-    public static @NotNull MVEntity4DataNegotiation sampleBase2() {
-        return getSampleScorpio(sample2(), "13fe567ea61edaf196a86a3e6ec514ebaf09a21dfd35700c5b5fdbbb41a7bf0a", "d2f8cccf5d6be19125a8e8eb99a18512c102883d5e8ebe91a0059beef93a67a0");
-    }
-
-    public static @NotNull MVEntity4DataNegotiation newSampleBase2FromScorpio() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
-        String json = EntityMother.scorpioJson2();
-        JSONObject jsonObject = new JSONObject(json);
-        String id = jsonObject.getString("id");
-        String type = jsonObject.getString("type");
-        String version = jsonObject.getJSONObject("version").getString("value");
-        String lastUpdate = jsonObject.getJSONObject("lastUpdate").getString("value");
-        String lifecycleStatus = jsonObject.getJSONObject("lifecycleStatus").getString("value");
-        String validFor = jsonObject.getJSONObject("validFor").getString("value");
-        String hash = ApplicationUtils.calculateSHA256(json);
-        return new MVEntity4DataNegotiation(id, type, version, lastUpdate, lifecycleStatus, validFor, hash, "a0f5aba1ec869f49bce6d1f1dbfdb4f222f3d5a45ec7c13320224a88b0221b17");
-    }
-
-    public static @NotNull MVEntity4DataNegotiation sampleBase2Old() {
-        return getSampleScorpio(sample2VersionOld(), "cc3ea885443502a323113c9fcd703cbcb4b5f3413b47271216dc742a40ea9d87", "fa544b34af6221ea9fd2f306c8d90e7a04e5020fd9a137180702e23f694281b8bc4e");
-    }
-
-    public static @NotNull MVEntity4DataNegotiation samplePop2() {
-        return new MVEntity4DataNegotiation("urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c52", "ProductOfferingPrice", "1.3", "2024-09-11T14:50:00Z", LAUNCHED, VALID_FOR, "9a69533ae44995f511c926b6f443e9e9738041421cf5ddf0c8f5b31ffde310cf", "fa549a69533ae44995f511c926b6f443e9e9738041421cf5ddf0c8f5b31ffde310cf");
-    }
-
-    public static @NotNull MVEntity4DataNegotiation samplePop2HashlinkHash() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
-        String json = EntityMother.scorpioJsonPop2();
-        JSONObject jsonObject = new JSONObject(json);
-        String id = jsonObject.getString("id");
-        String type = jsonObject.getString("type");
-        String version = jsonObject.getJSONObject("version").getString("value");
-        String lastUpdate = jsonObject.getJSONObject("lastUpdate").getString("value");
-        String hash = ApplicationUtils.calculateSHA256(json);
-        return new MVEntity4DataNegotiation(id, type, version, lastUpdate, null, null, hash, hash);
-    }
-
-    public static @NotNull MVEntity4DataNegotiation samplePop2Old() {
-        return new MVEntity4DataNegotiation("urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c52", "ProductOfferingPrice", "1.3", "2024-09-11T14:50:00Z", LAUNCHED, VALID_FOR, "17957d0dda5fcb2302da0cd16679a0d8215605ef30173df99c869464db338f3f", "fa54");
-    }
-
-    public static @NotNull MVEntity4DataNegotiation sampleBase3() {
-        return getSampleScorpio(sample3(), "04cdea6c3b403dbc6f4f0ff9916b4a034f1d070fe05b9f0fc4983da73f710571", "fa54");
-    }
-
-    public static @NotNull MVEntity4DataNegotiation samplePop3() {
-        return new MVEntity4DataNegotiation("urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c53", "ProductOfferingPrice", "1.3", "2024-09-11T14:50:00Z", LAUNCHED, VALID_FOR, "5db30a1dbb3804eaecc333130d72d1f596603c219c4b346dd0af602aedfecc78", "fa54");
-    }
-
-    public static @NotNull MVEntity4DataNegotiation sampleBase4() {
-        return getSampleScorpio(sample4(), "fbf101c522188d9663882bb0b143539463d2a034bf5622f3c85ffc35e2e15f03", "fa54c91e4fb89b21afca059a879d5d936f61331ecdbb2f61546af1c4abbafe6f27c6");
-    }
-
-    public static @NotNull MVEntity4DataNegotiation samplePop4() {
-        return new MVEntity4DataNegotiation("urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a", "ProductOfferingPrice", "1.3", "2024-09-11T14:50:00Z", LAUNCHED, VALID_FOR, "7c0cd001f472cd991c12fdf82683efa727016bf49c0eee24feb96cc22a1ab6f8", "fa547c0cd001f472cd991c12fdf82683efa727016bf49c0eee24feb96cc22a1ab6f8");
-    }
-
-    public static @NotNull MVEntity4DataNegotiation samplePop4HashlinkHash() {
-        return new MVEntity4DataNegotiation("urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a", "ProductOfferingPrice", "1.3", "2024-09-11T14:50:00Z", LAUNCHED, VALID_FOR, "e8541e4110e32394a1dee270d073cbdc34a54a96d23a6779cafd14a17ca4b0aa", "e8541e4110e32394a1dee270d073cbdc34a54a96d23a6779cafd14a17ca4b0aa");
-    }
-
-    public static @NotNull MVEntity4DataNegotiation samplePrice() {
-        return new MVEntity4DataNegotiation("urn:Price:2d5f3c16-4e77-45b3-8915-3da36b714e7b", "Price", "1.3", "2024-09-11T14:50:00Z", LAUNCHED, VALID_FOR, "f2ca059930791fcddaa387480cd722c64ba31d816a0255c2f89bf4b28def7680", "fa54f2ca059930791fcddaa387480cd722c64ba31d816a0255c2f89bf4b28def7680");
-    }
-
-    public static @NotNull MVEntity4DataNegotiation samplePriceHashlinkHash() {
-        return new MVEntity4DataNegotiation("urn:Price:2d5f3c16-4e77-45b3-8915-3da36b714e7b", "Price", "1.3", "2024-09-11T14:50:00Z", LAUNCHED, VALID_FOR, "16187e78cde007c8113ab2231c6aabe92d3e133ad634db4ef59d711533cc0fde", "16187e78cde007c8113ab2231c6aabe92d3e133ad634db4ef59d711533cc0fde");
-    }
-
     public static @NotNull MVEntity4DataNegotiation category1() {
         return new MVEntity4DataNegotiation("urn:category:1", "category", "1.2", "2024-09-05T12:00:00Z", LAUNCHED, VALID_FOR, "prova", "prova");
     }
@@ -200,39 +119,39 @@ public final class MVEntity4DataNegotiationMother {
     }
 
     public static @NotNull List<MVEntity4DataNegotiation> list1And2() {
-        List<MVEntity4DataNegotiation> MVEntity4DataNegotiationList = new ArrayList<>();
-        MVEntity4DataNegotiationList.add(sample1());
-        MVEntity4DataNegotiationList.add(sample2());
-        return MVEntity4DataNegotiationList;
+        List<MVEntity4DataNegotiation> mVEntity4DataNegotiationList = new ArrayList<>();
+        mVEntity4DataNegotiationList.add(sample1());
+        mVEntity4DataNegotiationList.add(sample2());
+        return mVEntity4DataNegotiationList;
     }
 
     public static @NotNull List<MVEntity4DataNegotiation> list1And2OldAnd3() {
-        List<MVEntity4DataNegotiation> MVEntity4DataNegotiationList = new ArrayList<>();
-        MVEntity4DataNegotiationList.add(sample1());
-        MVEntity4DataNegotiationList.add(sample2VersionOld());
-        MVEntity4DataNegotiationList.add(sample3());
-        return MVEntity4DataNegotiationList;
+        List<MVEntity4DataNegotiation> mVEntity4DataNegotiationList = new ArrayList<>();
+        mVEntity4DataNegotiationList.add(sample1());
+        mVEntity4DataNegotiationList.add(sample2VersionOld());
+        mVEntity4DataNegotiationList.add(sample3());
+        return mVEntity4DataNegotiationList;
     }
 
     public static @NotNull List<MVEntity4DataNegotiation> listbadHash1And2() {
-        List<MVEntity4DataNegotiation> MVEntity4DataNegotiationList = new ArrayList<>();
-        MVEntity4DataNegotiationList.add(sample1BadHash());
-        MVEntity4DataNegotiationList.add(sample2());
-        return MVEntity4DataNegotiationList;
+        List<MVEntity4DataNegotiation> mVEntity4DataNegotiationList = new ArrayList<>();
+        mVEntity4DataNegotiationList.add(sample1BadHash());
+        mVEntity4DataNegotiationList.add(sample2());
+        return mVEntity4DataNegotiationList;
     }
 
     public static @NotNull List<MVEntity4DataNegotiation> list2And3() {
-        List<MVEntity4DataNegotiation> MVEntity4DataNegotiationList = new ArrayList<>();
-        MVEntity4DataNegotiationList.add(sample2());
-        MVEntity4DataNegotiationList.add(sample3());
-        return MVEntity4DataNegotiationList;
+        List<MVEntity4DataNegotiation> mVEntity4DataNegotiationList = new ArrayList<>();
+        mVEntity4DataNegotiationList.add(sample2());
+        mVEntity4DataNegotiationList.add(sample3());
+        return mVEntity4DataNegotiationList;
     }
 
     public static @NotNull List<MVEntity4DataNegotiation> list3And4() {
-        List<MVEntity4DataNegotiation> MVEntity4DataNegotiationList = new ArrayList<>();
-        MVEntity4DataNegotiationList.add(sample3());
-        MVEntity4DataNegotiationList.add(sample4());
-        return MVEntity4DataNegotiationList;
+        List<MVEntity4DataNegotiation> mVEntity4DataNegotiationList = new ArrayList<>();
+        mVEntity4DataNegotiationList.add(sample3());
+        mVEntity4DataNegotiationList.add(sample4());
+        return mVEntity4DataNegotiationList;
     }
 
     public static @NotNull List<MVEntity4DataNegotiation> listCategories() {
@@ -248,12 +167,12 @@ public final class MVEntity4DataNegotiationMother {
     }
 
     public static @NotNull List<MVEntity4DataNegotiation> fullList() {
-        List<MVEntity4DataNegotiation> MVEntity4DataNegotiationList = new ArrayList<>();
-        MVEntity4DataNegotiationList.add(sample1());
-        MVEntity4DataNegotiationList.add(sample2());
-        MVEntity4DataNegotiationList.add(sample3());
-        MVEntity4DataNegotiationList.add(sample4());
-        return MVEntity4DataNegotiationList;
+        List<MVEntity4DataNegotiation> mVEntity4DataNegotiationList = new ArrayList<>();
+        mVEntity4DataNegotiationList.add(sample1());
+        mVEntity4DataNegotiationList.add(sample2());
+        mVEntity4DataNegotiationList.add(sample3());
+        mVEntity4DataNegotiationList.add(sample4());
+        return mVEntity4DataNegotiationList;
     }
 
     public static @NotNull List<MVEntity4DataNegotiation> randomList(int size) {

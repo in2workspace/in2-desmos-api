@@ -18,10 +18,10 @@ public final class EntityMother {
 
     public static @NotNull String getFullJsonList() throws JsonProcessingException, JSONException {
         var jsonArray = new JSONArray();
-        jsonArray.put(new JSONObject(productOffering1));
-        jsonArray.put(new JSONObject(productOffering2));
-        jsonArray.put(new JSONObject(productOffering3));
-        jsonArray.put(new JSONObject(productOffering4));
+        jsonArray.put(new JSONObject(PRODUCT_OFFERING_1));
+        jsonArray.put(new JSONObject(PRODUCT_OFFERING_2));
+        jsonArray.put(new JSONObject(PRODUCT_OFFERING_3));
+        jsonArray.put(new JSONObject(PRODUCT_OFFERING_4));
 
         String fullJsonList = jsonArray.toString();
 
@@ -30,23 +30,9 @@ public final class EntityMother {
 
     public static String getJsonList1And2OldAnd3() throws JsonProcessingException, JSONException {
         var jsonArray = new JSONArray();
-        jsonArray.put(new JSONObject(productOffering1));
-        jsonArray.put(new JSONObject(productOffering2Old));
-        jsonArray.put(new JSONObject(productOffering3));
-
-        String fullJsonList = jsonArray.toString();
-
-        return compressJson(fullJsonList);
-    }
-
-    public static String getJsonList1And2OldAnd3AndSubOfferings() throws JsonProcessingException, JSONException {
-        var jsonArray = new JSONArray();
-        jsonArray.put(new JSONObject(productOffering1));
-        jsonArray.put(new JSONObject(productOffering2Old));
-        jsonArray.put(new JSONObject(productOffering3));
-        jsonArray.put(new JSONObject(productOfferingPrice1));
-        jsonArray.put(new JSONObject(productOfferingPrice2));
-        jsonArray.put(new JSONObject(productOfferingPrice3));
+        jsonArray.put(new JSONObject(PRODUCT_OFFERING_1));
+        jsonArray.put(new JSONObject(PRODUCT_OFFERING_2_OLD));
+        jsonArray.put(new JSONObject(PRODUCT_OFFERING_3));
 
         String fullJsonList = jsonArray.toString();
 
@@ -54,14 +40,14 @@ public final class EntityMother {
     }
 
     public static String getJson2() throws JsonProcessingException {
-        return compressJson(productOffering2);
+        return compressJson(PRODUCT_OFFERING_2);
     }
 
     public static String getJson4() throws JsonProcessingException {
-        return compressJson(productOffering4);
+        return compressJson(PRODUCT_OFFERING_4);
     }
 
-    private static final String productOffering1 = """
+    private static final String PRODUCT_OFFERING_1 = """
         {
             "id": "urn:ProductOffering:d86735a6-0faa-463d-a872-00b97affa1cb",
             "type": "ProductOffering",
@@ -81,7 +67,7 @@ public final class EntityMother {
             }
         }""";
 
-    private static final String productOffering2 = """
+    private static final String PRODUCT_OFFERING_2 = """
         {
             "id": "urn:ProductOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87",
             "type": "ProductOffering",
@@ -101,7 +87,7 @@ public final class EntityMother {
             }
         }""";
 
-    private static final String productOffering2Old = """
+    private static final String PRODUCT_OFFERING_2_OLD = """
         {
             "id": "urn:ProductOffering:ed9c56c8-a5ab-42cc-bc62-0fca69a30c87",
             "type": "ProductOffering",
@@ -121,7 +107,7 @@ public final class EntityMother {
             }
         }""";
 
-    private static final String productOffering3 = """
+    private static final String PRODUCT_OFFERING_3 = """
         {
             "id": "urn:ProductOffering:537e1ee3-0556-4fff-875f-e55bb97e7ab0",
             "type": "ProductOffering",
@@ -141,7 +127,7 @@ public final class EntityMother {
             }
         }""";
 
-    private static final String productOffering4 = """
+    private static final String PRODUCT_OFFERING_4 = """
         {
             "id": "urn:ProductOffering:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c",
             "type": "ProductOffering",
@@ -161,192 +147,7 @@ public final class EntityMother {
             }
         }""";
 
-    private static final String productOfferingPrice1 = """
-        {
-            "id": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c51",
-            "type": "ProductOfferingPrice",
-            "version": "1.3",
-            "lastUpdate": "2024-09-11T14:50:00Z",
-            "lifecycleStatus": "Launched",
-            "validFor": {
-                "startDateTime": "2024-01-01T00:00:00.000Z"
-            },
-            "value": "5"
-        }""";
-
-    private static final String productOfferingPrice2 = """
-        {
-            "id": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c52",
-            "type": "ProductOfferingPrice",
-            "version": "1.3",
-            "lastUpdate": "2024-09-11T14:50:00Z",
-            "lifecycleStatus": "Launched",
-            "validFor": {
-                "startDateTime": "2024-01-01T00:00:00.000Z"
-            },
-            "value": "5"
-        }""";
-
-    private static final String productOfferingPrice3 = """
-        {
-            "id": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c53",
-            "type": "ProductOfferingPrice",
-            "version": "1.3",
-            "lastUpdate": "2024-09-11T14:50:00Z",
-            "lifecycleStatus": "Launched",
-            "validFor": {
-                "startDateTime": "2024-01-01T00:00:00.000Z"
-            },
-            "value": "5"
-        }""";
-
-    private static final String listJson2And4AndSubOfferings = """
-            [""" + productOffering2 + """
-                 ,""" + productOfferingPrice2 + """
-                 ,
-                 {
-                      "id": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5b",
-                      "type": "ProductOfferingPrice",
-                      "version": "1.3",
-                      "lastUpdate": "2024-09-11T14:50:00Z",
-                      "lifecycleStatus": "Launched",
-                      "validFor": {
-                         "startDateTime": "2024-01-01T00:00:00.000Z"
-                      },
-                      "value": "5"
-                 },
-                 {
-                     "id": "urn:ProductOffering:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c",
-                     "type": "ProductOffering",
-                     "version": "1.9",
-                     "lastUpdate": "2024-06-02T12:00:00Z",
-                     "lifecycleStatus": "Launched",
-                     "validFor": {
-                         "startDateTime": "2024-01-01T00:00:00.000Z"
-                     },
-                     "productSpecification": {
-                         "id": "spec-broadband-001",
-                         "name": "1Gbps Broadband Spec"
-                     },
-                     "productOfferingPrice": {
-                         "type": "Relationship",
-                         "object": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"
-                     }
-                 },
-                 {
-                      "id": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a",
-                      "type": "ProductOfferingPrice",
-                      "lastUpdate": {
-                          "type": "Property",
-                          "value": "2024-09-11T14:50:00Z"
-                      },
-                      "price": {
-                          "type": "Relationship",
-                          "object": "urn:Price:2d5f3c16-4e77-45b3-8915-3da36b714e7b"
-                      },
-                      "version": {
-                          "type": "Property",
-                          "value": "1.3"
-                      },
-                      "lifecycleStatus": "Launched",
-                      "validFor": {
-                         "startDateTime": "2024-01-01T00:00:00.000Z"
-                      }
-                  },
-                 {
-                      "id": "urn:Price:2d5f3c16-4e77-45b3-8915-3da36b714e7b",
-                      "type": "Price",
-                      "version": "2.1",
-                      "lastUpdate": "2024-06-03T12:00:00Z",
-                      "lifecycleStatus": "Launched",
-                      "validFor": {
-                         "startDateTime": "2024-01-01T00:00:00.000Z"
-                      }
-                 }
-             ]""";
-
-    public static String getListJson2And4AndSubOfferings() throws JsonProcessingException {
-        return compressJson(listJson2And4AndSubOfferings);
-    }
-
-    private static String newGetScorpioProductOfferingString(String originalProductOffering) throws JSONException {
-        JSONObject jsonObject = new JSONObject(originalProductOffering);
-        String id = jsonObject.getString("id");
-        String type = jsonObject.getString("type");
-        String version = jsonObject.getString("version");
-        String lastUpdate = jsonObject.getString("lastUpdate");
-
-        JSONObject productOfferingPriceObject = jsonObject.getJSONObject("productOfferingPrice");
-        String productOfferingPriceValue = productOfferingPriceObject.getString("object");
-
-        JSONObject productOffering = new JSONObject();
-
-        productOffering.put("id", id);
-        productOffering.put("type", type);
-
-        var versionProperty = getScorpioProperty(version);
-        productOffering.put("version", versionProperty);
-
-        var lastUpdateProperty = getScorpioProperty(lastUpdate);
-        productOffering.put("lastUpdate", lastUpdateProperty);
-
-        var lifecycleStatus = new JSONObject();
-        lifecycleStatus.put("type", "Property");
-        lifecycleStatus.put("value", "Launched");
-
-        productOffering.put("lifecycleStatus", lifecycleStatus);
-
-        JSONObject validForObject = new JSONObject();
-        validForObject.put("type", "Property");
-        JSONObject valueObject = new JSONObject();
-        valueObject.put("startDateTime", "2024-01-01T00:00:00.000Z");
-        validForObject.put("value", valueObject);
-
-        productOffering.put("validFor", validForObject);
-
-        JSONObject productSpecificationValue = new JSONObject();
-        productSpecificationValue.put("id", "spec-broadband-001");
-        productSpecificationValue.put("name", "1Gbps Broadband Spec");
-
-        JSONObject productSpecification = new JSONObject();
-        productSpecification.put("type", "Property");
-        productSpecification.put("value", productSpecificationValue);
-
-        productOffering.put("productSpecification", productSpecification);
-
-        JSONObject productOfferingPrice = new JSONObject();
-        productOfferingPrice.put("type", "Relationship");
-        productOfferingPrice.put("object", productOfferingPriceValue);
-
-        productOffering.put("productOfferingPrice", productOfferingPrice);
-
-        return productOffering.toString();
-    }
-
-    private static String newGetScorpioProductOfferingPriceString(String originalProductOfferingPrice) throws JSONException {
-        JSONObject jsonObject = new JSONObject(originalProductOfferingPrice);
-        String id = jsonObject.getString("id");
-        String type = jsonObject.getString("type");
-        String version = jsonObject.getString("version");
-        String lastUpdate = jsonObject.getString("lastUpdate");
-
-        JSONObject productOffering = new JSONObject();
-
-        productOffering.put("id", id);
-        productOffering.put("type", type);
-
-        var versionProperty = getScorpioProperty(version);
-        productOffering.put("version", versionProperty);
-
-        var lastUpdateProperty = getScorpioProperty(lastUpdate);
-        productOffering.put("lastUpdate", lastUpdateProperty);
-
-        productOffering.put("value", "5");
-
-        return productOffering.toString();
-    }
-
-    private static String getScorpioProductOfferingString(MVEntity4DataNegotiation mvEntity4DataNegotiation, String productOfferingPriceValue) throws JSONException {
+    private static String getScorpioProductOfferingString(MVEntity4DataNegotiation mvEntity4DataNegotiation) throws JSONException {
         JSONObject productOffering = new JSONObject();
 
         productOffering.put("id", mvEntity4DataNegotiation.id());
@@ -384,7 +185,7 @@ public final class EntityMother {
 
         JSONObject productOfferingPrice = new JSONObject();
         productOfferingPrice.put("type", "Relationship");
-        productOfferingPrice.put("object", productOfferingPriceValue);
+        productOfferingPrice.put("object", "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a");
 
         productOffering.put("productOfferingPrice", productOfferingPrice);
 
@@ -450,40 +251,22 @@ public final class EntityMother {
 
     public static String scorpioDefaultJson1() throws JSONException {
         MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample1();
-        return getScorpioProductOfferingString(mvEntity4DataNegotiation, "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a");
+        return getScorpioProductOfferingString(mvEntity4DataNegotiation);
     }
 
     public static String scorpioDefaultJson2() throws JSONException {
         MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample2();
-        return getScorpioProductOfferingString(mvEntity4DataNegotiation, "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a");
+        return getScorpioProductOfferingString(mvEntity4DataNegotiation);
     }
 
     public static String scorpioDefaultJson3() throws JSONException {
         MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample3();
-        return getScorpioProductOfferingString(mvEntity4DataNegotiation, "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a");
+        return getScorpioProductOfferingString(mvEntity4DataNegotiation);
     }
 
     public static String scorpioDefaultJson4() throws JSONException {
         MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample4();
-        return getScorpioProductOfferingString(mvEntity4DataNegotiation, "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a");
-    }
-
-    public static String scorpioJson1() throws JSONException {
-        return newGetScorpioProductOfferingString(productOffering1);
-    }
-
-    public static String scorpioJson2() throws JSONException {
-        return newGetScorpioProductOfferingString(productOffering2);
-    }
-
-    public static String scorpioJson3(String productOfferingPriceValue) throws JSONException {
-        MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample3();
-        return getScorpioProductOfferingString(mvEntity4DataNegotiation, productOfferingPriceValue);
-    }
-
-    public static String scorpioJson4(String productOfferingPriceValue) throws JSONException {
-        MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample4();
-        return getScorpioProductOfferingString(mvEntity4DataNegotiation, productOfferingPriceValue);
+        return getScorpioProductOfferingString(mvEntity4DataNegotiation);
     }
 
     public static String scorpioJson1WithoutRelationship() throws JSONException {
@@ -505,70 +288,4 @@ public final class EntityMother {
         MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample4();
         return getEntityJsonScorpioStringWithoutRelationship(mvEntity4DataNegotiation);
     }
-
-    public static final String scorpioJsonPop1 = """
-            {
-                "id": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c51",
-                "type": "ProductOfferingPrice",
-                "lastUpdate": {
-                    "type": "Property",
-                    "value": "2024-09-11T14:50:00Z"
-                },
-                "version": {
-                    "type": "Property",
-                    "value": "1.3"
-                },
-                "value": "5"
-            }""";
-
-    public static String scorpioJsonPop2() throws JSONException {
-        return newGetScorpioProductOfferingPriceString(productOfferingPrice2);
-    }
-
-    public static final String scorpioJsonPop3 = """
-            {
-                "id": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c53",
-                "type": "ProductOfferingPrice",
-                "lastUpdate": {
-                    "type": "Property",
-                    "value": "2024-09-11T14:50:00Z"
-                },
-                "version": {
-                    "type": "Property",
-                    "value": "1.3"
-                },
-                "value": "5"
-            }""";
-
-    public static final String scorpioJsonPop4 = """
-            {
-                 "id": "urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a",
-                 "type": "ProductOfferingPrice",
-                 "lastUpdate": {
-                     "type": "Property",
-                     "value": "2024-09-11T14:50:00Z"
-                 },
-                 "price": {
-                     "type": "Relationship",
-                     "object": "urn:Price:2d5f3c16-4e77-45b3-8915-3da36b714e7b"
-                 },
-                 "version": {
-                     "type": "Property",
-                     "value": "1.3"
-                 }
-             }""";
-
-    public static final String scorpioJsonPrice = """
-            {
-                 "id": "urn:Price:2d5f3c16-4e77-45b3-8915-3da36b714e7b",
-                 "type": "Price",
-                 "lastUpdate": {
-                     "type": "Property",
-                     "value": "2024-06-03T12:00:00Z"
-                 },
-                 "version": {
-                     "type": "Property",
-                     "value": "2.1"
-                 }
-             }""";
 }
