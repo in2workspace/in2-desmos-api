@@ -1,11 +1,10 @@
 package es.in2.desmos.application.runners;
 
 import es.in2.desmos.application.workflows.DataSyncWorkflow;
-import es.in2.desmos.application.workflows.PublishWorkflow;
-import es.in2.desmos.application.workflows.SubscribeWorkflow;
 import es.in2.desmos.domain.exceptions.RequestErrorException;
 import es.in2.desmos.domain.models.BlockchainSubscription;
 import es.in2.desmos.domain.models.BrokerSubscription;
+import es.in2.desmos.domain.services.api.SubscriptionManagerService;
 import es.in2.desmos.domain.services.blockchain.BlockchainListenerService;
 import es.in2.desmos.domain.services.broker.BrokerListenerService;
 import es.in2.desmos.infrastructure.configs.ApiConfig;
@@ -18,9 +17,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.MediaType;
 import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
-import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -44,12 +41,8 @@ public class ApplicationRunner {
     private final BrokerListenerService brokerListenerService;
     private final BlockchainListenerService blockchainListenerService;
     private final DataSyncWorkflow dataSyncWorkflow;
-    private final PublishWorkflow publishWorkflow;
-    private final SubscribeWorkflow subscribeWorkflow;
+    private final SubscriptionManagerService subscriptionManagerService;
     private final AtomicBoolean isQueueAuthorizedForEmit = new AtomicBoolean(false);
-    private final String getCurrentEnvironment;
-    private Disposable publishQueueDisposable;
-    private Disposable subscribeQueueDisposable;
 
     @EventListener(ApplicationReadyEvent.class)
     public Mono<Void> onApplicationReady() {
@@ -135,38 +128,7 @@ public class ApplicationRunner {
 
     private void restartQueueProcessing(String processId) {
         log.debug("ProcessID: {} - Restarting queue processing...", processId);
-        resetActiveSubscriptions(processId);
-        startBlockchainEventProcessing(processId);
-        startBrokerEventProcessing(processId);
-    }
-
-    private void resetActiveSubscriptions(String processId) {
-        log.debug("ProcessID: {} - Resetting active subscriptions...", processId);
-        disposeIfActive(publishQueueDisposable);
-        disposeIfActive(subscribeQueueDisposable);
-    }
-
-    private void disposeIfActive(Disposable subscription) {
-        if (subscription != null && !subscription.isDisposed()) {
-            subscription.dispose();
-        }
-    }
-
-    private void startBlockchainEventProcessing(String processId) {
-        publishQueueDisposable = publishWorkflow.startPublishWorkflow(processId)
-                .subscribe(
-                        null,
-                        error -> log.error("ProcessID: {} - Error occurred during Publish Workflow", processId, error),
-                        () -> log.info("ProcessID: {} - Publish Workflow completed", processId)
-                );
-    }
-
-    private void startBrokerEventProcessing(String processId) {
-        subscribeQueueDisposable = subscribeWorkflow.startSubscribeWorkflow(processId)
-                .subscribe(
-                        null,
-                        error -> log.error("ProcessID: {} - Error occurred during Subscribe Workflow", processId, error),
-                        () -> log.info("ProcessID: {} - Subscribe Workflow completed", processId)
-                );
+        subscriptionManagerService.restartPublishSubscription(processId);
+        subscriptionManagerService.restartSubscribeSubscription(processId);
     }
 }
