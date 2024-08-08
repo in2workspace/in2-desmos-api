@@ -5,6 +5,7 @@ import es.in2.desmos.domain.models.DiscoverySyncRequest;
 import es.in2.desmos.domain.models.DiscoverySyncResponse;
 import es.in2.desmos.domain.models.Id;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
+import es.in2.desmos.domain.services.api.SubscriptionManagerService;
 import es.in2.desmos.domain.services.sync.services.DataSyncService;
 import es.in2.desmos.infrastructure.configs.BrokerConfig;
 import jakarta.validation.Valid;
@@ -12,7 +13,9 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -28,14 +31,24 @@ public class DataSyncController {
     private final DataSyncService dataSyncService;
     private final P2PDataSyncJob p2PDataSyncJob;
     private final BrokerConfig brokerConfig;
+    private final SubscriptionManagerService subscriptionManagerService;
 
     @GetMapping("/data")
     public Mono<Void> synchronizeData() {
         String processId = UUID.randomUUID().toString();
         log.info("ProcessID: {} - Starting Data Synchronization...", processId);
 
-        // TODO decide if we wanna go through the p2p or dataSync
-        return dataSyncService.synchronizeData(processId);
+        subscriptionManagerService.stopPublishSubscription(processId);
+        subscriptionManagerService.stopSubscribeSubscription(processId);
+
+        return dataSyncService.synchronizeData(processId)
+                .doOnTerminate(() -> {
+                    log.info("ProcessID: {} - DataSyncWorkflow completed. Restarting queues...", processId);
+
+                    subscriptionManagerService.startPublishSubscription(processId);
+                    subscriptionManagerService.startSubscribeSubscription(processId);
+                })
+                .then();
     }
 
     @PostMapping("/discovery")
