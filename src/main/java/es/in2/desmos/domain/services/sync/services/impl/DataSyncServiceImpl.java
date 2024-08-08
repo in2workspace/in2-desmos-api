@@ -8,6 +8,7 @@ import es.in2.desmos.domain.exceptions.HashLinkException;
 import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.BlockchainNotification;
 import es.in2.desmos.domain.services.api.AuditRecordService;
+import es.in2.desmos.domain.services.api.QueueService;
 import es.in2.desmos.domain.services.sync.services.DataSyncService;
 import es.in2.desmos.infrastructure.configs.ApiConfig;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class DataSyncServiceImpl implements DataSyncService {
     private final ObjectMapper objectMapper;
     private final AuditRecordService auditRecordService;
     private final P2PDataSyncJob p2PDataSyncJob;
+    private final QueueService queueServiceImpl;
 
     /*
      *  Workflow steps:
@@ -43,7 +45,16 @@ public class DataSyncServiceImpl implements DataSyncService {
     @Override
     public Mono<Void> synchronizeData(String processId) {
         log.debug("ProcessID: {} - Synchronizing data...", processId);
-        return p2PDataSyncJob.synchronizeData(processId);
+
+        queueServiceImpl.pause();
+
+        return p2PDataSyncJob.synchronizeData(processId)
+                .doOnTerminate(() -> {
+                    log.info("ProcessID: {} - DataSyncWorkflow completed. Restarting queues...", processId);
+
+                    queueServiceImpl.resume();
+                })
+                .then();
     }
 
     /*
