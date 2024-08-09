@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static es.in2.desmos.domain.utils.ApplicationConstants.HASHLINK_PREFIX;
+
 public final class AuditRecordMother {
     private AuditRecordMother() {
     }
@@ -29,7 +31,7 @@ public final class AuditRecordMother {
                 .entityType(mvEntity4DataNegotiation.type())
                 .entityHash(mvEntity4DataNegotiation.hash())
                 .entityHashLink(mvEntity4DataNegotiation.hashlink())
-                .dataLocation(baseUri + "/ngsi-ld/v1/entities/" + mvEntity4DataNegotiation.id() + "?" + mvEntity4DataNegotiation.hash())
+                .dataLocation(baseUri + "/api/v1/entities/" + mvEntity4DataNegotiation.id() + HASHLINK_PREFIX + mvEntity4DataNegotiation.hashlink())
                 .status(auditRecordStatus)
                 .trader(AuditRecordTrader.CONSUMER)
                 .hash("")

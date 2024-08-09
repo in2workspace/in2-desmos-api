@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
+import static es.in2.desmos.domain.utils.ApplicationConstants.HASHLINK_PREFIX;
 import static es.in2.desmos.domain.utils.ApplicationUtils.*;
 
 @Slf4j
@@ -157,10 +158,10 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                         String entityHash = mvEntity4DataNegotiation.hash();
                         String entityHashLink = mvEntity4DataNegotiation.hashlink();
                         String dataLocation = issuer +
-                                "/ngsi-ld/v1/entities/" +
+                                "/api/v1/entities/" +
                                 mvEntity4DataNegotiation.id() +
-                                "?"
-                                + mvEntity4DataNegotiation.hash();
+                                HASHLINK_PREFIX
+                                + mvEntity4DataNegotiation.hashlink();
 
                         AuditRecord auditRecord =
                                 AuditRecord.builder()
