@@ -148,7 +148,7 @@ public class ContainerManager {
         registry.add("spring.r2dbc.username", postgresContainerA::getUsername);
         registry.add("spring.r2dbc.password", postgresContainerA::getPassword);
         registry.add("spring.flyway.url", postgresContainerA::getJdbcUrl);
-        registry.add("broker.externalDomain", ContainerManager::getBaseUriForScorpioA);
+        registry.add("broker.internalDomain", ContainerManager::getBaseUriForScorpioA);
         registry.add("dlt-adapter.externalDomain", ContainerManager::getBaseUriBlockchainAdapterA);
 //        registry.add("dlt-adapter.externalDomain", () -> String.format("http://%s:%s",
 //                blockchainAdapterContainerA.getHost(),
@@ -158,6 +158,11 @@ public class ContainerManager {
     @DynamicPropertySource
     public static void externalAccessNodesProperties(DynamicPropertyRegistry registry) {
         registry.add("external-access-nodes.urls", ContainerManager::getBaseUriDesmosB);
+    }
+
+    @DynamicPropertySource
+    public static void securityProperties(DynamicPropertyRegistry registry) {
+        registry.add("security.privateKey", ContainerManager::getSecurityPrivateKey);
     }
 
     public static String getBaseUriForScorpioA() {
@@ -174,5 +179,9 @@ public class ContainerManager {
 
     public static String getBaseUriDesmosB() {
         return "http://" + desmosContainerB.getHost() + ":" + desmosContainerB.getMappedPort(8080);
+    }
+
+    public static String getSecurityPrivateKey() {
+        return "0x1aff50dca1ac463a5af99a858c2eef7517b8e46d3bf84723ff6dcfead7dc8db6";
     }
 }

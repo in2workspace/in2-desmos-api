@@ -11,6 +11,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -37,7 +38,8 @@ public class ServerHttpBearerAuthenticationConverter implements Function<ServerW
                 .flatMap(ServerHttpBearerAuthenticationConverter::extract)
                 .filter(matchBearerLength)
                 .flatMap(isolateBearerValue)
-                .flatMap(jwtVerifier::validateSignedJwt)
+                .flatMap(jwtString ->
+                        jwtVerifier.validateSignedJwt(jwtString, serverWebExchange.getRequest().getHeaders().getFirst("origin")))
                 .flatMap(ServerHttpBearerAuthenticationConverter::create).log();
     }
 
@@ -49,16 +51,14 @@ public class ServerHttpBearerAuthenticationConverter implements Function<ServerW
 
     public static Mono<Authentication> create(SignedJWT signedJWTMono) {
         String subject;
-        String auths;
+        //String auths;
         try {
             subject = signedJWTMono.getJWTClaimsSet().getSubject();
-            auths = (String) signedJWTMono.getJWTClaimsSet().getClaim("roles");
+            //auths = (String) signedJWTMono.getJWTClaimsSet().getClaim("roles");
         } catch (ParseException | java.text.ParseException e) {
             return Mono.empty();
         }
-        List<SimpleGrantedAuthority> authorities = Stream.of(auths.split(","))
-                .map(SimpleGrantedAuthority::new)
-                .toList();
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
         return  Mono.justOrEmpty(new UsernamePasswordAuthenticationToken(subject, null, authorities));
     }
 

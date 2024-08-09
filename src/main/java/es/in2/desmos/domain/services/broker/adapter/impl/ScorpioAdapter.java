@@ -179,7 +179,9 @@ public class ScorpioAdapter implements BrokerAdapterService {
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<List<BrokerSubscription>>() {
                 })
-                .onErrorMap(error -> new SubscriptionCreationException("Error fetching subscriptions from broker"));
+                .onErrorMap(error -> {
+                    return new SubscriptionCreationException("Error fetching subscriptions from broker");
+                });
     }
 
     @Override

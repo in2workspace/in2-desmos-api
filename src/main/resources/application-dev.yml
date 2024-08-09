@@ -113,3 +113,7 @@ dlt-adapter:
 tx-subscription:
   notificationEndpoint:
   entityTypes:
+
+# Access Node
+access-node:
+  prefixDirectory: "https://raw.githubusercontent.com/DOME-Marketplace/dome-access-node-directory/main/access-node-directory-"

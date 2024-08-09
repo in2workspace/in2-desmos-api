@@ -17,8 +17,10 @@ import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.math.BigInteger;
@@ -28,7 +30,6 @@ import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECPublicKeySpec;
 import java.security.spec.EllipticCurve;
 import java.security.spec.InvalidKeySpecException;
-import java.text.ParseException;
 import java.util.Date;
 import java.util.UUID;
 
@@ -98,7 +99,7 @@ public class JwtTokenProvider {
 
 
     // Use public keys from Access Node Directory in memory
-    public Mono<SignedJWT> validateSignedJwt(String jwtString) {
+    public Mono<SignedJWT> validateSignedJwt(String jwtString, String origin) {
         try {
             SignedJWT jwt = SignedJWT.parse(jwtString);
             ECDSAVerifier verifier = new ECDSAVerifier(ecJWK.toPublicJWK());
@@ -112,6 +113,14 @@ public class JwtTokenProvider {
     }
 
     // todo: Get public keys from Access Node Directory
+
+    public void getPublicKeyFromAccessNodeRepository(){
+        log.info("JwtTokenProvider -- Init -- getPublicKeyFromAccessNodeRepository()");
+
+
+
+
+    }
 
 
 }

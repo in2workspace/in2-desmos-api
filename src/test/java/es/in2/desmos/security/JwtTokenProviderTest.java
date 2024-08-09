@@ -56,7 +56,7 @@ class JwtTokenProviderTest {
     void testValidateSignedJwt() throws JOSEException {
         String jwtString = jwtTokenProvider.generateToken(resourceURI);
         System.out.println(jwtString);
-        SignedJWT result = jwtTokenProvider.validateSignedJwt(jwtString).block();
+        SignedJWT result = jwtTokenProvider.validateSignedJwt(jwtString,"origin").block();
         assert result != null;
         Assertions.assertEquals(jwtString, result.serialize());
     }
@@ -64,7 +64,7 @@ class JwtTokenProviderTest {
     @Test
     void testInvalidJwt() {
         String invalidJwt = "invalid.jwt.token";
-        assertThrows(Exception.class, () -> jwtTokenProvider.validateSignedJwt(invalidJwt).block());
+        assertThrows(Exception.class, () -> jwtTokenProvider.validateSignedJwt(invalidJwt,"origin").block());
     }
 
 }
