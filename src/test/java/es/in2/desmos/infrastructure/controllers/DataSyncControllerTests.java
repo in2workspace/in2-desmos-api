@@ -7,7 +7,6 @@ import es.in2.desmos.domain.models.DiscoverySyncResponse;
 import es.in2.desmos.domain.models.Id;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.application.workflows.jobs.P2PDataSyncJob;
-import es.in2.desmos.domain.services.api.SubscriptionManagerService;
 import es.in2.desmos.domain.services.sync.services.DataSyncService;
 import es.in2.desmos.infrastructure.configs.BrokerConfig;
 import es.in2.desmos.objectmothers.BrokerDataMother;
@@ -51,9 +50,6 @@ class DataSyncControllerTests {
 
     @MockBean
     private BrokerConfig brokerConfig;
-
-    @MockBean
-    private SubscriptionManagerService subscriptionManagerService;
 
 
     @Test
