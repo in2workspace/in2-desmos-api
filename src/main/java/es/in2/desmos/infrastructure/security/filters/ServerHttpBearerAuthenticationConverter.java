@@ -1,8 +1,10 @@
 package es.in2.desmos.infrastructure.security.filters;
 
 import com.nimbusds.jwt.SignedJWT;
+import es.in2.desmos.infrastructure.configs.cache.AccessNodeMemoryStore;
 import es.in2.desmos.infrastructure.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.expression.ParseException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,32 +26,37 @@ import java.util.stream.Stream;
  * Validity means is well formed and signature is correct
  */
 @RequiredArgsConstructor
+@Slf4j
 public class ServerHttpBearerAuthenticationConverter implements Function<ServerWebExchange, Mono<Authentication>> {
 
     private static final String BEARER = "Bearer ";
     private static final Predicate<String> matchBearerLength = authValue -> authValue.length() > BEARER.length();
     private static final Function<String,Mono<String>> isolateBearerValue = authValue -> Mono.justOrEmpty(authValue.substring(BEARER.length()));
-
+    private final AccessNodeMemoryStore accessNodeMemoryStore;
     private final JwtTokenProvider jwtVerifier;
 
     @Override
     public Mono<Authentication> apply(ServerWebExchange serverWebExchange) {
+        log.info("INIT ServerHttpBearerAuthenticationConverter APPLY");
+
         return Mono.justOrEmpty(serverWebExchange)
                 .flatMap(ServerHttpBearerAuthenticationConverter::extract)
                 .filter(matchBearerLength)
                 .flatMap(isolateBearerValue)
                 .flatMap(jwtString ->
-                        jwtVerifier.validateSignedJwt(jwtString, serverWebExchange.getRequest().getHeaders().getFirst("origin")))
+                        jwtVerifier.validateSignedJwt(jwtString, serverWebExchange.getRequest().getHeaders().getFirst("externalNodeUrl"), accessNodeMemoryStore))
                 .flatMap(ServerHttpBearerAuthenticationConverter::create).log();
     }
 
     public static Mono<String> extract(ServerWebExchange serverWebExchange) {
+        log.info("INIT ServerHttpBearerAuthenticationConverter EXTRACT");
         return Mono.justOrEmpty(serverWebExchange.getRequest()
                 .getHeaders()
                 .getFirst(HttpHeaders.AUTHORIZATION));
     }
 
     public static Mono<Authentication> create(SignedJWT signedJWTMono) {
+        log.info("INIT ServerHttpBearerAuthenticationConverter CREATE");
         String subject;
         //String auths;
         try {

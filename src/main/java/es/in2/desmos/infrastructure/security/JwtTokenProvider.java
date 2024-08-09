@@ -12,17 +12,22 @@ import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import es.in2.desmos.domain.models.AccessNodeOrganization;
+import es.in2.desmos.domain.models.AccessNodeYamlData;
+import es.in2.desmos.infrastructure.configs.cache.AccessNodeMemoryStore;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.ECNamedCurveTable;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemReader;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.io.StringReader;
 import java.math.BigInteger;
 import java.security.*;
 import java.security.interfaces.ECPrivateKey;
@@ -30,6 +35,8 @@ import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECPublicKeySpec;
 import java.security.spec.EllipticCurve;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 import java.util.Date;
 import java.util.UUID;
 
@@ -39,8 +46,14 @@ public class JwtTokenProvider {
 
     private final ECKey ecJWK;
 
+    // Ensure BouncyCastle is added as a security provider
+    static {
+        Security.addProvider(new BouncyCastleProvider());
+    }
+
     // Build a useful Private Key from the hexadecimal private key set in the application.properties
     public JwtTokenProvider(SecurityProperties securityProperties) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
+        log.info("INIT JwtTokenProvider CONSTRUCTOR");
         Security.addProvider(BouncyCastleProviderSingleton.getInstance());
         // Convert the private key from hexadecimal to BigInteger
         String privateKeyHex = securityProperties.privateKey().replace("0x", "");
@@ -75,6 +88,8 @@ public class JwtTokenProvider {
     // Generate JWT + SEP256K1 signature
     // https://connect2id.com/products/nimbus-jose-jwt/examples/jwt-with-es256k-signature
     public String generateToken(String resourceURI) throws JOSEException {
+        log.info("INIT JwtTokenProvider GenerateToken");
+
         // Sample JWT claims
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
                 .jwtID(UUID.randomUUID().toString())
@@ -99,10 +114,21 @@ public class JwtTokenProvider {
 
 
     // Use public keys from Access Node Directory in memory
-    public Mono<SignedJWT> validateSignedJwt(String jwtString, String origin) {
+    public Mono<SignedJWT> validateSignedJwt(String jwtString, String externalNodeUrl, AccessNodeMemoryStore accessNodeMemoryStore) {
+        log.info("INIT JwtTokenProvider validateSignedJwt");
+
         try {
+            // Retrieve the public key from AccessNodeMemoryStore
+            String publicKeyPem = getPublicKeyFromAccessNodeMemory(externalNodeUrl, accessNodeMemoryStore);
+            if (publicKeyPem == null) {
+                return Mono.error(new InvalidKeyException("Public key not found for origin: " + externalNodeUrl));
+            }
+
+            // Convert the PEM public key to ECPublicKey
+            ECPublicKey ecPublicKey = convertPemToECPublicKey(publicKeyPem);
+
             SignedJWT jwt = SignedJWT.parse(jwtString);
-            ECDSAVerifier verifier = new ECDSAVerifier(ecJWK.toPublicJWK());
+            ECDSAVerifier verifier = new ECDSAVerifier(ecPublicKey);
             verifier.getJCAContext().setProvider(BouncyCastleProviderSingleton.getInstance());
             jwt.verify(verifier);
             return Mono.just(jwt);
@@ -112,15 +138,54 @@ public class JwtTokenProvider {
         }
     }
 
-    // todo: Get public keys from Access Node Directory
+    private String getPublicKeyFromAccessNodeMemory(String origin, AccessNodeMemoryStore accessNodeMemoryStore) {
+        log.info("JwtTokenProvider -- Init -- getPublicKeyFromAccessNodeMemory()");
 
-    public void getPublicKeyFromAccessNodeRepository(){
-        log.info("JwtTokenProvider -- Init -- getPublicKeyFromAccessNodeRepository()");
+        // Retrieve the organizations data from AccessNodeMemoryStore
+        AccessNodeYamlData yamlData = accessNodeMemoryStore.getOrganizations();
+        if (yamlData == null || yamlData.getOrganizations() == null) {
+            log.warn("No organizations data available in AccessNodeMemoryStore.");
+            return null;
+        }
+        System.out.println("EXAMPLE DATA!!! --> " + yamlData.getOrganizations());
+        System.out.println("EXAMPLE DATA!!! --> " + yamlData.getOrganizations().get(0).getUrl());
+        // Search for the organization with the matching URL
+        for (AccessNodeOrganization org : yamlData.getOrganizations()) {
+            if (org.getUrl().equals(origin)) {
+                log.info("Found public key for origin: {}", origin);
+                return org.getPublicKey();
+            }
+        }
 
-
-
-
+        // No matching organization found
+        log.warn("Public key not found for origin: {}", origin);
+        return null;
     }
+
+    private ECPublicKey convertPemToECPublicKey(String pem) throws Exception {
+        PemReader pemReader = new PemReader(new StringReader(pem));
+        PemObject pemObject = pemReader.readPemObject();
+        byte[] encoded = pemObject.getContent();
+
+        // Remove PEM header and footer if present
+        String base64 = new String(encoded);
+        base64 = base64.replaceAll("-----BEGIN PUBLIC KEY-----", "")
+                .replaceAll("-----END PUBLIC KEY-----", "")
+                .replaceAll("\\s", "");
+
+        byte[] keyBytes = Base64.getDecoder().decode(base64);
+
+        KeyFactory keyFactory = KeyFactory.getInstance("EC", "BC");
+        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
+        PublicKey publicKey = keyFactory.generatePublic(keySpec);
+
+        if (publicKey instanceof ECPublicKey) {
+            return (ECPublicKey) publicKey;
+        } else {
+            throw new IllegalArgumentException("Key is not of type ECPublicKey");
+        }
+    }
+
 
 
 }

@@ -1,5 +1,6 @@
 package es.in2.desmos.infrastructure.security;
 
+import es.in2.desmos.infrastructure.configs.cache.AccessNodeMemoryStore;
 import es.in2.desmos.infrastructure.security.filters.BearerTokenReactiveAuthenticationManager;
 import es.in2.desmos.infrastructure.security.filters.ServerHttpBearerAuthenticationConverter;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ import java.util.function.Function;
 public class SecurityConfig {
 
     private final JwtTokenProvider jwtVerifier;
+    private final AccessNodeMemoryStore accessNodeMemoryStore;
 
     /**
      * For Spring Security webflux, a chain of filters will provide user authentication
@@ -45,9 +47,10 @@ public class SecurityConfig {
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         http
                 .authorizeExchange(exchanges -> exchanges
+                        .pathMatchers("/api/notification/*").permitAll()
+                        .pathMatchers("/api/v1/notifications/test/token").permitAll()
                         .pathMatchers("/api/v1/entities/*").authenticated() //replication endpoint
                         .pathMatchers("/api/v1/sync/p2p/*").authenticated() //synchronization endpoint
-                        .pathMatchers("/api/notification/*").permitAll()
                         .anyExchange().authenticated()
                 )
                 .addFilterAt(bearerAuthenticationFilter(), SecurityWebFiltersOrder.AUTHENTICATION);
@@ -69,7 +72,7 @@ public class SecurityConfig {
         ReactiveAuthenticationManager authManager;
         authManager = new BearerTokenReactiveAuthenticationManager();
         bearerAuthenticationFilter = new AuthenticationWebFilter(authManager);
-        bearerConverter = new ServerHttpBearerAuthenticationConverter(jwtVerifier);
+        bearerConverter = new ServerHttpBearerAuthenticationConverter(accessNodeMemoryStore,jwtVerifier);
         bearerAuthenticationFilter
                 .setAuthenticationConverter(bearerConverter);
         bearerAuthenticationFilter
