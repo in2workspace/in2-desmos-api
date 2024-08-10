@@ -119,19 +119,23 @@ class BrokerPublisherServiceTests {
         verifyNoMoreInteractions(brokerAdapterService);
     }
 
-    @Test
-    void itShouldFindAllEntitiesFromListById() throws JSONException, JsonProcessingException {
+    @ParameterizedTest
+    @ValueSource(strings = {
+            BrokerDataMother.GetEntityRequestBrokerJson,
+            BrokerDataMother.GetEntityRequestWithSubentitiesArrayJson,
+            BrokerDataMother.GetEntityRequestWithSubentitiesArrayWithPropertyJson
+    })
+    void itShouldFindAllEntitiesFromListWithArrayOfSubentitiesById(String brokerJson) throws JSONException, JsonProcessingException {
         String processId = "0";
         Mono<List<Id>> idsMono = Mono.just(Arrays.stream(IdMother.entitiesRequest).toList());
 
-        String entityRequestBrokerJson = BrokerDataMother.getEntityRequestBrokerJson;
-        JSONArray expectedResponseJsonArray = new JSONArray(entityRequestBrokerJson);
+        JSONArray expectedResponseJsonArray = new JSONArray(brokerJson);
         List<String> localEntities = new ArrayList<>();
         for (int i = 0; i < expectedResponseJsonArray.length(); i++) {
             String entity = expectedResponseJsonArray.getString(i);
             localEntities.add(entity);
         }
-        JsonNode rootEntityJsonNode = objectMapper.readValue(BrokerDataMother.getEntityRequestBrokerJson, JsonNode.class);
+        JsonNode rootEntityJsonNode = objectMapper.readValue(brokerJson, JsonNode.class);
         when(brokerAdapterService.getEntityById(eq(processId), any())).thenAnswer(invocation -> {
             String entityId = invocation.getArgument(1);
             for (JsonNode rootEntityNodeChildren : rootEntityJsonNode) {
@@ -162,7 +166,7 @@ class BrokerPublisherServiceTests {
 
     @ParameterizedTest
     @ValueSource(strings = {
-            BrokerDataMother.getEntityRequestBrokerNoTypeJson,
+            BrokerDataMother.GetEntityRequestBrokerNoTypeJson,
             BrokerDataMother.getEntityRequestBrokerNoRelationshipJson,
             BrokerDataMother.getEntityRequestBrokerNoObjectJson
     })

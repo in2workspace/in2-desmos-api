@@ -13,4 +13,8 @@ public final class IdMother {
             new Id("urn:productOffering:d1c34fc5-0c2b-4022-94ab-d7cb99d8edc2"),
             new Id("urn:productOffering:39e31a28-583b-4f0d-80c6-6d7600cc9e36")
     };
+
+    public static final Id[] entitiesRequestToExtractSubentitiesArray = {
+            new Id("urn:productOffering:06f56a54-9be9-4d45-bae7-2a036b721d27")
+    };
 }

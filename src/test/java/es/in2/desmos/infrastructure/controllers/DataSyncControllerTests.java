@@ -95,7 +95,7 @@ class DataSyncControllerTests {
         Id[] entitySyncRequest = IdMother.entitiesRequest;
         Mono<Id[]> entitySyncRequestMono = Mono.just(entitySyncRequest);
 
-        String entities = BrokerDataMother.getEntityRequestBrokerJson;
+        String entities = BrokerDataMother.GetEntityRequestBrokerJson;
 
         JSONArray originalEntities = new JSONArray(entities);
         JSONArray expectedEntities = new JSONArray();

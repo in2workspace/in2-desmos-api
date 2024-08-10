@@ -274,7 +274,7 @@ class DataSyncServiceIT {
 
     private void givenEntitiesToRequestInScorpio() {
         String brokerUrl = ContainerManager.getBaseUriForScorpioA();
-        String entities = BrokerDataMother.getEntityRequestBrokerJson;
+        String entities = BrokerDataMother.GetEntityRequestBrokerJson;
         ScorpioInflator.addInitialJsonEntitiesToContextBroker(brokerUrl, entities);
     }
 
