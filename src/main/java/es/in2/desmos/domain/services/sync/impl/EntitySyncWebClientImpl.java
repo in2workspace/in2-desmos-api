@@ -36,7 +36,7 @@ public class EntitySyncWebClientImpl implements EntitySyncWebClient {
                 .post()
                 .uri(issuer + "/api/v1/sync/p2p/entities")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
-                .header("externalNodeUrl", apiConfig.getExternalDomain())
+                .header("external-node-url", apiConfig.getExternalDomain())
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(entitySyncRequest, Id[].class)
                 .retrieve()

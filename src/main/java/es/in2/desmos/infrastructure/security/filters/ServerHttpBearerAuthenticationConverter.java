@@ -44,7 +44,7 @@ public class ServerHttpBearerAuthenticationConverter implements Function<ServerW
                 .filter(matchBearerLength)
                 .flatMap(isolateBearerValue)
                 .flatMap(jwtString ->
-                        jwtVerifier.validateSignedJwt(jwtString, serverWebExchange.getRequest().getHeaders().getFirst("externalNodeUrl"), accessNodeMemoryStore))
+                        jwtVerifier.validateSignedJwt(jwtString, serverWebExchange.getRequest().getHeaders().getFirst("external-node-url"), accessNodeMemoryStore))
                 .flatMap(ServerHttpBearerAuthenticationConverter::create).log();
     }
 

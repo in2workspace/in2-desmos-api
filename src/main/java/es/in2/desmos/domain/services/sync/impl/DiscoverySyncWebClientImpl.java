@@ -37,7 +37,7 @@ public class DiscoverySyncWebClientImpl implements DiscoverySyncWebClient {
                 .post()
                 .uri(externalAccessNode + "/api/v1/sync/p2p/discovery")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
-                .header("externalNodeUrl", apiConfig.getExternalDomain())
+                .header("external-node-url", apiConfig.getExternalDomain())
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(discoverySyncRequest, DiscoverySyncRequest.class)
                 .retrieve()
