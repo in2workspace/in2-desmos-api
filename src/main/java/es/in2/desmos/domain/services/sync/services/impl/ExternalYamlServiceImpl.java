@@ -14,6 +14,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.util.Objects;
+
 import static es.in2.desmos.domain.utils.ApplicationConstants.YAML_FILE_SUFFIX;
 
 @Slf4j
@@ -33,7 +35,7 @@ public class ExternalYamlServiceImpl implements ExternalYamlService {
 
         log.debug("ProcessID: {} - Retrieving YAML data from the external source repository...", processId);
         // Get the External URL from configuration
-        String repoPath = accessNodeProperties.prefixDirectory() + env.getProperty("SPRING_PROFILES_ACTIVE")  + YAML_FILE_SUFFIX;
+        String repoPath = accessNodeProperties.prefixDirectory() + getExternalYamlProfile() + YAML_FILE_SUFFIX;
 
         log.debug("ProcessID: {} - External URL: {}", processId, repoPath);
         // Retrieve YAML data from the External URL
@@ -53,4 +55,20 @@ public class ExternalYamlServiceImpl implements ExternalYamlService {
                     accessNodeMemoryStore.setOrganizations(data);
                 });
     }
+
+    private String getExternalYamlProfile() {
+        String profile = env.getProperty("SPRING_PROFILES_ACTIVE");
+
+        if (profile == null) {
+            throw new RuntimeException("Environment variable SPRING_PROFILES_ACTIVE is not set");
+        }
+
+        return switch (profile) {
+            case "dev" -> "sbx";
+            case "test" -> "dev";
+            case "prod" -> "prd";
+            default -> throw new IllegalArgumentException("Invalid profile: " + profile);
+        };
+    }
+
 }

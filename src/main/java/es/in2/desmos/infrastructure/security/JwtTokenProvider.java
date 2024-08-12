@@ -147,8 +147,6 @@ public class JwtTokenProvider {
             log.warn("No organizations data available in AccessNodeMemoryStore.");
             return null;
         }
-        System.out.println("EXAMPLE DATA!!! --> " + yamlData.getOrganizations());
-        System.out.println("EXAMPLE DATA!!! --> " + yamlData.getOrganizations().get(0).getUrl());
         // Search for the organization with the matching URL
         for (AccessNodeOrganization org : yamlData.getOrganizations()) {
             if (org.getUrl().equals(origin)) {
