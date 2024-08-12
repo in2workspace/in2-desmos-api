@@ -125,16 +125,12 @@ public class JwtTokenProvider {
             ECPublicKey ecPublicKey = convertHexPublicKeyToECPublicKey(publicKeyHex);
 
             ECDSAVerifier verifier = new ECDSAVerifier(ecPublicKey);
-            log.info("ECDSAVerifier created!!!!!!!!!!!!!!");
 
             verifier.getJCAContext().setProvider(BouncyCastleProviderSingleton.getInstance());
-            log.info("verifier.getJCAContext().setProvider finished!!!!!!!!!!!!!!");
 
             SignedJWT jwt = SignedJWT.parse(jwtString);
-            log.info("SignedJWT created!!!!!!!!!!!!!!");
 
             jwt.verify(verifier);
-            log.info("jwt.verify!!!!!!!!!!!!!!");
 
             return Mono.just(jwt);
         } catch (Exception e) {
