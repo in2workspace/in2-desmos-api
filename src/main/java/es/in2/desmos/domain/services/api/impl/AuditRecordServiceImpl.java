@@ -13,9 +13,7 @@ import reactor.core.publisher.Mono;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.UUID;
+import java.util.*;
 
 import static es.in2.desmos.domain.utils.ApplicationConstants.HASHLINK_PREFIX;
 import static es.in2.desmos.domain.utils.ApplicationUtils.*;
@@ -27,6 +25,8 @@ public class AuditRecordServiceImpl implements AuditRecordService {
 
     private final ObjectMapper objectMapper;
     private final AuditRecordRepository auditRecordRepository;
+
+    private final List<String> auditRecordsInUse = Collections.synchronizedList(new ArrayList<>());
 
     /**
      * Create a new AuditRecord with status CREATED or PUBLISHED and trader CONSUMER
@@ -247,6 +247,29 @@ public class AuditRecordServiceImpl implements AuditRecordService {
     public Mono<AuditRecord> findLatestConsumerPublishedAuditRecord(String processId) {
         log.debug("ProcessID: {} - Fetching all audit records...", processId);
         return auditRecordRepository.findLastPublishedConsumerAuditRecord();
+    }
+
+    @Override
+    public Mono<Void> setAuditRecordLock(String processId, String id, boolean hasToBeLocked) {
+        return Mono.fromRunnable(() -> {
+            if (hasToBeLocked) {
+                auditRecordsInUse.add(id);
+            } else {
+                auditRecordsInUse.remove(id);
+            }
+        });
+    }
+
+    @Override
+    public void unlockAuditRecords(String processId) {
+        auditRecordsInUse.clear();
+
+        log.debug("ProcessID: {} - Unlocked all Audit Records.", processId);
+    }
+
+    @Override
+    public Mono<Boolean> isAuditRecordUnlocked(String processId, String id) {
+        return Mono.fromCallable(() -> !auditRecordsInUse.contains(id));
     }
 
     private String setAuditRecordHashLink(AuditRecord lastAuditRecordRegistered, String auditRecordHash)

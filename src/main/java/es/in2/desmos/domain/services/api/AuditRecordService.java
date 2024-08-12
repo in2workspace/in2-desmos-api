@@ -29,4 +29,9 @@ public interface AuditRecordService {
 
     Mono<AuditRecord> findLatestConsumerPublishedAuditRecord(String processId);
 
+    Mono<Void> setAuditRecordLock(String processId, String id, boolean lock);
+
+    void unlockAuditRecords(String processId);
+
+    Mono<Boolean> isAuditRecordUnlocked(String processId, String id);
 }

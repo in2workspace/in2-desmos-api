@@ -29,6 +29,10 @@ public final class MVEntity4DataNegotiationMother {
         return createSampleWithSameHashAndHashlink(EntityMother.PRODUCT_OFFERING_1);
     }
 
+    public static @NotNull MVEntity4DataNegotiation sample1NullLifecyclestatus() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
+        return createSampleWithSameHashAndHashlink(EntityMother.PRODUCT_OFFERING_1_NULL_LIFECYCLESTATUS);
+    }
+
     public static @NotNull MVEntity4DataNegotiation sample1BadHash() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         var sample = createSampleWithSameHashAndHashlink(EntityMother.PRODUCT_OFFERING_1);
         return new MVEntity4DataNegotiation(sample.id(), sample.type(), sample.version(), sample.lastUpdate(), sample.lifecycleStatus(), sample.validFor(), "8ce0461d10e02556d3f16e21c8ac662c037f8b39efd059186b070f9aad8c00f0", null);
@@ -160,6 +164,13 @@ public final class MVEntity4DataNegotiationMother {
         return mVEntity4DataNegotiationList;
     }
 
+    public static @NotNull List<MVEntity4DataNegotiation> sample1NullLifecyclestatusAnd2() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
+        List<MVEntity4DataNegotiation> mVEntity4DataNegotiationList = new ArrayList<>();
+        mVEntity4DataNegotiationList.add(sample1NullLifecyclestatus());
+        mVEntity4DataNegotiationList.add(sample2());
+        return mVEntity4DataNegotiationList;
+    }
+
     public static @NotNull List<MVEntity4DataNegotiation> randomList(int size) {
         List<MVEntity4DataNegotiation> initialEntities = new ArrayList<>();
         for (int i = 0; i < size; i++) {
@@ -174,7 +185,13 @@ public final class MVEntity4DataNegotiationMother {
         String type = jsonObject.getString("type");
         String version = jsonObject.getJSONObject("version").getString("value");
         String lastUpdate = jsonObject.getJSONObject("lastUpdate").getString("value");
-        String lifecycleStatus = jsonObject.getJSONObject("lifecycleStatus").getString("value");
+
+        String lifecycleStatus;
+        if(jsonObject.has("lifecycleStatus")){
+            lifecycleStatus = jsonObject.getJSONObject("lifecycleStatus").getString("value");
+        } else {
+            lifecycleStatus = null;
+        }
         String validFor = jsonObject.getJSONObject("validFor").getJSONObject("value").getString("startDateTime");
         String hash = ApplicationUtils.calculateSHA256(entityMotherJson);
         return new MVEntity4DataNegotiation(id, type, version, lastUpdate, lifecycleStatus, validFor, hash, hash);

@@ -101,7 +101,7 @@ public class DataNegotiationJobImpl implements DataNegotiationJob {
         return externalMVEntityListMono
                 .map(externalMVEntityList -> externalMVEntityList
                         .stream()
-                        .filter(mvEntity -> mvEntity.lifecycleStatus().equals("Launched") || mvEntity.lifecycleStatus().equals("Retired"))
+                        .filter(mvEntity -> mvEntity.lifecycleStatus() != null && (mvEntity.lifecycleStatus().equals("Launched") || mvEntity.lifecycleStatus().equals("Retired")))
                         .toList());
     }
 

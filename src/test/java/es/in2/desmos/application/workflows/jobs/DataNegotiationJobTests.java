@@ -118,6 +118,44 @@ class DataNegotiationJobTests {
     }
 
     @Test
+    void itShouldNotSyncWhenLifecyclestatusIsNull() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
+        String issuer = "http://example.org";
+        Mono<String> issuerMono = Mono.just(issuer);
+
+        List<MVEntity4DataNegotiation> externalEntityIds = MVEntity4DataNegotiationMother.sample1NullLifecyclestatusAnd2();
+        Mono<List<MVEntity4DataNegotiation>> externalEntityIdsMono = Mono.just(externalEntityIds);
+
+        Mono<List<MVEntity4DataNegotiation>> localEntityIdsMono = Mono.just(new ArrayList<>());
+
+        String processId = "0";
+        DataNegotiationEvent dataNegotiationEvent = new DataNegotiationEvent(processId, issuerMono, externalEntityIdsMono, localEntityIdsMono);
+
+        List<MVEntity4DataNegotiation> expectedNewEntitiesToSync = List.of(MVEntity4DataNegotiationMother.sample2());
+
+        List<MVEntity4DataNegotiation> expectedExistingEntitiesToSync = new ArrayList<>();
+
+        DataNegotiationResult expectedDataNegotiationResult = new DataNegotiationResult(issuer, expectedNewEntitiesToSync, expectedExistingEntitiesToSync);
+
+        when(dataTransferJob.syncData(any(), any())).thenReturn(Mono.empty());
+
+        var result = dataNegotiationJob.negotiateDataSyncFromEvent(dataNegotiationEvent);
+
+        StepVerifier
+                .create(result)
+                .verifyComplete();
+
+        verify(dataTransferJob, times(1)).syncData(eq(processId), dataNegotiationResultCaptor.capture());
+        verifyNoMoreInteractions(dataTransferJob);
+
+        Mono<DataNegotiationResult> dataNegotiationResultCaptured = dataNegotiationResultCaptor.getValue();
+
+        StepVerifier
+                .create(dataNegotiationResultCaptured)
+                .expectNext(expectedDataNegotiationResult)
+                .verifyComplete();
+    }
+
+    @Test
     void itShouldSyncDataWithExistingEntitiesToAddWhenExternalVersionIsAfter() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         String issuer = "http://example.org";
         Mono<String> issuerMono = Mono.just(issuer);

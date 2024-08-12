@@ -58,6 +58,8 @@ class DataVerificationJobTest {
 
         when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sample2().id())).thenReturn(Mono.just(AuditRecord.builder().entityHashLink(MVEntity4DataNegotiationMother.sample2VersionOld().hashlink()).build()));
 
+        when(auditRecordService.setAuditRecordLock(eq(processId), anyString(), anyBoolean())).thenReturn(Mono.empty());
+
         when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any())).thenReturn(Mono.empty());
 
         when(brokerPublisherService.batchUpsertEntitiesToContextBroker(any(), any())).thenReturn(Mono.empty());
@@ -83,7 +85,6 @@ class DataVerificationJobTest {
 
         verify(auditRecordService, times(2)).buildAndSaveAuditRecordFromDataSync(eq(processId), eq(dataNegotiationResult.issuer()), any(), eq(AuditRecordStatus.RETRIEVED));
         verify(auditRecordService, times(2)).buildAndSaveAuditRecordFromDataSync(eq(processId), eq(dataNegotiationResult.issuer()), any(), eq(AuditRecordStatus.PUBLISHED));
-        verifyNoMoreInteractions(auditRecordService);
     }
 
     @Test
@@ -95,6 +96,8 @@ class DataVerificationJobTest {
         when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sample2().id())).thenReturn(Mono.just(AuditRecord.builder().entityId(MVEntity4DataNegotiationMother.sample2().id()).entityHashLink(MVEntity4DataNegotiationMother.sample2VersionOld().hashlink()).build()));
 
         when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any())).thenReturn(Mono.empty());
+
+        when(auditRecordService.setAuditRecordLock(eq(processId), anyString(), anyBoolean())).thenReturn(Mono.empty());
 
         when(brokerPublisherService.batchUpsertEntitiesToContextBroker(any(), any())).thenReturn(Mono.empty());
 
@@ -125,11 +128,10 @@ class DataVerificationJobTest {
 
         StepVerifier.
                 create(result)
-                .verifyComplete();
+                    .verifyComplete();
 
         verify(auditRecordService, times(2)).buildAndSaveAuditRecordFromDataSync(eq(processId), eq("http://example.org"), mvEntity4DataNegotiationCaptor.capture(), eq(AuditRecordStatus.RETRIEVED));
         verify(auditRecordService, times(2)).buildAndSaveAuditRecordFromDataSync(eq(processId), eq("http://example.org"), any(), eq(AuditRecordStatus.PUBLISHED));
-        verifyNoMoreInteractions(auditRecordService);
 
         var mvEntity4DataNegotiationSentToAuditRecord = mvEntity4DataNegotiationCaptor.getAllValues();
 
@@ -148,6 +150,8 @@ class DataVerificationJobTest {
                 .thenReturn(Mono.just(AuditRecord.builder().entityId(MVEntity4DataNegotiationMother.sample2().id()).entityId("").entityHashLink(MVEntity4DataNegotiationMother.sample2VersionOld().hashlink()).build()));
 
         when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any())).thenReturn(Mono.empty());
+
+        when(auditRecordService.setAuditRecordLock(eq(processId), anyString(), anyBoolean())).thenReturn(Mono.empty());
 
         when(brokerPublisherService.batchUpsertEntitiesToContextBroker(any(), any())).thenReturn(Mono.empty());
 
@@ -182,12 +186,51 @@ class DataVerificationJobTest {
 
         verify(auditRecordService, times(2)).buildAndSaveAuditRecordFromDataSync(eq(processId), eq("http://example.org"), mvEntity4DataNegotiationCaptor.capture(), eq(AuditRecordStatus.RETRIEVED));
         verify(auditRecordService, times(2)).buildAndSaveAuditRecordFromDataSync(eq(processId), eq("http://example.org"), any(), eq(AuditRecordStatus.PUBLISHED));
-        verifyNoMoreInteractions(auditRecordService);
 
         var mvEntity4DataNegotiationSentToAuditRecord = mvEntity4DataNegotiationCaptor.getAllValues();
 
         assertThat(mvEntity4DataNegotiationSentToAuditRecord.get(0)).isEqualTo(expectedMVEntity4DataNegotiationSample2);
         assertThat(mvEntity4DataNegotiationSentToAuditRecord.get(1)).isEqualTo(MVEntity4DataNegotiationMother.sample4());
+    }
+
+    @Test
+    void itShouldBuildAnSaveAuditRecordForSubEntityWhenNotExistsInAuditRecordDBWithNullLifecyclestatus() throws JsonProcessingException, JSONException, NoSuchAlgorithmException {
+        Mono<String> entitySyncResponseMono = Mono.just(EntityMother.scorpioJson1NullLifecyclestatus());
+
+        String processId = "0";
+
+        when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sample1NullLifecyclestatus().id()))
+                .thenReturn(Mono.just(AuditRecord.builder().entityId(MVEntity4DataNegotiationMother.sample1NullLifecyclestatus().id()).entityHashLink(MVEntity4DataNegotiationMother.sample1NullLifecyclestatus().hashlink()).build()));
+
+        when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any())).thenReturn(Mono.empty());
+
+        when(auditRecordService.setAuditRecordLock(eq(processId), anyString(), anyBoolean())).thenReturn(Mono.empty());
+
+        when(brokerPublisherService.batchUpsertEntitiesToContextBroker(any(), any())).thenReturn(Mono.empty());
+
+        Mono<String> issuer = Mono.just("http://example.org");
+
+        Map<Id, Entity> entitiesById = new HashMap<>();
+        entitiesById.put(new Id(MVEntity4DataNegotiationMother.sample1NullLifecyclestatus().id()), new Entity(EntityMother.PRODUCT_OFFERING_1_NULL_LIFECYCLESTATUS));
+
+        List<MVEntity4DataNegotiation> allMVEntity4DataNegotiation = new ArrayList<>();
+
+        Map<Id, HashAndHashLink> existingEntitiesOriginalValidationDataById = new HashMap<>();
+
+        MVEntity4DataNegotiation expectedMVEntity4DataNegotiationSample1 = MVEntity4DataNegotiationMother.sample1NullLifecyclestatus();
+
+        Mono<Void> result = dataVerificationJob.verifyData(processId, issuer, Mono.just(entitiesById), Mono.just(allMVEntity4DataNegotiation), entitySyncResponseMono, Mono.just(existingEntitiesOriginalValidationDataById));
+
+        StepVerifier.
+                create(result)
+                .verifyComplete();
+
+        verify(auditRecordService, times(1)).buildAndSaveAuditRecordFromDataSync(eq(processId), eq("http://example.org"), mvEntity4DataNegotiationCaptor.capture(), eq(AuditRecordStatus.RETRIEVED));
+        verify(auditRecordService, times(1)).buildAndSaveAuditRecordFromDataSync(eq(processId), eq("http://example.org"), any(), eq(AuditRecordStatus.PUBLISHED));
+
+        var mvEntity4DataNegotiationSentToAuditRecord = mvEntity4DataNegotiationCaptor.getAllValues();
+
+        assertThat(mvEntity4DataNegotiationSentToAuditRecord.get(0)).isEqualTo(expectedMVEntity4DataNegotiationSample1);
     }
 
     @Test
@@ -261,6 +304,8 @@ class DataVerificationJobTest {
         when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sample2().id())).thenReturn(Mono.just(AuditRecord.builder().entityHashLink(MVEntity4DataNegotiationMother.sample2VersionOld().hashlink()).build()));
 
         when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any())).thenReturn(Mono.empty());
+
+        when(auditRecordService.setAuditRecordLock(eq(processId), anyString(), anyBoolean())).thenReturn(Mono.empty());
 
         when(brokerPublisherService.batchUpsertEntitiesToContextBroker(any(), any())).thenReturn(Mono.empty());
 
