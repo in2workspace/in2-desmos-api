@@ -18,6 +18,7 @@ import es.in2.desmos.infrastructure.configs.cache.AccessNodeMemoryStore;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
@@ -32,10 +33,7 @@ import java.math.BigInteger;
 import java.security.*;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
-import java.security.spec.ECPublicKeySpec;
-import java.security.spec.EllipticCurve;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
+import java.security.spec.*;
 import java.util.Base64;
 import java.util.Date;
 import java.util.UUID;
@@ -119,18 +117,25 @@ public class JwtTokenProvider {
 
         try {
             // Retrieve the public key from AccessNodeMemoryStore
-            String publicKeyPem = getPublicKeyFromAccessNodeMemory(externalNodeUrl, accessNodeMemoryStore);
-            if (publicKeyPem == null) {
+            String publicKeyHex = getPublicKeyFromAccessNodeMemory(externalNodeUrl, accessNodeMemoryStore);
+            if (publicKeyHex == null) {
                 return Mono.error(new InvalidKeyException("Public key not found for origin: " + externalNodeUrl));
             }
-
             // Convert the PEM public key to ECPublicKey
-            ECPublicKey ecPublicKey = convertPemToECPublicKey(publicKeyPem);
+            ECPublicKey ecPublicKey = convertHexPublicKeyToECPublicKey(publicKeyHex);
+
+            ECDSAVerifier verifier = new ECDSAVerifier(ecPublicKey);
+            log.info("ECDSAVerifier created!!!!!!!!!!!!!!");
+
+            verifier.getJCAContext().setProvider(BouncyCastleProviderSingleton.getInstance());
+            log.info("verifier.getJCAContext().setProvider finished!!!!!!!!!!!!!!");
 
             SignedJWT jwt = SignedJWT.parse(jwtString);
-            ECDSAVerifier verifier = new ECDSAVerifier(ecPublicKey);
-            verifier.getJCAContext().setProvider(BouncyCastleProviderSingleton.getInstance());
+            log.info("SignedJWT created!!!!!!!!!!!!!!");
+
             jwt.verify(verifier);
+            log.info("jwt.verify!!!!!!!!!!!!!!");
+
             return Mono.just(jwt);
         } catch (Exception e) {
             log.warn("Error parsing JWT", e);
@@ -160,28 +165,49 @@ public class JwtTokenProvider {
         return null;
     }
 
-    private ECPublicKey convertPemToECPublicKey(String pem) throws Exception {
-        PemReader pemReader = new PemReader(new StringReader(pem));
-        PemObject pemObject = pemReader.readPemObject();
-        byte[] encoded = pemObject.getContent();
+    public ECPublicKey convertHexPublicKeyToECPublicKey(String hexPublicKey)
+            throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
 
-        // Remove PEM header and footer if present
-        String base64 = new String(encoded);
-        base64 = base64.replaceAll("-----BEGIN PUBLIC KEY-----", "")
-                .replaceAll("-----END PUBLIC KEY-----", "")
-                .replaceAll("\\s", "");
+        String replacedPublicKeyHex = hexPublicKey.replace("0x", "");
 
-        byte[] keyBytes = Base64.getDecoder().decode(base64);
+        // Parse the hexadecimal string into a BigInteger
+        BigInteger publicKeyInt = new BigInteger(replacedPublicKeyHex, 16);
 
+        // Get the curve specification for secp256k1
+        ECParameterSpec bcEcSpec = ECNamedCurveTable.getParameterSpec("secp256k1");
+        ECCurve bcCurve = bcEcSpec.getCurve();
+
+        // Convert BigInteger to ECPoint (this is a raw public key)
+        ECPoint q = bcCurve.decodePoint(publicKeyInt.toByteArray());
+        q = q.normalize();  // Ensure the point is normalized
+
+        // Convert BouncyCastle ECPoint to standard ECPoint
+        java.security.spec.ECPoint w = new java.security.spec.ECPoint(
+                q.getAffineXCoord().toBigInteger(),
+                q.getAffineYCoord().toBigInteger()
+        );
+
+        // Construct the EllipticCurve and ECParameterSpec using Java's standard classes
+        EllipticCurve curve = new EllipticCurve(
+                new ECFieldFp(bcCurve.getField().getCharacteristic()),
+                bcCurve.getA().toBigInteger(),
+                bcCurve.getB().toBigInteger()
+        );
+
+        java.security.spec.ECParameterSpec ecSpec = new java.security.spec.ECParameterSpec(
+                curve,
+                new java.security.spec.ECPoint(
+                        bcEcSpec.getG().getAffineXCoord().toBigInteger(),
+                        bcEcSpec.getG().getAffineYCoord().toBigInteger()
+                ),
+                bcEcSpec.getN(),
+                bcEcSpec.getH().intValue()
+        );
+
+        // Create the public key from the ECPoint and specification
         KeyFactory keyFactory = KeyFactory.getInstance("EC", "BC");
-        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
-        PublicKey publicKey = keyFactory.generatePublic(keySpec);
-
-        if (publicKey instanceof ECPublicKey) {
-            return (ECPublicKey) publicKey;
-        } else {
-            throw new IllegalArgumentException("Key is not of type ECPublicKey");
-        }
+        ECPublicKeySpec ecPublicKeySpec = new ECPublicKeySpec(w, ecSpec);
+        return (ECPublicKey) keyFactory.generatePublic(ecPublicKeySpec);
     }
 
 
