@@ -69,6 +69,7 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
         return externalAccessNodesConfig.getExternalAccessNodesUrls()
                 .flatMapIterable(externalAccessNodesList -> externalAccessNodesList)
                 .flatMap(externalAccessNode -> {
+                    log.debug("ProcessID: {} - External Access Node: {}", processId, externalAccessNode);
                     var discoverySyncRequest = new DiscoverySyncRequest(apiConfig.getOperatorExternalDomain(), localMvEntities4DataNegotiation);
 
                     Mono<DiscoverySyncRequest> discoverySyncRequestMono = Mono.just(discoverySyncRequest);
