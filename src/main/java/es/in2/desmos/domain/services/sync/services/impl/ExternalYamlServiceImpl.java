@@ -57,7 +57,7 @@ public class ExternalYamlServiceImpl implements ExternalYamlService {
     }
 
     private String getExternalYamlProfile() {
-        String profile = env.getProperty("SPRING_PROFILES_ACTIVE");
+        String profile = apiConfig.getCurrentEnvironment();
 
         if (profile == null) {
             throw new RuntimeException("Environment variable SPRING_PROFILES_ACTIVE is not set");
