@@ -3,6 +3,7 @@ package es.in2.desmos.domain.services.sync.impl;
 import com.nimbusds.jose.JOSEException;
 import es.in2.desmos.domain.models.Id;
 import es.in2.desmos.domain.services.sync.EntitySyncWebClient;
+import es.in2.desmos.infrastructure.configs.ApiConfig;
 import es.in2.desmos.infrastructure.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,7 @@ import reactor.core.publisher.Mono;
 public class EntitySyncWebClientImpl implements EntitySyncWebClient {
     private final WebClient webClient;
     private final JwtTokenProvider jwtTokenProvider;
+    private final ApiConfig apiConfig;
 
     public Mono<String> makeRequest(String processId, Mono<String> issuerMono, Mono<Id[]> entitySyncRequest) {
         log.debug("ProcessID: {} - Making a Entity Sync Web Client request", processId);
@@ -34,6 +36,7 @@ public class EntitySyncWebClientImpl implements EntitySyncWebClient {
                 .post()
                 .uri(issuer + "/api/v1/sync/p2p/entities")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .header("externalNodeUrl", apiConfig.getExternalDomain())
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(entitySyncRequest, Id[].class)
                 .retrieve()
