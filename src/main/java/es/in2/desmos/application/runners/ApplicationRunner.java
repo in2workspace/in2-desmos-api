@@ -6,6 +6,7 @@ import es.in2.desmos.application.workflows.SubscribeWorkflow;
 import es.in2.desmos.domain.exceptions.RequestErrorException;
 import es.in2.desmos.domain.models.BlockchainSubscription;
 import es.in2.desmos.domain.models.BrokerSubscription;
+import es.in2.desmos.domain.services.api.BrokerSubscriptionValidateService;
 import es.in2.desmos.domain.services.blockchain.BlockchainListenerService;
 import es.in2.desmos.domain.services.broker.BrokerListenerService;
 import es.in2.desmos.infrastructure.configs.ApiConfig;
@@ -46,6 +47,7 @@ public class ApplicationRunner {
     private final DataSyncWorkflow dataSyncWorkflow;
     private final PublishWorkflow publishWorkflow;
     private final SubscribeWorkflow subscribeWorkflow;
+    private final BrokerSubscriptionValidateService brokerSubscriptionValidateService;
     private final AtomicBoolean isQueueAuthorizedForEmit = new AtomicBoolean(false);
     private final String getCurrentEnvironment;
     private Disposable publishQueueDisposable;
@@ -69,8 +71,9 @@ public class ApplicationRunner {
         brokerConfig.getEntityTypes().forEach(entityType -> entities.add(BrokerSubscription.Entity.builder()
                 .type(entityType).build()));
         // Create the Broker Subscription object
+        String brokerSubscriptionid = SUBSCRIPTION_ID_PREFIX + UUID.randomUUID();
         BrokerSubscription brokerSubscription = BrokerSubscription.builder()
-                .id(SUBSCRIPTION_ID_PREFIX + UUID.randomUUID())
+                .id(brokerSubscriptionid)
                 .type(SUBSCRIPTION_TYPE)
                 .entities(entities)
                 .notification(BrokerSubscription.SubscriptionNotification.builder()
@@ -86,6 +89,7 @@ public class ApplicationRunner {
         // Create the subscription and log the result
         log.debug("ProcessID: {} - Broker Subscription: {}", processId, brokerSubscription);
         return brokerListenerService.createSubscription(processId, brokerSubscription)
+                .then(brokerSubscriptionValidateService.setSubscriptionId(processId, brokerSubscription.id()))
                 .doOnSuccess(response -> log.info("ProcessID: {} - Broker Subscription created successfully.", processId))
                 .doOnError(e -> log.error("ProcessID: {} - Error creating Broker Subscription", processId, e));
     }

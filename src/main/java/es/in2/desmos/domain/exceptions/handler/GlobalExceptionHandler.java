@@ -128,4 +128,13 @@ public class GlobalExceptionHandler {
         return Mono.just(GlobalErrorMessage.builder().title("UnauthorizedDomeParticipantException").message(unauthorizedDomeParticipantException.getMessage()).path(path).build());
     }
 
+    @ExceptionHandler(UnauthorizedBrokerSubscriptionException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ResponseBody
+    public Mono<GlobalErrorMessage> handleUnauthorizedBrokerSubscriptionException(UnauthorizedBrokerSubscriptionException unauthorizedBrokerSubscriptionException, ServerHttpRequest request) {
+        log.error("UnauthorizedBrokerSubscriptionException: {}", unauthorizedBrokerSubscriptionException.getMessage());
+        String path = String.valueOf(request.getPath());
+        return Mono.just(GlobalErrorMessage.builder().title("UnauthorizedBrokerSubscriptionException").message(unauthorizedBrokerSubscriptionException.getMessage()).path(path).build());
+    }
+
 }
