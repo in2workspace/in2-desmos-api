@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import es.in2.desmos.domain.models.AccessNodeOrganization;
 import es.in2.desmos.domain.models.AccessNodeYamlData;
-import es.in2.desmos.domain.services.sync.services.ExternalYamlService;
 import es.in2.desmos.infrastructure.configs.ApiConfig;
 import es.in2.desmos.infrastructure.configs.cache.AccessNodeMemoryStore;
 import es.in2.desmos.infrastructure.configs.properties.AccessNodeProperties;
@@ -15,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
@@ -64,7 +62,7 @@ public class SecurityConfig {
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         http
                 .authorizeExchange(exchanges -> exchanges
-                        .pathMatchers("/api/v1/notifications/test/token").permitAll()
+                        .matchers(new LocalhostHealthMatcher()).permitAll()
                         .pathMatchers("/api/v1/notifications/broker").permitAll()
                         .pathMatchers("/api/v1/notifications/dlt").permitAll()
                         .pathMatchers("/api/v1/entities/*").authenticated() //replication endpoint
