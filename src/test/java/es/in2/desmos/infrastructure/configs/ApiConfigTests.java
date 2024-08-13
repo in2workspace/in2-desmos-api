@@ -2,6 +2,7 @@ package es.in2.desmos.infrastructure.configs;
 
 import es.in2.desmos.domain.exceptions.HashCreationException;
 import es.in2.desmos.domain.utils.ApplicationUtils;
+import es.in2.desmos.infrastructure.configs.properties.ApiProperties;
 import es.in2.desmos.infrastructure.configs.properties.OpenApiProperties;
 import es.in2.desmos.infrastructure.configs.properties.OperatorProperties;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -31,6 +32,9 @@ class ApiConfigTests {
 
     @Mock
     private OperatorProperties operatorProperties;
+
+    @Mock
+    private ApiProperties apiProperties;
 
     @Mock
     private Environment environment;
@@ -118,14 +122,14 @@ class ApiConfigTests {
     }
 
     @Test
-    void getOperatorExternalDomain(){
+    void getExternalDomain(){
         String externalDomain = "http://my-domain.org";
-        when(operatorProperties.externalDomain()).thenReturn(externalDomain);
+        when(apiProperties.externalDomain()).thenReturn(externalDomain);
 
-        assertEquals(externalDomain, apiConfig.getOperatorExternalDomain());
+        assertEquals(externalDomain, apiConfig.getExternalDomain());
 
-        verify(operatorProperties, times(1)).externalDomain();
-        verifyNoMoreInteractions(operatorProperties);
+        verify(apiProperties, times(1)).externalDomain();
+        verifyNoMoreInteractions(apiProperties);
     }
 
 }

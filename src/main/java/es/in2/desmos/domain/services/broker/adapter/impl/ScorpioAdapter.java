@@ -40,7 +40,7 @@ public class ScorpioAdapter implements BrokerAdapterService {
 
     @PostConstruct
     public void init() {
-        this.webClient = WebClient.builder().baseUrl(brokerConfig.getExternalDomain()).build();
+        this.webClient = WebClient.builder().baseUrl(brokerConfig.getInternalDomain()).build();
     }
 
     @Override
@@ -179,7 +179,9 @@ public class ScorpioAdapter implements BrokerAdapterService {
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<List<BrokerSubscription>>() {
                 })
-                .onErrorMap(error -> new SubscriptionCreationException("Error fetching subscriptions from broker"));
+                .onErrorMap(error -> {
+                    return new SubscriptionCreationException("Error fetching subscriptions from broker");
+                });
     }
 
     @Override

@@ -9,6 +9,7 @@ import es.in2.desmos.domain.models.BrokerSubscription;
 import es.in2.desmos.domain.services.api.BrokerSubscriptionValidateService;
 import es.in2.desmos.domain.services.blockchain.BlockchainListenerService;
 import es.in2.desmos.domain.services.broker.BrokerListenerService;
+import es.in2.desmos.domain.services.sync.services.ExternalYamlService;
 import es.in2.desmos.infrastructure.configs.ApiConfig;
 import es.in2.desmos.infrastructure.configs.BlockchainConfig;
 import es.in2.desmos.infrastructure.configs.BrokerConfig;
@@ -44,6 +45,7 @@ public class ApplicationRunner {
     private final BlockchainConfig blockchainConfig;
     private final BrokerListenerService brokerListenerService;
     private final BlockchainListenerService blockchainListenerService;
+    private final ExternalYamlService externalYamlService;
     private final DataSyncWorkflow dataSyncWorkflow;
     private final PublishWorkflow publishWorkflow;
     private final SubscribeWorkflow subscribeWorkflow;
@@ -60,6 +62,7 @@ public class ApplicationRunner {
         return setBrokerSubscription(processId)
                 .then(setBlockchainSubscription(processId))
                 .thenMany(initializeDataSync(processId))
+                .then(setAccessNodePublicKeysFromExternalYaml(processId))
                 .then();
     }
 
@@ -107,6 +110,16 @@ public class ApplicationRunner {
         return blockchainListenerService.createSubscription(processId, blockchainSubscription)
                 .doOnSuccess(response -> log.info("ProcessID: {} - Blockchain Subscription created successfully.", processId))
                 .doOnError(e -> log.error("ProcessID: {} - Error creating Blockchain Subscription", processId, e));
+    }
+
+    @Retryable(retryFor = RequestErrorException.class, maxAttempts = 4, backoff = @Backoff(delay = 2000))
+    private Mono<Void> setAccessNodePublicKeysFromExternalYaml(String processId) {
+        log.info("ProcessID: {} - Setting Access Node Public Keys into Memory...", processId);
+
+        // Get public keys
+        return externalYamlService.getAccessNodeYamlDataFromExternalSource(processId)
+                .doOnSuccess(response -> log.info("ProcessID: {} - Public keys loaded successfully in memory.", processId))
+                .doOnError(e -> log.error("ProcessID: {} - Error setting public keys from access node repository", processId, e));
     }
 
     private Flux<Void> initializeDataSync(String processId) {

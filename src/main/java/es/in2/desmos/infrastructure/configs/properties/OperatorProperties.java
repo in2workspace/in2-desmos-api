@@ -8,5 +8,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @param organizationIdentifier - OrganizationID information
  */
 @ConfigurationProperties(prefix = "operator")
-public record OperatorProperties(String organizationIdentifier, String externalDomain) {
+public record OperatorProperties(String organizationIdentifier) {
 }

@@ -37,8 +37,8 @@ class BrokerPublisherServiceIT {
     @LocalServerPort
     private int localServerPort;
 
-    @Value("${broker.externalDomain}")
-    private String contextBrokerExternalDomain;
+    /*@Value("${broker.externalDomain}")
+    private String contextBrokerInternalDomain;*/
 
     private static List<BrokerEntityWithIdTypeLastUpdateAndVersion> initialEntities;
 
