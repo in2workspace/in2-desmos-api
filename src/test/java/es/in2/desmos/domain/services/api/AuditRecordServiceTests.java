@@ -10,7 +10,7 @@ import es.in2.desmos.domain.models.BlockchainTxPayload;
 import es.in2.desmos.domain.repositories.AuditRecordRepository;
 import es.in2.desmos.domain.services.api.impl.AuditRecordServiceImpl;
 import es.in2.desmos.objectmothers.AuditRecordMother;
-import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
+import es.in2.desmos.objectmothers.MVAuditServiceEntity4DataNegotiationMother;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -133,14 +133,14 @@ class AuditRecordServiceTests {
     void itShouldBuildAndSaveAuditRecordFromDataSync() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         String processId = "0";
         String issuer = "http://example.org";
-        MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample1();
+        MVAuditServiceEntity4DataNegotiation mvAuditServiceEntity4DataNegotiation = MVAuditServiceEntity4DataNegotiationMother.sample1();
         AuditRecordStatus status = AuditRecordStatus.RETRIEVED;
-        AuditRecord expectedAuditRecord = AuditRecordMother.createAuditRecordFromMVEntity4DataNegotiation("http://example.org", mvEntity4DataNegotiation, status);
+        AuditRecord expectedAuditRecord = AuditRecordMother.createAuditRecordFromMVAuditServiceEntity4DataNegotiation("http://example.org", mvAuditServiceEntity4DataNegotiation, status);
 
         when(auditRecordRepository.findMostRecentAuditRecord()).thenReturn(Mono.just(new AuditRecord()));
         when(auditRecordRepository.save(any())).thenReturn(Mono.just(expectedAuditRecord));
 
-        var result = auditRecordService.buildAndSaveAuditRecordFromDataSync(processId, issuer, mvEntity4DataNegotiation, status);
+        var result = auditRecordService.buildAndSaveAuditRecordFromDataSync(processId, issuer, mvAuditServiceEntity4DataNegotiation, status);
 
         StepVerifier
                 .create(result)
@@ -325,14 +325,14 @@ class AuditRecordServiceTests {
     void itShouldReturnErrorWhenAuditRecordCreatesIncorrectJson() throws JsonProcessingException, JSONException, NoSuchAlgorithmException {
         String processId = "0";
         String issuer = "http://example.org";
-        MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample1();
+        MVAuditServiceEntity4DataNegotiation mvAuditServiceEntity4DataNegotiation = MVAuditServiceEntity4DataNegotiationMother.sample1();
         AuditRecordStatus status = AuditRecordStatus.RETRIEVED;
 
         when(auditRecordRepository.findMostRecentAuditRecord()).thenReturn(Mono.just(new AuditRecord()));
 
         when(objectMapper.writeValueAsString(any())).thenThrow(JsonProcessingException.class);
 
-        var result = auditRecordService.buildAndSaveAuditRecordFromDataSync(processId, issuer, mvEntity4DataNegotiation, status);
+        var result = auditRecordService.buildAndSaveAuditRecordFromDataSync(processId, issuer, mvAuditServiceEntity4DataNegotiation, status);
 
         StepVerifier
                 .create(result)
@@ -360,15 +360,12 @@ class AuditRecordServiceTests {
     void testSetAuditRecordUnlock() {
         String processId = "process1";
         String id = "record1";
-        boolean isLocked = true;
 
-        StepVerifier.create(auditRecordService.setAuditRecordLock(processId, id, isLocked))
+        StepVerifier.create(auditRecordService.setAuditRecordLock(processId, id, true))
                 .expectComplete()
                 .verify();
 
-        isLocked = false;
-
-        StepVerifier.create(auditRecordService.setAuditRecordLock(processId, id, isLocked))
+        StepVerifier.create(auditRecordService.setAuditRecordLock(processId, id, false))
                 .expectComplete()
                 .verify();
 

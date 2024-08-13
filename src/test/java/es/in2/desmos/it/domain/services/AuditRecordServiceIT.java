@@ -3,10 +3,12 @@ package es.in2.desmos.it.domain.services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.AuditRecordStatus;
+import es.in2.desmos.domain.models.MVAuditServiceEntity4DataNegotiation;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.it.ContainerManager;
 import es.in2.desmos.objectmothers.AuditRecordMother;
+import es.in2.desmos.objectmothers.MVAuditServiceEntity4DataNegotiationMother;
 import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
 import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,16 +50,16 @@ class AuditRecordServiceIT {
     void itShouldBuildAndSaveAuditRecordFromDataSync() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         String processId = "0";
         String issuer = "http://example.org";
-        MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample1();
+        MVAuditServiceEntity4DataNegotiation mvAuditServiceEntity4DataNegotiationMother = MVAuditServiceEntity4DataNegotiationMother.sample1();
         AuditRecordStatus status = AuditRecordStatus.PUBLISHED;
 
-        Mono<Void> result = auditRecordService.buildAndSaveAuditRecordFromDataSync(processId, issuer, mvEntity4DataNegotiation, status);
+        Mono<Void> result = auditRecordService.buildAndSaveAuditRecordFromDataSync(processId, issuer, mvAuditServiceEntity4DataNegotiationMother, status);
 
         StepVerifier
                 .create(result)
                 .verifyComplete();
 
-        assertAuditRecordEntityIsExpected(mvEntity4DataNegotiation.id(), MVEntity4DataNegotiationMother.sample1(), issuer);
+        assertAuditRecordEntityIsExpected(mvAuditServiceEntity4DataNegotiationMother.id(), MVEntity4DataNegotiationMother.sample1(), issuer);
     }
 
     private void assertAuditRecordEntityIsExpected(String entityId, MVEntity4DataNegotiation expectedMVEntity4DataNegotiation, String baseUri) {

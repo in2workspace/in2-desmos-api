@@ -9,6 +9,7 @@ import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
 import es.in2.desmos.objectmothers.DataNegotiationResultMother;
 import es.in2.desmos.objectmothers.EntityMother;
+import es.in2.desmos.objectmothers.MVAuditServiceEntity4DataNegotiationMother;
 import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
@@ -38,14 +39,9 @@ class DataVerificationJobTest {
     private AuditRecordService auditRecordService;
     @Mock
     private BrokerPublisherService brokerPublisherService;
-    @Captor
-    private ArgumentCaptor<Mono<String>> monoIssuerCaptor;
 
     @Captor
-    private ArgumentCaptor<Mono<Id[]>> entitySyncRequestCaptor;
-
-    @Captor
-    private ArgumentCaptor<MVEntity4DataNegotiation> mvEntity4DataNegotiationCaptor;
+    private ArgumentCaptor<MVAuditServiceEntity4DataNegotiation> mvAuditServiceEntity4DataNegotiationArgumentCaptor;
 
 
     @Test
@@ -113,14 +109,10 @@ class DataVerificationJobTest {
         Map<Id, HashAndHashLink> existingEntitiesOriginalValidationDataById = new HashMap<>();
         existingEntitiesOriginalValidationDataById.put(new Id(MVEntity4DataNegotiationMother.sample2().id()), new HashAndHashLink(MVEntity4DataNegotiationMother.sample2().hash(), MVEntity4DataNegotiationMother.sample2().hashlink()));
 
-        MVEntity4DataNegotiation expectedMVEntity4DataNegotiationSample2 =
-                new MVEntity4DataNegotiation(
+        MVAuditServiceEntity4DataNegotiation expectedMVEntity4DataNegotiationSample2 =
+                new MVAuditServiceEntity4DataNegotiation(
                         MVEntity4DataNegotiationMother.sample2().id(),
                         MVEntity4DataNegotiationMother.sample2().type(),
-                        MVEntity4DataNegotiationMother.sample2().version(),
-                        MVEntity4DataNegotiationMother.sample2().lastUpdate(),
-                        MVEntity4DataNegotiationMother.sample2().lifecycleStatus(),
-                        MVEntity4DataNegotiationMother.sample2().validFor(),
                         MVEntity4DataNegotiationMother.sample2().hash(),
                         MVEntity4DataNegotiationMother.sample2VersionOld().hashlink());
 
@@ -130,13 +122,13 @@ class DataVerificationJobTest {
                 create(result)
                     .verifyComplete();
 
-        verify(auditRecordService, times(2)).buildAndSaveAuditRecordFromDataSync(eq(processId), eq("http://example.org"), mvEntity4DataNegotiationCaptor.capture(), eq(AuditRecordStatus.RETRIEVED));
+        verify(auditRecordService, times(2)).buildAndSaveAuditRecordFromDataSync(eq(processId), eq("http://example.org"), mvAuditServiceEntity4DataNegotiationArgumentCaptor.capture(), eq(AuditRecordStatus.RETRIEVED));
         verify(auditRecordService, times(2)).buildAndSaveAuditRecordFromDataSync(eq(processId), eq("http://example.org"), any(), eq(AuditRecordStatus.PUBLISHED));
 
-        var mvEntity4DataNegotiationSentToAuditRecord = mvEntity4DataNegotiationCaptor.getAllValues();
+        var mvEntity4DataNegotiationSentToAuditRecord = mvAuditServiceEntity4DataNegotiationArgumentCaptor.getAllValues();
 
         assertThat(mvEntity4DataNegotiationSentToAuditRecord.get(0)).isEqualTo(expectedMVEntity4DataNegotiationSample2);
-        assertThat(mvEntity4DataNegotiationSentToAuditRecord.get(1)).isEqualTo(MVEntity4DataNegotiationMother.sample4());
+        assertThat(mvEntity4DataNegotiationSentToAuditRecord.get(1)).isEqualTo(MVAuditServiceEntity4DataNegotiationMother.sample4());
     }
 
     @Test
@@ -167,14 +159,10 @@ class DataVerificationJobTest {
         Map<Id, HashAndHashLink> existingEntitiesOriginalValidationDataById = new HashMap<>();
         existingEntitiesOriginalValidationDataById.put(new Id(MVEntity4DataNegotiationMother.sample2().id()), new HashAndHashLink(MVEntity4DataNegotiationMother.sample2().hash(), MVEntity4DataNegotiationMother.sample2().hashlink()));
 
-        MVEntity4DataNegotiation expectedMVEntity4DataNegotiationSample2 =
-                new MVEntity4DataNegotiation(
+        MVAuditServiceEntity4DataNegotiation expectedMVAuditServiceEntity4DataNegotiation2 =
+                new MVAuditServiceEntity4DataNegotiation(
                         MVEntity4DataNegotiationMother.sample2().id(),
                         MVEntity4DataNegotiationMother.sample2().type(),
-                        MVEntity4DataNegotiationMother.sample2().version(),
-                        MVEntity4DataNegotiationMother.sample2().lastUpdate(),
-                        MVEntity4DataNegotiationMother.sample2().lifecycleStatus(),
-                        MVEntity4DataNegotiationMother.sample2().validFor(),
                         MVEntity4DataNegotiationMother.sample2().hash(),
                         MVEntity4DataNegotiationMother.sample2().hash());
 
@@ -184,13 +172,13 @@ class DataVerificationJobTest {
                 create(result)
                 .verifyComplete();
 
-        verify(auditRecordService, times(2)).buildAndSaveAuditRecordFromDataSync(eq(processId), eq("http://example.org"), mvEntity4DataNegotiationCaptor.capture(), eq(AuditRecordStatus.RETRIEVED));
+        verify(auditRecordService, times(2)).buildAndSaveAuditRecordFromDataSync(eq(processId), eq("http://example.org"), mvAuditServiceEntity4DataNegotiationArgumentCaptor.capture(), eq(AuditRecordStatus.RETRIEVED));
         verify(auditRecordService, times(2)).buildAndSaveAuditRecordFromDataSync(eq(processId), eq("http://example.org"), any(), eq(AuditRecordStatus.PUBLISHED));
 
-        var mvEntity4DataNegotiationSentToAuditRecord = mvEntity4DataNegotiationCaptor.getAllValues();
+        var mvEntity4DataNegotiationSentToAuditRecord = mvAuditServiceEntity4DataNegotiationArgumentCaptor.getAllValues();
 
-        assertThat(mvEntity4DataNegotiationSentToAuditRecord.get(0)).isEqualTo(expectedMVEntity4DataNegotiationSample2);
-        assertThat(mvEntity4DataNegotiationSentToAuditRecord.get(1)).isEqualTo(MVEntity4DataNegotiationMother.sample4());
+        assertThat(mvEntity4DataNegotiationSentToAuditRecord.get(0)).isEqualTo(expectedMVAuditServiceEntity4DataNegotiation2);
+        assertThat(mvEntity4DataNegotiationSentToAuditRecord.get(1)).isEqualTo(MVAuditServiceEntity4DataNegotiationMother.sample4());
     }
 
     @Test
@@ -217,7 +205,7 @@ class DataVerificationJobTest {
 
         Map<Id, HashAndHashLink> existingEntitiesOriginalValidationDataById = new HashMap<>();
 
-        MVEntity4DataNegotiation expectedMVEntity4DataNegotiationSample1 = MVEntity4DataNegotiationMother.sample1NullLifecyclestatus();
+        MVAuditServiceEntity4DataNegotiation expectedMVAuditServiceEntity4DataNegotiationSample1 = MVAuditServiceEntity4DataNegotiationMother.sample1NullLifecyclestatus();
 
         Mono<Void> result = dataVerificationJob.verifyData(processId, issuer, Mono.just(entitiesById), Mono.just(allMVEntity4DataNegotiation), entitySyncResponseMono, Mono.just(existingEntitiesOriginalValidationDataById));
 
@@ -225,12 +213,12 @@ class DataVerificationJobTest {
                 create(result)
                 .verifyComplete();
 
-        verify(auditRecordService, times(1)).buildAndSaveAuditRecordFromDataSync(eq(processId), eq("http://example.org"), mvEntity4DataNegotiationCaptor.capture(), eq(AuditRecordStatus.RETRIEVED));
+        verify(auditRecordService, times(1)).buildAndSaveAuditRecordFromDataSync(eq(processId), eq("http://example.org"), mvAuditServiceEntity4DataNegotiationArgumentCaptor.capture(), eq(AuditRecordStatus.RETRIEVED));
         verify(auditRecordService, times(1)).buildAndSaveAuditRecordFromDataSync(eq(processId), eq("http://example.org"), any(), eq(AuditRecordStatus.PUBLISHED));
 
-        var mvEntity4DataNegotiationSentToAuditRecord = mvEntity4DataNegotiationCaptor.getAllValues();
+        var mvEntity4DataNegotiationSentToAuditRecord = mvAuditServiceEntity4DataNegotiationArgumentCaptor.getAllValues();
 
-        assertThat(mvEntity4DataNegotiationSentToAuditRecord.get(0)).isEqualTo(expectedMVEntity4DataNegotiationSample1);
+        assertThat(mvEntity4DataNegotiationSentToAuditRecord.get(0)).isEqualTo(expectedMVAuditServiceEntity4DataNegotiationSample1);
     }
 
     @Test

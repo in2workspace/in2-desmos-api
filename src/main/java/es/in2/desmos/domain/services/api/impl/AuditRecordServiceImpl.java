@@ -151,25 +151,25 @@ public class AuditRecordServiceImpl implements AuditRecordService {
      * If the retrievedBrokerEntity is null or blank, the status will be RECEIVED.
      */
     @Override
-    public Mono<Void> buildAndSaveAuditRecordFromDataSync(String processId, String issuer, MVEntity4DataNegotiation mvEntity4DataNegotiation, AuditRecordStatus status) {
+    public Mono<Void> buildAndSaveAuditRecordFromDataSync(String processId, String issuer, MVAuditServiceEntity4DataNegotiation mvAuditServiceEntity4DataNegotiation, AuditRecordStatus status) {
         return fetchMostRecentAuditRecord()
                 .flatMap(lastAuditRecordRegistered -> {
                     try {
-                        String entityHash = mvEntity4DataNegotiation.hash();
-                        String entityHashLink = mvEntity4DataNegotiation.hashlink();
+                        String entityHash = mvAuditServiceEntity4DataNegotiation.hash();
+                        String entityHashLink = mvAuditServiceEntity4DataNegotiation.hashlink();
                         String dataLocation = issuer +
                                 "/api/v1/entities/" +
-                                mvEntity4DataNegotiation.id() +
+                                mvAuditServiceEntity4DataNegotiation.id() +
                                 HASHLINK_PREFIX
-                                + mvEntity4DataNegotiation.hashlink();
+                                + mvAuditServiceEntity4DataNegotiation.hashlink();
 
                         AuditRecord auditRecord =
                                 AuditRecord.builder()
                                         .id(UUID.randomUUID())
                                         .processId(processId)
                                         .createdAt(Timestamp.from(Instant.now()))
-                                        .entityId(mvEntity4DataNegotiation.id())
-                                        .entityType(mvEntity4DataNegotiation.type())
+                                        .entityId(mvAuditServiceEntity4DataNegotiation.id())
+                                        .entityType(mvAuditServiceEntity4DataNegotiation.type())
                                         .entityHash(entityHash)
                                         .entityHashLink(entityHashLink)
                                         .dataLocation(dataLocation)

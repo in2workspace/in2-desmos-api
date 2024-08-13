@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 
 public record MVAuditServiceEntity4DataNegotiation(@JsonProperty("id") @NotBlank String id,
+                                                   @JsonProperty("type") @NotBlank String type,
                                                    @JsonProperty("hash") @NotBlank String hash,
                                                    @JsonProperty("hashlink") @NotBlank String hashlink) {
 }

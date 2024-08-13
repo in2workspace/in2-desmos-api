@@ -190,6 +190,7 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                                         .map(auditRecord ->
                                                 new MVAuditServiceEntity4DataNegotiation(
                                                         auditRecord.getEntityId(),
+                                                        auditRecord.getEntityType(),
                                                         auditRecord.getEntityHash(),
                                                         auditRecord.getEntityHashLink()
                                                 )

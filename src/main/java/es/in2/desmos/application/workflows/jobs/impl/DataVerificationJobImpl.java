@@ -95,8 +95,11 @@ public class DataVerificationJobImpl implements DataVerificationJob {
                                         .filter(x -> x.id().equals(id))
                                         .findFirst();
                                 return mvEntity4DataNegotiation.map(entity4DataNegotiation -> issuerMono
-                                                .flatMap(issuer -> auditRecordService
-                                                        .buildAndSaveAuditRecordFromDataSync(processId, issuer, entity4DataNegotiation, auditRecordStatus)))
+                                                .flatMap(issuer -> {
+                                                    MVAuditServiceEntity4DataNegotiation mvAuditServiceEntity4DataNegotiation = new MVAuditServiceEntity4DataNegotiation(entity4DataNegotiation.id(), entity4DataNegotiation.type(), entity4DataNegotiation.hash(), entity4DataNegotiation.hashlink());
+                                                    return auditRecordService
+                                                            .buildAndSaveAuditRecordFromDataSync(processId, issuer, mvAuditServiceEntity4DataNegotiation, auditRecordStatus);
+                                                }))
                                         .orElseGet(() -> issuerMono
                                                 .flatMap(issuer -> getMVEntity4DataNegotiationForNewSubEntity(processId, Mono.just(rcvdEntityById), Mono.just(id))
                                                         .flatMap(newMVEntity4DataNegotiation -> auditRecordService
@@ -108,25 +111,14 @@ public class DataVerificationJobImpl implements DataVerificationJob {
                 .then();
     }
 
-    private Mono<MVEntity4DataNegotiation> getMVEntity4DataNegotiationForNewSubEntity(String processId, Mono<Map.Entry<Id, Entity>> rcvdEntityByIdMono, Mono<String> idMono) {
+    // Canviar perquè retorni això.
+    private Mono<MVAuditServiceEntity4DataNegotiation> getMVEntity4DataNegotiationForNewSubEntity(String processId, Mono<Map.Entry<Id, Entity>> rcvdEntityByIdMono, Mono<String> idMono) {
         return rcvdEntityByIdMono.flatMap(rcvdEntityById -> {
             String entity = rcvdEntityById.getValue().value();
             try {
                 JsonNode entityNode = objectMapper.readTree(entity);
 
                 String type = entityNode.get("type").asText();
-                String value = "value";
-                String lastUpdate = entityNode.get("lastUpdate").get(value).asText();
-                String version = entityNode.get("version").get(value).asText();
-
-                String lifecycleStatus;
-                if (entityNode.has("lifecycleStatus")) {
-                    lifecycleStatus = entityNode.get("lifecycleStatus").get(value).asText();
-                } else {
-                    lifecycleStatus = null;
-                }
-
-                String validFor = entityNode.get("validFor").get(value).get("startDateTime").asText();
 
                 Mono<String> calculatedHashMono = calculateHash(Mono.just(entity));
                 Mono<String> hashLinkMono = getHashLinkForNewSubEntity(processId, calculatedHashMono, idMono);
@@ -137,7 +129,7 @@ public class DataVerificationJobImpl implements DataVerificationJob {
                             String hashLink = tuple.getT2();
 
                             return calculatedHashMono.map(hash ->
-                                    new MVEntity4DataNegotiation(id, type, version, lastUpdate, lifecycleStatus, validFor, hash, hashLink));
+                                    new MVAuditServiceEntity4DataNegotiation(id, type, hash, hashLink));
                         });
             } catch (JsonProcessingException e) {
                 return Mono.error(e);
