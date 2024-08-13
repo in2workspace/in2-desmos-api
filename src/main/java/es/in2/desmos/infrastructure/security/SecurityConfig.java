@@ -15,6 +15,7 @@ import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
+import org.springframework.security.web.server.csrf.CookieServerCsrfTokenRepository;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
@@ -47,14 +48,22 @@ public class SecurityConfig {
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         http
                 .authorizeExchange(exchanges -> exchanges
-                        .pathMatchers("/api/notification/*").permitAll()
                         .pathMatchers("/api/v1/notifications/test/token").permitAll()
+                        .pathMatchers("/api/v1/notifications/broker").permitAll()
+                        .pathMatchers("/api/v1/notifications/dlt").permitAll()
                         .pathMatchers("/api/v1/entities/*").authenticated() //replication endpoint
                         .pathMatchers("/api/v1/sync/p2p/*").authenticated() //synchronization endpoint
                         .anyExchange().authenticated()
                 )
+                .csrf(csrf -> csrf
+                        .requireCsrfProtectionMatcher(ServerWebExchangeMatchers.pathMatchers("/api/v1/**"))
+                        .csrfTokenRepository(CookieServerCsrfTokenRepository.withHttpOnlyFalse())
+                        .disable() // Disable CSRF protection for specific paths
+                )
                 .addFilterAt(bearerAuthenticationFilter(), SecurityWebFiltersOrder.AUTHENTICATION);
         return http.build();
+
+
     }
 
     /**
