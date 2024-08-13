@@ -22,19 +22,15 @@ import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
-import org.bouncycastle.util.io.pem.PemObject;
-import org.bouncycastle.util.io.pem.PemReader;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
-import java.io.StringReader;
 import java.math.BigInteger;
 import java.security.*;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.*;
-import java.util.Base64;
 import java.util.Date;
 import java.util.UUID;
 
@@ -44,14 +40,12 @@ public class JwtTokenProvider {
 
     private final ECKey ecJWK;
 
-    // Ensure BouncyCastle is added as a security provider
     static {
         Security.addProvider(new BouncyCastleProvider());
     }
 
     // Build a useful Private Key from the hexadecimal private key set in the application.properties
     public JwtTokenProvider(SecurityProperties securityProperties) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
-        log.info("INIT JwtTokenProvider CONSTRUCTOR");
         Security.addProvider(BouncyCastleProviderSingleton.getInstance());
         // Convert the private key from hexadecimal to BigInteger
         String privateKeyHex = securityProperties.privateKey().replace("0x", "");
@@ -86,7 +80,6 @@ public class JwtTokenProvider {
     // Generate JWT + SEP256K1 signature
     // https://connect2id.com/products/nimbus-jose-jwt/examples/jwt-with-es256k-signature
     public String generateToken(String resourceURI) throws JOSEException {
-        log.info("INIT JwtTokenProvider GenerateToken");
 
         // Sample JWT claims
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
@@ -113,7 +106,6 @@ public class JwtTokenProvider {
 
     // Use public keys from Access Node Directory in memory
     public Mono<SignedJWT> validateSignedJwt(String jwtString, String externalNodeUrl, AccessNodeMemoryStore accessNodeMemoryStore) {
-        log.info("INIT JwtTokenProvider validateSignedJwt");
 
         try {
             // Retrieve the public key from AccessNodeMemoryStore
