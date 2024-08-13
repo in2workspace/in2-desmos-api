@@ -173,7 +173,7 @@ public class SecurityConfig {
         }
 
         return switch (profile) {
-            case "dev" -> "sbx";
+            case "default", "dev" -> "sbx";
             case "test" -> "dev";
             case "prod" -> "prd";
             default -> throw new IllegalArgumentException("Invalid profile: " + profile);
