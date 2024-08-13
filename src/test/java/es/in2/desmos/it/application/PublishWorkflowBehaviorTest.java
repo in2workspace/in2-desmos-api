@@ -3,22 +3,28 @@ package es.in2.desmos.it.application;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import es.in2.desmos.domain.services.api.BrokerSubscriptionValidateService;
+import es.in2.desmos.it.ContainerManager;
 import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.BrokerNotification;
 import es.in2.desmos.domain.repositories.AuditRecordRepository;
 import es.in2.desmos.domain.services.api.QueueService;
 import es.in2.desmos.infrastructure.controllers.NotificationController;
-import es.in2.desmos.it.ContainerManager;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
+
+import static org.mockito.ArgumentMatchers.anyString;
+import static reactor.core.publisher.Mono.when;
 
 @SpringBootTest
 @Testcontainers
@@ -40,26 +46,32 @@ class PublishWorkflowBehaviorTest {
     @Autowired
     private QueueService pendingPublishEventsQueue;
 
+    @Autowired
+    private BrokerSubscriptionValidateService brokerSubscriptionValidateService;
+
     @DynamicPropertySource
     static void setDynamicProperties(DynamicPropertyRegistry registry) {
         ContainerManager.postgresqlProperties(registry);
     }
 
+    @BeforeEach
     @AfterEach
     public void cleanUp() {
         auditRecordRepository.deleteAll().block();
     }
 
-    /*
-     *  Given a BrokerNotification, we will send a POST request emulating the broker behavior.
-     *  When the POST request is received, the application will create a BlockchainTxPayload,
-     *  and publish it into the blockchain. During the process, three AuditRecord will be created
-     *  with the information of the transaction; RECEIVED, CREATED, and PUBLISHED.
-     */
     @Order(1)
     @Test
     void publishWorkflowBehaviorTest() {
         log.info("Starting Publish Workflow Behavior Test...");
+        /*
+            Given a BrokerNotification, we will send a POST request emulating the broker behavior.
+            When the POST request is received, the application will create a BlockchainTxPayload,
+            and publish it into the blockchain.
+            During the process, three AuditRecord will be created with the information of the transaction;
+            RECEIVED, CREATED, and PUBLISHED.
+         */
+
         // Given
         String brokerNotificationJSON = """
                 {
@@ -159,10 +171,14 @@ class PublishWorkflowBehaviorTest {
                     "subscriptionId": "urn:ngsi-ld:subscription:43109437-bbee-4187-9892-e325210d7ca4"
                 }
                 """;
+
         // When
         try {
             log.info("1. Create a BrokerNotification and send a POST request to the application");
             BrokerNotification brokerNotification = objectMapper.readValue(brokerNotificationJSON, BrokerNotification.class);
+
+            brokerSubscriptionValidateService.setSubscriptionId("0", brokerNotification.subscriptionId()).block();
+
             notificationController.postBrokerNotification(brokerNotification).block();
             log.info("1.1. Get the event stream from the pendingPublishEventsQueue and subscribe to it.");
             pendingPublishEventsQueue.getEventStream().subscribe(event -> log.info("Event: {}", event));

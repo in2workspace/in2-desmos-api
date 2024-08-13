@@ -34,6 +34,10 @@ public class BrokerConfig {
         return brokerProperties.paths().entities();
     }
 
+    public String getEntityOperationsPath() {
+        return brokerProperties.paths().entityOperations();
+    }
+
     public String getSubscriptionsPath() {
         return brokerProperties.paths().subscriptions();
     }

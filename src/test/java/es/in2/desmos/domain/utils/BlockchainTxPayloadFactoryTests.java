@@ -79,7 +79,7 @@ class BlockchainTxPayloadFactoryTests {
                     try {
                         assertEquals(calculateHashLink(previousHash, calculateSHA256("dataMapString")),
                                 extractHashLinkFromDataLocation(blockchainTxPayload.dataLocation()));
-                    } catch (NoSuchAlgorithmException e) {
+                    } catch (NoSuchAlgorithmException | JsonProcessingException e) {
                         throw new HashLinkException("Error while calculating hash link on test");
                     }
                 }).verifyComplete();
@@ -111,7 +111,7 @@ class BlockchainTxPayloadFactoryTests {
                 .assertNext(previousHash -> {
                     try {
                         assertEquals(calculateSHA256("dataMapString"), previousHash);
-                    } catch (NoSuchAlgorithmException e) {
+                    } catch (NoSuchAlgorithmException | JsonProcessingException e) {
                         throw new HashLinkException("Error while calculating hash link on test");
                     }
                 }).verifyComplete();

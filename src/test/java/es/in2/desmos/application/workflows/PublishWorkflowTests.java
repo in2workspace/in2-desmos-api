@@ -58,8 +58,8 @@ class PublishWorkflowTests {
 
     @Test
     void testBuildBlockchainTxPayload() {
-        Map<String, Object> dataTest = new HashMap<>();
-        dataTest.put("id", "123");
+        Map<String, Object> data = new HashMap<>();
+        data.put("id", "123");
         String previousHash = "5d41402abc4b2a76b9719d911017c592";
         EventQueue eventQueueMock = mock(EventQueue.class);
 
@@ -81,7 +81,7 @@ class PublishWorkflowTests {
 
         publishWorkflow.startPublishWorkflow(processId).blockLast();
 
-        verify(blockchainTxPayloadFactory).buildBlockchainTxPayload(processId, dataTest, previousHash);
+        verify(blockchainTxPayloadFactory).buildBlockchainTxPayload(processId, data, previousHash);
         verify(auditRecordService).buildAndSaveAuditRecordFromBrokerNotification(eq(processId), any(), eq(AuditRecordStatus.CREATED), any());
         verify(blockchainPublisherService).publishDataToBlockchain(eq(processId), any());
         verify(auditRecordService).buildAndSaveAuditRecordFromBrokerNotification(eq(processId), any(), eq(AuditRecordStatus.PUBLISHED), any());

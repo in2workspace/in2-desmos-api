@@ -1,7 +1,5 @@
 package es.in2.desmos.domain.services.sync.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.domain.exceptions.BrokerEntityRetrievalException;
 import es.in2.desmos.domain.exceptions.HashLinkException;
@@ -41,17 +39,17 @@ class DataSyncServiceImplTests {
             .publisherAddress("0x40b0ab9dfd960064fb7e9fdf77f889c71569e349055ff563e8d699d8fa97fa90")
             .eventType("ProductOffering")
             .timestamp(1712753824)
-            .dataLocation("http://scorpio:9090/ngsi-ld/v1/entities/urn:ngsi-ld:ProductOffering:122355255?hl=fcb394bb4f2da4abbf53ab7eb9b5b8257b7c6abe0c110f466f3ee947d057e579")
+            .dataLocation("http://scorpio:9090/ngsi-ld/v1/entities/urn:ngsi-ld:ProductOffering:122355255?hl=6d91b01418c21ccad12072d5f986bab2c99206bb08e65e5a430a35f7e60dcdbf")
             .relevantMetadata(Collections.emptyList())
             .entityId("0x4eb401aa1248b6a95c298d0747eb470b6ba6fc3f54ea630dc6c77f23ad1abe3e")
-            .previousEntityHash("0xfcb394bb4f2da4abbf53ab7eb9b5b8257b7c6abe0c110f466f3ee947d057e579")
+            .previousEntityHash("0x6d91b01418c21ccad12072d5f986bab2c99206bb08e65e5a430a35f7e60dcdbf")
             .build();
     AuditRecord auditRecord = AuditRecord.builder()
             .id(UUID.randomUUID())
             .processId(UUID.randomUUID().toString())
             .entityId(UUID.randomUUID().toString())
             .entityType("ProductOffering")
-            .entityHashLink("fcb394bb4f2da4abbf53ab7eb9b5b8257b7c6abe0c110f466f3ee947d057e579")
+            .entityHashLink("6d91b01418c21ccad12072d5f986bab2c99206bb08e65e5a430a35f7e60dcdbf")
             .status(AuditRecordStatus.PUBLISHED)
             .createdAt(Timestamp.from(Instant.now()))
             .build();
@@ -105,11 +103,8 @@ class DataSyncServiceImplTests {
     private DataSyncServiceImpl dataSyncService;
 
     @Test
-    void testVerifyDataIntegrity_Success_FirstEntity() throws JsonProcessingException {
+    void testVerifyDataIntegrity_Success_FirstEntity() {
         //Arrange
-        JsonNode mockJsonNode = mock(JsonNode.class);
-        when(objectMapper.readTree(anyString())).thenReturn(mockJsonNode);
-        when(objectMapper.writeValueAsString(mockJsonNode)).thenReturn(retrievedBrokerEntityMock);
         when(auditRecordService.findLatestConsumerPublishedAuditRecordByEntityId(anyString(), anyString())).thenReturn(Mono.empty());
 
         //Act & Assert
@@ -120,11 +115,8 @@ class DataSyncServiceImplTests {
     }
 
     @Test
-    void testVerifyDataIntegrityAndDataConsistency_Success() throws JsonProcessingException {
+    void testVerifyDataIntegrityAndDataConsistency_Success() {
         //Arrange
-        JsonNode mockJsonNode = mock(JsonNode.class);
-        when(objectMapper.readTree(anyString())).thenReturn(mockJsonNode);
-        when(objectMapper.writeValueAsString(mockJsonNode)).thenReturn(retrievedBrokerEntityMock);
         when(auditRecordService.findLatestConsumerPublishedAuditRecordByEntityId(anyString(), anyString())).thenReturn(Mono.just(auditRecord));
 
         //Act & Assert
@@ -136,11 +128,8 @@ class DataSyncServiceImplTests {
     }
 
     @Test
-    void testVerifyDataIntegrityAndDataConsistency_Failure() throws JsonProcessingException {
+    void testVerifyDataIntegrityAndDataConsistency_Failure() {
         //Arrange
-        JsonNode mockJsonNode = mock(JsonNode.class);
-        when(objectMapper.readTree(anyString())).thenReturn(mockJsonNode);
-        when(objectMapper.writeValueAsString(mockJsonNode)).thenReturn(retrievedBrokerEntityMock);
         when(auditRecordService.findLatestConsumerPublishedAuditRecordByEntityId(anyString(), anyString())).thenReturn(Mono.just(errorAuditRecord));
 
         //Act & Assert
@@ -151,25 +140,8 @@ class DataSyncServiceImplTests {
     }
 
     @Test
-    void testVerifyDataIntegrity_Failure_HashMismatch() throws JsonProcessingException {
+    void testVerifyDataIntegrity_Failure_HashMismatch() {
         //Arrange
-        JsonNode mockJsonNode = mock(JsonNode.class);
-        when(objectMapper.readTree(anyString())).thenReturn(mockJsonNode);
-        when(objectMapper.writeValueAsString(mockJsonNode)).thenReturn(retrievedBrokerEntityMock);
-        when(auditRecordService.findLatestConsumerPublishedAuditRecordByEntityId(anyString(), anyString())).thenReturn(Mono.empty());
-
-        //Act & Assert
-        StepVerifier.create(dataSyncService.verifyRetrievedEntityData("processId", errorNotification, retrievedBrokerEntityMock))
-                .expectError(HashLinkException.class)
-                .verify();
-    }
-
-    @Test
-    void testVerifyDataIntegrity_Failure_JsonProcessingExceptionError() throws JsonProcessingException {
-        //Arrange
-        JsonNode mockJsonNode = mock(JsonNode.class);
-        when(objectMapper.readTree(anyString())).thenReturn(mockJsonNode);
-        when(objectMapper.writeValueAsString(mockJsonNode)).thenThrow(JsonProcessingException.class);
         when(auditRecordService.findLatestConsumerPublishedAuditRecordByEntityId(anyString(), anyString())).thenReturn(Mono.empty());
 
         //Act & Assert

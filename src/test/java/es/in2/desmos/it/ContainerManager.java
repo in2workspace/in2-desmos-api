@@ -20,6 +20,13 @@ public class ContainerManager {
     private static final GenericContainer<?> blockchainAdapterContainerA;
     private static final PostgreSQLContainer<?> postgresContainerA;
 
+    private static final Network testNetworkB = Network.newNetwork();
+    private static final GenericContainer<?> desmosContainerB;
+    private static final GenericContainer<?> scorpioContainerB;
+    private static final GenericContainer<?> postgisContainerB;
+    private static final GenericContainer<?> blockchainAdapterContainerB;
+    private static final PostgreSQLContainer<?> postgresContainerB;
+
     static {
         // Node A
         postgresContainerA = new PostgreSQLContainer<>("postgres:latest")
@@ -27,7 +34,7 @@ public class ContainerManager {
                 .withUsername("postgres")
                 .withPassword("postgres")
                 .withNetwork(testNetworkA)
-                .withNetworkAliases("postgres");
+                .withNetworkAliases("postgres-node-a");
         postgresContainerA.start();
 
         postgisContainerA = new GenericContainer<>(DockerImageName.parse("postgis/postgis"))
@@ -36,15 +43,15 @@ public class ContainerManager {
                 .withEnv("POSTGRES_PASSWORD", "ngb")
                 .withEnv("POSTGRES_DB", "ngb")
                 .withNetwork(testNetworkA)
-                .withNetworkAliases("postgis");
+                .withNetworkAliases("postgis-node-a");
         postgisContainerA.start();
 
         scorpioContainerA = new GenericContainer<>(DockerImageName.parse("scorpiobroker/all-in-one-runner:java-latest"))
                 .withExposedPorts(9090)
-                .withEnv("DBHOST", "postgis")
+                .withEnv("DBHOST", "postgis-node-a")
                 .dependsOn(postgisContainerA)
                 .withNetwork(testNetworkA)
-                .withNetworkAliases("scorpio");
+                .withNetworkAliases("scorpio-node-a");
         scorpioContainerA.start();
 
         blockchainAdapterContainerA = new GenericContainer<>(DockerImageName.parse("quay.io/digitelts/dlt-adapter:1.3"))
@@ -55,9 +62,77 @@ public class ContainerManager {
                 .withEnv("DOME_PRODUCTION_BLOCK_NUMBER", "0")
                 .withEnv("ISS", "0x9eb763b0a6b7e617d56b85f1df943f176018c8eedb2dd9dd37c0bd77496833fe")
                 .withNetwork(testNetworkA)
-                .withNetworkAliases("dlt-adapter")
+                .withNetworkAliases("dlt-adapter-node-a")
                 .waitingFor(Wait.forHttp("/health").forStatusCode(200));
         blockchainAdapterContainerA.start();
+    }
+
+    static {
+        // Node B
+
+        postgresContainerB = new PostgreSQLContainer<>("postgres:latest")
+                .withDatabaseName("it_db")
+                .withUsername("postgres")
+                .withPassword("postgres")
+                .withNetwork(testNetworkB)
+                .withNetworkAliases("postgres-node-b")
+                .withInitScript("db/populate/Create_Postgre_B_AuditRecords.sql");
+        postgresContainerB.start();
+
+        postgisContainerB = new GenericContainer<>(DockerImageName.parse("postgis/postgis"))
+                .withExposedPorts(5432)
+                .withEnv("POSTGRES_USER", "ngb")
+                .withEnv("POSTGRES_PASSWORD", "ngb")
+                .withEnv("POSTGRES_DB", "ngb")
+                .withNetwork(testNetworkB)
+                .withNetworkAliases("postgis-node-b");
+        postgisContainerB.start();
+
+        scorpioContainerB = new GenericContainer<>(DockerImageName.parse("scorpiobroker/all-in-one-runner:java-latest"))
+                .withExposedPorts(9090)
+                .withEnv("DBHOST", "postgis-node-b")
+                .dependsOn(postgisContainerB)
+                .withNetwork(testNetworkB)
+                .withNetworkAliases("scorpio-node-b");
+        scorpioContainerB.start();
+
+        blockchainAdapterContainerB = new GenericContainer<>(DockerImageName.parse("quay.io/digitelts/dlt-adapter:1.3"))
+                .withExposedPorts(8080)
+                .withEnv("PRIVATE_KEY", "0x304d170fb355df65cc17ef7934404fe9baee73a1244380076436dec6fafb1e1f")
+                .withEnv("DOME_EVENTS_CONTRACT_ADDRESS", "")
+                .withEnv("RPC_ADDRESS", "http://blockchain-testnode.infra.svc.cluster.local:8545/")
+                .withEnv("DOME_PRODUCTION_BLOCK_NUMBER", "0")
+                .withEnv("ISS", "0x9eb763b0a6b7e617d56b85f1df943f176018c8eedb2dd9dd37c0bd77496833fe")
+                .withNetwork(testNetworkB)
+                .withNetworkAliases("dlt-adapter-node-b")
+                .waitingFor(Wait.forHttp("/health").forStatusCode(200));
+        blockchainAdapterContainerB.start();
+
+        desmosContainerB = new GenericContainer<>(DockerImageName.parse("desmos-api:latest"))
+                .withExposedPorts(8080)
+                .withEnv("SPRING_PROFILES_ACTIVE", "test")
+                .withEnv("LOGGING_LEVEL_ES_IN2_DESMOS", "DEBUG")
+                .withEnv("SPRING_R2DBC_URL", "r2dbc:postgresql://postgres-node-b:5432/it_db")
+                .withEnv("SPRING_R2DBC_USERNAME", "postgres")
+                .withEnv("SPRING_R2DBC_PASSWORD", "postgres")
+                .withEnv("SPRING_FLYWAY_URL", "jdbc:postgresql://postgres-node-b:5432/it_db")
+                .withEnv("OPERATOR_ORGANIZATION_IDENTIFIER", "VATES-S9999999E")
+                .withEnv("DLT_ADAPTER_PROVIDER", "digitelts")
+                .withEnv("DLT_ADAPTER_INTERNAL_DOMAIN", "http://dlt-adapter-node-b:8080")
+                .withEnv("DLT_ADAPTER_EXTERNAL_DOMAIN", "http://dlt-adapter-node-b:8080")
+                .withEnv("TX_SUBSCRIPTION_NOTIFICATION_ENDPOINT", "http://desmos-node-b:8080/api/v1/notifications/dlt")
+                .withEnv("TX_SUBSCRIPTION_ENTITY_TYPES", "ProductOffering,Category,Catalogue")
+                .withEnv("BROKER_PROVIDER", "scorpio")
+                .withEnv("BROKER_INTERNAL_DOMAIN", "http://scorpio-node-b:9090")
+                .withEnv("BROKER_EXTERNAL_DOMAIN", "http://scorpio-node-b:9090")
+                .withEnv("NGSI_SUBSCRIPTION_NOTIFICATION_ENDPOINT", "http://desmos-node-b:8080/api/v1/notifications/broker")
+                .withEnv("NGSI_SUBSCRIPTION_ENTITY_TYPES", "ProductOffering,Category,Catalogue")
+                .dependsOn(blockchainAdapterContainerB)
+                .dependsOn(scorpioContainerB)
+                .dependsOn(postgresContainerB)
+                .withNetwork(testNetworkB)
+                .withNetworkAliases("desmos-node-b");
+        desmosContainerB.start();
     }
 
     public static ContainerManager getInstance() {
@@ -75,6 +150,14 @@ public class ContainerManager {
         registry.add("spring.flyway.url", postgresContainerA::getJdbcUrl);
         registry.add("broker.externalDomain", ContainerManager::getBaseUriForScorpioA);
         registry.add("dlt-adapter.externalDomain", ContainerManager::getBaseUriBlockchainAdapterA);
+//        registry.add("dlt-adapter.externalDomain", () -> String.format("http://%s:%s",
+//                blockchainAdapterContainerA.getHost(),
+//                blockchainAdapterContainerA.getFirstMappedPort()));
+    }
+
+    @DynamicPropertySource
+    public static void externalAccessNodesProperties(DynamicPropertyRegistry registry) {
+        registry.add("external-access-nodes.urls", ContainerManager::getBaseUriDesmosB);
     }
 
     public static String getBaseUriForScorpioA() {
@@ -85,4 +168,11 @@ public class ContainerManager {
         return "http://" + blockchainAdapterContainerA.getHost() + ":" + blockchainAdapterContainerA.getMappedPort(8080);
     }
 
+    public static String getBaseUriForScorpioB() {
+        return "http://" + scorpioContainerB.getHost() + ":" + scorpioContainerB.getMappedPort(9090);
+    }
+
+    public static String getBaseUriDesmosB() {
+        return "http://" + desmosContainerB.getHost() + ":" + desmosContainerB.getMappedPort(8080);
+    }
 }

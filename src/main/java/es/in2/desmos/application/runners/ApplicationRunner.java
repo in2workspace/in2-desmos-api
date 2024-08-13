@@ -6,6 +6,7 @@ import es.in2.desmos.application.workflows.SubscribeWorkflow;
 import es.in2.desmos.domain.exceptions.RequestErrorException;
 import es.in2.desmos.domain.models.BlockchainSubscription;
 import es.in2.desmos.domain.models.BrokerSubscription;
+import es.in2.desmos.domain.services.api.BrokerSubscriptionValidateService;
 import es.in2.desmos.domain.services.blockchain.BlockchainListenerService;
 import es.in2.desmos.domain.services.broker.BrokerListenerService;
 import es.in2.desmos.infrastructure.configs.ApiConfig;
@@ -18,6 +19,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.MediaType;
 import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
@@ -45,7 +47,9 @@ public class ApplicationRunner {
     private final DataSyncWorkflow dataSyncWorkflow;
     private final PublishWorkflow publishWorkflow;
     private final SubscribeWorkflow subscribeWorkflow;
+    private final BrokerSubscriptionValidateService brokerSubscriptionValidateService;
     private final AtomicBoolean isQueueAuthorizedForEmit = new AtomicBoolean(false);
+    private final String getCurrentEnvironment;
     private Disposable publishQueueDisposable;
     private Disposable subscribeQueueDisposable;
 
@@ -67,8 +71,9 @@ public class ApplicationRunner {
         brokerConfig.getEntityTypes().forEach(entityType -> entities.add(BrokerSubscription.Entity.builder()
                 .type(entityType).build()));
         // Create the Broker Subscription object
+        String brokerSubscriptionid = SUBSCRIPTION_ID_PREFIX + UUID.randomUUID();
         BrokerSubscription brokerSubscription = BrokerSubscription.builder()
-                .id(SUBSCRIPTION_ID_PREFIX + UUID.randomUUID())
+                .id(brokerSubscriptionid)
                 .type(SUBSCRIPTION_TYPE)
                 .entities(entities)
                 .notification(BrokerSubscription.SubscriptionNotification.builder()
@@ -84,6 +89,7 @@ public class ApplicationRunner {
         // Create the subscription and log the result
         log.debug("ProcessID: {} - Broker Subscription: {}", processId, brokerSubscription);
         return brokerListenerService.createSubscription(processId, brokerSubscription)
+                .then(brokerSubscriptionValidateService.setSubscriptionId(processId, brokerSubscription.id()))
                 .doOnSuccess(response -> log.info("ProcessID: {} - Broker Subscription created successfully.", processId))
                 .doOnError(e -> log.error("ProcessID: {} - Error creating Broker Subscription", processId, e));
     }
@@ -107,10 +113,12 @@ public class ApplicationRunner {
         log.info("ProcessID: {} - Initializing Data Synchronization Workflow...", processId);
         // Start data synchronization process
         return dataSyncWorkflow.startDataSyncWorkflow(processId)
-                .doOnTerminate(() -> {
+                .doOnComplete(() -> {
                     log.info("ProcessID: {} - Data Synchronization Workflow has finished.", processId);
                     log.info("ProcessID: {} - Authorizing queues for Pub-Sub Workflows...", processId);
                     isQueueAuthorizedForEmit.set(true);
+                })
+                .doOnTerminate(() -> {
                     initializeQueueProcessing(processId);
                     log.info("ProcessID: {} - Queues have been authorized and enabled.", processId);
                 });
@@ -165,5 +173,4 @@ public class ApplicationRunner {
                         () -> log.info("ProcessID: {} - Subscribe Workflow completed", processId)
                 );
     }
-
 }
