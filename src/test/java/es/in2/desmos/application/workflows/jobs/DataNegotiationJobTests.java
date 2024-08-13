@@ -1,5 +1,6 @@
 package es.in2.desmos.application.workflows.jobs;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import es.in2.desmos.domain.models.DataNegotiationEvent;
 import es.in2.desmos.domain.models.DataNegotiationResult;
 import es.in2.desmos.domain.models.Issuer;
@@ -7,6 +8,7 @@ import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.application.workflows.jobs.impl.DataNegotiationJobImpl;
 import es.in2.desmos.objectmothers.DataNegotiationResultMother;
 import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
+import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
@@ -14,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,19 +40,19 @@ class DataNegotiationJobTests {
     private ArgumentCaptor<Mono<List<DataNegotiationResult>>> dataNegotiationResultsCaptor;
 
     @Test
-    void itShouldSyncDataWithMultipleIssuers() {
+    void itShouldSyncDataWithMultipleIssuers() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         String processId = "0";
 
         Map<Issuer, List<MVEntity4DataNegotiation>> externalMVENtities4DataNegotiationByIssuer = new HashMap<>();
         Issuer issuer1 = new Issuer("http://example1.org");
         var externalMVEntitiesIssuer1 =
-                List.of(MVEntity4DataNegotiationMother.sampleScorpio1(),
-                        MVEntity4DataNegotiationMother.sampleScorpio2());
+                List.of(MVEntity4DataNegotiationMother.sample1(),
+                        MVEntity4DataNegotiationMother.sample2());
         externalMVENtities4DataNegotiationByIssuer.put(issuer1, externalMVEntitiesIssuer1);
         Issuer issuer2 = new Issuer("http://example2.org");
         var externalMVEntitiesIssuer2 =
-                List.of(MVEntity4DataNegotiationMother.sampleScorpio3(),
-                        MVEntity4DataNegotiationMother.sampleScorpio4());
+                List.of(MVEntity4DataNegotiationMother.sample3(),
+                        MVEntity4DataNegotiationMother.sample4());
 
         externalMVENtities4DataNegotiationByIssuer.put(issuer2, externalMVEntitiesIssuer2);
 
@@ -77,7 +80,7 @@ class DataNegotiationJobTests {
     }
 
     @Test
-    void itShouldSyncDataWithNewEntitiesToAdd() {
+    void itShouldSyncDataWithNewEntitiesToAdd() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         String issuer = "http://example.org";
         Mono<String> issuerMono = Mono.just(issuer);
 
@@ -115,7 +118,45 @@ class DataNegotiationJobTests {
     }
 
     @Test
-    void itShouldSyncDataWithExistingEntitiesToAddWhenExternalVersionIsAfter() {
+    void itShouldNotSyncWhenLifecyclestatusIsNull() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
+        String issuer = "http://example.org";
+        Mono<String> issuerMono = Mono.just(issuer);
+
+        List<MVEntity4DataNegotiation> externalEntityIds = MVEntity4DataNegotiationMother.sample1NullLifecyclestatusAnd2();
+        Mono<List<MVEntity4DataNegotiation>> externalEntityIdsMono = Mono.just(externalEntityIds);
+
+        Mono<List<MVEntity4DataNegotiation>> localEntityIdsMono = Mono.just(new ArrayList<>());
+
+        String processId = "0";
+        DataNegotiationEvent dataNegotiationEvent = new DataNegotiationEvent(processId, issuerMono, externalEntityIdsMono, localEntityIdsMono);
+
+        List<MVEntity4DataNegotiation> expectedNewEntitiesToSync = List.of(MVEntity4DataNegotiationMother.sample2());
+
+        List<MVEntity4DataNegotiation> expectedExistingEntitiesToSync = new ArrayList<>();
+
+        DataNegotiationResult expectedDataNegotiationResult = new DataNegotiationResult(issuer, expectedNewEntitiesToSync, expectedExistingEntitiesToSync);
+
+        when(dataTransferJob.syncData(any(), any())).thenReturn(Mono.empty());
+
+        var result = dataNegotiationJob.negotiateDataSyncFromEvent(dataNegotiationEvent);
+
+        StepVerifier
+                .create(result)
+                .verifyComplete();
+
+        verify(dataTransferJob, times(1)).syncData(eq(processId), dataNegotiationResultCaptor.capture());
+        verifyNoMoreInteractions(dataTransferJob);
+
+        Mono<DataNegotiationResult> dataNegotiationResultCaptured = dataNegotiationResultCaptor.getValue();
+
+        StepVerifier
+                .create(dataNegotiationResultCaptured)
+                .expectNext(expectedDataNegotiationResult)
+                .verifyComplete();
+    }
+
+    @Test
+    void itShouldSyncDataWithExistingEntitiesToAddWhenExternalVersionIsAfter() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         String issuer = "http://example.org";
         Mono<String> issuerMono = Mono.just(issuer);
 
@@ -153,7 +194,7 @@ class DataNegotiationJobTests {
     }
 
     @Test
-    void itShouldSyncDataWithExistingEntitiesToAddWhenVersionIsEqualAndExternalLastUpdateIsAfter() {
+    void itShouldSyncDataWithExistingEntitiesToAddWhenVersionIsEqualAndExternalLastUpdateIsAfter() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         String issuer = "http://example.org";
         Mono<String> issuerMono = Mono.just(issuer);
 
@@ -191,7 +232,7 @@ class DataNegotiationJobTests {
     }
 
     @Test
-    void itShouldNotSyncWhenVersionIsNewer() {
+    void itShouldNotSyncWhenVersionIsNewer() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         String issuer = "http://example.org";
         Mono<String> issuerMono = Mono.just(issuer);
 

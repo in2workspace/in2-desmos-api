@@ -10,13 +10,13 @@ import java.util.List;
 
 public final class BrokerDataMother {
 
-    public final static ObjectMapper objectMapper = new ObjectMapper();
+    public static final ObjectMapper objectMapper = new ObjectMapper();
 
     private BrokerDataMother() {
     }
 
     public static String getGetEntityRequestBrokerJsonBase64() throws JsonProcessingException {
-        JsonNode jsonNode = objectMapper.readTree(getEntityRequestBrokerJson);
+        JsonNode jsonNode = objectMapper.readTree(GetEntityRequestBrokerJson);
         List<String> items = new ArrayList<>();
         jsonNode.forEach(item -> {
             String base64Item = Base64.getEncoder().encodeToString(item.toString().getBytes());
@@ -28,7 +28,7 @@ public final class BrokerDataMother {
 
     }
 
-    public final static String getEntityRequestBrokerJson =
+    public static final String GetEntityRequestBrokerJson =
             """
                     [
                         {
@@ -141,7 +141,64 @@ public final class BrokerDataMother {
                         }
                     ]""";
 
-    public final static String getEntityRequestBrokerNoTypeJson =
+    public static final String GetEntityRequestWithSubentitiesArrayJson =
+            """
+                    [
+                        {
+                            "id": "urn:productOffering:06f56a54-9be9-4d45-bae7-2a036b721d27",
+                            "type": "productOffering",
+                            "category": [
+                                 {
+                                     "type": "Relationship",
+                                     "object": "urn:category:ebdaf266-c967-43bc-a469-c6b6498facff"
+                                 },
+                                 {
+                                     "type": "Relationship",
+                                     "object": "urn:category:363a79ba-38ed-48c4-978c-131521b943ef"
+                                 }
+                            ]
+                        },
+                        {
+                            "id": "urn:category:ebdaf266-c967-43bc-a469-c6b6498facff",
+                            "type": "category"
+                        },
+                        {
+                            "id": "urn:category:363a79ba-38ed-48c4-978c-131521b943ef",
+                            "type": "category"
+                        }
+                    ]""";
+
+    public static final String GetEntityRequestWithSubentitiesArrayWithPropertyJson =
+            """
+                    [
+                        {
+                            "id": "urn:productOffering:06f56a54-9be9-4d45-bae7-2a036b721d27",
+                            "type": "productOffering",
+                            "category": {
+                                 "type": "Property",
+                                 "value": [
+                                     {
+                                         "type": "Relationship",
+                                         "object": "urn:category:ebdaf266-c967-43bc-a469-c6b6498facff"
+                                     },
+                                     {
+                                         "type": "Relationship",
+                                         "object": "urn:category:363a79ba-38ed-48c4-978c-131521b943ef"
+                                     }
+                                 ]
+                            }
+                        },
+                        {
+                            "id": "urn:category:ebdaf266-c967-43bc-a469-c6b6498facff",
+                            "type": "category"
+                        },
+                        {
+                            "id": "urn:category:363a79ba-38ed-48c4-978c-131521b943ef",
+                            "type": "category"
+                        }
+                    ]""";
+
+    public static final String GetEntityRequestBrokerNoTypeJson =
             """
                     [
                         {
@@ -186,7 +243,7 @@ public final class BrokerDataMother {
                         }
                     ]""";
 
-    public final static String getEntityRequestBrokerNoRelationshipJson =
+    public static final String getEntityRequestBrokerNoRelationshipJson =
             """
                     [
                         {
@@ -231,7 +288,7 @@ public final class BrokerDataMother {
                         }
                     ]""";
 
-    public final static String getEntityRequestBrokerNoObjectJson =
+    public static final String getEntityRequestBrokerNoObjectJson =
             """
                     [
                         {

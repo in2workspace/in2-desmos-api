@@ -123,3 +123,6 @@ security:
 # Access Node
 access-node:
   prefixDirectory: "https://raw.githubusercontent.com/DOME-Marketplace/dome-access-node-directory/main/access-node-directory-"
+
+external-access-nodes:
+  urls: "https://desmos.dome-marketplace-sbx.org/"

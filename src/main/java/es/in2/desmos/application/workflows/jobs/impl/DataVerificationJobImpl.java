@@ -32,8 +32,10 @@ public class DataVerificationJobImpl implements DataVerificationJob {
 
         return validateConsistency(processId, entitiesByIdMono, existingEntitiesOriginalValidationDataById)
                 .then(buildAndSaveAuditRecordFromDataSync(processId, issuer, entitiesByIdMono, allMVEntity4DataNegotiation, AuditRecordStatus.RETRIEVED))
+                .then(lockAuditRecords(processId, entitiesByIdMono))
                 .then(batchUpsertEntitiesToContextBroker(processId, entitySyncResponseMono))
-                .then(buildAndSaveAuditRecordFromDataSync(processId, issuer, entitiesByIdMono, allMVEntity4DataNegotiation, AuditRecordStatus.PUBLISHED));
+                .then(buildAndSaveAuditRecordFromDataSync(processId, issuer, entitiesByIdMono, allMVEntity4DataNegotiation, AuditRecordStatus.PUBLISHED))
+                .doOnTerminate(() -> unlockAuditRecords(processId));
     }
 
     private Mono<Void> validateConsistency(String processId, Mono<Map<Id, Entity>> rcvdEntitiesByIdMono, Mono<Map<Id, HashAndHashLink>> existingEntitiesValidationDataByIdMono) {
@@ -84,7 +86,7 @@ public class DataVerificationJobImpl implements DataVerificationJob {
     private Mono<Void> buildAndSaveAuditRecordFromDataSync(String processId, Mono<String> issuerMono, Mono<Map<Id, Entity>> rcvdEntitiesByIdMono, Mono<List<MVEntity4DataNegotiation>> mvEntity4DataNegotiationListMono, AuditRecordStatus auditRecordStatus) {
         return rcvdEntitiesByIdMono
                 .flatMapIterable(Map::entrySet)
-                .flatMap(rcvdEntityById -> {
+                .concatMap(rcvdEntityById -> {
                     String id = rcvdEntityById.getKey().id();
 
                     return mvEntity4DataNegotiationListMono
@@ -116,7 +118,14 @@ public class DataVerificationJobImpl implements DataVerificationJob {
                 String value = "value";
                 String lastUpdate = entityNode.get("lastUpdate").get(value).asText();
                 String version = entityNode.get("version").get(value).asText();
-                String lifecycleStatus = entityNode.get("lifecycleStatus").get(value).asText();
+
+                String lifecycleStatus;
+                if (entityNode.has("lifecycleStatus")) {
+                    lifecycleStatus = entityNode.get("lifecycleStatus").get(value).asText();
+                } else {
+                    lifecycleStatus = null;
+                }
+
                 String validFor = entityNode.get("validFor").get(value).get("startDateTime").asText();
 
                 Mono<String> calculatedHashMono = calculateHash(Mono.just(entity));
@@ -157,5 +166,20 @@ public class DataVerificationJobImpl implements DataVerificationJob {
                 return Mono.error(e);
             }
         });
+    }
+
+    private Mono<Void> lockAuditRecords(String processId, Mono<Map<Id, Entity>> entitiesByIdMono) {
+        return entitiesByIdMono
+                .flatMapIterable(Map::entrySet)
+                .flatMap(entityWithId -> {
+                    String id = entityWithId.getKey().id();
+                    return auditRecordService.setAuditRecordLock(processId, id, true);
+                })
+                .collectList()
+                .then();
+    }
+
+    private void unlockAuditRecords(String processId) {
+        auditRecordService.unlockAuditRecords(processId);
     }
 }

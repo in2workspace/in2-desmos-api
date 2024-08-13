@@ -24,6 +24,7 @@ import static es.in2.desmos.domain.utils.ApplicationUtils.extractEntityIdFromDat
 @Service
 public class BrokerPublisherServiceImpl implements BrokerPublisherService {
 
+    private static final String VALUE_FIELD_NAME = "value";
     private final BrokerAdapterService brokerAdapterService;
 
     private final ObjectMapper objectMapper;
@@ -42,7 +43,7 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
         return getEntityById(processId, entityId)
                 .switchIfEmpty(Mono.just(""))
                 .flatMap(response -> {
-                    if(response.isBlank()) {
+                    if (response.isBlank()) {
                         log.info("ProcessID: {} - Entity doesn't exist", processId);
                         // Logic for when the entity does not exist, for example, creating it
                         return postEntity(processId, retrievedBrokerEntity);
@@ -110,9 +111,17 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
 
                                 String relationshipFieldName = "Relationship";
                                 String objectFieldName = "object";
+                                String propertyFieldName = "Property";
                                 if (fieldType.equals(relationshipFieldName) && rootEntityNodeFieldValue.has(objectFieldName)) {
                                     return Mono.just(new Id(rootEntityNodeFieldValue.get(objectFieldName).asText()));
+                                } else if (fieldType.equals(propertyFieldName) && rootEntityNodeFieldValue.has(VALUE_FIELD_NAME)) {
+                                    var jsonArray = rootEntityNodeFieldValue.get(VALUE_FIELD_NAME);
+                                    return Flux.fromIterable(jsonArray)
+                                            .flatMap(arrayElement -> getEntityRelationshipIdsFromArray(Mono.just(arrayElement.toString())));
                                 }
+                            } else if (rootEntityNodeFieldValue.isArray()) {
+                                return Flux.fromIterable(rootEntityNodeFieldValue)
+                                        .flatMap(arrayElement -> getEntityRelationshipIdsFromArray(Mono.just(arrayElement.toString())));
                             }
                             return Mono.empty();
                         })
@@ -123,6 +132,33 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
         });
     }
 
+    private Mono<Id> getEntityRelationshipIdsFromArray(Mono<String> entityMono) {
+        return entityMono.flatMap(entity -> {
+            try {
+                JsonNode rootEntityJsonNode = objectMapper.readTree(entity);
+
+                String typeFieldName = "type";
+
+                if (rootEntityJsonNode.isObject() &&
+                        rootEntityJsonNode.has(typeFieldName)) {
+
+                    String fieldType = rootEntityJsonNode.get(typeFieldName).asText();
+
+                    String relationshipFieldName = "Relationship";
+                    String objectFieldName = "object";
+                    if (fieldType.equals(relationshipFieldName) && rootEntityJsonNode.has(objectFieldName)) {
+                        return Mono.just(new Id(rootEntityJsonNode.get(objectFieldName).asText()));
+                    }
+                }
+
+                return Mono.empty();
+
+
+            } catch (JsonProcessingException e) {
+                return Mono.error(e);
+            }
+        });
+    }
 
     private Mono<Void> batchUpsertEntities(String processId, String requestBody) {
         return brokerAdapterService.batchUpsertEntities(processId, requestBody);

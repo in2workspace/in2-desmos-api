@@ -1,5 +1,6 @@
 //package es.in2.desmos.it.application;
 //
+//import com.fasterxml.jackson.core.JsonProcessingException;
 //import com.fasterxml.jackson.databind.ObjectMapper;
 //import es.in2.desmos.domain.models.AuditRecord;
 //import es.in2.desmos.domain.models.AuditRecordStatus;
@@ -27,6 +28,7 @@
 //import reactor.test.StepVerifier;
 //
 //import java.io.IOException;
+//import java.security.NoSuchAlgorithmException;
 //import java.util.List;
 //import java.util.concurrent.TimeUnit;
 //
@@ -65,7 +67,7 @@
 //    }
 //
 //    @BeforeEach
-//    void setUp() throws IOException {
+//    void setUp() throws IOException, JSONException {
 //        initialMvEntity4DataNegotiationList = createInitialEntitiesInScorpio(
 //                ContainerManager.getBaseUriForScorpioA(),
 //                EntityMother.getJsonList1And2OldAnd3AndSubOfferings(),
@@ -91,7 +93,7 @@
 //    }
 //
 //    @Test
-//    void WhenOneExternalAccessNode() throws JSONException {
+//    void WhenOneExternalAccessNode() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
 //        Mono<Void> response = WebClient.builder()
 //                .baseUrl("http://localhost:" + localServerPort)
 //                .build()
@@ -105,19 +107,19 @@
 //                .create(response)
 //                .verifyComplete();
 //
-//        assertScorpioAEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio1().id(), EntityMother.scorpioJson1("urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c51"));
-//        assertScorpioAEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio2().id(), EntityMother.scorpioJson2("urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5b"));
+//        assertScorpioAEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio1().id(), EntityMother.scorpioJson1());
+//        assertScorpioAEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio2().id(), EntityMother.scorpioJson2());
 //        assertScorpioAEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio3().id(), EntityMother.scorpioJson3("urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c53"));
 //        assertScorpioAEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio4().id(), EntityMother.scorpioJson4("urn:ProductOfferingPrice:912efae1-7ff6-4838-89f3-cfedfdfa1c5a"));
 //        assertScorpioAEntityIsExpected(MVEntity4DataNegotiationMother.samplePop1().id(), EntityMother.scorpioJsonPop1);
-//        assertScorpioAEntityIsExpected(MVEntity4DataNegotiationMother.samplePop2().id(), EntityMother.scorpioJsonPop2);
+//        assertScorpioAEntityIsExpected(MVEntity4DataNegotiationMother.samplePop2().id(), EntityMother.scorpioJsonPop2());
 //        assertScorpioAEntityIsExpected(MVEntity4DataNegotiationMother.samplePop3().id(), EntityMother.scorpioJsonPop3);
 //        assertScorpioAEntityIsExpected(MVEntity4DataNegotiationMother.samplePop4().id(), EntityMother.scorpioJsonPop4);
 //        assertScorpioAEntityIsExpected(MVEntity4DataNegotiationMother.samplePrice().id(), EntityMother.scorpioJsonPrice);
 //
 //        String externalDomain = ContainerManager.getBaseUriDesmosB();
 //        assertAuditRecordAEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio1().id(), MVEntity4DataNegotiationMother.sampleBase1(), LOCAL_ISSUER);
-//        assertAuditRecordAEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio2().id(), MVEntity4DataNegotiationMother.sampleBase2(), externalDomain);
+//        assertAuditRecordAEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio2().id(), MVEntity4DataNegotiationMother.newSampleBase2FromScorpio(), externalDomain);
 //        assertAuditRecordAEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio3().id(), MVEntity4DataNegotiationMother.sampleBase3(), LOCAL_ISSUER);
 //        assertAuditRecordAEntityIsExpected(MVEntity4DataNegotiationMother.sampleScorpio4().id(), MVEntity4DataNegotiationMother.sampleBase4(), externalDomain);
 //        assertAuditRecordAEntityIsExpected(MVEntity4DataNegotiationMother. samplePop1().id(), MVEntity4DataNegotiationMother.samplePop1(), LOCAL_ISSUER);

@@ -9,7 +9,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 @Service
@@ -19,12 +22,19 @@ public class QueueServiceImpl implements QueueService {
     private final Sinks.Many<EventQueue> sink = Sinks.many().multicast().onBackpressureBuffer();
     private final PriorityBlockingQueue<EventQueue> queue = new PriorityBlockingQueue<>();
 
+    private final AtomicBoolean paused = new AtomicBoolean(false);
+    private final Queue<EventQueue> buffer = new ConcurrentLinkedQueue<>();
+
     @Override
     public Mono<Void> enqueueEvent(EventQueue event) {
+        if (paused.get()) {
+            buffer.offer(event);
+            return Mono.empty();
+        }
+
         if (queue.offer(event)) {
             log.debug(queue.toString());
             emitNext();
-            return Mono.empty();
         }
         return Mono.empty();
     }
@@ -40,6 +50,28 @@ public class QueueServiceImpl implements QueueService {
     @Override
     public Flux<EventQueue> getEventStream() {
         return sink.asFlux();
+    }
+
+    public void pause() {
+        paused.set(true);
+        log.debug("Queue paused.");
+    }
+
+    public void resume() {
+        paused.set(false);
+        log.debug("Queue resumed.");
+        // Procesar todos los eventos almacenados en buffer
+        processBufferedEvents();
+    }
+
+    private synchronized void processBufferedEvents() {
+        EventQueue eventQueue;
+        while ((eventQueue = buffer.poll()) != null) {
+            if (queue.offer(eventQueue)) {
+                log.debug("Re-processing buffered event: " + eventQueue);
+                emitNext();
+            }
+        }
     }
 
 }

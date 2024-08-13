@@ -7,6 +7,7 @@ import es.in2.desmos.domain.services.broker.BrokerPublisherService;
 import es.in2.desmos.inflators.ScorpioInflator;
 import es.in2.desmos.it.ContainerManager;
 import es.in2.desmos.objectmothers.MVBrokerEntity4DataNegotiationMother;
+import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
 import org.json.JSONException;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +65,7 @@ class BrokerPublisherServiceIT {
     @Test
     void itShouldReturnEntityIds() {
         String processId = "0";
-        var resultMono = brokerPublisherService.findAllIdTypeAndAttributesByType(processId, "ProductOffering", "lastUpdate", "version", "lifecycleStatus", "validFor", BrokerEntityWithIdTypeLastUpdateAndVersion[].class);
+        var resultMono = brokerPublisherService.findAllIdTypeAndAttributesByType(processId, MVEntity4DataNegotiationMother.PRODUCT_OFFERING_TYPE_NAME, "lastUpdate", "version", "lifecycleStatus", "validFor", BrokerEntityWithIdTypeLastUpdateAndVersion[].class);
 
         StepVerifier.create(resultMono)
                 .assertNext(result -> assertThat(result).hasSameElementsAs(initialEntities))

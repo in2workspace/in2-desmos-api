@@ -11,6 +11,7 @@ import es.in2.desmos.domain.repositories.AuditRecordRepository;
 import es.in2.desmos.domain.services.api.impl.AuditRecordServiceImpl;
 import es.in2.desmos.objectmothers.AuditRecordMother;
 import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
+import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
@@ -20,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -128,7 +130,7 @@ class AuditRecordServiceTests {
 
 
     @Test
-    void itShouldBuildAndSaveAuditRecordFromDataSync() {
+    void itShouldBuildAndSaveAuditRecordFromDataSync() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         String processId = "0";
         String issuer = "http://example.org";
         MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample1();
@@ -320,7 +322,7 @@ class AuditRecordServiceTests {
 
 
     @Test
-    void itShouldReturnErrorWhenAuditRecordCreatesIncorrectJson() throws JsonProcessingException {
+    void itShouldReturnErrorWhenAuditRecordCreatesIncorrectJson() throws JsonProcessingException, JSONException, NoSuchAlgorithmException {
         String processId = "0";
         String issuer = "http://example.org";
         MVEntity4DataNegotiation mvEntity4DataNegotiation = MVEntity4DataNegotiationMother.sample1();
@@ -335,6 +337,129 @@ class AuditRecordServiceTests {
         StepVerifier
                 .create(result)
                 .expectErrorMatches(throwable -> throwable instanceof JsonProcessingException)
+                .verify();
+    }
+
+    @Test
+    void testSetAuditRecordLock() {
+        String processId = "process1";
+        String id = "record1";
+        boolean isLocked = true;
+
+        StepVerifier.create(auditRecordService.setAuditRecordLock(processId, id, isLocked))
+                .expectComplete()
+                .verify();
+
+        StepVerifier.create(auditRecordService.isAuditRecordUnlocked(processId, id))
+                .consumeNextWith(result -> assertThat(result).isFalse())
+                .expectComplete()
+                .verify();
+    }
+
+    @Test
+    void testSetAuditRecordUnlock() {
+        String processId = "process1";
+        String id = "record1";
+        boolean isLocked = true;
+
+        StepVerifier.create(auditRecordService.setAuditRecordLock(processId, id, isLocked))
+                .expectComplete()
+                .verify();
+
+        isLocked = false;
+
+        StepVerifier.create(auditRecordService.setAuditRecordLock(processId, id, isLocked))
+                .expectComplete()
+                .verify();
+
+        StepVerifier.create(auditRecordService.isAuditRecordUnlocked(processId, id))
+                .consumeNextWith(result -> assertThat(result).isTrue())
+                .expectComplete()
+                .verify();
+    }
+
+    @Test
+    void testUnlockAuditRecords() {
+        String processId = "process2";
+        String id1 = "record1";
+        String id2 = "record2";
+
+        StepVerifier.create(auditRecordService.setAuditRecordLock(processId, id1, true))
+                .expectComplete()
+                .verify();
+
+        StepVerifier.create(auditRecordService.setAuditRecordLock(processId, id2, true))
+                .expectComplete()
+                .verify();
+
+        auditRecordService.unlockAuditRecords(processId);
+
+        StepVerifier.create(auditRecordService.isAuditRecordUnlocked(processId, id1))
+                .consumeNextWith(result -> assertThat(result).isTrue())
+                .expectComplete()
+                .verify();
+
+        StepVerifier.create(auditRecordService.isAuditRecordUnlocked(processId, id2))
+                .consumeNextWith(result -> assertThat(result).isTrue())
+                .expectComplete()
+                .verify();
+    }
+
+    @Test
+    void testUnlockAllAndTurnToLockAuditRecords() {
+        String processId = "process2";
+        String id1 = "record1";
+        String id2 = "record2";
+
+        StepVerifier.create(auditRecordService.setAuditRecordLock(processId, id1, true))
+                .expectComplete()
+                .verify();
+
+        StepVerifier.create(auditRecordService.setAuditRecordLock(processId, id2, true))
+                .expectComplete()
+                .verify();
+
+        auditRecordService.unlockAuditRecords(processId);
+
+        StepVerifier.create(auditRecordService.isAuditRecordUnlocked(processId, id1))
+                .consumeNextWith(result -> assertThat(result).isTrue())
+                .expectComplete()
+                .verify();
+
+        StepVerifier.create(auditRecordService.isAuditRecordUnlocked(processId, id2))
+                .consumeNextWith(result -> assertThat(result).isTrue())
+                .expectComplete()
+                .verify();
+
+        String id3 = "record3";
+        String id4 = "record4";
+
+        StepVerifier.create(auditRecordService.setAuditRecordLock(processId, id3, true))
+                .expectComplete()
+                .verify();
+
+        StepVerifier.create(auditRecordService.setAuditRecordLock(processId, id4, true))
+                .expectComplete()
+                .verify();
+
+        StepVerifier.create(auditRecordService.isAuditRecordUnlocked(processId, id1))
+                .consumeNextWith(result -> assertThat(result).isTrue())
+                .expectComplete()
+                .verify();
+
+        StepVerifier.create(auditRecordService.isAuditRecordUnlocked(processId, id2))
+                .consumeNextWith(result -> assertThat(result).isTrue())
+                .expectComplete()
+                .verify();
+
+        StepVerifier.create(auditRecordService.isAuditRecordUnlocked(processId, id3))
+                .consumeNextWith(result -> assertThat(result).isFalse())
+                .expectComplete()
+                .verify();
+
+        StepVerifier.create(auditRecordService.isAuditRecordUnlocked(processId, id4))
+                .consumeNextWith(result -> assertThat(result).isFalse())
+                .expectComplete()
                 .verify();
     }
 

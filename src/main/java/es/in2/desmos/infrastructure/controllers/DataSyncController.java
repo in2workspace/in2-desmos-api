@@ -36,7 +36,6 @@ public class DataSyncController {
         String processId = UUID.randomUUID().toString();
         log.info("ProcessID: {} - Starting Data Synchronization...", processId);
 
-        // TODO decide if we wanna go through the p2p or dataSync
         return dataSyncService.synchronizeData(processId);
     }
 

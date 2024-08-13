@@ -1,5 +1,6 @@
 package es.in2.desmos.application.workflows.jobs;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import es.in2.desmos.application.workflows.jobs.impl.P2PDataSyncJobImpl;
 import es.in2.desmos.domain.events.DataNegotiationEventPublisher;
 import es.in2.desmos.domain.models.*;
@@ -19,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -53,16 +55,36 @@ class P2PDataSyncJobTests {
     private DataNegotiationJob dataNegotiationJob;
 
     @Test
-    void itShouldUpsertEntitiesFromOtherAccessNodes(){
+    void itShouldUpsertEntitiesFromOtherTwoAccessNodes() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         String processId = "0";
 
         List<BrokerEntityWithIdTypeLastUpdateAndVersion> brokerEntities = MVBrokerEntity4DataNegotiationMother.list3And4();
-        when(brokerPublisherService.findAllIdTypeAndAttributesByType(processId, "ProductOffering", "lastUpdate", "version", "lifecycleStatus", "validFor", BrokerEntityWithIdTypeLastUpdateAndVersion[].class)).thenReturn(Mono.just(brokerEntities));
+        when(brokerPublisherService.findAllIdTypeAndAttributesByType(processId, MVEntity4DataNegotiationMother.PRODUCT_OFFERING_TYPE_NAME, "lastUpdate", "version", "lifecycleStatus", "validFor", BrokerEntityWithIdTypeLastUpdateAndVersion[].class)).thenReturn(Mono.just(brokerEntities));
+
+        List<BrokerEntityWithIdTypeLastUpdateAndVersion> brokerCategories = MVBrokerEntity4DataNegotiationMother.listCatalogs();
+        when(brokerPublisherService.findAllIdTypeAndAttributesByType(processId, MVEntity4DataNegotiationMother.CATEGORY_TYPE_NAME, "lastUpdate", "version", "lifecycleStatus", "validFor", BrokerEntityWithIdTypeLastUpdateAndVersion[].class))
+                .thenReturn(Mono.just(brokerCategories));
+
+        List<BrokerEntityWithIdTypeLastUpdateAndVersion> brokerCatalogs = MVBrokerEntity4DataNegotiationMother.listCategories();
+        when(brokerPublisherService.findAllIdTypeAndAttributesByType(processId, MVEntity4DataNegotiationMother.CATALOG_TYPE_NAME, "lastUpdate", "version", "lifecycleStatus", "validFor", BrokerEntityWithIdTypeLastUpdateAndVersion[].class))
+                .thenReturn(Mono.just(brokerCatalogs));
 
 
         List<AuditRecord> auditRecordEntities = AuditRecordMother.list3And4();
         when(auditRecordService.findLatestAuditRecordForEntity(processId, auditRecordEntities.get(0).getEntityId())).thenReturn(Mono.just(auditRecordEntities.get(0)));
         when(auditRecordService.findLatestAuditRecordForEntity(processId, auditRecordEntities.get(1).getEntityId())).thenReturn(Mono.just(auditRecordEntities.get(1)));
+
+        List<AuditRecord> auditRecordCategories = AuditRecordMother.listCategories();
+        when(auditRecordService.findLatestAuditRecordForEntity(processId, auditRecordCategories.get(0).getEntityId()))
+                .thenReturn(Mono.just(auditRecordCategories.get(0)));
+        when(auditRecordService.findLatestAuditRecordForEntity(processId, auditRecordCategories.get(1).getEntityId()))
+                .thenReturn(Mono.just(auditRecordCategories.get(1)));
+
+        List<AuditRecord> auditRecordCatalogs = AuditRecordMother.listCatalogs();
+        when(auditRecordService.findLatestAuditRecordForEntity(processId, auditRecordCatalogs.get(0).getEntityId()))
+                .thenReturn(Mono.just(auditRecordCatalogs.get(0)));
+        when(auditRecordService.findLatestAuditRecordForEntity(processId, auditRecordCatalogs.get(1).getEntityId()))
+                .thenReturn(Mono.just(auditRecordCatalogs.get(1)));
 
         String myDomain = "http://my-domain.org";
         when(apiConfig.getOperatorExternalDomain()).thenReturn(myDomain);
@@ -89,41 +111,63 @@ class P2PDataSyncJobTests {
                 .create(result)
                 .verifyComplete();
 
-        verify(apiConfig, times(2)).getOperatorExternalDomain();
+        verify(apiConfig, times(6)).getOperatorExternalDomain();
         verifyNoMoreInteractions(apiConfig);
 
-        verify(discoverySyncWebClient, times(2)).makeRequest(eq(processId), any(), any());
+        verify(discoverySyncWebClient, times(6)).makeRequest(eq(processId), any(), any());
         verifyNoMoreInteractions(discoverySyncWebClient);
 
-        verify(brokerPublisherService, times(1)).findAllIdTypeAndAttributesByType(processId, "ProductOffering", "lastUpdate", "version", "lifecycleStatus", "validFor", BrokerEntityWithIdTypeLastUpdateAndVersion[].class);
+        verify(brokerPublisherService, times(1)).findAllIdTypeAndAttributesByType(processId, MVEntity4DataNegotiationMother.PRODUCT_OFFERING_TYPE_NAME, "lastUpdate", "version", "lifecycleStatus", "validFor", BrokerEntityWithIdTypeLastUpdateAndVersion[].class);
         verifyNoMoreInteractions(brokerPublisherService);
 
-        verify(auditRecordService, times(2)).findLatestAuditRecordForEntity(eq(processId), any());
+        verify(auditRecordService, times(6)).findLatestAuditRecordForEntity(eq(processId), any());
         verifyNoMoreInteractions(auditRecordService);
 
-        verify(discoverySyncWebClient, times(2)).makeRequest(eq(processId), any(), any());
+        verify(discoverySyncWebClient, times(6)).makeRequest(eq(processId), any(), any());
         verifyNoMoreInteractions(discoverySyncWebClient);
 
-        verify(externalAccessNodesConfig, times(1)).getExternalAccessNodesUrls();
+        verify(externalAccessNodesConfig, times(3)).getExternalAccessNodesUrls();
         verifyNoMoreInteractions(externalAccessNodesConfig);
 
-        verify(dataNegotiationJob, times(1)).negotiateDataSyncWithMultipleIssuers(eq(processId), any(), any());
+        verify(dataNegotiationJob, times(3)).negotiateDataSyncWithMultipleIssuers(eq(processId), any(), any());
         verifyNoMoreInteractions(dataNegotiationJob);
     }
 
     @Test
-    void itShouldReturnInternalEntities() {
+    void itShouldReturnInternalEntities() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
+        List<MVEntity4DataNegotiation> internalEntities = MVEntity4DataNegotiationMother.list3And4();
+        internalEntities.addAll(MVEntity4DataNegotiationMother.listCatalogs());
+        internalEntities.addAll(MVEntity4DataNegotiationMother.listCategories());
 
-        List<MVEntity4DataNegotiation> expectedInternalEntities = MVEntity4DataNegotiationMother.list3And4();
+        List<BrokerEntityWithIdTypeLastUpdateAndVersion> brokerProductOfferings = MVBrokerEntity4DataNegotiationMother.list3And4();
+        List<BrokerEntityWithIdTypeLastUpdateAndVersion> brokerCatalogs = MVBrokerEntity4DataNegotiationMother.listCategories();
+        List<BrokerEntityWithIdTypeLastUpdateAndVersion> brokerCategories = MVBrokerEntity4DataNegotiationMother.listCatalogs();
 
-        List<BrokerEntityWithIdTypeLastUpdateAndVersion> brokerEntities = MVBrokerEntity4DataNegotiationMother.list3And4();
-
-        List<AuditRecord> auditRecordEntities = AuditRecordMother.list3And4();
+        List<AuditRecord> auditRecordProductOfferings = AuditRecordMother.list3And4();
+        List<AuditRecord> auditRecordCategories = AuditRecordMother.listCategories();
+        List<AuditRecord> auditRecordCatalogs = AuditRecordMother.listCatalogs();
 
         String processId = "0";
-        when(brokerPublisherService.findAllIdTypeAndAttributesByType(processId, "ProductOffering", "lastUpdate", "version", "lifecycleStatus", "validFor", BrokerEntityWithIdTypeLastUpdateAndVersion[].class)).thenReturn(Mono.just(brokerEntities));
-        when(auditRecordService.findLatestAuditRecordForEntity(processId, auditRecordEntities.get(0).getEntityId())).thenReturn(Mono.just(auditRecordEntities.get(0)));
-        when(auditRecordService.findLatestAuditRecordForEntity(processId, auditRecordEntities.get(1).getEntityId())).thenReturn(Mono.just(auditRecordEntities.get(1)));
+        when(brokerPublisherService.findAllIdTypeAndAttributesByType(processId, MVEntity4DataNegotiationMother.PRODUCT_OFFERING_TYPE_NAME, "lastUpdate", "version", "lifecycleStatus", "validFor", BrokerEntityWithIdTypeLastUpdateAndVersion[].class))
+                .thenReturn(Mono.just(brokerProductOfferings));
+        when(auditRecordService.findLatestAuditRecordForEntity(processId, auditRecordProductOfferings.get(0).getEntityId()))
+                .thenReturn(Mono.just(auditRecordProductOfferings.get(0)));
+        when(auditRecordService.findLatestAuditRecordForEntity(processId, auditRecordProductOfferings.get(1).getEntityId()))
+                .thenReturn(Mono.just(auditRecordProductOfferings.get(1)));
+
+        when(brokerPublisherService.findAllIdTypeAndAttributesByType(processId, MVEntity4DataNegotiationMother.CATEGORY_TYPE_NAME, "lastUpdate", "version", "lifecycleStatus", "validFor", BrokerEntityWithIdTypeLastUpdateAndVersion[].class))
+                .thenReturn(Mono.just(brokerCategories));
+        when(auditRecordService.findLatestAuditRecordForEntity(processId, auditRecordCategories.get(0).getEntityId()))
+                .thenReturn(Mono.just(auditRecordCategories.get(0)));
+        when(auditRecordService.findLatestAuditRecordForEntity(processId, auditRecordCategories.get(1).getEntityId()))
+                .thenReturn(Mono.just(auditRecordCategories.get(1)));
+
+        when(brokerPublisherService.findAllIdTypeAndAttributesByType(processId, MVEntity4DataNegotiationMother.CATALOG_TYPE_NAME, "lastUpdate", "version", "lifecycleStatus", "validFor", BrokerEntityWithIdTypeLastUpdateAndVersion[].class))
+                .thenReturn(Mono.just(brokerCatalogs));
+        when(auditRecordService.findLatestAuditRecordForEntity(processId, auditRecordCatalogs.get(0).getEntityId()))
+                .thenReturn(Mono.just(auditRecordCatalogs.get(0)));
+        when(auditRecordService.findLatestAuditRecordForEntity(processId, auditRecordCatalogs.get(1).getEntityId()))
+                .thenReturn(Mono.just(auditRecordCatalogs.get(1)));
 
         Mono<List<MVEntity4DataNegotiation>> result = p2PDataSyncJob.dataDiscovery(
                 processId,
@@ -131,10 +175,12 @@ class P2PDataSyncJobTests {
                 Mono.just(MVEntity4DataNegotiationMother.list1And2()));
 
         StepVerifier.create(result)
-                .expectNext(expectedInternalEntities)
+                .expectNext(internalEntities)
                 .verifyComplete();
 
-        verify(brokerPublisherService, times(1)).findAllIdTypeAndAttributesByType(processId, "ProductOffering", "lastUpdate", "version", "lifecycleStatus", "validFor", BrokerEntityWithIdTypeLastUpdateAndVersion[].class);
+        verify(brokerPublisherService, times(1)).findAllIdTypeAndAttributesByType(processId, MVEntity4DataNegotiationMother.PRODUCT_OFFERING_TYPE_NAME, "lastUpdate", "version", "lifecycleStatus", "validFor", BrokerEntityWithIdTypeLastUpdateAndVersion[].class);
+        verify(brokerPublisherService, times(1)).findAllIdTypeAndAttributesByType(processId, MVEntity4DataNegotiationMother.CATEGORY_TYPE_NAME, "lastUpdate", "version", "lifecycleStatus", "validFor", BrokerEntityWithIdTypeLastUpdateAndVersion[].class);
+        verify(brokerPublisherService, times(1)).findAllIdTypeAndAttributesByType(processId, MVEntity4DataNegotiationMother.CATALOG_TYPE_NAME, "lastUpdate", "version", "lifecycleStatus", "validFor", BrokerEntityWithIdTypeLastUpdateAndVersion[].class);
         verifyNoMoreInteractions(brokerPublisherService);
     }
 
@@ -142,7 +188,7 @@ class P2PDataSyncJobTests {
     void itShouldReturnLocalEntitiesWhenPassingId() throws JSONException {
         Mono<List<Id>> idsMono = Mono.just(Arrays.stream(IdMother.entitiesRequest).toList());
 
-        String entityRequestBrokerJson = BrokerDataMother.getEntityRequestBrokerJson;
+        String entityRequestBrokerJson = BrokerDataMother.GetEntityRequestBrokerJson;
         JSONArray expectedResponseJsonArray = new JSONArray(entityRequestBrokerJson);
         List<String> localEntities = new ArrayList<>();
         for (int i = 0; i < expectedResponseJsonArray.length(); i++) {
