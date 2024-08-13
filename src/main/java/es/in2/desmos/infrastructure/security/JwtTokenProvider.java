@@ -113,6 +113,7 @@ public class JwtTokenProvider {
             if (publicKeyHex == null) {
                 return Mono.error(new InvalidKeyException("Public key not found for origin: " + externalNodeUrl));
             }
+
             // Convert the PEM public key to ECPublicKey
             ECPublicKey ecPublicKey = convertHexPublicKeyToECPublicKey(publicKeyHex);
 
@@ -122,9 +123,14 @@ public class JwtTokenProvider {
 
             SignedJWT jwt = SignedJWT.parse(jwtString);
 
-            jwt.verify(verifier);
+            boolean verified = jwt.verify(verifier);
+            if (verified) {
+                log.info("VERIFIED OK? {}", jwt.verify(verifier));
+                return Mono.just(jwt);
+            } else {
+                return Mono.error(new Exception("JWT verification failed"));
+            }
 
-            return Mono.just(jwt);
         } catch (Exception e) {
             log.warn("Error parsing JWT", e);
             return Mono.error(new InvalidKeyException());

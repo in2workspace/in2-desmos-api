@@ -37,7 +37,6 @@ public class ServerHttpBearerAuthenticationConverter implements Function<ServerW
 
     @Override
     public Mono<Authentication> apply(ServerWebExchange serverWebExchange) {
-        log.info("INIT ServerHttpBearerAuthenticationConverter APPLY");
 
         return Mono.justOrEmpty(serverWebExchange)
                 .flatMap(ServerHttpBearerAuthenticationConverter::extract)
@@ -49,14 +48,12 @@ public class ServerHttpBearerAuthenticationConverter implements Function<ServerW
     }
 
     public static Mono<String> extract(ServerWebExchange serverWebExchange) {
-        log.info("INIT ServerHttpBearerAuthenticationConverter EXTRACT");
         return Mono.justOrEmpty(serverWebExchange.getRequest()
                 .getHeaders()
                 .getFirst(HttpHeaders.AUTHORIZATION));
     }
 
     public static Mono<Authentication> create(SignedJWT signedJWTMono) {
-        log.info("INIT ServerHttpBearerAuthenticationConverter CREATE");
         String subject;
         //String auths;
         try {
