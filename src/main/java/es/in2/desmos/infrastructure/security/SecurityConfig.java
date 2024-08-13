@@ -1,12 +1,21 @@
 package es.in2.desmos.infrastructure.security;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import es.in2.desmos.domain.models.AccessNodeOrganization;
+import es.in2.desmos.domain.models.AccessNodeYamlData;
+import es.in2.desmos.domain.services.sync.services.ExternalYamlService;
+import es.in2.desmos.infrastructure.configs.ApiConfig;
 import es.in2.desmos.infrastructure.configs.cache.AccessNodeMemoryStore;
+import es.in2.desmos.infrastructure.configs.properties.AccessNodeProperties;
 import es.in2.desmos.infrastructure.security.filters.BearerTokenReactiveAuthenticationManager;
 import es.in2.desmos.infrastructure.security.filters.ServerHttpBearerAuthenticationConverter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
@@ -23,8 +32,11 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+
+import static es.in2.desmos.domain.utils.ApplicationConstants.YAML_FILE_SUFFIX;
 
 @Slf4j
 @Configuration
@@ -34,6 +46,10 @@ public class SecurityConfig {
 
     private final JwtTokenProvider jwtVerifier;
     private final AccessNodeMemoryStore accessNodeMemoryStore;
+    private final AccessNodeProperties accessNodeProperties;
+    private final ApiConfig apiConfig;
+    private final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+
 
     /**
      * For Spring Security webflux, a chain of filters will provide user authentication
@@ -92,7 +108,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.setAllowedOrigins(List.of("*"));
+        corsConfig.setAllowedOrigins(getCorsUrls());
         corsConfig.setMaxAge(8000L);
         corsConfig.setAllowedMethods(List.of(
                 HttpMethod.GET.name(),
@@ -108,6 +124,60 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfig); // Apply the configuration to all paths
         return source;
+    }
+
+    private List<String> getCorsUrls(){
+
+        log.debug("ProcessID: {} - Retrieving YAML data from the external source repository...", "processId");
+        // Get the External URL from configuration
+        String repoPath = accessNodeProperties.prefixDirectory() + getExternalYamlProfile() + YAML_FILE_SUFFIX;
+
+        log.debug("ProcessID: {} - External URL: {}", "processId", repoPath);
+        // Retrieve YAML data from the External URL
+
+        apiConfig.webClient().get()
+                .uri(repoPath)
+                .retrieve()
+                .bodyToMono(String.class)
+                .handle((yamlContent, sink) -> {
+                    AccessNodeYamlData data;
+                    try {
+                        data = yamlMapper.readValue(yamlContent, AccessNodeYamlData.class);
+                    } catch (JsonProcessingException e) {
+                        sink.error(new RuntimeException(e));
+                        return;
+                    }
+                    log.debug("ProcessID: {} - AccessNodeYamlData: {}", "processId", data);
+                    accessNodeMemoryStore.setOrganizations(data);
+                }).block();
+
+
+        List<String> urls = new ArrayList<>();
+        AccessNodeYamlData yamlData = accessNodeMemoryStore.getOrganizations();
+        if (yamlData == null || yamlData.getOrganizations() == null) {
+            log.warn("No organizations data available in AccessNodeMemoryStore.");
+            return null;
+        }
+        for (AccessNodeOrganization org : yamlData.getOrganizations()) {
+            urls.add(org.getUrl());
+        }
+
+        return urls;
+    }
+
+    private String getExternalYamlProfile() {
+        String profile = apiConfig.getCurrentEnvironment();
+
+        if (profile == null) {
+            throw new RuntimeException("Environment variable SPRING_PROFILES_ACTIVE is not set");
+        }
+
+        return switch (profile) {
+            case "default", "dev" -> "sbx";
+            case "test" -> "dev";
+            case "prod" -> "prd";
+            default -> throw new IllegalArgumentException("Invalid profile: " + profile);
+        };
     }
 
 }
