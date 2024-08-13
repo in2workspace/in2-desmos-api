@@ -159,16 +159,24 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                                         .map(brokerEntity -> {
                                             MVAuditServiceEntity4DataNegotiation auditServiceEntity = auditServiceEntityMap.get(brokerEntity.getId());
 
-                                            return new MVEntity4DataNegotiation(
-                                                    brokerEntity.getId(),
-                                                    brokerEntity.getType(),
-                                                    brokerEntity.getVersion(),
-                                                    brokerEntity.getLastUpdate(),
-                                                    brokerEntity.getLifecycleStatus(),
-                                                    brokerEntity.getValidFor().startDateTime(),
-                                                    auditServiceEntity.hash(),
-                                                    auditServiceEntity.hashlink());
+                                            // FIXME
+                                            // It's not necessary since every entity has its auditRecord.
+                                            if(auditServiceEntity != null){
+                                                return new MVEntity4DataNegotiation(
+                                                        brokerEntity.getId(),
+                                                        brokerEntity.getType(),
+                                                        brokerEntity.getVersion(),
+                                                        brokerEntity.getLastUpdate(),
+                                                        brokerEntity.getLifecycleStatus(),
+                                                        brokerEntity.getValidFor().startDateTime(),
+                                                        auditServiceEntity.hash(),
+                                                        auditServiceEntity.hashlink());
+                                            } else {
+                                                return null;
+                                            }
+
                                         })
+                                        .filter(Objects::nonNull)
                                         .toList();
                             });
                 });
