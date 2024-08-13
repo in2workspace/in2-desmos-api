@@ -63,8 +63,9 @@
 //        String repoPath = "repoPath";
 //        //Arrange
 //        when(accessNodeProperties.prefixDirectory()).thenReturn("/prefix/directory");
-//        when(env.getProperty("SPRING_PROFILES_ACTIVE")).thenReturn("dev");
-//
+//        //when(env.getActiveProfiles()).thenReturn(new String[]{"dev"});
+//        when(apiConfig.getCurrentEnvironment())
+//                .thenReturn("dev");
 //        when(apiConfig.webClient()).thenReturn(webClientMock);
 //        when(webClientMock.get()).thenReturn(webClientRequestHeadersUriSpecMock);
 //        when(webClientRequestHeadersUriSpecMock.uri(repoPath)).thenReturn(webClientRequestHeadersSpecMock);

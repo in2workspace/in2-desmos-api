@@ -74,7 +74,7 @@
 //    @Test
 //    void testSyncData() throws JOSEException {
 //        Mockito.when(dataSyncService.synchronizeData(anyString())).thenReturn(Mono.empty());
-//        Mockito.when(jwtTokenProvider.generateToken(anyString())).thenReturn("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c");
+//        Mockito.when(jwtTokenProvider.generateToken(anyString())).thenReturn("eyJ0eXAiOiJkcG9wK2p3dCIsImFsZyI6IkVTMjU2SyIsImp3ayI6eyJrdHkiOiJFQyIsInVzZSI6InNpZyIsImNydiI6InNlY3AyNTZrMSIsIngiOiJobGNfbHFubG9BQjRWY3VpZXZVOUxYUFduTUZESm12RE51TmgwdlVTVDJZIiwieSI6Ik9jZ1Q1aW9jaGtJVExlUlZ0eTFseGlEeGpXbkFuakFTUFVJUHk0WGVOaDAifX0.eyJodG0iOiJQT1NUIiwiaHR1IjoiIiwiaWF0IjoxNzIzNTM2NDgwLCJqdGkiOiIyMDU0ZTYwNC04YzAzLTQ2ZjItYWY5NC05M2IxODVhYWU5MTYifQ.dOFfCTWH8qPWdj2Y-JdnXl5uOBSJvCJlHtCW4ENxTTVtrytkIK_sIx8jFLPAapTcYsAOdx_IYMxDeiI-kZKdBA");
 //
 //        String token;
 //        try {
@@ -87,8 +87,7 @@
 //                .uri("/api/v1/sync/p2p/data")
 //                .header("Authorization", "Bearer " + token)
 //                .exchange()
-//                .expectStatus().isOk()
-//                .expectHeader().contentLength(-1);
+//                .expectStatus().isOk();
 //    }
 //
 //    @Test
