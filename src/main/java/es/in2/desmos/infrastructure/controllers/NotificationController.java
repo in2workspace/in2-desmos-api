@@ -1,6 +1,5 @@
 package es.in2.desmos.infrastructure.controllers;
 
-import com.nimbusds.jose.JOSEException;
 import es.in2.desmos.domain.models.BlockchainNotification;
 import es.in2.desmos.domain.models.BrokerNotification;
 import es.in2.desmos.domain.services.blockchain.BlockchainListenerService;
@@ -41,14 +40,6 @@ public class NotificationController {
         log.info("ProcessID: {} - Blockchain Notification received", processId);
         log.debug("ProcessID: {}, Blockchain Notification received: {}", processId, blockchainNotification);
         return blockchainListenerService.processBlockchainNotification(processId, blockchainNotification);
-    }
-
-    @GetMapping("/test/token")
-    @ResponseStatus(HttpStatus.OK)
-    public String testToken() throws JOSEException {
-        String processId = UUID.randomUUID().toString();
-
-        return jwtTokenProvider.generateToken("");
     }
 
 }
