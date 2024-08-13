@@ -106,6 +106,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
+        List<String> corsUrls = getCorsUrls();
+        if (corsUrls != null) {
+            corsUrls.add("http://localhost:8080");
+        }
         corsConfig.setAllowedOrigins(getCorsUrls());
         corsConfig.setMaxAge(8000L);
         corsConfig.setAllowedMethods(List.of(
