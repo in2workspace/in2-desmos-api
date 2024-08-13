@@ -74,11 +74,6 @@ public class ApiConfig {
         }
     }
 
-    @Bean
-    public String getOperatorExternalDomain(){
-        return operatorProperties.externalDomain();
-    }
-
     public String getExternalDomain() {
         return apiProperties.externalDomain();
     }

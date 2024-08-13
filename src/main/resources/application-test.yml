@@ -83,6 +83,10 @@ openapi:
 operator:
   organizationIdentifier:
 
+# Desmos Configuration
+api:
+  externalDomain: "http://localhost:8080"
+
 # Context Broker Configuration
 broker:
   provider:
@@ -113,6 +117,9 @@ dlt-adapter:
 tx-subscription:
   notificationEndpoint:
   entityTypes:
+
+security:
+  privateKey: "0x1aff50dca1ac463a5af99a858c2eef7517b8e46d3bf84723ff6dcfead7dc8db6"
 
 # Access Node
 access-node:

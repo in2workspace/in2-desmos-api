@@ -87,7 +87,7 @@ class P2PDataSyncJobTests {
                 .thenReturn(Mono.just(auditRecordCatalogs.get(1)));
 
         String myDomain = "http://my-domain.org";
-        when(apiConfig.getOperatorExternalDomain()).thenReturn(myDomain);
+        when(apiConfig.getExternalDomain()).thenReturn(myDomain);
 
         String externalDomain = "http://external-domain.org";
         List<MVEntity4DataNegotiation> sample3InList = List.of(MVEntity4DataNegotiationMother.sample3());
@@ -111,7 +111,7 @@ class P2PDataSyncJobTests {
                 .create(result)
                 .verifyComplete();
 
-        verify(apiConfig, times(6)).getOperatorExternalDomain();
+        verify(apiConfig, times(6)).getExternalDomain();
         verifyNoMoreInteractions(apiConfig);
 
         verify(discoverySyncWebClient, times(6)).makeRequest(eq(processId), any(), any());
