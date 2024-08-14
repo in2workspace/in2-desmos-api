@@ -1,6 +1,7 @@
 package es.in2.desmos.domain.services.sync.impl;
 
 import com.nimbusds.jose.JOSEException;
+import es.in2.desmos.domain.exceptions.InvalidTokenException;
 import es.in2.desmos.domain.models.Id;
 import es.in2.desmos.domain.services.sync.EntitySyncWebClient;
 import es.in2.desmos.infrastructure.configs.ApiConfig;
@@ -29,7 +30,7 @@ public class EntitySyncWebClientImpl implements EntitySyncWebClient {
         try {
             token = jwtTokenProvider.generateToken("/api/v1/sync/p2p/discovery");
         } catch (JOSEException e) {
-            throw new RuntimeException(e);
+            throw new InvalidTokenException(e.getMessage());
         }
 
         return issuerMono.flatMap(issuer -> webClient

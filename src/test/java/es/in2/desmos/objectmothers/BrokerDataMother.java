@@ -16,7 +16,7 @@ public final class BrokerDataMother {
     }
 
     public static String getGetEntityRequestBrokerJsonBase64() throws JsonProcessingException {
-        JsonNode jsonNode = objectMapper.readTree(GetEntityRequestBrokerJson);
+        JsonNode jsonNode = objectMapper.readTree(GET_ENTITY_REQUEST_BROKER_JSON);
         List<String> items = new ArrayList<>();
         jsonNode.forEach(item -> {
             String base64Item = Base64.getEncoder().encodeToString(item.toString().getBytes());
@@ -28,7 +28,7 @@ public final class BrokerDataMother {
 
     }
 
-    public static final String GetEntityRequestBrokerJson =
+    public static final String GET_ENTITY_REQUEST_BROKER_JSON =
             """
                     [
                         {
@@ -141,7 +141,7 @@ public final class BrokerDataMother {
                         }
                     ]""";
 
-    public static final String GetEntityRequestWithSubentitiesArrayJson =
+    public static final String GET_ENTITY_REQUEST_WITH_SUB_ENTITIES_ARRAY_JSON =
             """
                     [
                         {
@@ -168,7 +168,7 @@ public final class BrokerDataMother {
                         }
                     ]""";
 
-    public static final String GetEntityRequestWithSubentitiesArrayWithPropertyJson =
+    public static final String GET_ENTITY_REQUEST_WITH_SUB_ENTITIES_ARRAY_WITH_PROPERTY_JSON =
             """
                     [
                         {
@@ -198,7 +198,7 @@ public final class BrokerDataMother {
                         }
                     ]""";
 
-    public static final String GetEntityRequestBrokerNoTypeJson =
+    public static final String GET_ENTITY_REQUEST_BROKER_NO_TYPE_JSON =
             """
                     [
                         {
@@ -243,7 +243,7 @@ public final class BrokerDataMother {
                         }
                     ]""";
 
-    public static final String getEntityRequestBrokerNoRelationshipJson =
+    public static final String GET_ENTITY_REQUEST_BROKER_NO_RELATIONSHIP_JSON =
             """
                     [
                         {
@@ -288,7 +288,7 @@ public final class BrokerDataMother {
                         }
                     ]""";
 
-    public static final String getEntityRequestBrokerNoObjectJson =
+    public static final String GET_ENTITY_REQUEST_BROKER_NO_OBJECT_JSON =
             """
                     [
                         {

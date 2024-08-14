@@ -1,6 +1,5 @@
 package es.in2.desmos.domain.services.api;
 
-import es.in2.desmos.domain.exceptions.BrokerEntityRetrievalException;
 import es.in2.desmos.domain.services.api.impl.BrokerSubscriptionValidateServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -1,8 +1,8 @@
 package es.in2.desmos.objectmothers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.domain.models.DiscoverySyncResponse;
+import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 

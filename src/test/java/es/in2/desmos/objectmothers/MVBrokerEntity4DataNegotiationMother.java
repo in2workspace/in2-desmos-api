@@ -16,12 +16,12 @@ public final class MVBrokerEntity4DataNegotiationMother {
     }
 
     public static @NotNull List<BrokerEntityWithIdTypeLastUpdateAndVersion> list3And4() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
-        List<BrokerEntityWithIdTypeLastUpdateAndVersion> MVEntity4DataNegotiationList = new ArrayList<>();
+        List<BrokerEntityWithIdTypeLastUpdateAndVersion> mVEntity4DataNegotiationList = new ArrayList<>();
         var sample3 = MVEntity4DataNegotiationMother.sample3();
         var sample4 = MVEntity4DataNegotiationMother.sample4();
-        MVEntity4DataNegotiationList.add(new BrokerEntityWithIdTypeLastUpdateAndVersion(sample3.id(), sample3.type(), sample3.version(), sample3.lastUpdate(), sample3.lifecycleStatus(), new BrokerEntityValidFor(sample4.validFor())));
-        MVEntity4DataNegotiationList.add(new BrokerEntityWithIdTypeLastUpdateAndVersion(sample4.id(), sample4.type(), sample4.version(), sample4.lastUpdate(), sample4.lifecycleStatus(), new BrokerEntityValidFor(sample4.validFor())));
-        return MVEntity4DataNegotiationList;
+        mVEntity4DataNegotiationList.add(new BrokerEntityWithIdTypeLastUpdateAndVersion(sample3.id(), sample3.type(), sample3.version(), sample3.lastUpdate(), sample3.lifecycleStatus(), new BrokerEntityValidFor(sample4.validFor())));
+        mVEntity4DataNegotiationList.add(new BrokerEntityWithIdTypeLastUpdateAndVersion(sample4.id(), sample4.type(), sample4.version(), sample4.lastUpdate(), sample4.lifecycleStatus(), new BrokerEntityValidFor(sample4.validFor())));
+        return mVEntity4DataNegotiationList;
     }
 
     public static @NotNull List<BrokerEntityWithIdTypeLastUpdateAndVersion> listCategories() {

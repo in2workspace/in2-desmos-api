@@ -3,7 +3,6 @@ package es.in2.desmos.domain.utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.objectmothers.JsonNotificationMother;
-import es.in2.desmos.objectmothers.JsonNotificationMother;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;

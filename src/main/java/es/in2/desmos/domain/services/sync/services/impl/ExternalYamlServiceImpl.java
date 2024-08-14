@@ -3,6 +3,7 @@ package es.in2.desmos.domain.services.sync.services.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import es.in2.desmos.domain.exceptions.InvalidProfileException;
 import es.in2.desmos.domain.models.AccessNodeYamlData;
 import es.in2.desmos.domain.services.sync.services.ExternalYamlService;
 import es.in2.desmos.infrastructure.configs.ApiConfig;
@@ -13,8 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
-
-import java.util.Objects;
 
 import static es.in2.desmos.domain.utils.ApplicationConstants.YAML_FILE_SUFFIX;
 
@@ -60,14 +59,14 @@ public class ExternalYamlServiceImpl implements ExternalYamlService {
         String profile = apiConfig.getCurrentEnvironment();
 
         if (profile == null) {
-            throw new RuntimeException("Environment variable SPRING_PROFILES_ACTIVE is not set");
+            throw new InvalidProfileException("Environment variable SPRING_PROFILES_ACTIVE is not set");
         }
 
         return switch (profile) {
             case "default", "dev" -> "sbx";
             case "test" -> "dev";
             case "prod" -> "prd";
-            default -> throw new IllegalArgumentException("Invalid profile: " + profile);
+            default -> throw new InvalidProfileException("Invalid profile: " + profile);
         };
     }
 

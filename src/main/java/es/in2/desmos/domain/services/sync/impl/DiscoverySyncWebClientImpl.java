@@ -1,6 +1,7 @@
 package es.in2.desmos.domain.services.sync.impl;
 
 import com.nimbusds.jose.JOSEException;
+import es.in2.desmos.domain.exceptions.InvalidTokenException;
 import es.in2.desmos.domain.models.DiscoverySyncRequest;
 import es.in2.desmos.domain.models.DiscoverySyncResponse;
 import es.in2.desmos.domain.services.sync.DiscoverySyncWebClient;
@@ -30,7 +31,7 @@ public class DiscoverySyncWebClientImpl implements DiscoverySyncWebClient {
         try {
             token = jwtTokenProvider.generateToken("/api/v1/sync/p2p/discovery");
         } catch (JOSEException e) {
-            throw new RuntimeException(e);
+            throw new InvalidTokenException(e.getMessage());
         }
 
         return externalAccessNodeMono.flatMap(externalAccessNode -> webClient

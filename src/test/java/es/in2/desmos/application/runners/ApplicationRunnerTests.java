@@ -87,11 +87,11 @@ class ApplicationRunnerTests {
     void whenDisposeIsActive() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         // Arrange
         String getCurrentEnvironment = "dev";
-        ApplicationRunner applicationRunner = new ApplicationRunner(apiConfig, brokerConfig, blockchainConfig, brokerListenerService, blockchainListenerService,  externalYamlService, dataSyncWorkflow, publishWorkflow, subscribeWorkflow, brokerSubscriptionValidateService, getCurrentEnvironment);
+        ApplicationRunner localApplicationRunner  = new ApplicationRunner(apiConfig, brokerConfig, blockchainConfig, brokerListenerService, blockchainListenerService,  externalYamlService, dataSyncWorkflow, publishWorkflow, subscribeWorkflow, brokerSubscriptionValidateService, getCurrentEnvironment);
         Method disposeIfActive = ApplicationRunner.class.getDeclaredMethod("disposeIfActive", Disposable.class);
         disposeIfActive.setAccessible(true);
         Disposable disposable = mock(Disposable.class);
-        disposeIfActive.invoke(applicationRunner, disposable);
+        disposeIfActive.invoke(localApplicationRunner , disposable);
         when(brokerListenerService.createSubscription(anyString(), any())).thenReturn(Mono.empty());
         when(blockchainListenerService.createSubscription(anyString(), any(BlockchainSubscription.class))).thenReturn(Mono.empty());
         when(externalYamlService.getAccessNodeYamlDataFromExternalSource(anyString())).thenReturn(Mono.empty());
@@ -103,7 +103,7 @@ class ApplicationRunnerTests {
         // Act
         mock(ApplicationReadyEvent.class);
         //Assert
-        StepVerifier.create(applicationRunner.onApplicationReady()).verifyComplete();
+        StepVerifier.create(localApplicationRunner .onApplicationReady()).verifyComplete();
     }
 }
 
