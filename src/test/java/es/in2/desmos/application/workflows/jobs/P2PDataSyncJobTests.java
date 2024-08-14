@@ -188,7 +188,7 @@ class P2PDataSyncJobTests {
     void itShouldReturnLocalEntitiesWhenPassingId() throws JSONException {
         Mono<List<Id>> idsMono = Mono.just(Arrays.stream(IdMother.entitiesRequest).toList());
 
-        String entityRequestBrokerJson = BrokerDataMother.getEntityRequestBrokerJson;
+        String entityRequestBrokerJson = BrokerDataMother.GET_ENTITY_REQUEST_BROKER_JSON;
         JSONArray expectedResponseJsonArray = new JSONArray(entityRequestBrokerJson);
         List<String> localEntities = new ArrayList<>();
         for (int i = 0; i < expectedResponseJsonArray.length(); i++) {

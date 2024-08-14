@@ -32,6 +32,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
@@ -107,7 +108,13 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.setAllowedOrigins(getCorsUrls());
+        //corsConfig.setAllowedOrigins(getCorsUrls());
+        corsConfig.setAllowedOrigins(new ArrayList<>(Arrays.asList(
+                "/api/v1/sync/p2p/**",
+                "/api/v1/entities/**",
+                "/api/v1/notifications/broker",
+                "/api/v1/notifications/dlt"
+        )));
         corsConfig.setMaxAge(8000L);
         corsConfig.setAllowedMethods(List.of(
                 HttpMethod.GET.name(),

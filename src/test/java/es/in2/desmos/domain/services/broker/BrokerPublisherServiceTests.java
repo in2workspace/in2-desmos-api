@@ -121,9 +121,9 @@ class BrokerPublisherServiceTests {
 
     @ParameterizedTest
     @ValueSource(strings = {
-            BrokerDataMother.getEntityRequestBrokerJson,
-            BrokerDataMother.getEntityRequestWithSubentitiesArrayJson,
-            BrokerDataMother.getEntityRequestWithSubentitiesArrayWithPropertyJson
+            BrokerDataMother.GET_ENTITY_REQUEST_BROKER_JSON,
+            BrokerDataMother.GET_ENTITY_REQUEST_WITH_SUB_ENTITIES_ARRAY_JSON,
+            BrokerDataMother.GET_ENTITY_REQUEST_WITH_SUB_ENTITIES_ARRAY_WITH_PROPERTY_JSON
     })
     void itShouldFindAllEntitiesFromListWithArrayOfSubentitiesById(String brokerJson) throws JSONException, JsonProcessingException {
         String processId = "0";
@@ -166,9 +166,9 @@ class BrokerPublisherServiceTests {
 
     @ParameterizedTest
     @ValueSource(strings = {
-            BrokerDataMother.getEntityRequestBrokerNoTypeJson,
-            BrokerDataMother.getEntityRequestBrokerNoRelationshipJson,
-            BrokerDataMother.getEntityRequestBrokerNoObjectJson
+            BrokerDataMother.GET_ENTITY_REQUEST_BROKER_NO_TYPE_JSON,
+            BrokerDataMother.GET_ENTITY_REQUEST_BROKER_NO_RELATIONSHIP_JSON,
+            BrokerDataMother.GET_ENTITY_REQUEST_BROKER_NO_OBJECT_JSON
     })
     void itShouldNotReturnIdIfIncorrectEntity(String brokerJson) throws JSONException, JsonProcessingException {
         String processId = "0";
