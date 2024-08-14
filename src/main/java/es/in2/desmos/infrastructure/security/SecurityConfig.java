@@ -7,8 +7,10 @@ import es.in2.desmos.domain.exceptions.InvalidProfileException;
 import es.in2.desmos.domain.models.AccessNodeOrganization;
 import es.in2.desmos.domain.models.AccessNodeYamlData;
 import es.in2.desmos.infrastructure.configs.ApiConfig;
+import es.in2.desmos.infrastructure.configs.BrokerConfig;
 import es.in2.desmos.infrastructure.configs.cache.AccessNodeMemoryStore;
 import es.in2.desmos.infrastructure.configs.properties.AccessNodeProperties;
+import es.in2.desmos.infrastructure.configs.properties.DLTAdapterProperties;
 import es.in2.desmos.infrastructure.security.filters.BearerTokenReactiveAuthenticationManager;
 import es.in2.desmos.infrastructure.security.filters.ServerHttpBearerAuthenticationConverter;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +34,6 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
@@ -48,6 +49,8 @@ public class SecurityConfig {
     private final AccessNodeMemoryStore accessNodeMemoryStore;
     private final AccessNodeProperties accessNodeProperties;
     private final ApiConfig apiConfig;
+    private final BrokerConfig brokerConfig;
+    private final DLTAdapterProperties dltAdapterProperties;
     private final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
 
 
@@ -76,7 +79,8 @@ public class SecurityConfig {
                         .csrfTokenRepository(CookieServerCsrfTokenRepository.withHttpOnlyFalse())
                         .disable() // Disable CSRF protection for specific paths
                 )
-                .addFilterAt(bearerAuthenticationFilter(), SecurityWebFiltersOrder.AUTHENTICATION);
+                .addFilterAt(bearerAuthenticationFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()));
         return http.build();
 
 
@@ -107,28 +111,56 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration corsConfig = new CorsConfiguration();
-        //corsConfig.setAllowedOrigins(getCorsUrls());
-        corsConfig.setAllowedOrigins(new ArrayList<>(Arrays.asList(
-                "/api/v1/sync/p2p/**",
-                "/api/v1/entities/**",
-                "/api/v1/notifications/broker",
-                "/api/v1/notifications/dlt"
-        )));
-        corsConfig.setMaxAge(8000L);
-        corsConfig.setAllowedMethods(List.of(
-                HttpMethod.GET.name(),
-                HttpMethod.HEAD.name(),
-                HttpMethod.POST.name(),
-                HttpMethod.PUT.name(),
-                HttpMethod.DELETE.name(),
-                HttpMethod.OPTIONS.name()));
-        corsConfig.setMaxAge(1800L);
-        corsConfig.addAllowedHeader("*");
-        corsConfig.addExposedHeader("*");
-        corsConfig.setAllowCredentials(true);
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", corsConfig); // Apply the configuration to all paths
+
+        CorsConfiguration brokerCorsConfig = new CorsConfiguration();
+        brokerCorsConfig.setAllowedOrigins(List.of(brokerConfig.getInternalDomain()));
+        brokerCorsConfig.setMaxAge(8000L);
+        brokerCorsConfig.setAllowedMethods(List.of(
+                HttpMethod.POST.name()));
+        brokerCorsConfig.setMaxAge(1800L);
+        brokerCorsConfig.addAllowedHeader("*");
+        brokerCorsConfig.addExposedHeader("*");
+        brokerCorsConfig.setAllowCredentials(false);
+        source.registerCorsConfiguration("/api/v1/notifications/broker", brokerCorsConfig); // Apply the configuration to all paths
+
+        CorsConfiguration dltAdapterCorsConfig = new CorsConfiguration();
+        dltAdapterCorsConfig.setAllowedOrigins(List.of(dltAdapterProperties.internalDomain(), dltAdapterProperties.externalDomain()));
+        dltAdapterCorsConfig.setMaxAge(8000L);
+        dltAdapterCorsConfig.setAllowedMethods(
+                List.of(HttpMethod.POST.name()));
+        dltAdapterCorsConfig.setMaxAge(1800L);
+        dltAdapterCorsConfig.addAllowedHeader("*");
+        dltAdapterCorsConfig.addExposedHeader("*");
+        dltAdapterCorsConfig.setAllowCredentials(false);
+        source.registerCorsConfiguration("/api/v1/notifications/dlt", dltAdapterCorsConfig); // Apply the configuration to all paths
+
+
+
+        CorsConfiguration githubSyncUrlsCorsConfig = new CorsConfiguration();
+        githubSyncUrlsCorsConfig.setAllowedOrigins(getCorsUrls());
+        githubSyncUrlsCorsConfig.setMaxAge(8000L);
+        githubSyncUrlsCorsConfig.setAllowedMethods(List.of(
+                HttpMethod.GET.name(),
+                HttpMethod.POST.name()));
+        githubSyncUrlsCorsConfig.setMaxAge(1800L);
+        githubSyncUrlsCorsConfig.addAllowedHeader("*");
+        githubSyncUrlsCorsConfig.addExposedHeader("*");
+        githubSyncUrlsCorsConfig.setAllowCredentials(true);
+        source.registerCorsConfiguration("/api/v1/sync/p2p/**", githubSyncUrlsCorsConfig); // Apply the configuration to all paths
+
+        CorsConfiguration githubEntitiesUrlsCorsConfig = new CorsConfiguration();
+        githubEntitiesUrlsCorsConfig.setAllowedOrigins(getCorsUrls());
+        githubEntitiesUrlsCorsConfig.setMaxAge(8000L);
+        githubEntitiesUrlsCorsConfig.setAllowedMethods(List.of(
+                HttpMethod.GET.name()));
+                githubEntitiesUrlsCorsConfig.setMaxAge(1800L);
+        githubEntitiesUrlsCorsConfig.addAllowedHeader("*");
+        githubEntitiesUrlsCorsConfig.addExposedHeader("*");
+        githubEntitiesUrlsCorsConfig.setAllowCredentials(true);
+        source.registerCorsConfiguration("/api/v1/entities/**", githubEntitiesUrlsCorsConfig); // Apply the configuration to all paths
+
         return source;
     }
 
