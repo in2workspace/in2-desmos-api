@@ -62,7 +62,7 @@ public class SecurityConfig {
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         http
                 .authorizeExchange(exchanges -> exchanges
-                        .matchers(new LocalhostHealthMatcher()).permitAll()
+                        .pathMatchers("/health").permitAll()
                         .pathMatchers("/api/v1/notifications/broker").permitAll()
                         .pathMatchers("/api/v1/notifications/dlt").permitAll()
                         .pathMatchers("/api/v1/entities/*").authenticated() //replication endpoint
@@ -106,10 +106,6 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        List<String> corsUrls = getCorsUrls();
-        if (corsUrls != null) {
-            corsUrls.add("http://localhost:8080");
-        }
         corsConfig.setAllowedOrigins(getCorsUrls());
         corsConfig.setMaxAge(8000L);
         corsConfig.setAllowedMethods(List.of(
