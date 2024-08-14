@@ -17,8 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * This converter extracts a bearer token from a WebExchange and
@@ -55,10 +53,8 @@ public class ServerHttpBearerAuthenticationConverter implements Function<ServerW
 
     public static Mono<Authentication> create(SignedJWT signedJWTMono) {
         String subject;
-        //String auths;
         try {
             subject = signedJWTMono.getJWTClaimsSet().getSubject();
-            //auths = (String) signedJWTMono.getJWTClaimsSet().getClaim("roles");
         } catch (ParseException | java.text.ParseException e) {
             return Mono.empty();
         }

@@ -30,7 +30,10 @@ import java.math.BigInteger;
 import java.security.*;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
-import java.security.spec.*;
+import java.security.spec.ECFieldFp;
+import java.security.spec.ECPublicKeySpec;
+import java.security.spec.EllipticCurve;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Date;
 import java.util.UUID;
 

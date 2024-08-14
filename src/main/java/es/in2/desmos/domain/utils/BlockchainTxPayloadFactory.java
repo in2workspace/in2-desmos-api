@@ -36,8 +36,6 @@ public class BlockchainTxPayloadFactory {
             String entityType = (String) dataMap.get("type");
             String entityHash = calculateSHA256(objectMapper.writeValueAsString(dataMap));
             String entityHashLink = entityHash.equals(previousHash) ? previousHash : calculateHashLink(previousHash, entityHash);
-            // old version -> to context broker
-//            String dataLocation = brokerConfig.getEntitiesExternalDomain() + "/" + entityId + HASHLINK_PREFIX + entityHashLink;
             String dataLocation = brokerConfig.getEntitiesExternalDomain() + "/api/v1/entities/" + entityId + HASHLINK_PREFIX + entityHashLink;
             String organizationIdentifier = HASH_PREFIX + apiConfig.organizationIdHash();
             String previousEntityHash = HASH_PREFIX + previousHash;

@@ -137,4 +137,22 @@ public class GlobalExceptionHandler {
         return Mono.just(GlobalErrorMessage.builder().title("UnauthorizedBrokerSubscriptionException").message(unauthorizedBrokerSubscriptionException.getMessage()).path(path).build());
     }
 
+    @ExceptionHandler(InvalidProfileException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody
+    public Mono<GlobalErrorMessage> handleInvalidProfileException(InvalidProfileException invalidProfileException, ServerHttpRequest request) {
+        log.error("InvalidProfileException: {}", invalidProfileException.getMessage());
+        String path = String.valueOf(request.getPath());
+        return Mono.just(GlobalErrorMessage.builder().title("InvalidProfileException").message(invalidProfileException.getMessage()).path(path).build());
+    }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody
+    public Mono<GlobalErrorMessage> handleInvalidTokenException(InvalidTokenException invalidTokenException, ServerHttpRequest request) {
+        log.error("InvalidTokenException: {}", invalidTokenException.getMessage());
+        String path = String.valueOf(request.getPath());
+        return Mono.just(GlobalErrorMessage.builder().title("InvalidTokenException").message(invalidTokenException.getMessage()).path(path).build());
+    }
+
 }

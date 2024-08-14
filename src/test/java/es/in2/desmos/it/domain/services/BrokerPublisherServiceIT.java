@@ -11,7 +11,6 @@ import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
 import org.json.JSONException;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -36,9 +35,6 @@ class BrokerPublisherServiceIT {
 
     @LocalServerPort
     private int localServerPort;
-
-    /*@Value("${broker.externalDomain}")
-    private String contextBrokerInternalDomain;*/
 
     private static List<BrokerEntityWithIdTypeLastUpdateAndVersion> initialEntities;
 

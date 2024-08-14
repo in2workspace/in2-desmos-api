@@ -3,6 +3,7 @@ package es.in2.desmos.infrastructure.security;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import es.in2.desmos.domain.exceptions.InvalidProfileException;
 import es.in2.desmos.domain.models.AccessNodeOrganization;
 import es.in2.desmos.domain.models.AccessNodeYamlData;
 import es.in2.desmos.infrastructure.configs.ApiConfig;
@@ -126,11 +127,11 @@ public class SecurityConfig {
 
     private List<String> getCorsUrls(){
 
-        log.debug("ProcessID: {} - Retrieving YAML data from the external source repository...", "processId");
+        log.debug("Retrieving YAML data from the external source repository...");
         // Get the External URL from configuration
         String repoPath = accessNodeProperties.prefixDirectory() + getExternalYamlProfile() + YAML_FILE_SUFFIX;
 
-        log.debug("ProcessID: {} - External URL: {}", "processId", repoPath);
+        log.debug("External URL: {}", repoPath);
         // Retrieve YAML data from the External URL
 
         apiConfig.webClient().get()
@@ -145,7 +146,7 @@ public class SecurityConfig {
                         sink.error(new RuntimeException(e));
                         return;
                     }
-                    log.debug("ProcessID: {} - AccessNodeYamlData: {}", "processId", data);
+                    log.debug("AccessNodeYamlData: {}", data);
                     accessNodeMemoryStore.setOrganizations(data);
                 }).block();
 
@@ -154,7 +155,7 @@ public class SecurityConfig {
         AccessNodeYamlData yamlData = accessNodeMemoryStore.getOrganizations();
         if (yamlData == null || yamlData.getOrganizations() == null) {
             log.warn("No organizations data available in AccessNodeMemoryStore.");
-            return null;
+            return urls;
         }
         for (AccessNodeOrganization org : yamlData.getOrganizations()) {
             urls.add(org.getUrl());
@@ -167,14 +168,14 @@ public class SecurityConfig {
         String profile = apiConfig.getCurrentEnvironment();
 
         if (profile == null) {
-            throw new RuntimeException("Environment variable SPRING_PROFILES_ACTIVE is not set");
+            throw new InvalidProfileException("Environment variable SPRING_PROFILES_ACTIVE is not set");
         }
 
         return switch (profile) {
             case "default", "dev" -> "sbx";
             case "test" -> "dev";
             case "prod" -> "prd";
-            default -> throw new IllegalArgumentException("Invalid profile: " + profile);
+            default -> throw new InvalidProfileException("Invalid profile: " + profile);
         };
     }
 
