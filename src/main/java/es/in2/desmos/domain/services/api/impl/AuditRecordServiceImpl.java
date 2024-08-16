@@ -186,6 +186,8 @@ public class AuditRecordServiceImpl implements AuditRecordService {
 
                         log.debug("ProcessID: {} - Audit Record to save: {}", processId, auditRecord);
 
+                        log.info("HOLA ProcessID: {} - Audit record save: {}", processId, auditRecord);
+
                         return auditRecordRepository.save(auditRecord).then();
 
                     } catch (JsonProcessingException | NoSuchAlgorithmException e) {
