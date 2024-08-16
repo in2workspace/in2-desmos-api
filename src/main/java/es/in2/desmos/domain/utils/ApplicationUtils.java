@@ -29,9 +29,15 @@ public class ApplicationUtils {
         final ObjectMapper objectMapper = new ObjectMapper();
         MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
 
-        byte[] result = isValidJSON(inputData, objectMapper) ?
-                messageDigest.digest(sortAttributesAlphabetically(inputData, objectMapper).getBytes(StandardCharsets.UTF_8)) :
-                messageDigest.digest(inputData.getBytes(StandardCharsets.UTF_8));
+        // HOLA
+        log.info("HOLA ProcessID: - SHA input data: {}", inputData);
+
+        byte[] result;
+        if (isValidJSON(inputData, objectMapper)) {
+            String sorted = sortAttributesAlphabetically(inputData, objectMapper);
+            log.info("HOLA ProcessID: - Sorted data: {}", sorted);
+            result = messageDigest.digest(sorted.getBytes(StandardCharsets.UTF_8));
+        } else result = messageDigest.digest(inputData.getBytes(StandardCharsets.UTF_8));
 
         return HexFormat.of().formatHex(result);
     }
