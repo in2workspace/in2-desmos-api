@@ -111,6 +111,8 @@ public class JwtTokenProvider {
     public Mono<SignedJWT> validateSignedJwt(String jwtString, String externalNodeUrl, AccessNodeMemoryStore accessNodeMemoryStore) {
 
         try {
+
+            log.info("HOLA ProcessID: {} - JWT Validant external node: {}", externalNodeUrl);
             // Retrieve the public key from AccessNodeMemoryStore
             String publicKeyHex = getPublicKeyFromAccessNodeMemory(externalNodeUrl, accessNodeMemoryStore);
             if (publicKeyHex == null) {
