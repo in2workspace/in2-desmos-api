@@ -28,7 +28,7 @@ public class EntitySyncWebClientImpl implements EntitySyncWebClient {
 
         String token;
         try {
-            token = jwtTokenProvider.generateToken("/api/v1/sync/p2p/discovery");
+            token = jwtTokenProvider.generateToken("/api/v1/sync/p2p/entities");
         } catch (JOSEException e) {
             throw new InvalidTokenException(e.getMessage());
         }
