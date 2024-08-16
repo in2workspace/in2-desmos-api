@@ -45,7 +45,6 @@ public class DataTransferJobImpl implements DataTransferJob {
     public Mono<Void> syncData(String processId, Mono<DataNegotiationResult> dataNegotiationResult) {
         return dataNegotiationResult.flatMap(result -> {
             log.info("ProcessID: {} - Starting Data Transfer Job", processId);
-            log.info("HOLA ProcessID: {} - Starting Data Transfer Job result: {}", processId, result);
 
             log.debug("ProcessID: {} - Issuer: {}", processId, result.issuer());
             log.debug("ProcessID: {} - New Entities to Sync: {}", processId, result.newEntitiesToSync());
@@ -60,7 +59,7 @@ public class DataTransferJobImpl implements DataTransferJob {
                 );
 
 
-                log.info("HOLA ProcessID: {} - Make Request issuer: {}, entities: {}", processId, issuer, entitiesToRequest);
+                log.info("HOLA ProcessID: {} - Make Request issuer: {}", processId, result.issuer());
 
                 return entitiesToRequest.flatMap(entities -> entitySyncWebClient.makeRequest(processId, issuer, entitiesToRequest)
                         .flatMap(entitySyncResponse -> {

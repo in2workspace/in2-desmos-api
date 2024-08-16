@@ -53,8 +53,6 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                                 .flatMap(localMvEntities4DataNegotiation -> {
                                     log.debug("ProcessID: {} - Local MV Entities 4 Data Negotiation synchronizing data: {}", processId, localMvEntities4DataNegotiation);
 
-                                    log.info("HOLA ProcessID: {} - Local entities 4 data negotiation: {}", processId, localMvEntities4DataNegotiation);
-
                                     return getExternalMVEntities4DataNegotiationByIssuer(processId, localMvEntities4DataNegotiation, entityType)
                                             .flatMap(mvEntities4DataNegotiationByIssuer -> {
                                                 Mono<Map<Issuer, List<MVEntity4DataNegotiation>>> externalMVEntities4DataNegotiationByIssuerMono = Mono.just(mvEntities4DataNegotiationByIssuer);
@@ -151,14 +149,11 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                 .flatMap(mvBrokerEntities4DataNegotiation -> {
                     log.debug("ProcessID: {} - MV Broker Entities 4 Data Negotiation: {}", processId, mvBrokerEntities4DataNegotiation);
 
-                    log.info("HOLA ProcessID: {} - Les del broker: {}", processId, mvBrokerEntities4DataNegotiation);
-
                     Mono<List<String>> entities4DataNegotiationIdsMono = getEntities4DataNegotiationIds(Mono.just(mvBrokerEntities4DataNegotiation));
 
                     return getMvAuditServiceEntities4DataNegotiation(processId, entities4DataNegotiationIdsMono)
                             .map(mvAuditServiceEntities4DataNegotiation -> {
                                 log.debug("ProcessID: {} - MV Audit Service Entities 4 Data Negotiation: {}", processId, mvAuditServiceEntities4DataNegotiation);
-                                log.info("HOLA ProcessID: {} - Les del audit: {}", processId, mvAuditServiceEntities4DataNegotiation);
 
                                 Map<String, MVAuditServiceEntity4DataNegotiation> auditServiceEntityMap = mvAuditServiceEntities4DataNegotiation.stream()
                                         .collect(Collectors.toMap(MVAuditServiceEntity4DataNegotiation::id, Function.identity()));

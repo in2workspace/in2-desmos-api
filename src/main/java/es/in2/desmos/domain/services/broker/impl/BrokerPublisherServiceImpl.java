@@ -58,10 +58,7 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
     @Override
     public <T extends BrokerEntityWithIdAndType> Mono<List<T>> findAllIdTypeAndAttributesByType(String processId, String type, String firstAttribute, String secondAttribute, String thirdAttribute, String forthAttribute, Class<T[]> responseClassArray) {
         return brokerAdapterService.findAllIdTypeAndAttributesByType(processId, type, firstAttribute, secondAttribute, thirdAttribute, forthAttribute, responseClassArray)
-                .map(array -> {
-                    log.info("HOLA ProcessID: {} - Les del broker from array: {}", processId, array);
-                    return Arrays.stream(array).toList();
-                });
+                .map(array -> Arrays.stream(array).toList());
     }
 
     @Override
@@ -71,10 +68,9 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
 
     @Override
     public Mono<List<String>> findAllById(String processId, Mono<List<Id>> idsMono) {
-        log.info("HOLA ProcessID: {} - Empezando findeAllById", processId);
         return idsMono
                 .flatMapIterable(ids -> ids)
-                .flatMap(id -> brokerAdapterService.getEntityById(processId, id.id())
+                .flatMapSequential(id -> brokerAdapterService.getEntityById(processId, id.id())
                         .flatMap(entity -> {
                             log.info("HOLA ProcessID: {} - Get entity by id: {}", processId, id.id());
                             List<String> newList = new ArrayList<>();
@@ -89,7 +85,7 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
                                     return Mono.just(newList);
                                 });
                             });
-                        }))
+                        }), 10)
                 .collectList()
                 .flatMap(listsList -> {
                     List<String> resultList = new ArrayList<>();
