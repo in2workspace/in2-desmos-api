@@ -66,7 +66,7 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
     }
 
     /*@Override
-    public Mono<List<String>> findAllById(String processId, Mono<List<Id>> idsMono) {
+    HOLA public Mono<List<String>> findAllById(String processId, Mono<List<Id>> idsMono) {
         return idsMono
                 .flatMapIterable(ids -> ids)
                 .flatMapSequential(id -> brokerAdapterService.getEntityById(processId, id.id())
@@ -99,26 +99,27 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
     public Mono<List<String>> findAllById(String processId, Mono<List<Id>> idsMono) {
         List<Id> processedEntities = new ArrayList<>();
         return idsMono.flatMapMany(Flux::fromIterable)
-                .flatMapSequential(id -> brokerAdapterService.getEntityById(processId, id.id())
-                        .flatMap(entity -> {
-                            log.info("HOLA ProcessID: {} - Get entity by id: {}", processId, id.id());
-                            if (!processedEntities.contains(id)) {
-                                return getEntityRelationshipIds(Mono.just(entity))
-                                        .flatMapMany(Flux::fromIterable)
-                                        .flatMap(relatedId -> findAllById(processId, Mono.just(List.of(relatedId))))
-                                        .collectList()
-                                        .map(relatedEntities -> {
-                                            List<String> resultList = relatedEntities.stream()
-                                                    .flatMap(List::stream)
-                                                    .collect(Collectors.toList());
-                                            resultList.add(entity);
-                                            processedEntities.add(id);
-                                            return resultList;
-                                        });
-                            } else {
-                                return Mono.empty();
-                            }
-                        }), 4)  // Limita el paralelismo a 4
+                .concatMap(id -> {
+                    if (!processedEntities.contains(id)) {
+                        log.info("HOLA ProcessID: {} - Get entity by id: {}", processId, id.id());
+                        return brokerAdapterService.getEntityById(processId, id.id())
+                                .flatMap(entity ->
+                                        getEntityRelationshipIds(Mono.just(entity))
+                                                .flatMapMany(Flux::fromIterable)
+                                                .concatMap(relatedId -> findAllById(processId, Mono.just(List.of(relatedId))))
+                                                .collectList()
+                                                .map(relatedEntities -> {
+                                                    List<String> resultList = relatedEntities.stream()
+                                                            .flatMap(List::stream)
+                                                            .collect(Collectors.toList());
+                                                    resultList.add(entity);
+                                                    processedEntities.add(id);
+                                                    return resultList;
+                                                }));
+                    } else {
+                        return Flux.empty();
+                    }
+                })
                 .collectList()
                 .flatMap(listsList -> {
                     List<String> resultList = new ArrayList<>();
