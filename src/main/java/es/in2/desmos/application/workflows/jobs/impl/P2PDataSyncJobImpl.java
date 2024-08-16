@@ -148,11 +148,14 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                 .flatMap(mvBrokerEntities4DataNegotiation -> {
                     log.debug("ProcessID: {} - MV Broker Entities 4 Data Negotiation: {}", processId, mvBrokerEntities4DataNegotiation);
 
+                    log.info("HOLA ProcessID: {} - Les del broker: {}", processId, mvBrokerEntities4DataNegotiation);
+
                     Mono<List<String>> entities4DataNegotiationIdsMono = getEntities4DataNegotiationIds(Mono.just(mvBrokerEntities4DataNegotiation));
 
                     return getMvAuditServiceEntities4DataNegotiation(processId, entities4DataNegotiationIdsMono)
                             .map(mvAuditServiceEntities4DataNegotiation -> {
                                 log.debug("ProcessID: {} - MV Audit Service Entities 4 Data Negotiation: {}", processId, mvAuditServiceEntities4DataNegotiation);
+                                log.info("HOLA ProcessID: {} - Les del audit: {}", processId, mvAuditServiceEntities4DataNegotiation);
 
                                 Map<String, MVAuditServiceEntity4DataNegotiation> auditServiceEntityMap = mvAuditServiceEntities4DataNegotiation.stream()
                                         .collect(Collectors.toMap(MVAuditServiceEntity4DataNegotiation::id, Function.identity()));
