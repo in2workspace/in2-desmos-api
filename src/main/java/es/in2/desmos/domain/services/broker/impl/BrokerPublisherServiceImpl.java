@@ -98,23 +98,24 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
     @Override
     public Mono<List<String>> findAllById(String processId, Mono<List<Id>> idsMono, List<Id> processedEntities) {
         return idsMono.flatMapMany(Flux::fromIterable)
-                .concatMap(id -> {
+                .flatMap(id -> {
                     if (!processedEntities.contains(id)) {
                         log.info("HOLA ProcessID: {} - Get entity by id: {}", processId, id.id());
                         return brokerAdapterService.getEntityById(processId, id.id())
-                                .flatMap(entity ->
-                                        getEntityRelationshipIds(Mono.just(entity))
-                                                .flatMapMany(Flux::fromIterable)
-                                                .concatMap(relatedId -> findAllById(processId, Mono.just(List.of(relatedId)), processedEntities))
-                                                .collectList()
-                                                .map(relatedEntities -> {
-                                                    List<String> resultList = relatedEntities.stream()
-                                                            .flatMap(List::stream)
-                                                            .collect(Collectors.toList());
-                                                    resultList.add(entity);
-                                                    processedEntities.add(id);
-                                                    return resultList;
-                                                }));
+                                .flatMap(entity -> {
+                                    processedEntities.add(id);
+                                    return getEntityRelationshipIds(Mono.just(entity))
+                                            .flatMapMany(Flux::fromIterable)
+                                            .flatMap(relatedId -> findAllById(processId, Mono.just(List.of(relatedId)), processedEntities))
+                                            .collectList()
+                                            .map(relatedEntities -> {
+                                                List<String> resultList = relatedEntities.stream()
+                                                        .flatMap(List::stream)
+                                                        .collect(Collectors.toList());
+                                                resultList.add(entity);
+                                                return resultList;
+                                            });
+                                });
                     } else {
                         return Flux.empty();
                     }
