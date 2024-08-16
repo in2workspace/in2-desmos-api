@@ -58,9 +58,6 @@ public class DataTransferJobImpl implements DataTransferJob {
                         Mono.just(result.existingEntitiesToSync())
                 );
 
-
-                log.info("HOLA ProcessID: {} - Make Request issuer: {}", processId, result.issuer());
-
                 return entitiesToRequest.flatMap(entities -> entitySyncWebClient.makeRequest(processId, issuer, entitiesToRequest)
                         .flatMap(entitySyncResponse -> {
                             Mono<String> entitySyncResponseMono = Mono.just(entitySyncResponse);
@@ -189,10 +186,7 @@ public class DataTransferJobImpl implements DataTransferJob {
                     Id id = entry.getKey();
                     HashAndHashLink hashAndHashLink = entry.getValue();
                     Mono<String> entityRcvdHash = Mono.just(hashAndHashLink.hash());
-                    Mono<String> entityMono = entitiesByIdMono.map(x -> {
-                        log.info("HOLA ProcessID: - The entity to hash: {}", x.get(id).value());
-                        return x.get(id).value();
-                    });
+                    Mono<String> entityMono = entitiesByIdMono.map(x -> x.get(id).value());
                     return calculateHash(entityMono)
                             .flatMap(calculatedHash ->
                                     entityRcvdHash.flatMap(hashValue -> {

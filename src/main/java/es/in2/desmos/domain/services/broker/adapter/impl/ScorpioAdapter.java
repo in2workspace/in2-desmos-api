@@ -220,8 +220,6 @@ public class ScorpioAdapter implements BrokerAdapterService {
         log.info("ProcessID: {} - Upserting entities to Scorpio", processId);
         log.debug("ProcessID: {} - Upserting entities to Scorpio: {}", processId, requestBody);
 
-        log.info("HOLA ProcessID: {} - Upserting Scorpio: {}", processId, requestBody);
-
         String uri = brokerConfig.getEntityOperationsPath() + "/" + "upsert";
 
         var acceptContentType = getContentTypeAndAcceptMediaType(requestBody);

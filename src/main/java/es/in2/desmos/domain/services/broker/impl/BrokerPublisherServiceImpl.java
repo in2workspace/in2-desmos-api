@@ -65,42 +65,11 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
         return batchUpsertEntities(processId, retrievedBrokerEntities);
     }
 
-    /*@Override
-    HOLA public Mono<List<String>> findAllById(String processId, Mono<List<Id>> idsMono) {
-        return idsMono
-                .flatMapIterable(ids -> ids)
-                .flatMapSequential(id -> brokerAdapterService.getEntityById(processId, id.id())
-                        .flatMap(entity -> {
-                            log.info("HOLA ProcessID: {} - Get entity by id: {}", processId, id.id());
-                            List<String> newList = new ArrayList<>();
-                            newList.add(entity);
-                            Mono<String> entityMono = Mono.just(entity);
-                            Mono<List<Id>> entityRelationshipIdsMono = getEntityRelationshipIds(entityMono);
-                            return entityRelationshipIdsMono.flatMap(entityRelationshipIds ->
-                            {
-                                Mono<List<Id>> entityRelationshipMonoMono = Mono.just(entityRelationshipIds);
-                                return findAllById(processId, entityRelationshipMonoMono).flatMap(relationshipsEntities -> {
-                                    newList.addAll(relationshipsEntities);
-                                    return Mono.just(newList);
-                                });
-                            });
-                        }), 10)
-                .collectList()
-                .flatMap(listsList -> {
-                    List<String> resultList = new ArrayList<>();
-                    for (List<String> list : listsList) {
-                        resultList.addAll(list);
-                    }
-                    return Mono.just(resultList);
-                });
-    }*/
-
     @Override
     public Mono<List<String>> findAllById(String processId, Mono<List<Id>> idsMono, List<Id> processedEntities) {
         return idsMono.flatMapMany(Flux::fromIterable)
                 .flatMap(id -> {
                     if (!processedEntities.contains(id)) {
-                        log.info("HOLA ProcessID: {} - Get entity by id: {}", processId, id.id());
                         return brokerAdapterService.getEntityById(processId, id.id())
                                 .flatMap(entity -> {
                                     processedEntities.add(id);

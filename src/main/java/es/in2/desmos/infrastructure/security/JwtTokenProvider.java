@@ -112,7 +112,6 @@ public class JwtTokenProvider {
 
         try {
 
-            log.info("HOLA ProcessID: {} - JWT Validant external node: {}", externalNodeUrl);
             // Retrieve the public key from AccessNodeMemoryStore
             String publicKeyHex = getPublicKeyFromAccessNodeMemory(externalNodeUrl, accessNodeMemoryStore);
             if (publicKeyHex == null) {
