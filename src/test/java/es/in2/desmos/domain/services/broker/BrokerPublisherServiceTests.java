@@ -147,7 +147,7 @@ class BrokerPublisherServiceTests {
         });
 
 
-        var resultMono = brokerPublisherService.findAllById(processId, idsMono);
+        var resultMono = brokerPublisherService.findAllById(processId, idsMono, new ArrayList<>());
 
         StepVerifier
                 .create(resultMono)
@@ -199,7 +199,7 @@ class BrokerPublisherServiceTests {
         });
 
 
-        var resultMono = brokerPublisherService.findAllById(processId, idsMono);
+        var resultMono = brokerPublisherService.findAllById(processId, idsMono, new ArrayList<>());
 
         StepVerifier
                 .create(resultMono)
@@ -229,7 +229,7 @@ class BrokerPublisherServiceTests {
         when(brokerAdapterService.getEntityById(eq(processId), any())).thenReturn(Mono.just(brokerJson));
 
 
-        var resultMono = brokerPublisherService.findAllById(processId, idsMono);
+        var resultMono = brokerPublisherService.findAllById(processId, idsMono, new ArrayList<>());
 
         StepVerifier.
                 create(resultMono)

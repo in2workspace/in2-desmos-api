@@ -96,8 +96,7 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
     }*/
 
     @Override
-    public Mono<List<String>> findAllById(String processId, Mono<List<Id>> idsMono) {
-        List<Id> processedEntities = new ArrayList<>();
+    public Mono<List<String>> findAllById(String processId, Mono<List<Id>> idsMono, List<Id> processedEntities) {
         return idsMono.flatMapMany(Flux::fromIterable)
                 .concatMap(id -> {
                     if (!processedEntities.contains(id)) {
@@ -106,7 +105,7 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
                                 .flatMap(entity ->
                                         getEntityRelationshipIds(Mono.just(entity))
                                                 .flatMapMany(Flux::fromIterable)
-                                                .concatMap(relatedId -> findAllById(processId, Mono.just(List.of(relatedId))))
+                                                .concatMap(relatedId -> findAllById(processId, Mono.just(List.of(relatedId)), processedEntities))
                                                 .collectList()
                                                 .map(relatedEntities -> {
                                                     List<String> resultList = relatedEntities.stream()

@@ -209,7 +209,7 @@ class P2PDataSyncJobTests {
         }
 
         String processId = "0";
-        when(brokerPublisherService.findAllById(eq(processId), any())).thenReturn(localEntitiesMono);
+        when(brokerPublisherService.findAllById(eq(processId), any(), any())).thenReturn(localEntitiesMono);
 
         Mono<List<String>> result = p2PDataSyncJob.getLocalEntitiesByIdInBase64(processId, idsMono);
 
@@ -220,7 +220,7 @@ class P2PDataSyncJobTests {
                 .expectNext(expectedLocalEntities)
                 .verifyComplete();
 
-        verify(brokerPublisherService, times(1)).findAllById(eq(processId), any());
+        verify(brokerPublisherService, times(1)).findAllById(eq(processId), any(), any());
         verifyNoMoreInteractions(brokerPublisherService);
     }
 }

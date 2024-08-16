@@ -16,10 +16,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -129,7 +126,7 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
     @Override
     public Mono<List<String>> getLocalEntitiesByIdInBase64(String processId, Mono<List<Id>> ids) {
         return brokerPublisherService
-                .findAllById(processId, ids)
+                .findAllById(processId, ids, new ArrayList<>())
                 .doOnSuccess(allEntitiesAndSubEntities ->
                         log.debug("ProcessID: {} - Found all local entities with sub-entities in Scorpio. [entities={}]", processId, allEntitiesAndSubEntities))
                 .map(items -> {
