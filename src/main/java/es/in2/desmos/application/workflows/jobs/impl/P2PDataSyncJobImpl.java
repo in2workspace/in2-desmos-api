@@ -134,7 +134,10 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                 .findAllById(processId, ids)
                 .doOnSuccess(allEntitiesAndSubEntities ->
                         log.debug("ProcessID: {} - Found all local entities with sub-entities in Scorpio. [entities={}]", processId, allEntitiesAndSubEntities))
-                .map(Base64Converter::convertStringListToBase64List)
+                .map(items -> {
+                    log.info("HOLA ProcessID: {} - Comença conversió en Base64:", processId);
+                    return Base64Converter.convertStringListToBase64List(items);
+                })
                 .doOnSuccess(base64Entities ->
                         log.debug("ProcessID: {} - Convert all local entities with sub-entities in Scorpio to Base64. [entities={}]", processId, base64Entities));
     }

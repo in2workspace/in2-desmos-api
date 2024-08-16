@@ -71,10 +71,12 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
 
     @Override
     public Mono<List<String>> findAllById(String processId, Mono<List<Id>> idsMono) {
+        log.info("HOLA ProcessID: {} - Empezando findeAllById", processId);
         return idsMono
                 .flatMapIterable(ids -> ids)
                 .flatMap(id -> brokerAdapterService.getEntityById(processId, id.id())
                         .flatMap(entity -> {
+                            log.info("HOLA ProcessID: {} - Get entity by id: {}", processId, id.id());
                             List<String> newList = new ArrayList<>();
                             newList.add(entity);
                             Mono<String> entityMono = Mono.just(entity);
