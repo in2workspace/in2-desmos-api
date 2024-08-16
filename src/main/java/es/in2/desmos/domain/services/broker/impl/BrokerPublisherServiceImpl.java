@@ -14,9 +14,8 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static es.in2.desmos.domain.utils.ApplicationUtils.extractEntityIdFromDataLocation;
 
@@ -66,7 +65,7 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
         return batchUpsertEntities(processId, retrievedBrokerEntities);
     }
 
-    @Override
+    /*@Override
     public Mono<List<String>> findAllById(String processId, Mono<List<Id>> idsMono) {
         return idsMono
                 .flatMapIterable(ids -> ids)
@@ -86,6 +85,40 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
                                 });
                             });
                         }), 10)
+                .collectList()
+                .flatMap(listsList -> {
+                    List<String> resultList = new ArrayList<>();
+                    for (List<String> list : listsList) {
+                        resultList.addAll(list);
+                    }
+                    return Mono.just(resultList);
+                });
+    }*/
+
+    @Override
+    public Mono<List<String>> findAllById(String processId, Mono<List<Id>> idsMono) {
+        List<Id> processedEntities = new ArrayList<>();
+        return idsMono.flatMapMany(Flux::fromIterable)
+                .flatMapSequential(id -> brokerAdapterService.getEntityById(processId, id.id())
+                        .flatMap(entity -> {
+                            log.info("HOLA ProcessID: {} - Get entity by id: {}", processId, id.id());
+                            if (!processedEntities.contains(id)) {
+                                return getEntityRelationshipIds(Mono.just(entity))
+                                        .flatMapMany(Flux::fromIterable)
+                                        .flatMap(relatedId -> findAllById(processId, Mono.just(List.of(relatedId))))
+                                        .collectList()
+                                        .map(relatedEntities -> {
+                                            List<String> resultList = relatedEntities.stream()
+                                                    .flatMap(List::stream)
+                                                    .collect(Collectors.toList());
+                                            resultList.add(entity);
+                                            processedEntities.add(id);
+                                            return resultList;
+                                        });
+                            } else {
+                                return Mono.empty();
+                            }
+                        }), 4)  // Limita el paralelismo a 4
                 .collectList()
                 .flatMap(listsList -> {
                     List<String> resultList = new ArrayList<>();
