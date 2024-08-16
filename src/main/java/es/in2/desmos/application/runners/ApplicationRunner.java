@@ -6,7 +6,6 @@ import es.in2.desmos.application.workflows.SubscribeWorkflow;
 import es.in2.desmos.domain.exceptions.RequestErrorException;
 import es.in2.desmos.domain.models.BlockchainSubscription;
 import es.in2.desmos.domain.models.BrokerSubscription;
-import es.in2.desmos.domain.services.api.BrokerSubscriptionValidateService;
 import es.in2.desmos.domain.services.blockchain.BlockchainListenerService;
 import es.in2.desmos.domain.services.broker.BrokerListenerService;
 import es.in2.desmos.domain.services.sync.services.ExternalYamlService;
@@ -48,7 +47,6 @@ public class ApplicationRunner {
     private final DataSyncWorkflow dataSyncWorkflow;
     private final PublishWorkflow publishWorkflow;
     private final SubscribeWorkflow subscribeWorkflow;
-    private final BrokerSubscriptionValidateService brokerSubscriptionValidateService;
     private final AtomicBoolean isQueueAuthorizedForEmit = new AtomicBoolean(false);
     private final String getCurrentEnvironment;
     private Disposable publishQueueDisposable;
@@ -91,7 +89,6 @@ public class ApplicationRunner {
         // Create the subscription and log the result
         log.debug("ProcessID: {} - Broker Subscription: {}", processId, brokerSubscription);
         return brokerListenerService.createSubscription(processId, brokerSubscription)
-                .then(brokerSubscriptionValidateService.setSubscriptionId(processId, brokerSubscription.id()))
                 .doOnSuccess(response -> log.info("ProcessID: {} - Broker Subscription created successfully.", processId))
                 .doOnError(e -> log.error("ProcessID: {} - Error creating Broker Subscription", processId, e));
     }

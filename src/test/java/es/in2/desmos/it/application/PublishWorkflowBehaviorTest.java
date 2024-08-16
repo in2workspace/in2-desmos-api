@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.BrokerNotification;
 import es.in2.desmos.domain.repositories.AuditRecordRepository;
-import es.in2.desmos.domain.services.api.BrokerSubscriptionValidateService;
 import es.in2.desmos.domain.services.api.QueueService;
 import es.in2.desmos.infrastructure.controllers.NotificationController;
 import es.in2.desmos.it.ContainerManager;
@@ -40,9 +39,6 @@ class PublishWorkflowBehaviorTest {
 
     @Autowired
     private QueueService pendingPublishEventsQueue;
-
-    @Autowired
-    private BrokerSubscriptionValidateService brokerSubscriptionValidateService;
 
     @DynamicPropertySource
     static void setDynamicProperties(DynamicPropertyRegistry registry) {
@@ -171,8 +167,6 @@ class PublishWorkflowBehaviorTest {
         try {
             log.info("1. Create a BrokerNotification and send a POST request to the application");
             BrokerNotification brokerNotification = objectMapper.readValue(brokerNotificationJSON, BrokerNotification.class);
-
-            brokerSubscriptionValidateService.setSubscriptionId("0", brokerNotification.subscriptionId()).block();
 
             notificationController.postBrokerNotification(brokerNotification).block();
             log.info("1.1. Get the event stream from the pendingPublishEventsQueue and subscribe to it.");

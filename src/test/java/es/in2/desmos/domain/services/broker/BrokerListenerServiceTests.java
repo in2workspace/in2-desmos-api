@@ -9,7 +9,6 @@ import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.AuditRecordStatus;
 import es.in2.desmos.domain.models.BrokerNotification;
 import es.in2.desmos.domain.services.api.AuditRecordService;
-import es.in2.desmos.domain.services.api.BrokerSubscriptionValidateService;
 import es.in2.desmos.domain.services.api.QueueService;
 import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import es.in2.desmos.domain.services.broker.adapter.factory.BrokerAdapterFactory;
@@ -67,9 +66,6 @@ class BrokerListenerServiceTests {
     @Mock
     private ObjectWriter objectWriter;
 
-    @Mock
-    BrokerSubscriptionValidateService brokerSubscriptionValidateService;
-
     @Test
     void processBrokerNotificationTest_firstNotification() {
         // Arrange
@@ -85,7 +81,6 @@ class BrokerListenerServiceTests {
                 .notifiedAt(Instant.now().toString())
                 .build();
         // Act
-        when(brokerSubscriptionValidateService.validateSubscription(processId, brokerNotification.subscriptionId())).thenReturn(Mono.empty());
         when(auditRecordService.findLatestAuditRecordForEntity(anyString(), any())).thenReturn(Mono.empty());
         when(auditRecordService.isAuditRecordUnlocked(eq(processId), anyString())).thenReturn(Mono.just(true));
         when(auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(anyString(), any(), any(), any())).thenReturn(Mono.empty());
@@ -110,7 +105,6 @@ class BrokerListenerServiceTests {
                 .notifiedAt(Instant.now().toString())
                 .build();
         // Act
-        when(brokerSubscriptionValidateService.validateSubscription(processId, brokerNotification.subscriptionId())).thenReturn(Mono.empty());
         when(auditRecordService.findLatestAuditRecordForEntity(anyString(), any())).thenReturn(Mono.just(auditRecord));
         when(auditRecordService.isAuditRecordUnlocked(eq(processId), anyString())).thenReturn(Mono.just(true));
         when(objectMapper.writer()).thenReturn(objectWriter);
@@ -153,7 +147,6 @@ class BrokerListenerServiceTests {
                 .notifiedAt(Instant.now().toString())
                 .build();
         // Act
-        when(brokerSubscriptionValidateService.validateSubscription(processId, brokerNotification.subscriptionId())).thenReturn(Mono.empty());
         when(auditRecordService.findLatestAuditRecordForEntity(anyString(), any())).thenReturn(Mono.just(auditRecord));
         when(objectMapper.writer()).thenReturn(objectWriter);
         when(objectWriter.writeValueAsString(any())).thenReturn("""
@@ -197,7 +190,6 @@ class BrokerListenerServiceTests {
                 .notifiedAt(Instant.now().toString())
                 .build();
 
-        when(brokerSubscriptionValidateService.validateSubscription(processId, brokerNotification.subscriptionId())).thenReturn(Mono.empty());
         when(auditRecordService.findLatestAuditRecordForEntity(anyString(), any())).thenReturn(Mono.just(auditRecord));
         when(auditRecordService.isAuditRecordUnlocked(eq(processId), anyString())).thenReturn(Mono.just(true));
         when(objectMapper.writer()).thenReturn(objectWriter);
