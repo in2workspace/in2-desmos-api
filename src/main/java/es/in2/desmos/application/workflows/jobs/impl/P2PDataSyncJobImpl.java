@@ -161,10 +161,10 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
 
                                             // FIXME
                                             // It's not necessary since every entity has its auditRecord.
-                                            if(auditServiceEntity != null){
+                                            if (auditServiceEntity != null) {
                                                 return new MVEntity4DataNegotiation(
                                                         brokerEntity.getId(),
-                                                        brokerEntity.getType(),
+                                                        brokerEntityType,
                                                         brokerEntity.getVersion(),
                                                         brokerEntity.getLastUpdate(),
                                                         brokerEntity.getLifecycleStatus(),

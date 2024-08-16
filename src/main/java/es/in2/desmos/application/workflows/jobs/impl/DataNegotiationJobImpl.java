@@ -138,7 +138,10 @@ public class DataNegotiationJobImpl implements DataNegotiationJob {
                             .filter(externalEntity ->
                                     localList
                                             .stream()
-                                            .filter(localEntity -> localEntity.id().equals(externalEntity.id()))
+                                            .filter(localEntity ->
+                                                    localEntity.id().equals(externalEntity.id()) &&
+                                                            localEntity.version() != null && !localEntity.version().isBlank() &&
+                                                            localEntity.lastUpdate() != null && !localEntity.lastUpdate().isBlank())
                                             .findFirst()
                                             .map(sameLocalEntity ->
                                                     {

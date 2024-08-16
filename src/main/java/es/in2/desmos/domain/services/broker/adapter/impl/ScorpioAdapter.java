@@ -204,7 +204,7 @@ public class ScorpioAdapter implements BrokerAdapterService {
     public <T extends BrokerEntityWithIdAndType> Mono<T[]> findAllIdTypeAndAttributesByType(String processId, String type, String firstAttribute, String secondAttribute, String thirdAttribute, String forthAttribute, Class<T[]> responseClass) {
         log.info("ProcessID: {} - Getting Entities With Version And Last Update", processId);
 
-        String uri = brokerConfig.getEntitiesPath() + "/" + String.format("?type=%s&attrs=%s,%s,%s,%s&options=keyValues", type, firstAttribute, secondAttribute, thirdAttribute, forthAttribute);
+        String uri = brokerConfig.getEntitiesPath() + "/" + String.format("?type=%s&options=keyValues",type);
 
         return webClient
                 .get()

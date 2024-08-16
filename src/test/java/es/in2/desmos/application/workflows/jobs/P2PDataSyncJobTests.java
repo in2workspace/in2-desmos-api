@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -140,8 +141,8 @@ class P2PDataSyncJobTests {
         internalEntities.addAll(MVEntity4DataNegotiationMother.listCategories());
 
         List<BrokerEntityWithIdTypeLastUpdateAndVersion> brokerProductOfferings = MVBrokerEntity4DataNegotiationMother.list3And4();
-        List<BrokerEntityWithIdTypeLastUpdateAndVersion> brokerCatalogs = MVBrokerEntity4DataNegotiationMother.listCategories();
-        List<BrokerEntityWithIdTypeLastUpdateAndVersion> brokerCategories = MVBrokerEntity4DataNegotiationMother.listCatalogs();
+        List<BrokerEntityWithIdTypeLastUpdateAndVersion> brokerCatalogs = MVBrokerEntity4DataNegotiationMother.listCatalogs();
+        List<BrokerEntityWithIdTypeLastUpdateAndVersion> brokerCategories = MVBrokerEntity4DataNegotiationMother.listCategories();
 
         List<AuditRecord> auditRecordProductOfferings = AuditRecordMother.list3And4();
         List<AuditRecord> auditRecordCategories = AuditRecordMother.listCategories();
@@ -169,13 +170,15 @@ class P2PDataSyncJobTests {
         when(auditRecordService.findLatestAuditRecordForEntity(processId, auditRecordCatalogs.get(1).getEntityId()))
                 .thenReturn(Mono.just(auditRecordCatalogs.get(1)));
 
-        Mono<List<MVEntity4DataNegotiation>> result = p2PDataSyncJob.dataDiscovery(
+        Mono<List<MVEntity4DataNegotiation>> resultMono = p2PDataSyncJob.dataDiscovery(
                 processId,
                 Mono.just("https://example.org"),
                 Mono.just(MVEntity4DataNegotiationMother.list1And2()));
 
-        StepVerifier.create(result)
-                .expectNext(internalEntities)
+        StepVerifier.create(resultMono)
+                .consumeNextWith(result -> {
+                    assertThat(result).containsExactlyInAnyOrderElementsOf(internalEntities);
+                })
                 .verifyComplete();
 
         verify(brokerPublisherService, times(1)).findAllIdTypeAndAttributesByType(processId, MVEntity4DataNegotiationMother.PRODUCT_OFFERING_TYPE_NAME, "lastUpdate", "version", "lifecycleStatus", "validFor", BrokerEntityWithIdTypeLastUpdateAndVersion[].class);
