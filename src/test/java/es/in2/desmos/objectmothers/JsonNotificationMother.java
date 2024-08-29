@@ -99,7 +99,7 @@ public final class JsonNotificationMother {
 
     public static String getArrayInput2Expected() {
         return """
-                [{"descripcion":{"color":"rojo","tamaño":"grande"},"id":1,"nombre":"Objeto 1","subelementos":[{"descripcion":{"color":"naranja","tamaño":"mediano"},"id":4,"nombre":"Objeto 4"},{"descripcion":{"color":"azul","tamaño":"pequeño"},"id":5,"nombre":"Objeto 5"}]},{"descripcion":{"color":"azul","tamaño":"pequeño"},"id":2,"nombre":"Objeto 2"}]""";
+                [{"descripcion":{"color":"azul","tamaño":"pequeño"},"id":2,"nombre":"Objeto 2"},{"descripcion":{"color":"rojo","tamaño":"grande"},"id":1,"nombre":"Objeto 1","subelementos":[{"descripcion":{"color":"azul","tamaño":"pequeño"},"id":5,"nombre":"Objeto 5"},{"descripcion":{"color":"naranja","tamaño":"mediano"},"id":4,"nombre":"Objeto 4"}]}]""";
     }
 
     public static String getPrimitiveInput() {
