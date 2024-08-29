@@ -20,6 +20,7 @@ import java.util.HexFormat;
 import java.util.stream.Stream;
 
 import static es.in2.desmos.domain.utils.ApplicationUtils.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -92,6 +93,36 @@ class ApplicationUtilsTests {
                 """;
         // Act & Assert
         assertDoesNotThrow(() -> calculateSHA256(data));
+    }
+
+    @Test
+    void itShouldCalculateCorrectSHA256() throws NoSuchAlgorithmException, JsonProcessingException {
+        // Arrange
+        String data = """
+                {
+                   "id": "notification:-5106976853901020699",
+                   "type": "Notification",
+                   "data": [
+                     {
+                       "id": "urn:ngsi-ld:ProductOffering:122355255",
+                       "type": "ProductOffering",
+                       "description": {
+                         "type": "Property",
+                         "value": "Example of a Product offering for cloud services suite"
+                       },
+                       "notifiedAt": "2024-04-10T11:33:43.807Z"
+                     }
+                   ],
+                   "subscriptionId": "urn:ngsi-ld:Subscription:122355255",
+                   "notifiedAt": "2023-03-14T16:38:15.123456Z"
+                 }
+                """;
+
+        String result = calculateSHA256(data);
+
+        String expectedSha256 = "08aec4a32245954733602f864acfed6a8fe733d387b9bcd4217cdc07ee6198b8";
+
+        assertThat(result).isEqualTo(expectedSha256);
     }
 
     @Test
