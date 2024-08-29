@@ -84,6 +84,7 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                                                 .filter(mvEntity4DataNegotiation -> Objects.equals(mvEntity4DataNegotiation.type(), entityType))
                                                 .toList();
 
+                                log.info("HOLAAA ProcessID: {} - DiscoverySync Response filtered. [issuer={}, response={}]", processId, externalAccessNode, filteredEntitiesByType);
                                 log.debug("ProcessID: {} - DiscoverySync Response filtered. [issuer={}, response={}]", processId, externalAccessNode, filteredEntitiesByType);
 
                                 return Map.entry(issuer, filteredEntitiesByType);
@@ -101,6 +102,7 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                         createLocalMvEntities4DataNegotiationByEntityType(processId, entityType)
                                 .flatMap(localMvEntities4DataNegotiation -> {
                                     log.debug("ProcessID: {} - Local MV Entities 4 Data Negotiation: {}", processId, localMvEntities4DataNegotiation);
+                                    log.info("HOLAAA ProcessID: {} - Local MV Entities 4 Data Negotiation: {}", processId, localMvEntities4DataNegotiation);
 
                                     return externalMvEntities4DataNegotiationMono
                                             .flatMap(externalMvEntities4DataNegotiation -> {
