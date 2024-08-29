@@ -126,6 +126,35 @@ class ApplicationUtilsTests {
     }
 
     @Test
+    void itShouldCalculateSHA256ForAJsonWithArray() throws NoSuchAlgorithmException, JsonProcessingException {
+        // Arrange
+        String jsonToCalculateSha256 = """
+                {
+                    "people": [
+                      {
+                        "name": "John",
+                        "age": 30
+                      },
+                      {
+                        "name": "Mary",
+                        "age": 25
+                      },
+                      {
+                        "name": "Peter",
+                        "age": 35
+                      }
+                    ]
+                  }
+                """;
+
+        String expectedSha256 = "4f62b08ecde7e75bdafd7d7b3ec8ac43ce8698be1ce8ecf6114ba642a6fe5298";
+
+        var result = calculateSHA256(jsonToCalculateSha256);
+
+        assertThat(result).isEqualTo(expectedSha256);
+    }
+
+    @Test
     void testCalculateHashLink_ValidHashes() throws NoSuchAlgorithmException, JsonProcessingException {
         // Arrange
         String previousHash = "5d41402abc4b2a76b9719d911017c592";

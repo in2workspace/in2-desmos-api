@@ -11,10 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.HexFormat;
-import java.util.Optional;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -119,15 +116,26 @@ public class ApplicationUtils {
     }
 
     private static String sortJsonArray(ObjectMapper objectMapper, JsonNode jsonNode) throws JsonProcessingException {
-        ArrayNode sortedArrayNode = objectMapper.createArrayNode();
-        for (JsonNode subNode : jsonNode) {
-            if (subNode.isObject()) {
-                sortedArrayNode.add(objectMapper.readTree(sortAttributesAlphabetically(subNode.toString(), objectMapper)));
-            } else {
-                sortedArrayNode.add(subNode);
+        if (jsonNode.isArray()) {
+            List<JsonNode> nodeList = new ArrayList<>();
+            for (JsonNode subNode : jsonNode) {
+                if (subNode.isObject()) {
+                    String jsonAttributesSortedAlphabetically = sortAttributesAlphabetically(subNode.toString(), objectMapper);
+                    JsonNode jsonNodeAttributesSortedAlphabetically = objectMapper.readTree(jsonAttributesSortedAlphabetically);
+                    nodeList.add(jsonNodeAttributesSortedAlphabetically);
+                } else {
+                    nodeList.add(subNode);
+                }
             }
-        }
-        return objectMapper.writeValueAsString(sortedArrayNode);
-    }
+            Collections.sort(nodeList, (a, b) -> a.toString().compareTo(b.toString()));
 
+            ArrayNode sortedArrayNode = objectMapper.createArrayNode();
+            for (JsonNode node : nodeList) {
+                sortedArrayNode.add(node);
+            }
+            return objectMapper.writeValueAsString(sortedArrayNode);
+        } else {
+            return objectMapper.writeValueAsString(jsonNode);
+        }
+    }
 }
