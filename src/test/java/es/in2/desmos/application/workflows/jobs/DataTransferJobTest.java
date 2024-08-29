@@ -4,15 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.application.workflows.jobs.impl.DataTransferJobImpl;
-import es.in2.desmos.domain.exceptions.InvalidIntegrityException;
 import es.in2.desmos.domain.exceptions.InvalidSyncResponseException;
 import es.in2.desmos.domain.models.DataNegotiationResult;
+import es.in2.desmos.domain.models.Entity;
 import es.in2.desmos.domain.models.Id;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
 import es.in2.desmos.domain.services.sync.EntitySyncWebClient;
-import es.in2.desmos.objectmothers.DataNegotiationResultMother;
-import es.in2.desmos.objectmothers.EntitySyncRequestMother;
-import es.in2.desmos.objectmothers.EntitySyncResponseMother;
+import es.in2.desmos.objectmothers.*;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,12 +21,10 @@ import reactor.test.StepVerifier;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -54,6 +50,9 @@ class DataTransferJobTest {
 
     @Captor
     private ArgumentCaptor<Mono<List<MVEntity4DataNegotiation>>> mvEntities4DataNegotiationCaptor;
+
+    @Captor
+    private ArgumentCaptor<Mono<Map<Id, Entity>>> entitiesByIdCaptor;
 
     private static int objectMapperReadTreeCounter = 0;
 
@@ -168,7 +167,7 @@ class DataTransferJobTest {
     }
 
     @Test
-    void itShouldReturnInvalidIntegrityExceptionWhenHashIsIncorrect() throws IOException, JSONException, NoSuchAlgorithmException {
+    void itShouldPassOnlyValidEntitiesWhenHashIsIncorrect() throws IOException, JSONException, NoSuchAlgorithmException {
         DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.badHash();
         Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
 
@@ -179,14 +178,28 @@ class DataTransferJobTest {
 
         when(dataVerificationJob.verifyData(eq(processId), any(), any(), any(), any(), any())).thenReturn(Mono.empty());
 
+        List<Id> expectedEntitiesById = List.of(
+                new Id(MVEntity4DataNegotiationMother.sample2().id()),
+                new Id(MVEntity4DataNegotiationMother.sample3().id()),
+                new Id(MVEntity4DataNegotiationMother.sample4().id())
+        );
+
         Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
 
-        StepVerifier.
-                create(result)
-                .expectErrorMatches(throwable -> throwable instanceof InvalidIntegrityException &&
-                        throwable.getMessage().equals("The hash received at the origin is different from the actual hash of the entity.")
-                )
-                .verify();
+        StepVerifier
+                .create(result)
+                .verifyComplete();
+
+        verify(dataVerificationJob, times(1)).verifyData(any(), any(), entitiesByIdCaptor.capture(), any(), any(), any());
+
+        Mono<Map<Id, Entity>> entitiesByIdCaptured = entitiesByIdCaptor.getValue();
+
+        StepVerifier.create(entitiesByIdCaptured)
+                .assertNext(entitiesById -> {
+                    List<Id> ids = entitiesById.keySet().stream().toList();
+                    assertThat(ids).containsExactlyInAnyOrderElementsOf(expectedEntitiesById);
+                })
+                .verifyComplete();
     }
 
     @Test

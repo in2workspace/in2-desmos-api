@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonParser;
 import es.in2.desmos.application.workflows.jobs.DataTransferJob;
 import es.in2.desmos.application.workflows.jobs.DataVerificationJob;
-import es.in2.desmos.domain.exceptions.InvalidIntegrityException;
 import es.in2.desmos.domain.exceptions.InvalidSyncResponseException;
 import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.services.sync.EntitySyncWebClient;
@@ -22,6 +21,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -84,7 +84,14 @@ public class DataTransferJobImpl implements DataTransferJob {
                                                     );
 
                                                     return validateIntegrity(entitiesByIdMono, entitiesHashAndHashlinkById)
-                                                            .then(dataVerificationJob.verifyData(processId, issuer, entitiesByIdMono, mvEntities4DataNegotiation, decodedEntitySyncResponseMono, existingEntitiesHashAndHashLinkById));
+                                                            .flatMap(validIds -> {
+                                                                Mono<List<Id>> validIdsMono = Mono.just(validIds);
+                                                                return filterEntitiesById(entitiesByIdMono, validIdsMono)
+                                                                        .flatMap(filteredEntitiesById -> {
+                                                                            Mono<Map<Id, Entity>> filteredEntitiesByIdMono = Mono.just(filteredEntitiesById);
+                                                                            return dataVerificationJob.verifyData(processId, issuer, filteredEntitiesByIdMono, mvEntities4DataNegotiation, decodedEntitySyncResponseMono, existingEntitiesHashAndHashLinkById);
+                                                                        });
+                                                            });
                                                 });
                                     });
                         }));
@@ -140,17 +147,17 @@ public class DataTransferJobImpl implements DataTransferJob {
         return entitiesMono.flatMap(entities -> {
             try {
                 JsonNode entitiesJsonNode = objectMapper.readTree(entities);
-                    return Mono.just(entitiesJsonNode)
-                            .flatMapIterable(entitiesJsonNodes -> entitiesJsonNodes)
-                            .flatMap(entityNode -> {
-                                if(entityNode.has("id")){
-                                    String currentEntityId = entityNode.get("id").asText();
-                                    return Mono.just(Map.entry(new Id(currentEntityId), new Entity(entityNode.toString())));
-                                } else {
-                                    return Mono.error(new InvalidSyncResponseException(INVALID_ENTITY_SYNC_RESPONSE));
-                                }
-                            })
-                            .collectMap(Map.Entry::getKey, Map.Entry::getValue);
+                return Mono.just(entitiesJsonNode)
+                        .flatMapIterable(entitiesJsonNodes -> entitiesJsonNodes)
+                        .flatMap(entityNode -> {
+                            if (entityNode.has("id")) {
+                                String currentEntityId = entityNode.get("id").asText();
+                                return Mono.just(Map.entry(new Id(currentEntityId), new Entity(entityNode.toString())));
+                            } else {
+                                return Mono.error(new InvalidSyncResponseException(INVALID_ENTITY_SYNC_RESPONSE));
+                            }
+                        })
+                        .collectMap(Map.Entry::getKey, Map.Entry::getValue);
             } catch (JsonProcessingException e) {
                 return Mono.error(e);
             }
@@ -179,7 +186,7 @@ public class DataTransferJobImpl implements DataTransferJob {
                 });
     }
 
-    private Mono<Void> validateIntegrity(Mono<Map<Id, Entity>> entitiesByIdMono, Mono<Map<Id, HashAndHashLink>> allEntitiesExistingValidationDataById) {
+    private Mono<List<Id>> validateIntegrity(Mono<Map<Id, Entity>> entitiesByIdMono, Mono<Map<Id, HashAndHashLink>> allEntitiesExistingValidationDataById) {
         return allEntitiesExistingValidationDataById
                 .flatMapIterable(Map::entrySet)
                 .flatMap(entry -> {
@@ -191,15 +198,14 @@ public class DataTransferJobImpl implements DataTransferJob {
                             .flatMap(calculatedHash ->
                                     entityRcvdHash.flatMap(hashValue -> {
                                         if (calculatedHash.equals(hashValue)) {
-                                            return Mono.empty();
+                                            return Mono.just(id);
                                         } else {
-                                            log.error("expected hash: {}\ncurrent hash: {}", hashValue, calculatedHash);
-                                            return Mono.error(new InvalidIntegrityException("The hash received at the origin is different from the actual hash of the entity."));
+                                            log.info("Expected hash: {}\nCurrent hash: {}", hashValue, calculatedHash);
+                                            return Mono.empty();
                                         }
                                     }));
                 })
-                .collectList()
-                .then();
+                .collectList();
     }
 
     private Mono<String> calculateHash(Mono<String> retrievedBrokerEntityMono) {
@@ -212,4 +218,14 @@ public class DataTransferJobImpl implements DataTransferJob {
         });
     }
 
+    private Mono<Map<Id, Entity>> filterEntitiesById(Mono<Map<Id, Entity>> entitiesByIdMono, Mono<List<Id>> validIdsMono) {
+        return validIdsMono.flatMap(validIds ->
+                entitiesByIdMono.map(entitiesById ->
+                        entitiesById.entrySet()
+                                .stream()
+                                .filter(entry -> validIds.contains(entry.getKey()))
+                                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+                )
+        );
+    }
 }
