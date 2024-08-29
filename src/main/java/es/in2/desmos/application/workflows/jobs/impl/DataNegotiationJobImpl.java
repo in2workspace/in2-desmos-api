@@ -70,6 +70,9 @@ public class DataNegotiationJobImpl implements DataNegotiationJob {
                                                 log.debug("ProcessID: {} - New entities to sync: {}", processId, newEntitiesToSync);
                                                 log.debug("ProcessID: {} - Existing entities to sync: {}", processId, existingEntitiesToSync);
 
+                                                log.info("HOLAAA ProcessID: {} - New entities to sync: {}", processId, newEntitiesToSync);
+                                                log.info("HOLAAA ProcessID: {} - Existing entities to sync: {}", processId, existingEntitiesToSync);
+
                                                 return externalIssuerMono.
                                                         flatMap(externalIssuer -> {
                                                             Mono<String> issuerMono = Mono.just(externalIssuer);
