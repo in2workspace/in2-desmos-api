@@ -52,7 +52,7 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                         createLocalMvEntities4DataNegotiationByEntityType(processId, entityType)
                                 .flatMap(localMvEntities4DataNegotiation -> {
                                     log.debug("ProcessID: {} - Local MV Entities 4 Data Negotiation synchronizing data: {}", processId, localMvEntities4DataNegotiation);
-                                    log.info("HOLAAA ProcessID: {} - Local MV Entities 4 Data Negotiation synchronizing data: {}", processId, localMvEntities4DataNegotiation);
+                                    log.info("HOLAAA ProcessID: {} - Local MV Entities 4 Data Negotiation synchronizing data: {}", entityType, localMvEntities4DataNegotiation);
                                     return getExternalMVEntities4DataNegotiationByIssuer(processId, localMvEntities4DataNegotiation, entityType)
                                             .flatMap(mvEntities4DataNegotiationByIssuer -> {
                                                 Mono<Map<Issuer, List<MVEntity4DataNegotiation>>> externalMVEntities4DataNegotiationByIssuerMono = Mono.just(mvEntities4DataNegotiationByIssuer);
