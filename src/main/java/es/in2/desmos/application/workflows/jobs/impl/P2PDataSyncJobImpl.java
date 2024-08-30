@@ -1,5 +1,6 @@
 package es.in2.desmos.application.workflows.jobs.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import es.in2.desmos.application.workflows.jobs.DataNegotiationJob;
 import es.in2.desmos.application.workflows.jobs.P2PDataSyncJob;
 import es.in2.desmos.domain.events.DataNegotiationEventPublisher;
@@ -7,6 +8,7 @@ import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
 import es.in2.desmos.domain.services.sync.DiscoverySyncWebClient;
+import es.in2.desmos.domain.utils.ApplicationUtils;
 import es.in2.desmos.domain.utils.Base64Converter;
 import es.in2.desmos.infrastructure.configs.ApiConfig;
 import es.in2.desmos.infrastructure.configs.ExternalAccessNodesConfig;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -148,37 +151,49 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                     Mono<List<String>> entities4DataNegotiationIdsMono = getEntities4DataNegotiationIds(Mono.just(mvBrokerEntities4DataNegotiation));
 
                     return getMvAuditServiceEntities4DataNegotiation(processId, entities4DataNegotiationIdsMono)
-                            .map(mvAuditServiceEntities4DataNegotiation -> {
+                            .flatMap(mvAuditServiceEntities4DataNegotiation -> {
                                 log.debug("ProcessID: {} - MV Audit Service Entities 4 Data Negotiation: {}", processId, mvAuditServiceEntities4DataNegotiation);
 
                                 Map<String, MVAuditServiceEntity4DataNegotiation> auditServiceEntityMap = mvAuditServiceEntities4DataNegotiation.stream()
                                         .collect(Collectors.toMap(MVAuditServiceEntity4DataNegotiation::id, Function.identity()));
 
-                                return mvBrokerEntities4DataNegotiation.stream()
-                                        .map(brokerEntity -> {
+                                return Flux.fromIterable(mvBrokerEntities4DataNegotiation)
+                                        .flatMap(brokerEntity -> {
                                             MVAuditServiceEntity4DataNegotiation auditServiceEntity = auditServiceEntityMap.get(brokerEntity.getId());
 
-                                            // FIXME
-                                            // It's not necessary since every entity has its auditRecord.
                                             if (auditServiceEntity != null) {
-                                                return new MVEntity4DataNegotiation(
-                                                        brokerEntity.getId(),
-                                                        brokerEntityType,
-                                                        brokerEntity.getVersion(),
-                                                        brokerEntity.getLastUpdate(),
-                                                        brokerEntity.getLifecycleStatus(),
-                                                        brokerEntity.getValidFor().startDateTime(),
-                                                        auditServiceEntity.hash(),
-                                                        auditServiceEntity.hashlink());
+                                                return getEntityHash(processId, Mono.just(brokerEntity.getId()))
+                                                        .map(hash -> new MVEntity4DataNegotiation(
+                                                                brokerEntity.getId(),
+                                                                brokerEntityType,
+                                                                brokerEntity.getVersion(),
+                                                                brokerEntity.getLastUpdate(),
+                                                                brokerEntity.getLifecycleStatus(),
+                                                                brokerEntity.getValidFor().startDateTime(),
+                                                                hash,
+                                                                auditServiceEntity.hashlink()
+                                                        ));
                                             } else {
-                                                return null;
+                                                return Mono.empty();
                                             }
-
                                         })
-                                        .filter(Objects::nonNull)
-                                        .toList();
+                                        .collectList();
                             });
                 });
+    }
+
+
+    private Mono<String> getEntityHash(String processId, Mono<String> entityIdMono) {
+        return entityIdMono.flatMap(entityId ->
+                brokerPublisherService.getEntityById(processId, entityId)
+                        .flatMap(entity -> {
+                            try {
+                                String hash = ApplicationUtils.calculateSHA256(entity);
+                                return Mono.just(hash);
+                            } catch (NoSuchAlgorithmException | JsonProcessingException e) {
+                                return Mono.error(e);
+                            }
+                        }));
     }
 
     private Mono<List<MVAuditServiceEntity4DataNegotiation>> getMvAuditServiceEntities4DataNegotiation(String processId, Mono<List<String>> entities4DataNegotiationIdsMono) {

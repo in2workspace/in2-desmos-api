@@ -99,6 +99,11 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
                 });
     }
 
+    @Override
+    public Mono<String> getEntityById(String processId, String entityId) {
+        return brokerAdapterService.getEntityById(processId, entityId);
+    }
+
     private Mono<List<Id>> getEntityRelationshipIds(Mono<String> entityMono) {
         return entityMono.flatMap(entity -> {
             try {
@@ -170,10 +175,6 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
 
     private Mono<Void> postEntity(String processId, String requestBody) {
         return brokerAdapterService.postEntity(processId, requestBody);
-    }
-
-    private Mono<String> getEntityById(String processId, String entityId) {
-        return brokerAdapterService.getEntityById(processId, entityId);
     }
 
     private Mono<Void> updateEntity(String processId, String requestBody) {

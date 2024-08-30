@@ -16,4 +16,6 @@ public interface BrokerPublisherService {
     Mono<Void> batchUpsertEntitiesToContextBroker(String processId, String retrievedBrokerEntities);
 
     Mono<List<String>> findAllById(String processId, Mono<List<Id>> ids, List<Id> processedEntities);
+
+    Mono<String> getEntityById(String processId, String entityId);
 }
