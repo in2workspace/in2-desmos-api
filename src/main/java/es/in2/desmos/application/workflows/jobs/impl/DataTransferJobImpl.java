@@ -58,6 +58,8 @@ public class DataTransferJobImpl implements DataTransferJob {
                         Mono.just(result.existingEntitiesToSync())
                 );
 
+
+                log.info("AAA ProcessID: {} - Entities To Request", entitiesToRequest);
                 return entitiesToRequest.flatMap(entities -> entitySyncWebClient.makeRequest(processId, issuer, entitiesToRequest)
                         .flatMap(entitySyncResponse -> {
                             Mono<String> entitySyncResponseMono = Mono.just(entitySyncResponse);

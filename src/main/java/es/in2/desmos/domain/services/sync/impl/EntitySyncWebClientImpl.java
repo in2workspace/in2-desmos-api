@@ -23,7 +23,7 @@ public class EntitySyncWebClientImpl implements EntitySyncWebClient {
     private final ApiConfig apiConfig;
 
     public Mono<String> makeRequest(String processId, Mono<String> issuerMono, Mono<Id[]> entitySyncRequest) {
-        log.debug("ProcessID: {} - Making a Entity Sync Web Client request", processId);
+        log.info("ProcessID: {} - Making a Entity Sync Web Client request", processId);
 
 
         String token;
