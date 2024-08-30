@@ -17,12 +17,13 @@ public record MVEntity4DataNegotiation(
         @JsonProperty("hashlink") @NotBlank String hashlink) {
 
     @JsonIgnore
-    public Float getFloatVersion(){
-        return Float.parseFloat(version.substring(1));
+    public Float getFloatVersion() {
+        String versionValue = version.startsWith("v") ? version.substring(1) : version;
+        return Float.parseFloat(versionValue);
     }
 
     @JsonIgnore
-    public Instant getInstantLastUpdate(){
+    public Instant getInstantLastUpdate() {
         return Instant.parse(lastUpdate);
     }
 }
