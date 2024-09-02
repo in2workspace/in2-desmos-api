@@ -105,6 +105,14 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
     public Mono<List<MVEntity4DataNegotiation>> dataDiscovery(String processId, Mono<String> issuer, Mono<List<MVEntity4DataNegotiation>> externalMvEntities4DataNegotiationMono) {
         log.info("ProcessID: {} - Starting P2P Data Synchronization Discovery Workflow", processId);
 
+        Id[] ids = new Id[]{new Id("urn:ngsi-ld:product-offering:6cb06cea-ad6c-42d1-a14e-a1b9e2414659")};
+        // Ejecutar makeRequest en segundo plano y no bloquear el flujo principal
+        AAAEntitySyncWebClient.makeRequest(processId, issuer, Mono.just(ids))
+                .subscribeOn(Schedulers.boundedElastic())
+                .doOnNext(result -> log.info("AAA ProcessID: {} - Entities received successfully: {}", processId, result))
+                .subscribeOn(Schedulers.boundedElastic())
+                .subscribe(); // No espera a que complete
+
         return Flux.fromIterable(Arrays.asList(BROKER_ENTITY_TYPES))
                 .concatMap(entityType ->
                         createLocalMvEntities4DataNegotiationByEntityType(processId, entityType)
@@ -124,13 +132,13 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                                                 /*var dataNegotiationEvent = new DataNegotiationEvent(processId, issuer, Mono.just(externalMvEntities4DataNegotiationOfType), localMvEntities4DataNegotiationMono);
                                                 dataNegotiationEventPublisher.publishEvent(dataNegotiationEvent);*/
 
-                                                Id[] ids = externalMvEntities4DataNegotiation.stream().map(x -> new Id(x.id())).toArray(Id[]::new);
+                                                /*Id[] ids = externalMvEntities4DataNegotiation.stream().map(x -> new Id(x.id())).toArray(Id[]::new);
                                                 // Ejecutar makeRequest en segundo plano y no bloquear el flujo principal
                                                 AAAEntitySyncWebClient.makeRequest(processId, issuer, Mono.just(ids))
                                                         .subscribeOn(Schedulers.boundedElastic())
                                                         .doOnNext(result -> log.info("AAA ProcessID: {} - Entities received successfully: {}", processId, result))
                                                         .subscribeOn(Schedulers.boundedElastic())
-                                                        .subscribe(); // No espera a que complete
+                                                        .subscribe(); // No espera a que complete*/
 
                                                 System.out.println("AAA Funcionaaa");
 
