@@ -7,6 +7,7 @@ import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.services.api.impl.AuditRecordServiceImpl;
 import es.in2.desmos.domain.services.broker.impl.BrokerPublisherServiceImpl;
 import es.in2.desmos.domain.services.sync.DiscoverySyncWebClient;
+import es.in2.desmos.domain.services.sync.EntitySyncWebClient;
 import es.in2.desmos.infrastructure.configs.ApiConfig;
 import es.in2.desmos.infrastructure.configs.ExternalAccessNodesConfig;
 import es.in2.desmos.objectmothers.*;
@@ -54,6 +55,9 @@ class P2PDataSyncJobTests {
 
     @Mock
     private DataNegotiationJob dataNegotiationJob;
+
+    @Mock
+    private EntitySyncWebClient AAAEntitySyncWebClient;
 
     @Test
     void itShouldUpsertEntitiesFromOtherTwoAccessNodes() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
@@ -193,6 +197,9 @@ class P2PDataSyncJobTests {
                 .thenReturn(Mono.just(""));
         when(brokerPublisherService.getEntityById(processId, auditRecordCatalogs.get(1).getEntityId()))
                 .thenReturn(Mono.just(""));
+
+        when(AAAEntitySyncWebClient.makeRequest(any(), any(), any()))
+                .thenReturn(Mono.just("Make Request HolAAA"));
 
         Mono<List<MVEntity4DataNegotiation>> resultMono = p2PDataSyncJob.dataDiscovery(
                 processId,

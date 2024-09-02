@@ -8,6 +8,7 @@ import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
 import es.in2.desmos.domain.services.sync.DiscoverySyncWebClient;
+import es.in2.desmos.domain.services.sync.EntitySyncWebClient;
 import es.in2.desmos.domain.utils.ApplicationUtils;
 import es.in2.desmos.domain.utils.Base64Converter;
 import es.in2.desmos.infrastructure.configs.ApiConfig;
@@ -17,8 +18,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -40,6 +43,8 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
     private final DataNegotiationJob dataNegotiationJob;
 
     private final DiscoverySyncWebClient discoverySyncWebClient;
+
+    private final EntitySyncWebClient AAAEntitySyncWebClient;
 
     private static final String[] BROKER_ENTITY_TYPES = {"product-offering", "category", "catalog"};
 
@@ -119,13 +124,25 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                                                 var dataNegotiationEvent = new DataNegotiationEvent(processId, issuer, Mono.just(externalMvEntities4DataNegotiationOfType), localMvEntities4DataNegotiationMono);
                                                 dataNegotiationEventPublisher.publishEvent(dataNegotiationEvent);
 
+                                                Id[] ids = externalMvEntities4DataNegotiation.stream().map(x -> new Id(x.id())).toArray(Id[]::new);
+                                                // Ejecutar makeRequest en segundo plano y no bloquear el flujo principal
+                                                AAAEntitySyncWebClient.makeRequest(processId, issuer, Mono.just(ids))
+                                                        .subscribeOn(Schedulers.boundedElastic())
+                                                        .doOnNext(result -> log.info("AAA ProcessID: {} - Entities received successfully: {}", processId, result))
+                                                        .subscribeOn(Schedulers.boundedElastic())
+                                                        .subscribe(); // No espera a que complete
+
+                                                System.out.println("AAA Funcionaaa");
+
+                                                // Devuelve el resultado esperado del flujo
                                                 return Mono.just(localMvEntities4DataNegotiation);
                                             });
                                 })
                                 .doOnSuccess(success -> log.info("ProcessID: {} - P2P Data Synchronization Discovery Workflow successfully.", processId))
                                 .doOnError(error -> log.error("ProcessID: {} - Error occurred while processing the P2P Data Synchronization Discovery Workflow: {}", processId, error.getMessage())))
                 .flatMap(Flux::fromIterable)
-                .collectList();
+                .collectList()
+                .doOnTerminate(() -> log.info("ProcessID: {} - AAA final del tot"));
     }
 
     @Override
