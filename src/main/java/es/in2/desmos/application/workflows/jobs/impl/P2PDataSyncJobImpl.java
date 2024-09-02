@@ -121,8 +121,8 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
 
                                                 var localMvEntities4DataNegotiationMono = Mono.just(localMvEntities4DataNegotiation);
 
-                                                var dataNegotiationEvent = new DataNegotiationEvent(processId, issuer, Mono.just(externalMvEntities4DataNegotiationOfType), localMvEntities4DataNegotiationMono);
-                                                dataNegotiationEventPublisher.publishEvent(dataNegotiationEvent);
+                                                /*var dataNegotiationEvent = new DataNegotiationEvent(processId, issuer, Mono.just(externalMvEntities4DataNegotiationOfType), localMvEntities4DataNegotiationMono);
+                                                dataNegotiationEventPublisher.publishEvent(dataNegotiationEvent);*/
 
                                                 Id[] ids = externalMvEntities4DataNegotiation.stream().map(x -> new Id(x.id())).toArray(Id[]::new);
                                                 // Ejecutar makeRequest en segundo plano y no bloquear el flujo principal
