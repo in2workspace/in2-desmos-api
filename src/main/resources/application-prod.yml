@@ -18,7 +18,7 @@ logging:
   pattern:
     level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
   level:
-    es.in2.desmos: INFO
+    es.in2.desmos: DEBUG
 
 # Spring Management Configuration - Actuator
 management:
