@@ -1,6 +1,5 @@
 package es.in2.desmos.application.workflows.jobs.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.application.workflows.jobs.DataNegotiationJob;
 import es.in2.desmos.application.workflows.jobs.DataTransferJob;
 import es.in2.desmos.domain.models.DataNegotiationEvent;
@@ -27,7 +26,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DataNegotiationJobImpl implements DataNegotiationJob {
     private final DataTransferJob dataTransferJob;
-    private final ObjectMapper objectMapper;
 
     @Override
     public Mono<Void> negotiateDataSyncWithMultipleIssuers(String processId, Mono<Map<Issuer, List<MVEntity4DataNegotiation>>> externalMVEntities4DataNegotiationByIssuerMono, Mono<List<MVEntity4DataNegotiation>> localMVEntities4DataNegotiationMono) {
@@ -70,9 +68,6 @@ public class DataNegotiationJobImpl implements DataNegotiationJob {
                                                 log.debug("ProcessID: {} - New entities to sync: {}", processId, newEntitiesToSync);
                                                 log.debug("ProcessID: {} - Existing entities to sync: {}", processId, existingEntitiesToSync);
 
-                                                log.info("HOLAAA ProcessID: {} - New entities to sync: {}", processId, newEntitiesToSync);
-                                                log.info("HOLAAA ProcessID: {} - Existing entities to sync: {}", processId, existingEntitiesToSync);
-
                                                 return externalIssuerMono.
                                                         flatMap(externalIssuer -> {
                                                             Mono<String> issuerMono = Mono.just(externalIssuer);
@@ -88,8 +83,6 @@ public class DataNegotiationJobImpl implements DataNegotiationJob {
             Mono<List<MVEntity4DataNegotiation>> localEntityIds) {
         return externalEntityIds.zipWith(localEntityIds)
                 .map(tuple -> {
-                    log.info("HOLAAA - Local Entities: {}", tuple.getT2());
-                    log.info("HOLAAA - External Entities: {}", tuple.getT1());
                     List<MVEntity4DataNegotiation> originalList = tuple.getT1();
                     Set<String> idsToCheck = tuple.getT2().stream()
                             .map(MVEntity4DataNegotiation::id)

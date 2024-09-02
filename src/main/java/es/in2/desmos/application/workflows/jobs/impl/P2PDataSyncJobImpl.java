@@ -8,7 +8,6 @@ import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
 import es.in2.desmos.domain.services.sync.DiscoverySyncWebClient;
-import es.in2.desmos.domain.services.sync.EntitySyncWebClient;
 import es.in2.desmos.domain.utils.ApplicationUtils;
 import es.in2.desmos.domain.utils.Base64Converter;
 import es.in2.desmos.infrastructure.configs.ApiConfig;
@@ -18,10 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 import java.security.NoSuchAlgorithmException;
-import java.time.Duration;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -44,8 +41,6 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
 
     private final DiscoverySyncWebClient discoverySyncWebClient;
 
-    private final EntitySyncWebClient AAAEntitySyncWebClient;
-
     private static final String[] BROKER_ENTITY_TYPES = {"product-offering", "category", "catalog"};
 
     @Override
@@ -57,7 +52,6 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                         createLocalMvEntities4DataNegotiationByEntityType(processId, entityType)
                                 .flatMap(localMvEntities4DataNegotiation -> {
                                     log.debug("ProcessID: {} - Local MV Entities 4 Data Negotiation synchronizing data: {}", processId, localMvEntities4DataNegotiation);
-                                    log.info("HOLAAA ProcessID: {} - Local MV Entities 4 Data Negotiation synchronizing data: {}", entityType, localMvEntities4DataNegotiation);
                                     return getExternalMVEntities4DataNegotiationByIssuer(processId, localMvEntities4DataNegotiation, entityType)
                                             .flatMap(mvEntities4DataNegotiationByIssuer -> {
                                                 Mono<Map<Issuer, List<MVEntity4DataNegotiation>>> externalMVEntities4DataNegotiationByIssuerMono = Mono.just(mvEntities4DataNegotiationByIssuer);
@@ -92,7 +86,6 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                                                 .filter(mvEntity4DataNegotiation -> Objects.equals(mvEntity4DataNegotiation.type(), entityType))
                                                 .toList();
 
-                                log.info("HOLAAA ProcessID: {} - DiscoverySync Response filtered. [issuer={}, response={}]", entityType, externalAccessNode, filteredEntitiesByType);
                                 log.debug("ProcessID: {} - DiscoverySync Response filtered. [issuer={}, response={}]", processId, externalAccessNode, filteredEntitiesByType);
 
                                 return Map.entry(issuer, filteredEntitiesByType);
@@ -105,20 +98,11 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
     public Mono<List<MVEntity4DataNegotiation>> dataDiscovery(String processId, Mono<String> issuer, Mono<List<MVEntity4DataNegotiation>> externalMvEntities4DataNegotiationMono) {
         log.info("ProcessID: {} - Starting P2P Data Synchronization Discovery Workflow", processId);
 
-        /*Id[] ids = new Id[]{new Id("urn:ngsi-ld:product-offering:6cb06cea-ad6c-42d1-a14e-a1b9e2414659")};
-        // Ejecutar makeRequest en segundo plano y no bloquear el flujo principal
-        AAAEntitySyncWebClient.makeRequest(processId, issuer, Mono.just(ids))
-                .subscribeOn(Schedulers.boundedElastic())
-                .doOnNext(result -> log.info("AAA ProcessID: {} - Entities received successfully: {}", processId, result))
-                .subscribeOn(Schedulers.boundedElastic())
-                .subscribe(); // No espera a que complete*/
-
         return Flux.fromIterable(Arrays.asList(BROKER_ENTITY_TYPES))
                 .concatMap(entityType ->
                         createLocalMvEntities4DataNegotiationByEntityType(processId, entityType)
                                 .flatMap(localMvEntities4DataNegotiation -> {
                                     log.debug("ProcessID: {} - Local MV Entities 4 Data Negotiation: {}", processId, localMvEntities4DataNegotiation);
-                                    log.info("HOLAAA ProcessID: {} - Local MV Entities 4 Data Negotiation: {}", entityType, localMvEntities4DataNegotiation);
 
                                     return externalMvEntities4DataNegotiationMono
                                             .flatMap(externalMvEntities4DataNegotiation -> {
@@ -132,17 +116,6 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                                                 var dataNegotiationEvent = new DataNegotiationEvent(processId, issuer, Mono.just(externalMvEntities4DataNegotiationOfType), localMvEntities4DataNegotiationMono);
                                                 dataNegotiationEventPublisher.publishEvent(dataNegotiationEvent);
 
-                                                /*Id[] ids = externalMvEntities4DataNegotiation.stream().map(x -> new Id(x.id())).toArray(Id[]::new);
-                                                // Ejecutar makeRequest en segundo plano y no bloquear el flujo principal
-                                                AAAEntitySyncWebClient.makeRequest(processId, issuer, Mono.just(ids))
-                                                        .subscribeOn(Schedulers.boundedElastic())
-                                                        .doOnNext(result -> log.info("AAA ProcessID: {} - Entities received successfully: {}", processId, result))
-                                                        .subscribeOn(Schedulers.boundedElastic())
-                                                        .subscribe(); // No espera a que complete*/
-
-                                                System.out.println("AAA Funcionaaa");
-
-                                                // Devuelve el resultado esperado del flujo
                                                 return Mono.just(localMvEntities4DataNegotiation);
                                             });
                                 })
