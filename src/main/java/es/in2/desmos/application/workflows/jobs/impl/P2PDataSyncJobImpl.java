@@ -71,6 +71,8 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                     log.debug("ProcessID: {} - External Access Node: {}", processId, externalAccessNode);
                     var discoverySyncRequest = new DiscoverySyncRequest(apiConfig.getExternalDomain(), localMvEntities4DataNegotiation);
 
+                    log.info("ProcessID: {} - AAA Local Entities:", processId, localMvEntities4DataNegotiation);
+
                     Mono<DiscoverySyncRequest> discoverySyncRequestMono = Mono.just(discoverySyncRequest);
 
                     return discoverySyncWebClient.makeRequest(processId, Mono.just(externalAccessNode), discoverySyncRequestMono)
