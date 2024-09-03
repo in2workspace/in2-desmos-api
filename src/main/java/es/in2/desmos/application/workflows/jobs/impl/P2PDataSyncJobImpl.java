@@ -111,6 +111,8 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                                                         .filter(mvEntity4DataNegotiation -> Objects.equals(mvEntity4DataNegotiation.type(), entityType))
                                                         .toList();
 
+                                                log.info("ProcessID: {} - AAA External Entities:", processId, externalMvEntities4DataNegotiation);
+
                                                 var localMvEntities4DataNegotiationMono = Mono.just(localMvEntities4DataNegotiation);
 
                                                 var dataNegotiationEvent = new DataNegotiationEvent(processId, issuer, Mono.just(externalMvEntities4DataNegotiationOfType), localMvEntities4DataNegotiationMono);
