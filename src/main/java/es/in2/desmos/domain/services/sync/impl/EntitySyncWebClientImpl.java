@@ -13,6 +13,9 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
+
+import java.time.Duration;
 
 @Slf4j
 @Service
@@ -42,6 +45,6 @@ public class EntitySyncWebClientImpl implements EntitySyncWebClient {
                 .body(entitySyncRequest, Id[].class)
                 .retrieve()
                 .bodyToMono(String.class)
-                .retry(3));
+                .retryWhen(Retry.backoff(3, Duration.ofSeconds(2))));
     }
 }
