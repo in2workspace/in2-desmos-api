@@ -160,21 +160,17 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                                             
                                             MVAuditServiceEntity4DataNegotiation mvAuditEntity = mvAuditEntitiesById.get(entityId);
 
-                                            if (mvAuditEntity != null) {
-                                                return getEntityHash(processId, Mono.just(entityId))
-                                                        .map(entityHash -> new MVEntity4DataNegotiation(
-                                                                entityId,
-                                                                entityType,
-                                                                mvBrokerEntity.getVersion(),
-                                                                mvBrokerEntity.getLastUpdate(),
-                                                                mvBrokerEntity.getLifecycleStatus(),
-                                                                mvBrokerEntity.getValidFor().startDateTime(),
-                                                                mvAuditEntity.hash(),
-                                                                mvAuditEntity.hashlink()
-                                                        ));
-                                            } else {
-                                                return Mono.empty();
-                                            }
+                                            return getEntityHash(processId, Mono.just(entityId))
+                                                    .map(entityHash -> new MVEntity4DataNegotiation(
+                                                            entityId,
+                                                            mvBrokerEntity.getType(),
+                                                            mvBrokerEntity.getVersion(),
+                                                            mvBrokerEntity.getLastUpdate(),
+                                                            mvBrokerEntity.getLifecycleStatus(),
+                                                            mvBrokerEntity.getValidFor().startDateTime(),
+                                                            mvAuditEntity.hash(),
+                                                            mvAuditEntity.hashlink()
+                                                    ));
                                         })
                                         .collectList();
                             });
