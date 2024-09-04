@@ -152,23 +152,24 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
 
                                 log.debug("ProcessID: {} - MV Audit Service Entities 4 Data Negotiation: {}", processId, mvAuditEntities);
 
-                                Map<String, MVAuditServiceEntity4DataNegotiation> mvAuditEntitiesById = mvAuditEntities.stream()
-                                        .collect(Collectors.toMap(MVAuditServiceEntity4DataNegotiation::id, Function.identity()));
+                                Map<String, MVAuditServiceEntity4DataNegotiation> mvAuditEntitiesById = getMvAuditEntitiesById(mvAuditEntities);
 
                                 return Flux.fromIterable(mvBrokerEntities)
                                         .flatMap(mvBrokerEntity -> {
-                                            MVAuditServiceEntity4DataNegotiation mvAuditEntity = mvAuditEntitiesById.get(mvBrokerEntity.getId());
+                                            String entityId = mvBrokerEntity.getId();
+                                            
+                                            MVAuditServiceEntity4DataNegotiation mvAuditEntity = mvAuditEntitiesById.get(entityId);
 
                                             if (mvAuditEntity != null) {
-                                                return getEntityHash(processId, Mono.just(mvBrokerEntity.getId()))
+                                                return getEntityHash(processId, Mono.just(entityId))
                                                         .map(entityHash -> new MVEntity4DataNegotiation(
-                                                                mvBrokerEntity.getId(),
+                                                                entityId,
                                                                 entityType,
                                                                 mvBrokerEntity.getVersion(),
                                                                 mvBrokerEntity.getLastUpdate(),
                                                                 mvBrokerEntity.getLifecycleStatus(),
                                                                 mvBrokerEntity.getValidFor().startDateTime(),
-                                                                entityHash,
+                                                                mvAuditEntity.hash(),
                                                                 mvAuditEntity.hashlink()
                                                         ));
                                             } else {
@@ -178,6 +179,11 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                                         .collectList();
                             });
                 });
+    }
+
+    private Map<String, MVAuditServiceEntity4DataNegotiation> getMvAuditEntitiesById(List<MVAuditServiceEntity4DataNegotiation> mvAuditEntities) {
+        return mvAuditEntities.stream()
+                .collect(Collectors.toMap(MVAuditServiceEntity4DataNegotiation::id, Function.identity()));
     }
 
 
