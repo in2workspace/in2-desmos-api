@@ -29,62 +29,51 @@ import static es.in2.desmos.domain.utils.ApplicationConstants.YAML_FILE_SUFFIX;
 @Configuration
 @RequiredArgsConstructor
 public class CorsConfig {
-    
+
     private final AccessNodeMemoryStore accessNodeMemoryStore;
     private final AccessNodeProperties accessNodeProperties;
     private final ApiConfig apiConfig;
     private final BrokerConfig brokerConfig;
     private final DLTAdapterProperties dltAdapterProperties;
     private final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
-    
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
         CorsConfiguration brokerCorsConfig = new CorsConfiguration();
-        brokerCorsConfig.setAllowedOrigins(List.of(brokerConfig.getInternalDomain()));
-        brokerCorsConfig.setMaxAge(8000L);
-        brokerCorsConfig.setAllowedMethods(List.of(
-                HttpMethod.POST.name()));
-        brokerCorsConfig.addAllowedHeader("*");
-        brokerCorsConfig.addExposedHeader("*");
-        brokerCorsConfig.setAllowCredentials(false);
-        source.registerCorsConfiguration("/api/v1/notifications/broker", brokerCorsConfig); // Apply the configuration to all paths
+        setBrokerCorsConfig(brokerCorsConfig, List.of(brokerConfig.getInternalDomain()), List.of(
+                HttpMethod.POST.name()), false);
+        source.registerCorsConfiguration("/api/v1/notifications/broker", brokerCorsConfig);
 
         CorsConfiguration dltAdapterCorsConfig = new CorsConfiguration();
-        dltAdapterCorsConfig.setAllowedOrigins(List.of(dltAdapterProperties.internalDomain(), dltAdapterProperties.externalDomain()));
-        dltAdapterCorsConfig.setMaxAge(8000L);
-        dltAdapterCorsConfig.setAllowedMethods(
-                List.of(HttpMethod.POST.name()));
-        dltAdapterCorsConfig.addAllowedHeader("*");
-        dltAdapterCorsConfig.addExposedHeader("*");
-        dltAdapterCorsConfig.setAllowCredentials(false);
-        source.registerCorsConfiguration("/api/v1/notifications/dlt", dltAdapterCorsConfig); // Apply the configuration to all paths
+        setBrokerCorsConfig(dltAdapterCorsConfig, List.of(dltAdapterProperties.internalDomain(),
+                dltAdapterProperties.externalDomain()), List.of(HttpMethod.POST.name()), false);
+        source.registerCorsConfiguration("/api/v1/notifications/dlt", dltAdapterCorsConfig);
 
 
         CorsConfiguration githubSyncUrlsCorsConfig = new CorsConfiguration();
-        githubSyncUrlsCorsConfig.setAllowedOrigins(getCorsUrls());
-        githubSyncUrlsCorsConfig.setMaxAge(8000L);
-        githubSyncUrlsCorsConfig.setAllowedMethods(List.of(
+        setBrokerCorsConfig(githubSyncUrlsCorsConfig, getCorsUrls(), List.of(
                 HttpMethod.GET.name(),
-                HttpMethod.POST.name()));
-        githubSyncUrlsCorsConfig.addAllowedHeader("*");
-        githubSyncUrlsCorsConfig.addExposedHeader("*");
-        githubSyncUrlsCorsConfig.setAllowCredentials(true);
-        source.registerCorsConfiguration("/api/v1/sync/p2p/**", githubSyncUrlsCorsConfig); // Apply the configuration to all paths
+                HttpMethod.POST.name()), true);
+        source.registerCorsConfiguration("/api/v1/sync/p2p/**", githubSyncUrlsCorsConfig);
 
         CorsConfiguration githubEntitiesUrlsCorsConfig = new CorsConfiguration();
-        githubEntitiesUrlsCorsConfig.setAllowedOrigins(getCorsUrls());
-        githubEntitiesUrlsCorsConfig.setMaxAge(8000L);
-        githubEntitiesUrlsCorsConfig.setAllowedMethods(List.of(
-                HttpMethod.GET.name()));
-        githubEntitiesUrlsCorsConfig.addAllowedHeader("*");
-        githubEntitiesUrlsCorsConfig.addExposedHeader("*");
-        githubEntitiesUrlsCorsConfig.setAllowCredentials(true);
-        source.registerCorsConfiguration("/api/v1/entities/**", githubEntitiesUrlsCorsConfig); // Apply the configuration to all paths
+        setBrokerCorsConfig(githubEntitiesUrlsCorsConfig, getCorsUrls(), List.of(
+                HttpMethod.GET.name()), true);
+        source.registerCorsConfiguration("/api/v1/entities/**", githubEntitiesUrlsCorsConfig);
 
         return source;
+    }
+
+    private void setBrokerCorsConfig(CorsConfiguration brokerCorsConfig, List<String> allowedOrigins, List<String> allowedMethods, boolean allowCredentials) {
+        brokerCorsConfig.setAllowedOrigins(allowedOrigins);
+        brokerCorsConfig.setMaxAge(8000L);
+        brokerCorsConfig.setAllowedMethods(allowedMethods);
+        brokerCorsConfig.addAllowedHeader("*");
+        brokerCorsConfig.addExposedHeader("*");
+        brokerCorsConfig.setAllowCredentials(allowCredentials);
     }
 
     private List<String> getCorsUrls() {
