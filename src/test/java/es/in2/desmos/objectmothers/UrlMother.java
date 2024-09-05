@@ -9,6 +9,10 @@ public final class UrlMother {
     private UrlMother() {
     }
 
+    public static @NotNull List<String> example1List() {
+        return List.of("https://example1.org");
+    }
+
     public static @NotNull List<String> example1And2urlsList() {
         List<String> urlExternalAccessNodesList = new ArrayList<>();
         urlExternalAccessNodesList.add("https://example1.org");

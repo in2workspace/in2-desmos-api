@@ -3,6 +3,7 @@ package es.in2.desmos.domain.services.api;
 import es.in2.desmos.domain.models.*;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Map;
 
 public interface AuditRecordService {
@@ -24,6 +25,8 @@ public interface AuditRecordService {
     Mono<AuditRecord> findLatestConsumerPublishedAuditRecordByEntityId(String processId, String entityId);
 
     Mono<AuditRecord> findLatestConsumerPublishedAuditRecord(String processId);
+
+    Mono<List<MVAuditServiceEntity4DataNegotiation>> findCreateOrUpdateAuditRecordsByEntityIds(String processId, String entityType, Mono<List<String>> entityIdsMono);
 
     Mono<Void> setAuditRecordLock(String processId, String id, boolean lock);
 

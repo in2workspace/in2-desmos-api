@@ -5,7 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.repositories.AuditRecordRepository;
 import es.in2.desmos.domain.services.api.impl.AuditRecordServiceImpl;
+import es.in2.desmos.domain.services.broker.BrokerPublisherService;
 import es.in2.desmos.objectmothers.AuditRecordMother;
+import es.in2.desmos.objectmothers.EntityMother;
 import es.in2.desmos.objectmothers.MVAuditServiceEntity4DataNegotiationMother;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
@@ -17,6 +19,7 @@ import reactor.test.StepVerifier;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -34,6 +37,9 @@ class AuditRecordServiceTests {
 
     @Mock
     private BlockchainTxPayload blockchainTxPayload;
+
+    @Mock
+    private BrokerPublisherService brokerPublisherService;
 
     @SuppressWarnings("CanBeFinal")
     @Spy
@@ -454,4 +460,126 @@ class AuditRecordServiceTests {
                 .verify();
     }
 
+    @Test
+    void itShouldReturnExistingAuditRecordIfEntityHasAuditRecordAndHashIsEqualsToCurrentEntityHash() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
+
+        String processId = "0";
+        var expectedAuditEntities = MVAuditServiceEntity4DataNegotiationMother.sample3and4();
+
+        Mono<List<String>> entityIdsMono = Mono.just(List.of(expectedAuditEntities.get(0).id(), expectedAuditEntities.get(1).id()));
+
+        when(brokerPublisherService.getEntityById(eq(processId), any()))
+                .thenReturn(Mono.just(EntityMother.PRODUCT_OFFERING_3))
+                .thenReturn(Mono.just(EntityMother.PRODUCT_OFFERING_4));
+
+        when(auditRecordRepository.findLatestPublishedAuditRecordForProducerByEntityId(any()))
+                .thenReturn(Mono.just(AuditRecordMother.list3And4().get(0)))
+                .thenReturn(Mono.just(AuditRecordMother.list3And4().get(1)));
+
+        Mono<List<MVAuditServiceEntity4DataNegotiation>> resultMono =
+                auditRecordService.findCreateOrUpdateAuditRecordsByEntityIds(processId, expectedAuditEntities.get(0).type(), entityIdsMono);
+
+        StepVerifier
+                .create(resultMono)
+                .assertNext(result ->
+                        assertThat(result).isEqualTo(expectedAuditEntities))
+                .verifyComplete();
+
+        verify(auditRecordRepository, never()).save(any());
+        verifyNoMoreInteractions(auditRecordRepository);
+    }
+
+    @Test
+    void itShouldCreateAndReturnNewAuditRecordIfEntityHasAuditRecordAndHashIsNotEqualsToCurrentEntityHash() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
+
+        String processId = "0";
+        var expectedAuditEntities = MVAuditServiceEntity4DataNegotiationMother.sample3and4NewHashlink();
+
+        Mono<List<String>> entityIdsMono = Mono.just(List.of(expectedAuditEntities.get(0).id(), expectedAuditEntities.get(1).id()));
+
+        when(brokerPublisherService.getEntityById(eq(processId), any()))
+                .thenReturn(Mono.just(EntityMother.PRODUCT_OFFERING_3))
+                .thenReturn(Mono.just(EntityMother.PRODUCT_OFFERING_4));
+
+        when(auditRecordRepository.findLatestPublishedAuditRecordForProducerByEntityId(any()))
+                .thenReturn(Mono.just(AuditRecordMother.list3OtherHashAnd4().get(0)))
+                .thenReturn(Mono.just(AuditRecordMother.list3OtherHashAnd4().get(1)));
+
+        when(auditRecordRepository.findMostRecentAuditRecord())
+                .thenReturn(Mono.just(new AuditRecord()));
+
+        when(auditRecordRepository.save(any()))
+                .thenReturn(Mono.just(AuditRecordMother.list3OtherHashAnd4().get(0)));
+
+        Mono<List<MVAuditServiceEntity4DataNegotiation>> resultMono =
+                auditRecordService.findCreateOrUpdateAuditRecordsByEntityIds(processId, expectedAuditEntities.get(0).type(), entityIdsMono);
+
+        StepVerifier
+                .create(resultMono)
+                .assertNext(result ->
+                        assertThat(result).isEqualTo(expectedAuditEntities))
+                .verifyComplete();
+
+        verify(auditRecordRepository, times(1)).save(auditRecordArgumentCaptor.capture());
+        verifyNoMoreInteractions(auditRecordRepository);
+
+        var auditRecordSaved = auditRecordArgumentCaptor.getValue();
+        assertThat(auditRecordSaved)
+                .usingRecursiveComparison()
+                .comparingOnlyFields("entityId", "entityType", "entityHash", "entityHashLink")
+                .isEqualTo(
+                        AuditRecord
+                                .builder()
+                                .entityId(expectedAuditEntities.get(0).id())
+                                .entityType(expectedAuditEntities.get(0).type())
+                                .entityHash(expectedAuditEntities.get(0).hash())
+                                .entityHashLink(expectedAuditEntities.get(0).hashlink()));
+    }
+
+    @Test
+    void itShouldCreateAndReturnAuditRecordIfEntityHasNotAuditRecord() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
+
+        String processId = "0";
+        var expectedAuditEntities = MVAuditServiceEntity4DataNegotiationMother.sample3EqualsHashAndHashlinkAnd4();
+
+        Mono<List<String>> entityIdsMono = Mono.just(List.of(expectedAuditEntities.get(0).id(), expectedAuditEntities.get(1).id()));
+
+        when(brokerPublisherService.getEntityById(eq(processId), any()))
+                .thenReturn(Mono.just(EntityMother.PRODUCT_OFFERING_3))
+                .thenReturn(Mono.just(EntityMother.PRODUCT_OFFERING_4));
+
+        when(auditRecordRepository.findLatestPublishedAuditRecordForProducerByEntityId(any()))
+                .thenReturn(Mono.empty())
+                .thenReturn(Mono.just(AuditRecordMother.list3And4().get(1)));
+
+        when(auditRecordRepository.findMostRecentAuditRecord())
+                .thenReturn(Mono.just(new AuditRecord()));
+
+        when(auditRecordRepository.save(any()))
+                .thenReturn(Mono.just(AuditRecordMother.list3EqualsHashAndHashlinkAnd4().get(0)));
+
+        Mono<List<MVAuditServiceEntity4DataNegotiation>> resultMono =
+                auditRecordService.findCreateOrUpdateAuditRecordsByEntityIds(processId, expectedAuditEntities.get(0).type(), entityIdsMono);
+
+        StepVerifier
+                .create(resultMono)
+                .assertNext(result ->
+                        assertThat(result).isEqualTo(expectedAuditEntities))
+                .verifyComplete();
+
+        verify(auditRecordRepository, times(1)).save(auditRecordArgumentCaptor.capture());
+        verifyNoMoreInteractions(auditRecordRepository);
+
+        var auditRecordSaved = auditRecordArgumentCaptor.getValue();
+        assertThat(auditRecordSaved)
+                .usingRecursiveComparison()
+                .comparingOnlyFields("entityId", "entityType", "entityHash", "entityHashLink")
+                .isEqualTo(
+                        AuditRecord
+                                .builder()
+                                .entityId(expectedAuditEntities.get(0).id())
+                                .entityType(expectedAuditEntities.get(0).type())
+                                .entityHash(expectedAuditEntities.get(0).hash())
+                                .entityHashLink(expectedAuditEntities.get(0).hash()));
+    }
 }

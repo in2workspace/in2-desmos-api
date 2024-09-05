@@ -1,6 +1,5 @@
 package es.in2.desmos.application.workflows.jobs.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import es.in2.desmos.application.workflows.jobs.DataNegotiationJob;
 import es.in2.desmos.application.workflows.jobs.P2PDataSyncJob;
 import es.in2.desmos.domain.events.DataNegotiationEventPublisher;
@@ -8,7 +7,6 @@ import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
 import es.in2.desmos.domain.services.sync.DiscoverySyncWebClient;
-import es.in2.desmos.domain.utils.ApplicationUtils;
 import es.in2.desmos.domain.utils.Base64Converter;
 import es.in2.desmos.infrastructure.configs.ApiConfig;
 import es.in2.desmos.infrastructure.configs.ExternalAccessNodesConfig;
@@ -18,7 +16,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -147,7 +144,7 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
 
                     Mono<List<String>> entitiesIdsMono = getEntitiesIds(Mono.just(mvBrokerEntities));
 
-                    return getMvAuditServiceEntities4DataNegotiation(processId, entitiesIdsMono)
+                    return auditRecordService.findCreateOrUpdateAuditRecordsByEntityIds(processId, entityType, entitiesIdsMono)
                             .flatMap(mvAuditEntities -> {
 
                                 log.debug("ProcessID: {} - MV Audit Service Entities 4 Data Negotiation: {}", processId, mvAuditEntities);
@@ -155,13 +152,12 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                                 Map<String, MVAuditServiceEntity4DataNegotiation> mvAuditEntitiesById = getMvAuditEntitiesById(mvAuditEntities);
 
                                 return Flux.fromIterable(mvBrokerEntities)
-                                        .flatMap(mvBrokerEntity -> {
+                                        .map(mvBrokerEntity -> {
                                             String entityId = mvBrokerEntity.getId();
-                                            
+
                                             MVAuditServiceEntity4DataNegotiation mvAuditEntity = mvAuditEntitiesById.get(entityId);
 
-                                            return getEntityHash(processId, Mono.just(entityId))
-                                                    .map(entityHash -> new MVEntity4DataNegotiation(
+                                            return new MVEntity4DataNegotiation(
                                                             entityId,
                                                             mvBrokerEntity.getType(),
                                                             mvBrokerEntity.getVersion(),
@@ -170,7 +166,7 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                                                             mvBrokerEntity.getValidFor().startDateTime(),
                                                             mvAuditEntity.hash(),
                                                             mvAuditEntity.hashlink()
-                                                    ));
+                                                    );
                                         })
                                         .collectList();
                             });
@@ -181,37 +177,4 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
         return mvAuditEntities.stream()
                 .collect(Collectors.toMap(MVAuditServiceEntity4DataNegotiation::id, Function.identity()));
     }
-
-
-    private Mono<String> getEntityHash(String processId, Mono<String> entityIdMono) {
-        return entityIdMono.flatMap(entityId ->
-                brokerPublisherService.getEntityById(processId, entityId)
-                        .flatMap(entity -> {
-                            try {
-                                String hash = ApplicationUtils.calculateSHA256(entity);
-                                return Mono.just(hash);
-                            } catch (NoSuchAlgorithmException | JsonProcessingException e) {
-                                return Mono.error(e);
-                            }
-                        }));
-    }
-
-    private Mono<List<MVAuditServiceEntity4DataNegotiation>> getMvAuditServiceEntities4DataNegotiation(String processId, Mono<List<String>> entities4DataNegotiationIdsMono) {
-        return entities4DataNegotiationIdsMono.flatMap(entities4DataNegotiationIds ->
-                Flux.fromIterable(entities4DataNegotiationIds)
-                        .flatMap(id ->
-                                auditRecordService.findLatestAuditRecordForEntity(processId, id)
-                                        .map(auditRecord ->
-                                                new MVAuditServiceEntity4DataNegotiation(
-                                                        auditRecord.getEntityId(),
-                                                        auditRecord.getEntityType(),
-                                                        auditRecord.getEntityHash(),
-                                                        auditRecord.getEntityHashLink()
-                                                )
-                                        )
-                        )
-                        .collectList()
-        );
-    }
-
 }
