@@ -94,7 +94,7 @@ public final class AuditRecordMother {
         return auditRecordList;
     }
 
-    public static @NotNull List<AuditRecord> list3EqualsHashAndHashlinkAnd4() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
+    public static @NotNull List<AuditRecord> list3EqualsHashAndHashLinkAnd4() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         List<AuditRecord> auditRecordList = new ArrayList<>();
         var sample3 = MVEntity4DataNegotiationMother.sample3();
         var sample4 = MVEntity4DataNegotiationMother.sample4();
@@ -113,37 +113,4 @@ public final class AuditRecordMother {
         return auditRecordList;
     }
 
-    public static @NotNull List<AuditRecord> listCategories() {
-        List<AuditRecord> auditRecordList = new ArrayList<>();
-        var category1 = MVEntity4DataNegotiationMother.category1();
-        var category2 = MVEntity4DataNegotiationMother.category2();
-        auditRecordList.add(AuditRecord.builder()
-                .entityId(category1.id())
-                .entityHash(category1.hash())
-                .entityHashLink(category1.hashlink())
-                .build());
-        auditRecordList.add(AuditRecord.builder()
-                .entityId(category2.id())
-                .entityHash(category2.hash())
-                .entityHashLink(category2.hashlink())
-                .build());
-        return auditRecordList;
-    }
-
-    public static @NotNull List<AuditRecord> listCatalogs() {
-        List<AuditRecord> auditRecordList = new ArrayList<>();
-        var catalog1 = MVEntity4DataNegotiationMother.catalog1();
-        var catalog2 = MVEntity4DataNegotiationMother.catalog2();
-        auditRecordList.add(AuditRecord.builder()
-                .entityId(catalog1.id())
-                .entityHash(catalog1.hash())
-                .entityHashLink(catalog1.hashlink())
-                .build());
-        auditRecordList.add(AuditRecord.builder()
-                .entityId(catalog2.id())
-                .entityHash(catalog2.hash())
-                .entityHashLink(catalog2.hashlink())
-                .build());
-        return auditRecordList;
-    }
 }

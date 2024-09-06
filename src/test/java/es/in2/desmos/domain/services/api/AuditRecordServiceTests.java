@@ -556,7 +556,7 @@ class AuditRecordServiceTests {
                 .thenReturn(Mono.just(new AuditRecord()));
 
         when(auditRecordRepository.save(any()))
-                .thenReturn(Mono.just(AuditRecordMother.list3EqualsHashAndHashlinkAnd4().get(0)));
+                .thenReturn(Mono.just(AuditRecordMother.list3EqualsHashAndHashLinkAnd4().get(0)));
 
         Mono<List<MVAuditServiceEntity4DataNegotiation>> resultMono =
                 auditRecordService.findCreateOrUpdateAuditRecordsByEntityIds(processId, expectedAuditEntities.get(0).type(), entityIdsMono);
