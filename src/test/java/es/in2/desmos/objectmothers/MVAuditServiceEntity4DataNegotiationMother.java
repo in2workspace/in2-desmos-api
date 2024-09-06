@@ -37,7 +37,7 @@ public final class MVAuditServiceEntity4DataNegotiationMother {
     public static @NotNull List<MVAuditServiceEntity4DataNegotiation> sample3and4NewHashlink() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         MVEntity4DataNegotiation sample3 = MVEntity4DataNegotiationMother.sample3();
 
-        var newHashlink = ApplicationUtils.calculateHashLink(AuditRecordMother.list3OtherHashAnd4().get(0).getEntityHashLink(), sample3.hash());
+        var newHashlink = ApplicationUtils.calculateHashLink(AuditRecordMother.list3OtherHashTraderProducerAnd4().get(0).getEntityHashLink(), sample3.hash());
 
         return List.of(
                 new MVAuditServiceEntity4DataNegotiation(sample3.id(), sample3.type(), sample3.hash(), newHashlink),

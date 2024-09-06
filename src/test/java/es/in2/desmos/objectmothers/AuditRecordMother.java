@@ -75,13 +75,34 @@ public final class AuditRecordMother {
         return auditRecordList;
     }
 
-    public static @NotNull List<AuditRecord> list3OtherHashAnd4() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
+    public static @NotNull List<AuditRecord> list3OtherHashTraderProducerAnd4() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         List<AuditRecord> auditRecordList = new ArrayList<>();
         var sample3 = MVEntity4DataNegotiationMother.sample3();
         var sample4 = MVEntity4DataNegotiationMother.sample4();
         auditRecordList.add(AuditRecord.builder()
                 .entityId(sample3.id())
                 .entityType(sample3.type())
+                .entityHash("fjdslkjfdsafjdlskijfasoioiwdshoidsahogiodshgiosdaoi")
+                .entityHashLink(sample3.hashlink())
+                .trader(AuditRecordTrader.PRODUCER)
+                .build());
+        auditRecordList.add(AuditRecord.builder()
+                .entityId(sample4.id())
+                .entityType(sample4.type())
+                .entityHash(sample4.hash())
+                .entityHashLink(sample4.hashlink())
+                .build());
+        return auditRecordList;
+    }
+
+    public static @NotNull List<AuditRecord> list3OtherHashWithTraderConsumerAnd4() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
+        List<AuditRecord> auditRecordList = new ArrayList<>();
+        var sample3 = MVEntity4DataNegotiationMother.sample3();
+        var sample4 = MVEntity4DataNegotiationMother.sample4();
+        auditRecordList.add(AuditRecord.builder()
+                .entityId(sample3.id())
+                .entityType(sample3.type())
+                .trader(AuditRecordTrader.CONSUMER)
                 .entityHash("fjdslkjfdsafjdlskijfasoioiwdshoidsahogiodshgiosdaoi")
                 .entityHashLink(sample3.hashlink())
                 .build());

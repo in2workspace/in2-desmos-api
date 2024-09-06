@@ -25,6 +25,7 @@ import java.util.UUID;
 
 import static es.in2.desmos.domain.utils.ApplicationUtils.calculateHashLink;
 import static es.in2.desmos.domain.utils.ApplicationUtils.calculateSHA256;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -210,4 +211,52 @@ class AuditRecordRepositoryIT {
                 .verifyComplete();
     }
 
+    @Order(8)
+    @Test
+    void itShouldReturnMostRecentPublishedAuditRecordByEntityId() {
+
+        var entityId = "1234";
+        saveAuditRecordWithEntityIdStatusAndCurrentTimestamp(entityId, AuditRecordStatus.PUBLISHED);
+
+        saveAuditRecordWithEntityIdStatusAndCurrentTimestamp(entityId, AuditRecordStatus.DELETED);
+
+        var publishedTimestamp = saveAuditRecordWithEntityIdStatusAndCurrentTimestamp(entityId, AuditRecordStatus.PUBLISHED);
+        AuditRecord expectedAuditRecord = AuditRecord
+                .builder()
+                .entityId(entityId)
+                .status(AuditRecordStatus.PUBLISHED)
+                .createdAt(publishedTimestamp)
+                .build();
+
+        Mono<AuditRecord> receivedAuditRecordMono = auditRecordRepository
+                .findMostRecentPublishedAuditRecordByEntityId(entityId);
+
+        StepVerifier
+                .create(receivedAuditRecordMono)
+                .assertNext(receivedAuditRecord ->
+                        assertThat(receivedAuditRecord)
+                                .usingRecursiveComparison()
+                                .comparingOnlyFields("entityId", "status", "createdAt")
+                                .isEqualTo(expectedAuditRecord))
+                .verifyComplete();
+    }
+
+    private Timestamp saveAuditRecordWithEntityIdStatusAndCurrentTimestamp(String entityId, AuditRecordStatus auditRecordStatus) {
+        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+        System.out.println("El timestamp: " + timestamp);
+        AuditRecord auditRecordToSave = AuditRecord
+                .builder()
+                .entityId(entityId)
+                .status(auditRecordStatus)
+                .createdAt(timestamp)
+                .build();
+
+        var savedAuditRecordMono = auditRecordRepository.save(auditRecordToSave);
+        StepVerifier
+                .create(savedAuditRecordMono)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        return timestamp;
+    }
 }
