@@ -88,10 +88,10 @@ public class DataTransferJobImpl implements DataTransferJob {
                                                     );
 
                                                     return createReceivedAuditRecords(processId, issuer, decodedEntitySyncResponseMono)
-                                                            .then(validateIntegrity(entitiesByIdMono, entitiesHashAndHashlinkById))
-                                                            .flatMap(validIds -> {
-                                                                Mono<List<Id>> validIdsMono = Mono.just(validIds);
-                                                                return filterEntitiesById(entitiesByIdMono, validIdsMono)
+                                                            .then(getInconsistentEntitiesIds(entitiesByIdMono, entitiesHashAndHashlinkById))
+                                                            .flatMap(inconsistentEntitiesIds -> {
+                                                                Mono<List<Id>> incosistentEntitiesIdsMono = Mono.just(inconsistentEntitiesIds);
+                                                                return filterEntitiesById(entitiesByIdMono, incosistentEntitiesIdsMono)
                                                                         .flatMap(filteredEntitiesById -> {
                                                                             Mono<Map<Id, Entity>> filteredEntitiesByIdMono = Mono.just(filteredEntitiesById);
                                                                             return dataVerificationJob.verifyData(processId, issuer, filteredEntitiesByIdMono, mvEntities4DataNegotiation, existingEntitiesHashAndHashLinkById);
@@ -233,7 +233,7 @@ public class DataTransferJobImpl implements DataTransferJob {
                 });
     }
 
-    private Mono<List<Id>> validateIntegrity(Mono<Map<Id, Entity>> entitiesByIdMono, Mono<Map<Id, HashAndHashLink>> allEntitiesExistingValidationDataById) {
+    private Mono<List<Id>> getInconsistentEntitiesIds(Mono<Map<Id, Entity>> entitiesByIdMono, Mono<Map<Id, HashAndHashLink>> allEntitiesExistingValidationDataById) {
         return allEntitiesExistingValidationDataById
                 .flatMapIterable(Map::entrySet)
                 .flatMap(entry -> {
@@ -245,10 +245,10 @@ public class DataTransferJobImpl implements DataTransferJob {
                             .flatMap(calculatedHash ->
                                     entityRcvdHash.flatMap(hashValue -> {
                                         if (calculatedHash.equals(hashValue)) {
-                                            return Mono.just(id);
+                                            return Mono.empty();
                                         } else {
                                             log.debug("Expected hash: {}\nCurrent hash: {}", hashValue, calculatedHash);
-                                            return Mono.empty();
+                                            return Mono.just(id);
                                         }
                                     }));
                 })
@@ -265,12 +265,12 @@ public class DataTransferJobImpl implements DataTransferJob {
         });
     }
 
-    private Mono<Map<Id, Entity>> filterEntitiesById(Mono<Map<Id, Entity>> entitiesByIdMono, Mono<List<Id>> validIdsMono) {
-        return validIdsMono.flatMap(validIds ->
+    private Mono<Map<Id, Entity>> filterEntitiesById(Mono<Map<Id, Entity>> entitiesByIdMono, Mono<List<Id>> incosistentEntitiesIdsMono) {
+        return incosistentEntitiesIdsMono.flatMap(inconsistentEntitiesIds ->
                 entitiesByIdMono.map(entitiesById ->
                         entitiesById.entrySet()
                                 .stream()
-                                .filter(entry -> validIds.contains(entry.getKey()))
+                                .filter(entry -> !inconsistentEntitiesIds.contains(entry.getKey()))
                                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
                 )
         );

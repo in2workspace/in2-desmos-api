@@ -290,6 +290,30 @@ public final class EntityMother {
                 }
             }""";
 
+    public static final String CATEGORY = """
+            {
+                "id": "urn:category:1",
+                "type": "category",
+                "version": {
+                    "type": "Property",
+                    "value": "1.2"
+                },
+                "lifecycleStatus": {
+                    "type": "Property",
+                    "value": "Launched"
+                },
+                "validFor": {
+                    "type": "Property",
+                    "value": {
+                        "startDateTime": "2024-01-01T00:00:00.000Z"
+                    }
+                },
+                "lastUpdate": {
+                    "type": "Property",
+                    "value": "2024-09-05T12:00:00Z"
+                }
+            }""";
+
     private static String getEntityJsonScorpioStringWithoutRelationship(MVEntity4DataNegotiation mvEntity4DataNegotiation) throws JSONException {
         JSONObject productOffering = new JSONObject();
 
@@ -333,6 +357,16 @@ public final class EntityMother {
                 PRODUCT_OFFERING_2,
                 PRODUCT_OFFERING_3,
                 PRODUCT_OFFERING_4
+        };
+    }
+
+    public static String[] scorpioFullWithCategoryJsonArray() {
+        return new String[]{
+                PRODUCT_OFFERING_1,
+                PRODUCT_OFFERING_2,
+                PRODUCT_OFFERING_3,
+                PRODUCT_OFFERING_4,
+                CATEGORY
         };
     }
 

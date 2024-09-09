@@ -458,4 +458,53 @@ class DataTransferJobTest {
                 })
                 .verifyComplete();
     }
+
+    @Test
+    void itShouldAddSubEntities() throws JSONException, NoSuchAlgorithmException, IOException {
+        String processId = "0";
+
+        when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(Mono.just(EntitySyncResponseMother.getSampleWithCategoryBase64()));
+
+        when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any())).thenReturn(Mono.empty());
+
+        when(dataVerificationJob.verifyData(eq(processId), any(), any(), any(), any())).thenReturn(Mono.empty());
+
+        DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
+
+        Map<Id, Entity> expectedFilteredEntities = Map.of(
+                new Id(MVEntity4DataNegotiationMother.sample1().id()), new Entity(EntityMother.PRODUCT_OFFERING_1),
+                new Id(MVEntity4DataNegotiationMother.sample2().id()), new Entity(EntityMother.PRODUCT_OFFERING_2),
+                new Id(MVEntity4DataNegotiationMother.sample3().id()), new Entity(EntityMother.PRODUCT_OFFERING_3),
+                new Id(MVEntity4DataNegotiationMother.sample4().id()), new Entity(EntityMother.PRODUCT_OFFERING_4),
+                new Id("urn:category:1"), new Entity(EntityMother.CATEGORY));
+
+
+        dataTransferJob.syncData(processId, Mono.just(dataNegotiationResult)).block();
+
+        verify(dataVerificationJob, times(1))
+                .verifyData(
+                        any(),
+                        any(),
+                        idByEntityMonoCaptor.capture(),
+                        any(),
+                        any()
+                );
+
+        StepVerifier
+                .create(idByEntityMonoCaptor.getValue())
+                .assertNext(idByEntityResult -> {
+                    assertThat(idByEntityResult.keySet())
+                            .containsExactlyInAnyOrderElementsOf(expectedFilteredEntities.keySet());
+                    for (var id : idByEntityResult.keySet()) {
+                        var expectedJson = expectedFilteredEntities.get(id).value();
+                        var resultJson = idByEntityResult.get(id).value();
+                        try {
+                            JSONAssert.assertEquals(expectedJson, resultJson, true);
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                })
+                .verifyComplete();
+    }
 }
