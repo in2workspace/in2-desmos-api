@@ -48,8 +48,6 @@ class DataVerificationJobTest {
     void itShouldBuildAnSaveAuditRecord() throws JsonProcessingException, JSONException, NoSuchAlgorithmException {
         DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.newToSync4AndExistingToSync2();
 
-        Mono<String> entitySyncResponseMono = Mono.just(EntityMother.scorpioJson2And4());
-
         String processId = "0";
 
         when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sample2().id())).thenReturn(Mono.just(AuditRecord.builder().entityHashLink(MVEntity4DataNegotiationMother.sample2VersionOld().hashlink()).build()));
@@ -73,7 +71,7 @@ class DataVerificationJobTest {
         Map<Id, HashAndHashLink> existingEntitiesOriginalValidationDataById = new HashMap<>();
         existingEntitiesOriginalValidationDataById.put(new Id(MVEntity4DataNegotiationMother.sample2().id()), new HashAndHashLink(MVEntity4DataNegotiationMother.sample2().hash(), MVEntity4DataNegotiationMother.sample2().hashlink()));
 
-        Mono<Void> result = dataVerificationJob.verifyData(processId, issuer, Mono.just(entitiesById), Mono.just(allMVEntity4DataNegotiation), entitySyncResponseMono, Mono.just(existingEntitiesOriginalValidationDataById));
+        Mono<Void> result = dataVerificationJob.verifyData(processId, issuer, Mono.just(entitiesById), Mono.just(allMVEntity4DataNegotiation), Mono.just(existingEntitiesOriginalValidationDataById));
 
         StepVerifier.
                 create(result)
@@ -85,7 +83,6 @@ class DataVerificationJobTest {
 
     @Test
     void itShouldBuildAnSaveAuditRecordForSubEntity() throws JsonProcessingException, JSONException, NoSuchAlgorithmException {
-        Mono<String> entitySyncResponseMono = Mono.just(EntityMother.scorpioJson2And4());
 
         String processId = "0";
 
@@ -116,7 +113,7 @@ class DataVerificationJobTest {
                         MVEntity4DataNegotiationMother.sample2().hash(),
                         MVEntity4DataNegotiationMother.sample2VersionOld().hashlink());
 
-        Mono<Void> result = dataVerificationJob.verifyData(processId, issuer, Mono.just(entitiesById), Mono.just(allMVEntity4DataNegotiation), entitySyncResponseMono, Mono.just(existingEntitiesOriginalValidationDataById));
+        Mono<Void> result = dataVerificationJob.verifyData(processId, issuer, Mono.just(entitiesById), Mono.just(allMVEntity4DataNegotiation), Mono.just(existingEntitiesOriginalValidationDataById));
 
         StepVerifier.
                 create(result)
@@ -133,7 +130,6 @@ class DataVerificationJobTest {
 
     @Test
     void itShouldBuildAnSaveAuditRecordForSubEntityWhenNotExistsInAuditRecordDB() throws JsonProcessingException, JSONException, NoSuchAlgorithmException {
-        Mono<String> entitySyncResponseMono = Mono.just(EntityMother.scorpioJson2And4());
 
         String processId = "0";
 
@@ -166,7 +162,7 @@ class DataVerificationJobTest {
                         MVEntity4DataNegotiationMother.sample2().hash(),
                         MVEntity4DataNegotiationMother.sample2().hash());
 
-        Mono<Void> result = dataVerificationJob.verifyData(processId, issuer, Mono.just(entitiesById), Mono.just(allMVEntity4DataNegotiation), entitySyncResponseMono, Mono.just(existingEntitiesOriginalValidationDataById));
+        Mono<Void> result = dataVerificationJob.verifyData(processId, issuer, Mono.just(entitiesById), Mono.just(allMVEntity4DataNegotiation), Mono.just(existingEntitiesOriginalValidationDataById));
 
         StepVerifier.
                 create(result)
@@ -183,8 +179,6 @@ class DataVerificationJobTest {
 
     @Test
     void itShouldBuildAnSaveAuditRecordForSubEntityWhenNotExistsInAuditRecordDBWithNullLifecyclestatus() throws JsonProcessingException, JSONException, NoSuchAlgorithmException {
-        Mono<String> entitySyncResponseMono = Mono.just(EntityMother.scorpioJson1NullLifecyclestatus());
-
         String processId = "0";
 
         when(auditRecordService.findLatestAuditRecordForEntity(processId, MVEntity4DataNegotiationMother.sample1NullLifecyclestatus().id()))
@@ -207,7 +201,7 @@ class DataVerificationJobTest {
 
         MVAuditServiceEntity4DataNegotiation expectedMVAuditServiceEntity4DataNegotiationSample1 = MVAuditServiceEntity4DataNegotiationMother.sample1NullLifecyclestatus();
 
-        Mono<Void> result = dataVerificationJob.verifyData(processId, issuer, Mono.just(entitiesById), Mono.just(allMVEntity4DataNegotiation), entitySyncResponseMono, Mono.just(existingEntitiesOriginalValidationDataById));
+        Mono<Void> result = dataVerificationJob.verifyData(processId, issuer, Mono.just(entitiesById), Mono.just(allMVEntity4DataNegotiation), Mono.just(existingEntitiesOriginalValidationDataById));
 
         StepVerifier.
                 create(result)
@@ -223,7 +217,6 @@ class DataVerificationJobTest {
 
     @Test
     void itShouldReturnInvalidJsonProcessingExceptionWhenEntityIsInvalid() throws JsonProcessingException, JSONException, NoSuchAlgorithmException {
-        Mono<String> entitySyncResponseMono = Mono.just(EntityMother.scorpioJson2And4());
 
         String processId = "0";
 
@@ -243,7 +236,7 @@ class DataVerificationJobTest {
         Map<Id, HashAndHashLink> existingEntitiesOriginalValidationDataById = new HashMap<>();
         existingEntitiesOriginalValidationDataById.put(new Id(MVEntity4DataNegotiationMother.sample2().id()), new HashAndHashLink(MVEntity4DataNegotiationMother.sample2().hash(), MVEntity4DataNegotiationMother.sample2().hashlink()));
 
-        Mono<Void> result = dataVerificationJob.verifyData(processId, issuer, Mono.just(entitiesById), Mono.just(allMVEntity4DataNegotiation), entitySyncResponseMono, Mono.just(existingEntitiesOriginalValidationDataById));
+        Mono<Void> result = dataVerificationJob.verifyData(processId, issuer, Mono.just(entitiesById), Mono.just(allMVEntity4DataNegotiation), Mono.just(existingEntitiesOriginalValidationDataById));
 
         StepVerifier
                 .create(result)
@@ -253,7 +246,6 @@ class DataVerificationJobTest {
 
     @Test
     void itShouldReturnInvalidConsistencyException() throws JsonProcessingException, JSONException, NoSuchAlgorithmException {
-        Mono<String> entitySyncResponseMono = Mono.just(EntityMother.getFullJsonList());
 
         String processId = "0";
 
@@ -273,7 +265,7 @@ class DataVerificationJobTest {
         existingEntitiesOriginalValidationDataById.put(new Id(MVEntity4DataNegotiationMother.sample2().id()), new HashAndHashLink(MVEntity4DataNegotiationMother.sample2().hash(), MVEntity4DataNegotiationMother.sample2().hashlink()));
         existingEntitiesOriginalValidationDataById.put(new Id(MVEntity4DataNegotiationMother.sample4().id()), new HashAndHashLink(MVEntity4DataNegotiationMother.sample4().hash(), MVEntity4DataNegotiationMother.sample4().hashlink()));
 
-        Mono<Void> result = dataVerificationJob.verifyData(processId, issuer, Mono.just(entitiesById), Mono.just(allMVEntity4DataNegotiation), entitySyncResponseMono, Mono.just(existingEntitiesOriginalValidationDataById));
+        Mono<Void> result = dataVerificationJob.verifyData(processId, issuer, Mono.just(entitiesById), Mono.just(allMVEntity4DataNegotiation), Mono.just(existingEntitiesOriginalValidationDataById));
 
         StepVerifier.
                 create(result)
@@ -310,7 +302,7 @@ class DataVerificationJobTest {
         Map<Id, HashAndHashLink> existingEntitiesOriginalValidationDataById = new HashMap<>();
         existingEntitiesOriginalValidationDataById.put(new Id(MVEntity4DataNegotiationMother.sample2().id()), new HashAndHashLink(MVEntity4DataNegotiationMother.sample2().hash(), MVEntity4DataNegotiationMother.sample2().hashlink()));
 
-        Mono<Void> result = dataVerificationJob.verifyData(processId, issuer, Mono.just(entitiesById), Mono.just(allMVEntity4DataNegotiation), Mono.just(entitySyncResponse), Mono.just(existingEntitiesOriginalValidationDataById));
+        Mono<Void> result = dataVerificationJob.verifyData(processId, issuer, Mono.just(entitiesById), Mono.just(allMVEntity4DataNegotiation), Mono.just(existingEntitiesOriginalValidationDataById));
 
 
         StepVerifier.

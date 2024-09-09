@@ -27,6 +27,28 @@ public final class DataNegotiationResultMother {
         return new DataNegotiationResult(issuer, newEntitiesToSync, existingEntitiesToSync);
     }
 
+    public static DataNegotiationResult sampleBadHash2() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
+        String issuer = "http://example.org";
+
+        List<MVEntity4DataNegotiation> newEntitiesToSync = List.of(
+                MVEntity4DataNegotiationMother.sample1(),
+                new MVEntity4DataNegotiation(
+                        MVEntity4DataNegotiationMother.sample2().id(),
+                        MVEntity4DataNegotiationMother.sample2().type(),
+                        MVEntity4DataNegotiationMother.sample2().version(),
+                        MVEntity4DataNegotiationMother.sample2().lastUpdate(),
+                        MVEntity4DataNegotiationMother.sample2().lifecycleStatus(),
+                        MVEntity4DataNegotiationMother.sample2().validFor(),
+                        "fdafdsa",
+                        MVEntity4DataNegotiationMother.sample2().hashlink()));
+
+        List<MVEntity4DataNegotiation> existingEntitiesToSync =
+                List.of(MVEntity4DataNegotiationMother.sample3(),
+                        MVEntity4DataNegotiationMother.sample4());
+
+        return new DataNegotiationResult(issuer, newEntitiesToSync, existingEntitiesToSync);
+    }
+
     public static DataNegotiationResult badHash() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         String issuer = "http://example.org";
         List<MVEntity4DataNegotiation> newEntitiesToSync = MVEntity4DataNegotiationMother.listbadHash1And2();

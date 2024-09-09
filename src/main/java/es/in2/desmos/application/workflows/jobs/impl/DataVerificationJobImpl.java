@@ -3,6 +3,8 @@ package es.in2.desmos.application.workflows.jobs.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import es.in2.desmos.application.workflows.jobs.DataVerificationJob;
 import es.in2.desmos.domain.exceptions.InvalidConsistencyException;
 import es.in2.desmos.domain.models.*;
@@ -27,13 +29,13 @@ public class DataVerificationJobImpl implements DataVerificationJob {
     private final BrokerPublisherService brokerPublisherService;
     private final ObjectMapper objectMapper;
 
-    public Mono<Void> verifyData(String processId, Mono<String> issuer, Mono<Map<Id, Entity>> entitiesByIdMono, Mono<List<MVEntity4DataNegotiation>> allMVEntity4DataNegotiation, Mono<String> entitySyncResponseMono, Mono<Map<Id, HashAndHashLink>> existingEntitiesOriginalValidationDataById) {
+    public Mono<Void> verifyData(String processId, Mono<String> issuer, Mono<Map<Id, Entity>> entitiesByIdMono, Mono<List<MVEntity4DataNegotiation>> allMVEntity4DataNegotiation, Mono<Map<Id, HashAndHashLink>> existingEntitiesOriginalValidationDataById) {
         log.info("ProcessID: {} - Starting Data Verification Job", processId);
 
         return validateConsistency(processId, entitiesByIdMono, existingEntitiesOriginalValidationDataById)
                 .then(buildAndSaveAuditRecordFromDataSync(processId, issuer, entitiesByIdMono, allMVEntity4DataNegotiation, AuditRecordStatus.RETRIEVED))
                 .then(lockAuditRecords(processId, entitiesByIdMono))
-                .then(batchUpsertEntitiesToContextBroker(processId, entitySyncResponseMono))
+                .then(batchUpsertEntitiesToContextBroker(processId, entitiesByIdMono))
                 .then(buildAndSaveAuditRecordFromDataSync(processId, issuer, entitiesByIdMono, allMVEntity4DataNegotiation, AuditRecordStatus.PUBLISHED))
                 .doOnTerminate(() -> unlockAuditRecords(processId));
     }
@@ -146,8 +148,25 @@ public class DataVerificationJobImpl implements DataVerificationJob {
         );
     }
 
-    private Mono<Void> batchUpsertEntitiesToContextBroker(String processId, Mono<String> retrievedBrokerEntitiesMono) {
-        return retrievedBrokerEntitiesMono.flatMap(retrievedBrokerEntities -> brokerPublisherService.batchUpsertEntitiesToContextBroker(processId, retrievedBrokerEntities));
+    private Mono<Void> batchUpsertEntitiesToContextBroker(String processId, Mono<Map<Id, Entity>> entitiesByIdMono) {
+        return entitiesByIdMono.flatMap(entitiesById -> {
+            List<Entity> entities = entitiesById.values().stream().toList();
+            try {
+                ArrayNode arrayNode = objectMapper.createArrayNode();
+
+                for (var entityJson: entities){
+                    ObjectNode objectNode = (ObjectNode) objectMapper.readTree(entityJson.value());
+                    arrayNode.add(objectNode);
+                }
+
+                Mono<String> entitiesJsonMono = Mono.just(objectMapper.writeValueAsString(arrayNode));
+                return entitiesJsonMono.flatMap(entitiesJson ->
+                        brokerPublisherService.batchUpsertEntitiesToContextBroker(processId, entitiesJson));
+            } catch (JsonProcessingException e) {
+                return Mono.error(e);
+            }
+
+        });
     }
 
     private Mono<String> calculateHash(Mono<String> retrievedBrokerEntityMono) {

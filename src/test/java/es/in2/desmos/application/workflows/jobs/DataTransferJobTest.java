@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.skyscreamer.jsonassert.JSONAssert;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -48,6 +49,9 @@ class DataTransferJobTest {
 
     @Captor
     private ArgumentCaptor<MVAuditServiceEntity4DataNegotiation> mvAuditServiceCaptor;
+
+    @Captor
+    private ArgumentCaptor<Mono<Map<Id, Entity>>> idByEntityMonoCaptor;
 
     @Captor
     private ArgumentCaptor<Mono<Id[]>> entitySyncRequestCaptor;
@@ -88,7 +92,7 @@ class DataTransferJobTest {
                 });
 
         when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any())).thenReturn(Mono.empty());
-        when(dataVerificationJob.verifyData(eq(processId), any(), any(), any(), any(), any())).thenReturn(Mono.empty());
+        when(dataVerificationJob.verifyData(eq(processId), any(), any(), any(), any())).thenReturn(Mono.empty());
 
         Mono<Void> result = dataTransferJob.syncDataFromList(processId, Mono.just(dataNegotiationResults));
 
@@ -147,7 +151,7 @@ class DataTransferJobTest {
 
         when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any())).thenReturn(Mono.empty());
 
-        when(dataVerificationJob.verifyData(eq(processId), any(), any(), any(), any(), any())).thenReturn(Mono.empty());
+        when(dataVerificationJob.verifyData(eq(processId), any(), any(), any(), any())).thenReturn(Mono.empty());
 
         Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
 
@@ -185,7 +189,7 @@ class DataTransferJobTest {
 
         when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any())).thenReturn(Mono.empty());
 
-        when(dataVerificationJob.verifyData(eq(processId), any(), any(), any(), any(), any())).thenReturn(Mono.empty());
+        when(dataVerificationJob.verifyData(eq(processId), any(), any(), any(), any())).thenReturn(Mono.empty());
 
         List<Id> expectedEntitiesById = List.of(
                 new Id(MVEntity4DataNegotiationMother.sample2().id()),
@@ -199,7 +203,7 @@ class DataTransferJobTest {
                 .create(result)
                 .verifyComplete();
 
-        verify(dataVerificationJob, times(1)).verifyData(any(), any(), entitiesByIdCaptor.capture(), any(), any(), any());
+        verify(dataVerificationJob, times(1)).verifyData(any(), any(), entitiesByIdCaptor.capture(), any(), any());
 
         Mono<Map<Id, Entity>> entitiesByIdCaptured = entitiesByIdCaptor.getValue();
 
@@ -339,7 +343,7 @@ class DataTransferJobTest {
 
         when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any())).thenReturn(Mono.empty());
 
-        when(dataVerificationJob.verifyData(eq(processId), any(), any(), any(), any(), any())).thenReturn(Mono.empty());
+        when(dataVerificationJob.verifyData(eq(processId), any(), any(), any(), any())).thenReturn(Mono.empty());
 
         Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
 
@@ -347,7 +351,7 @@ class DataTransferJobTest {
                 create(result)
                 .verifyComplete();
 
-        verify(dataVerificationJob, times(1)).verifyData(eq(processId), any(), any(), mvEntities4DataNegotiationCaptor.capture(), any(), any());
+        verify(dataVerificationJob, times(1)).verifyData(eq(processId), any(), any(), mvEntities4DataNegotiationCaptor.capture(), any());
         verifyNoMoreInteractions(dataVerificationJob);
 
         Mono<List<MVEntity4DataNegotiation>> monoDataVerificationJobCaptured = mvEntities4DataNegotiationCaptor.getValue();
@@ -383,7 +387,7 @@ class DataTransferJobTest {
 
         when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any())).thenReturn(Mono.empty());
 
-        when(dataVerificationJob.verifyData(eq(processId), any(), any(), any(), any(), any())).thenReturn(Mono.empty());
+        when(dataVerificationJob.verifyData(eq(processId), any(), any(), any(), any())).thenReturn(Mono.empty());
 
         DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
 
@@ -406,5 +410,52 @@ class DataTransferJobTest {
         var mvAuditServiceCaptorResult = mvAuditServiceCaptor.getAllValues();
 
         assertThat(mvAuditServiceCaptorResult).isEqualTo(expectedMvAuditRecord);
+    }
+
+    @Test
+    void itShouldFilterEntitiesWithBadHash() throws JSONException, NoSuchAlgorithmException, IOException {
+        String processId = "0";
+
+        when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(Mono.just(EntitySyncResponseMother.getSampleBase64()));
+
+        when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any())).thenReturn(Mono.empty());
+
+        when(dataVerificationJob.verifyData(eq(processId), any(), any(), any(), any())).thenReturn(Mono.empty());
+
+        DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sampleBadHash2();
+
+        Map<Id, Entity> expectedFilteredEntities = Map.of(
+                new Id(MVEntity4DataNegotiationMother.sample1().id()), new Entity(EntityMother.PRODUCT_OFFERING_1),
+                new Id(MVEntity4DataNegotiationMother.sample3().id()), new Entity(EntityMother.PRODUCT_OFFERING_3),
+                new Id(MVEntity4DataNegotiationMother.sample4().id()), new Entity(EntityMother.PRODUCT_OFFERING_4));
+
+
+        dataTransferJob.syncData(processId, Mono.just(dataNegotiationResult)).block();
+
+        verify(dataVerificationJob, times(1))
+                .verifyData(
+                        any(),
+                        any(),
+                        idByEntityMonoCaptor.capture(),
+                        any(),
+                        any()
+                );
+
+        StepVerifier
+                .create(idByEntityMonoCaptor.getValue())
+                .assertNext(idByEntityResult -> {
+                    assertThat(idByEntityResult.keySet())
+                            .isEqualTo(expectedFilteredEntities.keySet());
+                    for (var id : idByEntityResult.keySet()) {
+                        var expectedJson = expectedFilteredEntities.get(id).value();
+                        var resultJson = idByEntityResult.get(id).value();
+                        try {
+                            JSONAssert.assertEquals(expectedJson, resultJson, true);
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                })
+                .verifyComplete();
     }
 }

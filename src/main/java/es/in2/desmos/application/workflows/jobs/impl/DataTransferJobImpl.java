@@ -94,7 +94,8 @@ public class DataTransferJobImpl implements DataTransferJob {
                                                                 return filterEntitiesById(entitiesByIdMono, validIdsMono)
                                                                         .flatMap(filteredEntitiesById -> {
                                                                             Mono<Map<Id, Entity>> filteredEntitiesByIdMono = Mono.just(filteredEntitiesById);
-                                                                            return dataVerificationJob.verifyData(processId, issuer, filteredEntitiesByIdMono, mvEntities4DataNegotiation, decodedEntitySyncResponseMono, existingEntitiesHashAndHashLinkById);
+                                                                            return dataVerificationJob.verifyData(processId, issuer, filteredEntitiesByIdMono, mvEntities4DataNegotiation, existingEntitiesHashAndHashLinkById);
+
                                                                         });
                                                             });
                                                 });
@@ -246,7 +247,7 @@ public class DataTransferJobImpl implements DataTransferJob {
                                         if (calculatedHash.equals(hashValue)) {
                                             return Mono.just(id);
                                         } else {
-                                            log.info("Expected hash: {}\nCurrent hash: {}", hashValue, calculatedHash);
+                                            log.debug("Expected hash: {}\nCurrent hash: {}", hashValue, calculatedHash);
                                             return Mono.empty();
                                         }
                                     }));
