@@ -85,6 +85,7 @@ public final class AuditRecordMother {
                 .entityHash("fjdslkjfdsafjdlskijfasoioiwdshoidsahogiodshgiosdaoi")
                 .entityHashLink(sample3.hashlink())
                 .trader(AuditRecordTrader.PRODUCER)
+                .dataLocation("dataLocation")
                 .build());
         auditRecordList.add(AuditRecord.builder()
                 .entityId(sample4.id())

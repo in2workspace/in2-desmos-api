@@ -7,6 +7,7 @@ import es.in2.desmos.domain.repositories.AuditRecordRepository;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
 import es.in2.desmos.domain.utils.ApplicationUtils;
+import es.in2.desmos.infrastructure.configs.ApiConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ public class AuditRecordServiceImpl implements AuditRecordService {
     private final ObjectMapper objectMapper;
     private final AuditRecordRepository auditRecordRepository;
     private final BrokerPublisherService brokerPublisherService;
+    private final ApiConfig apiConfig;
 
     private final List<String> auditRecordsInUse = Collections.synchronizedList(new ArrayList<>());
 
@@ -282,7 +284,6 @@ public class AuditRecordServiceImpl implements AuditRecordService {
 
                                                                     return buildAndSaveAuditRecordFromUnregisteredOrOutdatedEntity(
                                                                             processId,
-                                                                            id,
                                                                             new MVAuditServiceEntity4DataNegotiation(
                                                                                     auditRecord.getEntityId(),
                                                                                     auditRecord.getEntityType(),
@@ -297,7 +298,6 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                                         ).switchIfEmpty(Mono.defer(() ->
                                                 buildAndSaveAuditRecordFromUnregisteredOrOutdatedEntity(
                                                         processId,
-                                                        id,
                                                         new MVAuditServiceEntity4DataNegotiation(
                                                                 id,
                                                                 entityType,
@@ -335,13 +335,13 @@ public class AuditRecordServiceImpl implements AuditRecordService {
         return Mono.fromCallable(() -> !auditRecordsInUse.contains(id));
     }
 
-    private Mono<MVAuditServiceEntity4DataNegotiation> buildAndSaveAuditRecordFromUnregisteredOrOutdatedEntity(String processId, String issuer, MVAuditServiceEntity4DataNegotiation mvAuditServiceEntity4DataNegotiation, AuditRecordTrader trader, String dataLocation) {
+    private Mono<MVAuditServiceEntity4DataNegotiation> buildAndSaveAuditRecordFromUnregisteredOrOutdatedEntity(String processId, MVAuditServiceEntity4DataNegotiation mvAuditServiceEntity4DataNegotiation, AuditRecordTrader trader, String dataLocation) {
         return fetchMostRecentAuditRecord()
                 .flatMap(lastAuditRecordRegistered -> {
                     String newDataLocation = Objects.requireNonNullElseGet(
                             dataLocation,
                             () ->
-                                    getDataLocationForProducedEntity(issuer, mvAuditServiceEntity4DataNegotiation));
+                                    getDataLocationForProducedEntity(apiConfig.getExternalDomain(), mvAuditServiceEntity4DataNegotiation));
                     try {
                         AuditRecord auditRecord =
                                 AuditRecord.builder()

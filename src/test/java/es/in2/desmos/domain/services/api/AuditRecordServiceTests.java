@@ -6,6 +6,7 @@ import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.repositories.AuditRecordRepository;
 import es.in2.desmos.domain.services.api.impl.AuditRecordServiceImpl;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
+import es.in2.desmos.infrastructure.configs.ApiConfig;
 import es.in2.desmos.objectmothers.AuditRecordMother;
 import es.in2.desmos.objectmothers.EntityMother;
 import es.in2.desmos.objectmothers.MVAuditServiceEntity4DataNegotiationMother;
@@ -40,6 +41,9 @@ class AuditRecordServiceTests {
 
     @Mock
     private BrokerPublisherService brokerPublisherService;
+
+    @Mock
+    private ApiConfig apiConfig;
 
     @SuppressWarnings("CanBeFinal")
     @Spy
@@ -618,6 +622,12 @@ class AuditRecordServiceTests {
 
         when(auditRecordRepository.findMostRecentAuditRecord())
                 .thenReturn(Mono.just(new AuditRecord()));
+
+        when(auditRecordRepository.findMostRecentAuditRecord())
+                .thenReturn(Mono.just(new AuditRecord()));
+
+        when(apiConfig.getExternalDomain())
+                .thenReturn("http://my-external-domain.org");
 
         when(auditRecordRepository.save(any()))
                 .thenReturn(Mono.just(AuditRecordMother.list3EqualsHashAndHashLinkAnd4().get(0)));
