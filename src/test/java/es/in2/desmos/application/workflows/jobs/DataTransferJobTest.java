@@ -5,10 +5,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.application.workflows.jobs.impl.DataTransferJobImpl;
 import es.in2.desmos.domain.exceptions.InvalidSyncResponseException;
-import es.in2.desmos.domain.models.DataNegotiationResult;
-import es.in2.desmos.domain.models.Entity;
-import es.in2.desmos.domain.models.Id;
-import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
+import es.in2.desmos.domain.models.*;
+import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.sync.EntitySyncWebClient;
 import es.in2.desmos.objectmothers.*;
 import org.json.JSONException;
@@ -38,12 +36,18 @@ class DataTransferJobTest {
     @Mock
     private DataVerificationJob dataVerificationJob;
 
+    @Mock
+    private AuditRecordService auditRecordService;
+
     @SuppressWarnings("CanBeFinal")
     @Spy
     private static ObjectMapper objectMapper = new ObjectMapper();
 
     @Captor
     private ArgumentCaptor<Mono<String>> monoIssuerCaptor;
+
+    @Captor
+    private ArgumentCaptor<MVAuditServiceEntity4DataNegotiation> mvAuditServiceCaptor;
 
     @Captor
     private ArgumentCaptor<Mono<Id[]>> entitySyncRequestCaptor;
@@ -83,6 +87,7 @@ class DataTransferJobTest {
                     }
                 });
 
+        when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any())).thenReturn(Mono.empty());
         when(dataVerificationJob.verifyData(eq(processId), any(), any(), any(), any(), any())).thenReturn(Mono.empty());
 
         Mono<Void> result = dataTransferJob.syncDataFromList(processId, Mono.just(dataNegotiationResults));
@@ -140,6 +145,8 @@ class DataTransferJobTest {
         String processId = "0";
         when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
 
+        when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any())).thenReturn(Mono.empty());
+
         when(dataVerificationJob.verifyData(eq(processId), any(), any(), any(), any(), any())).thenReturn(Mono.empty());
 
         Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
@@ -175,6 +182,8 @@ class DataTransferJobTest {
 
         String processId = "0";
         when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
+
+        when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any())).thenReturn(Mono.empty());
 
         when(dataVerificationJob.verifyData(eq(processId), any(), any(), any(), any(), any())).thenReturn(Mono.empty());
 
@@ -328,6 +337,8 @@ class DataTransferJobTest {
         String processId = "0";
         when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
 
+        when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any())).thenReturn(Mono.empty());
+
         when(dataVerificationJob.verifyData(eq(processId), any(), any(), any(), any(), any())).thenReturn(Mono.empty());
 
         Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
@@ -362,5 +373,38 @@ class DataTransferJobTest {
         verifyNoInteractions(entitySyncWebClient);
         verifyNoInteractions(dataVerificationJob);
         verifyNoInteractions(objectMapper);
+    }
+
+    @Test
+    void itShouldCreateReceivedAuditRecord() throws JSONException, NoSuchAlgorithmException, IOException {
+        String processId = "0";
+
+        when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(Mono.just(EntitySyncResponseMother.getSampleBase64()));
+
+        when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any())).thenReturn(Mono.empty());
+
+        when(dataVerificationJob.verifyData(eq(processId), any(), any(), any(), any(), any())).thenReturn(Mono.empty());
+
+        DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
+
+        var expectedMvAuditRecord = List.of(
+                new MVAuditServiceEntity4DataNegotiation(MVEntity4DataNegotiationMother.sample1().id(), MVEntity4DataNegotiationMother.sample1().type(), "", ""),
+                new MVAuditServiceEntity4DataNegotiation(MVEntity4DataNegotiationMother.sample2().id(), MVEntity4DataNegotiationMother.sample2().type(), "", ""),
+                new MVAuditServiceEntity4DataNegotiation(MVEntity4DataNegotiationMother.sample3().id(), MVEntity4DataNegotiationMother.sample3().type(), "", ""),
+                new MVAuditServiceEntity4DataNegotiation(MVEntity4DataNegotiationMother.sample4().id(), MVEntity4DataNegotiationMother.sample4().type(), "", ""));
+
+
+        dataTransferJob.syncData(processId, Mono.just(dataNegotiationResult)).block();
+
+        verify(auditRecordService, times(4))
+                .buildAndSaveAuditRecordFromDataSync(
+                        eq(processId),
+                        eq(dataNegotiationResult.issuer()),
+                        mvAuditServiceCaptor.capture(),
+                        eq(AuditRecordStatus.RECEIVED));
+
+        var mvAuditServiceCaptorResult = mvAuditServiceCaptor.getAllValues();
+
+        assertThat(mvAuditServiceCaptorResult).isEqualTo(expectedMvAuditRecord);
     }
 }

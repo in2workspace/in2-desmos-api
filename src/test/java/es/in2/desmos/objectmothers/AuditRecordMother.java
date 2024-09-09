@@ -12,13 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static es.in2.desmos.domain.utils.ApplicationConstants.HASHLINK_PREFIX;
-
 public final class AuditRecordMother {
     private AuditRecordMother() {
     }
 
-    public static AuditRecord createAuditRecordFromMVEntity4DataNegotiation(String baseUri, MVEntity4DataNegotiation mvEntity4DataNegotiation, AuditRecordStatus auditRecordStatus) {
+    public static AuditRecord createAuditRecordFromMVEntity4DataNegotiation(MVEntity4DataNegotiation mvEntity4DataNegotiation, AuditRecordStatus auditRecordStatus) {
         String processId = "0";
         return AuditRecord.builder()
                 .id(UUID.randomUUID())
@@ -28,7 +26,7 @@ public final class AuditRecordMother {
                 .entityType(mvEntity4DataNegotiation.type())
                 .entityHash(mvEntity4DataNegotiation.hash())
                 .entityHashLink(mvEntity4DataNegotiation.hashlink())
-                .dataLocation(baseUri + "/api/v1/entities/" + mvEntity4DataNegotiation.id() + HASHLINK_PREFIX + mvEntity4DataNegotiation.hashlink())
+                .dataLocation("")
                 .status(auditRecordStatus)
                 .trader(AuditRecordTrader.CONSUMER)
                 .hash("")
@@ -37,7 +35,7 @@ public final class AuditRecordMother {
                 .build();
     }
 
-    public static AuditRecord createAuditRecordFromMVAuditServiceEntity4DataNegotiation(String baseUri, MVAuditServiceEntity4DataNegotiation mvAuditServiceEntity4DataNegotiation, AuditRecordStatus auditRecordStatus) {
+    public static AuditRecord createAuditRecordFromMVAuditServiceEntity4DataNegotiation(MVAuditServiceEntity4DataNegotiation mvAuditServiceEntity4DataNegotiation, AuditRecordStatus auditRecordStatus) {
         String processId = "0";
         return AuditRecord.builder()
                 .id(UUID.randomUUID())
@@ -47,7 +45,7 @@ public final class AuditRecordMother {
                 .entityType(mvAuditServiceEntity4DataNegotiation.type())
                 .entityHash(mvAuditServiceEntity4DataNegotiation.hash())
                 .entityHashLink(mvAuditServiceEntity4DataNegotiation.hashlink())
-                .dataLocation(baseUri + "/api/v1/entities/" + mvAuditServiceEntity4DataNegotiation.id() + HASHLINK_PREFIX + mvAuditServiceEntity4DataNegotiation.hashlink())
+                .dataLocation("")
                 .status(auditRecordStatus)
                 .trader(AuditRecordTrader.CONSUMER)
                 .hash("")

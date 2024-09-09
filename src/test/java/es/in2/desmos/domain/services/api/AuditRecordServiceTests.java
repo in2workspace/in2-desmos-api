@@ -139,7 +139,7 @@ class AuditRecordServiceTests {
         String issuer = "http://example.org";
         MVAuditServiceEntity4DataNegotiation mvAuditServiceEntity4DataNegotiation = MVAuditServiceEntity4DataNegotiationMother.sample1();
         AuditRecordStatus status = AuditRecordStatus.RETRIEVED;
-        AuditRecord expectedAuditRecord = AuditRecordMother.createAuditRecordFromMVAuditServiceEntity4DataNegotiation("http://example.org", mvAuditServiceEntity4DataNegotiation, status);
+        AuditRecord expectedAuditRecord = AuditRecordMother.createAuditRecordFromMVAuditServiceEntity4DataNegotiation(mvAuditServiceEntity4DataNegotiation, status);
 
         when(auditRecordRepository.findMostRecentAuditRecord()).thenReturn(Mono.just(new AuditRecord()));
         when(auditRecordRepository.save(any())).thenReturn(Mono.just(expectedAuditRecord));

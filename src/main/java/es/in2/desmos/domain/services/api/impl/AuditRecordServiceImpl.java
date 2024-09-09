@@ -163,7 +163,6 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                     try {
                         String entityHash = mvAuditServiceEntity4DataNegotiation.hash();
                         String entityHashLink = mvAuditServiceEntity4DataNegotiation.hashlink();
-                        String dataLocation = getDataLocationForProducedEntity(issuer, mvAuditServiceEntity4DataNegotiation);
 
                         AuditRecord auditRecord =
                                 AuditRecord.builder()
@@ -174,7 +173,7 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                                         .entityType(mvAuditServiceEntity4DataNegotiation.type())
                                         .entityHash(entityHash)
                                         .entityHashLink(entityHashLink)
-                                        .dataLocation(dataLocation)
+                                        .dataLocation("")
                                         .status(status)
                                         .trader(AuditRecordTrader.CONSUMER)
                                         .hash("")

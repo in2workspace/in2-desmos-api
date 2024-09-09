@@ -9,12 +9,14 @@ import es.in2.desmos.application.workflows.jobs.DataTransferJob;
 import es.in2.desmos.application.workflows.jobs.DataVerificationJob;
 import es.in2.desmos.domain.exceptions.InvalidSyncResponseException;
 import es.in2.desmos.domain.models.*;
+import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.sync.EntitySyncWebClient;
 import es.in2.desmos.domain.utils.ApplicationUtils;
 import es.in2.desmos.domain.utils.Base64Converter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.security.NoSuchAlgorithmException;
@@ -32,6 +34,7 @@ public class DataTransferJobImpl implements DataTransferJob {
     private final EntitySyncWebClient entitySyncWebClient;
     private final DataVerificationJob dataVerificationJob;
     private final ObjectMapper objectMapper;
+    private final AuditRecordService auditRecordService;
 
     @Override
     public Mono<Void> syncDataFromList(String processId, Mono<List<DataNegotiationResult>> dataNegotiationResult) {
@@ -84,7 +87,8 @@ public class DataTransferJobImpl implements DataTransferJob {
                                                             Mono.just(result.existingEntitiesToSync())
                                                     );
 
-                                                    return validateIntegrity(entitiesByIdMono, entitiesHashAndHashlinkById)
+                                                    return createReceivedAuditRecords(processId, issuer, decodedEntitySyncResponseMono)
+                                                            .then(validateIntegrity(entitiesByIdMono, entitiesHashAndHashlinkById))
                                                             .flatMap(validIds -> {
                                                                 Mono<List<Id>> validIdsMono = Mono.just(validIds);
                                                                 return filterEntitiesById(entitiesByIdMono, validIdsMono)
@@ -100,6 +104,47 @@ public class DataTransferJobImpl implements DataTransferJob {
                 return Mono.empty();
             }
         });
+    }
+
+    private Mono<Void> createReceivedAuditRecords(String processId, Mono<String> issuerMono, Mono<String> entitiesArrayJsonMono) {
+        return entitiesArrayJsonMono
+                .flatMap(entitiesArrayJson -> {
+                    try {
+                        JsonNode entitiesJsonNode = objectMapper.readTree(entitiesArrayJson);
+
+                        if (!entitiesJsonNode.isArray()) {
+                            return Mono.error(new InvalidSyncResponseException(INVALID_ENTITY_SYNC_RESPONSE));
+                        }
+
+                        return Flux.fromIterable(entitiesJsonNode)
+                                .flatMap(entityNode -> {
+                                    if (!entityNode.has("id") || !entityNode.has("type")) {
+                                        return Mono.error(new InvalidSyncResponseException(INVALID_ENTITY_SYNC_RESPONSE));
+                                    }
+
+                                    String entityId = entityNode.get("id").asText();
+                                    String entityType = entityNode.get("type").asText();
+
+                                    var mvAuditService = new MVAuditServiceEntity4DataNegotiation(
+                                            entityId,
+                                            entityType,
+                                            "",
+                                            "");
+
+                                    return issuerMono.flatMap(issuer ->
+                                            auditRecordService
+                                                    .buildAndSaveAuditRecordFromDataSync(
+                                                            processId,
+                                                            issuer,
+                                                            mvAuditService,
+                                                            AuditRecordStatus.RECEIVED));
+                                })
+                                .collectList()
+                                .then();
+                    } catch (JsonProcessingException e) {
+                        return Mono.error(e);
+                    }
+                });
     }
 
     private Mono<String> decodeEntitySyncResponse(Mono<String> entitySyncResponseMono) {

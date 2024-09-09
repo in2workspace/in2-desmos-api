@@ -59,10 +59,10 @@ class AuditRecordServiceIT {
                 .create(result)
                 .verifyComplete();
 
-        assertAuditRecordEntityIsExpected(mvAuditServiceEntity4DataNegotiationMother.id(), MVEntity4DataNegotiationMother.sample1(), issuer);
+        assertAuditRecordEntityIsExpected(mvAuditServiceEntity4DataNegotiationMother.id(), MVEntity4DataNegotiationMother.sample1());
     }
 
-    private void assertAuditRecordEntityIsExpected(String entityId, MVEntity4DataNegotiation expectedMVEntity4DataNegotiation, String baseUri) {
+    private void assertAuditRecordEntityIsExpected(String entityId, MVEntity4DataNegotiation expectedMVEntity4DataNegotiation) {
         await().atMost(10, TimeUnit.SECONDS).ignoreExceptions().until(() -> {
             String processId = "0";
             Mono<AuditRecord> auditRecordMono = auditRecordService.findLatestAuditRecordForEntity(processId, entityId);
@@ -72,7 +72,7 @@ class AuditRecordServiceIT {
                     .consumeNextWith(auditRecord -> {
                         System.out.println("Entity audit record AuditRecord entity check: " + auditRecord);
 
-                        AuditRecord expectedAuditRecord = AuditRecordMother.createAuditRecordFromMVEntity4DataNegotiation(baseUri, expectedMVEntity4DataNegotiation, AuditRecordStatus.PUBLISHED);
+                        AuditRecord expectedAuditRecord = AuditRecordMother.createAuditRecordFromMVEntity4DataNegotiation(expectedMVEntity4DataNegotiation, AuditRecordStatus.PUBLISHED);
 
                         assertThat(auditRecord)
                                 .usingRecursiveComparison()
