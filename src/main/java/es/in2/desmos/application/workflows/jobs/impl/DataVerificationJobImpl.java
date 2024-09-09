@@ -57,7 +57,7 @@ public class DataVerificationJobImpl implements DataVerificationJob {
                     return idMonoList
                             .flatMapIterable(list -> list)
                             .flatMap(id -> auditRecordService
-                                    .findLatestAuditRecordForEntity(processId, id.id())
+                                    .findLatestConsumerPublishedAuditRecordByEntityId(processId, id.id())
                                     .flatMap(auditRecord -> {
                                         String entityData = rcvdEntity.get(id).value();
                                         Mono<String> entityDataMono = Mono.just(entityData);
@@ -141,7 +141,7 @@ public class DataVerificationJobImpl implements DataVerificationJob {
 
     private Mono<String> getHashLinkForNewSubEntity(String processId, Mono<String> hashMono, Mono<String> idMono) {
         return idMono.flatMap(entityId ->
-                auditRecordService.findLatestAuditRecordForEntity(processId, entityId)
+                auditRecordService.findLatestConsumerPublishedAuditRecordByEntityId(processId, entityId)
                         .filter(auditRecord -> auditRecord.getEntityId().equals(entityId))
                         .map(AuditRecord::getEntityHashLink)
                         .switchIfEmpty(hashMono)

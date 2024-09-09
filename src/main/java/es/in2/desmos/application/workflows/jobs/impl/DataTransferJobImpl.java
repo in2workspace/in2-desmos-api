@@ -88,10 +88,10 @@ public class DataTransferJobImpl implements DataTransferJob {
                                                     );
 
                                                     return createReceivedAuditRecords(processId, issuer, decodedEntitySyncResponseMono)
-                                                            .then(getInconsistentEntitiesIds(entitiesByIdMono, entitiesHashAndHashlinkById))
-                                                            .flatMap(inconsistentEntitiesIds -> {
-                                                                Mono<List<Id>> incosistentEntitiesIdsMono = Mono.just(inconsistentEntitiesIds);
-                                                                return filterEntitiesById(entitiesByIdMono, incosistentEntitiesIdsMono)
+                                                            .then(getInvalidIntegrityEntitiesIds(entitiesByIdMono, entitiesHashAndHashlinkById))
+                                                            .flatMap(invalidIntegrityEntitiesIds -> {
+                                                                Mono<List<Id>> invalidIntegrityEntitiesIdsMono = Mono.just(invalidIntegrityEntitiesIds);
+                                                                return filterEntitiesById(entitiesByIdMono, invalidIntegrityEntitiesIdsMono)
                                                                         .flatMap(filteredEntitiesById -> {
                                                                             Mono<Map<Id, Entity>> filteredEntitiesByIdMono = Mono.just(filteredEntitiesById);
                                                                             return dataVerificationJob.verifyData(processId, issuer, filteredEntitiesByIdMono, mvEntities4DataNegotiation, existingEntitiesHashAndHashLinkById);
@@ -233,7 +233,7 @@ public class DataTransferJobImpl implements DataTransferJob {
                 });
     }
 
-    private Mono<List<Id>> getInconsistentEntitiesIds(Mono<Map<Id, Entity>> entitiesByIdMono, Mono<Map<Id, HashAndHashLink>> allEntitiesExistingValidationDataById) {
+    private Mono<List<Id>> getInvalidIntegrityEntitiesIds(Mono<Map<Id, Entity>> entitiesByIdMono, Mono<Map<Id, HashAndHashLink>> allEntitiesExistingValidationDataById) {
         return allEntitiesExistingValidationDataById
                 .flatMapIterable(Map::entrySet)
                 .flatMap(entry -> {
@@ -265,12 +265,12 @@ public class DataTransferJobImpl implements DataTransferJob {
         });
     }
 
-    private Mono<Map<Id, Entity>> filterEntitiesById(Mono<Map<Id, Entity>> entitiesByIdMono, Mono<List<Id>> incosistentEntitiesIdsMono) {
-        return incosistentEntitiesIdsMono.flatMap(inconsistentEntitiesIds ->
+    private Mono<Map<Id, Entity>> filterEntitiesById(Mono<Map<Id, Entity>> entitiesByIdMono, Mono<List<Id>> invalidIntegrityEntitiesIdsMono) {
+        return invalidIntegrityEntitiesIdsMono.flatMap(invalidIntegrityEntitiesIds ->
                 entitiesByIdMono.map(entitiesById ->
                         entitiesById.entrySet()
                                 .stream()
-                                .filter(entry -> !inconsistentEntitiesIds.contains(entry.getKey()))
+                                .filter(entry -> !invalidIntegrityEntitiesIds.contains(entry.getKey()))
                                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
                 )
         );
