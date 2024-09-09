@@ -20,7 +20,7 @@ public interface AuditRecordService {
 
     Mono<AuditRecord> getLastPublishedAuditRecordForProducerByEntityId(String processId, String entityId);
 
-    Mono<String> fetchLatestProducerEntityHashByEntityId(String processId, String entityId);
+    Mono<String> fetchLatestProducerEntityHashLinkByEntityId(String processId, String entityId);
 
     Mono<AuditRecord> findLatestConsumerPublishedAuditRecordByEntityId(String processId, String entityId);
 

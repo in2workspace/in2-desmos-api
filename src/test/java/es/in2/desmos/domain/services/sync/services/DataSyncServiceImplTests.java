@@ -42,7 +42,7 @@ class DataSyncServiceImplTests {
             .dataLocation("http://scorpio:9090/ngsi-ld/v1/entities/urn:ngsi-ld:ProductOffering:122355255?hl=6d91b01418c21ccad12072d5f986bab2c99206bb08e65e5a430a35f7e60dcdbf")
             .relevantMetadata(Collections.emptyList())
             .entityId("0x4eb401aa1248b6a95c298d0747eb470b6ba6fc3f54ea630dc6c77f23ad1abe3e")
-            .previousEntityHash("0x6d91b01418c21ccad12072d5f986bab2c99206bb08e65e5a430a35f7e60dcdbf")
+            .previousEntityHashLink("0x6d91b01418c21ccad12072d5f986bab2c99206bb08e65e5a430a35f7e60dcdbf")
             .build();
     AuditRecord auditRecord = AuditRecord.builder()
             .id(UUID.randomUUID())
@@ -70,7 +70,7 @@ class DataSyncServiceImplTests {
             .dataLocation("http://scorpio:9090/ngsi-ld/v1/entities/urn:ngsi-ld:ProductOffering:122355255?hl=fcb394bb4f2da4abbf53ab7eb9b5b8257b7c6abe6c110f466f3ee947d057e579")
             .relevantMetadata(Collections.emptyList())
             .entityId("0x4eb401aa1248b6a95c298d0747eb470b6ba6fc3f54ea630dc6c77f23ad1abe3e")
-            .previousEntityHash("0xfcb394bb4f2da4abbf53ab7eb9b5b8257b7c6abe0c110f468f3ee947d057e579")
+            .previousEntityHashLink("0xfcb394bb4f2da4abbf53ab7eb9b5b8257b7c6abe0c110f468f3ee947d057e579")
             .build();
     String retrievedBrokerEntityMock = """
             {

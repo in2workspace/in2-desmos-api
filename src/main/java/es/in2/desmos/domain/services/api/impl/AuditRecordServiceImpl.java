@@ -239,10 +239,10 @@ public class AuditRecordServiceImpl implements AuditRecordService {
     }
 
     @Override
-    public Mono<String> fetchLatestProducerEntityHashByEntityId(String processId, String entityId) {
+    public Mono<String> fetchLatestProducerEntityHashLinkByEntityId(String processId, String entityId) {
         return getLastPublishedAuditRecordForProducerByEntityId(processId, entityId)
                 .flatMap(auditRecord -> auditRecord != null
-                        ? Mono.just(auditRecord.getEntityHash())
+                        ? Mono.just(auditRecord.getEntityHashLink())
                         : Mono.error(new NoSuchElementException()));
     }
 

@@ -243,18 +243,19 @@ class AuditRecordServiceTests {
     }
 
     @Test
-    void testFetchLatestProducerEntityHashByEntityId() {
+    void testFetchLatestProducerEntityHashLinkByEntityId() {
         //Arrange
         String processId = "processId";
         String entityId = "entityId";
         AuditRecord auditRecord = AuditRecord.builder()
                 .entityHash("entityHash")
+                .entityHashLink("entityHashLink")
                 .build();
         when(auditRecordService.getLastPublishedAuditRecordForProducerByEntityId(processId, entityId)).thenReturn(Mono.just(auditRecord));
         // Act
-        String actualEntityHash = auditRecordService.fetchLatestProducerEntityHashByEntityId(processId, entityId).block();
+        String actualEntityHashLink = auditRecordService.fetchLatestProducerEntityHashLinkByEntityId(processId, entityId).block();
         // Assert
-        assertEquals(auditRecord.getEntityHash(), actualEntityHash);
+        assertEquals(auditRecord.getEntityHashLink(), actualEntityHashLink);
     }
 
     @Test

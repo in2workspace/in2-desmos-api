@@ -124,7 +124,7 @@ class BlockchainDataSyncJobImplTests {
                 .dataLocation("http://scorpio:9090/ngsi-ld/v1/entities/urn:ngsi-ld:ProductOffering:122355255?hl=abbc168236d38354add74d65698f37941947127290cd40a90b4dbe7eb68d25c0")
                 .relevantMetadata(List.of())
                 .entityId("0x4eb401aa1248b6a95c298d0747eb470b6ba6fc3f54ea630dc6c77f23ad1abe3e")
-                .previousEntityHash("0xabbc168236d38354add74d65698f37941947127290cd40a90b4dbe7eb68d25c0")
+                .previousEntityHashLink("0xabbc168236d38354add74d65698f37941947127290cd40a90b4dbe7eb68d25c0")
                 .ethereumAddress("0x4eb401aa1248b6a95c298d0747eb470b6ba6fc3f54ea630dc6c77f23ad1abe3e")
                 .build();
         when(objectMapper.readValue(eq(blockchainNotificationJson), any(TypeReference.class))).thenReturn(Collections.singletonList(blockchainNotification));

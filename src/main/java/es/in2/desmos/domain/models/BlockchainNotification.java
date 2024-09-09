@@ -43,8 +43,8 @@ public record BlockchainNotification(
         String entityId,
 
         @JsonProperty("previousEntityHash")
-        @NotBlank(message = "previousEntityHash must not be blank")
-        String previousEntityHash,
+        @NotBlank(message = "previousEntityHashLink must not be blank")
+        String previousEntityHashLink,
 
         @JsonProperty("ethereumAddress")
         @NotBlank(message = "ethereumAddress must not be blank")

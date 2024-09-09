@@ -20,7 +20,7 @@ class BlockchainNotificationTests {
             "?hl=03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4";
     private final List<String> relevantMetadata = List.of("metadata1", "metadata2");
     private final String entityIdHash = "6f6468ded8276d009ab1b6c578c2b922053acd6b5a507f36d408d3f7c9ae91d0";
-    private final String previousEntityHash = "98d9658d98764dbe135b316f52a98116b4b02f9d7e57212aa86335c42a58539a"; //7283
+    private final String previousEntityHashLink = "98d9658d98764dbe135b316f52a98116b4b02f9d7e57212aa86335c42a58539a"; //7283
 
     @Test
     void testBuilderAndLombokGeneratedMethods() {
@@ -33,7 +33,7 @@ class BlockchainNotificationTests {
                 .dataLocation(dataLocation)
                 .relevantMetadata(relevantMetadata)
                 .entityId(entityIdHash)
-                .previousEntityHash(previousEntityHash)
+                .previousEntityHashLink(previousEntityHashLink)
                 .build();
         // Assert
         assertEquals(id, blockchainNotification.id());
@@ -43,7 +43,7 @@ class BlockchainNotificationTests {
         assertEquals(dataLocation, blockchainNotification.dataLocation());
         assertEquals(relevantMetadata, blockchainNotification.relevantMetadata());
         assertEquals(entityIdHash, blockchainNotification.entityId());
-        assertEquals(previousEntityHash, blockchainNotification.previousEntityHash());
+        assertEquals(previousEntityHashLink, blockchainNotification.previousEntityHashLink());
     }
 
     @Test
@@ -67,7 +67,7 @@ class BlockchainNotificationTests {
                 .dataLocation(dataLocation)
                 .relevantMetadata(relevantMetadata)
                 .entityId(entityIdHash)
-                .previousEntityHash(previousEntityHash)
+                .previousEntityHashLink(previousEntityHashLink)
                 .build();
         // Act
         String result = blockchainNotification.toString();
@@ -79,7 +79,7 @@ class BlockchainNotificationTests {
         assertTrue(result.contains("dataLocation=" + dataLocation));
         assertTrue(result.contains("relevantMetadata=" + relevantMetadata));
         assertTrue(result.contains("entityId=" + entityIdHash));
-        assertTrue(result.contains("previousEntityHash=" + previousEntityHash));
+        assertTrue(result.contains("previousEntityHashLink=" + previousEntityHashLink));
     }
 
     @Test
@@ -93,7 +93,7 @@ class BlockchainNotificationTests {
                 + ", dataLocation=" + dataLocation
                 + ", relevantMetadata=" + relevantMetadata
                 + ", entityId=" + entityIdHash
-                + ", previousEntityHash=" + previousEntityHash
+                + ", previousEntityHashLink=" + previousEntityHashLink
                 + ", ethereumAddress=" + ethereumAddress + ")";
         // Act
         BlockchainNotification.BlockchainNotificationBuilder blockchainNotificationBuilder = BlockchainNotification.builder()
@@ -104,7 +104,7 @@ class BlockchainNotificationTests {
                 .dataLocation(dataLocation)
                 .relevantMetadata(relevantMetadata)
                 .entityId(entityIdHash)
-                .previousEntityHash(previousEntityHash)
+                .previousEntityHashLink(previousEntityHashLink)
                 .ethereumAddress(ethereumAddress);
         // Assert
         assertEquals(expectedToString, blockchainNotificationBuilder.toString());

@@ -45,7 +45,7 @@
 //                                                .eventType(event.getEntityType())
 //                                                .dataLocation(event.getDatalocation())
 //                                                .entityId(ApplicationUtils.HASH_PREFIX + ApplicationUtils.calculateSHA256(event.getEntityId()))
-//                                                .previousEntityHash(event.getPreviousEntityHash())
+//                                                .previousEntityHashLink(event.getPreviousEntityHash())
 //                                                .organizationIdentifier(event.getOrganizationId())
 //                                                .metadata(List.of())
 //                                                .build();
@@ -85,7 +85,7 @@
 //                                            .timestamp(entity.getTimestamp())
 //                                            .eventType(entity.getEntityType())
 //                                            .entityId(entity.getEntityId())
-//                                            .previousEntityHash(entity.getPreviousEntityHash())
+//                                            .previousEntityHashLink(entity.getPreviousEntityHash())
 //                                            .build();
 //                                    return dataRetrievalQueue.enqueueEvent(EventQueue.builder()
 //                                            .event(List.of(blkNotification, entity.getEntity()))

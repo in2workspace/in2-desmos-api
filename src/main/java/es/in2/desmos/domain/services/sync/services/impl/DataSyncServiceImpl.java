@@ -109,10 +109,10 @@ public class DataSyncServiceImpl implements DataSyncService {
         try {
             // Get the hash of the retrieved entity
             String retrievedEntityHash = calculateSHA256(retrievedBrokerEntity);
-            // To verify the data integrity: hash(previousEntityHash + retrievedEntityHash) = dataLocationHashLink
-            String previousEntityHash = blockchainNotification.previousEntityHash().substring(2);
+            // To verify the data integrity: hash(previousEntityHashLink + retrievedEntityHash) = dataLocationHashLink
+            String previousEntityHashLink = blockchainNotification.previousEntityHashLink().substring(2);
             String dataLocationHashLink = extractHashLinkFromDataLocation(blockchainNotification.dataLocation());
-            if (dataLocationHashLink.equals(previousEntityHash)) {
+            if (dataLocationHashLink.equals(previousEntityHashLink)) {
                 // It is the first entity in the chain, and we need to verify that
                 // the hash of the retrieved entity is equal to the hash in the dataLocation
                 if (!retrievedEntityHash.equals(dataLocationHashLink)) {
@@ -123,7 +123,7 @@ public class DataSyncServiceImpl implements DataSyncService {
                 // It is not the first entity in the chain, and we need to verify that
                 // the hash of the retrieved entity plus the previousEntitytHash is equal
                 // to the hashLink in the dataLocation
-                String calculatedEntityHasLink = calculateHashLink(previousEntityHash, retrievedEntityHash);
+                String calculatedEntityHasLink = calculateHashLink(previousEntityHashLink, retrievedEntityHash);
                 if (!calculatedEntityHasLink.equals(dataLocationHashLink)) {
                     log.error("ProcessID: {} - Error occurred while verifying the data integrity of the retrieved entity: HashLink verification failed", processId);
                     return Mono.error(new HashLinkException("HashLink verification failed"));
@@ -157,7 +157,7 @@ public class DataSyncServiceImpl implements DataSyncService {
     }
 
     private Mono<String> verifyDataConsistency(String processId, AuditRecord auditRecord, BlockchainNotification blockchainNotification, String retrievedBrokerEntity) {
-        String previousEntityHash = blockchainNotification.previousEntityHash().substring(2);
+        String previousEntityHash = blockchainNotification.previousEntityHashLink().substring(2);
         if (auditRecord.getEntityHashLink().equals(previousEntityHash)) {
             log.info("ProcessID: {} - Data consistency verification passed successfully", processId);
             return Mono.just(retrievedBrokerEntity);

@@ -68,7 +68,7 @@ class PublishWorkflowTests {
         when(eventQueueMock.getEvent()).thenReturn(List.of(brokerNotification));
         when(pendingPublishEventsQueue.getEventStream()).thenReturn(Flux.just(eventQueueMock));
         when(eventQueueMock.getEvent().get(0)).thenReturn(List.of(brokerNotification));
-        when(auditRecordService.fetchLatestProducerEntityHashByEntityId(processId, "123")).thenReturn(Mono.empty());
+        when(auditRecordService.fetchLatestProducerEntityHashLinkByEntityId(processId, "123")).thenReturn(Mono.empty());
         when(blockchainTxPayloadFactory.calculatePreviousHashIfEmpty(eq(processId), any())).thenReturn(Mono.just(previousHash));
         when(blockchainTxPayloadFactory.buildBlockchainTxPayload(anyString(), anyMap(), anyString()))
                 .thenReturn(Mono.just(blockchainTxPayload));
