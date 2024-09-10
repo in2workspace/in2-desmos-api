@@ -164,7 +164,7 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
 
                                             return new MVEntity4DataNegotiation(
                                                             entityId,
-                                                            mvBrokerEntity.getType(),
+                                                            entityType,
                                                             mvBrokerEntity.getVersion(),
                                                             mvBrokerEntity.getLastUpdate(),
                                                             mvBrokerEntity.getLifecycleStatus(),
