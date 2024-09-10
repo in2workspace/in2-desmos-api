@@ -74,6 +74,8 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                             .map(resultList -> {
                                 log.debug("ProcessID: {} - Get DiscoverySync Response. [issuer={}, response={}]", processId, externalAccessNode, resultList);
 
+                                System.out.println("AAA DiscoverySync Response: " + resultList);
+
                                 Issuer issuer = new Issuer(externalAccessNode);
 
                                 var filteredEntitiesByType =
