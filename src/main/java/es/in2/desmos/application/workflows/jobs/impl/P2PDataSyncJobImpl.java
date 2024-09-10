@@ -99,6 +99,7 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                 .concatMap(entityType ->
                         createLocalMvEntitiesByType(processId, entityType)
                                 .flatMap(localMvEntities4DataNegotiation -> {
+                                    System.out.println("AAA Local Entities: " + localMvEntities4DataNegotiation);
                                     log.debug("ProcessID: {} - Local MV Entities 4 Data Negotiation: {}", processId, localMvEntities4DataNegotiation);
 
                                     return externalMvEntities4DataNegotiationMono
@@ -141,11 +142,13 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
         return brokerPublisherService.findAllIdTypeAndAttributesByType(processId, entityType, "lastUpdate", "version", "lifecycleStatus", "validFor", BrokerEntityWithIdTypeLastUpdateAndVersion[].class)
                 .flatMap(mvBrokerEntities -> {
                     log.debug("ProcessID: {} - MV Broker Entities 4 Data Negotiation: {}", processId, mvBrokerEntities);
+                    System.out.println("AAA Broker Entities: " + mvBrokerEntities);
 
                     Mono<List<String>> entitiesIdsMono = getEntitiesIds(Mono.just(mvBrokerEntities));
 
                     return auditRecordService.findCreateOrUpdateAuditRecordsByEntityIds(processId, entityType, entitiesIdsMono)
                             .flatMap(mvAuditEntities -> {
+                                System.out.println("AAA AuditServices: " + mvAuditEntities);
 
                                 log.debug("ProcessID: {} - MV Audit Service Entities 4 Data Negotiation: {}", processId, mvAuditEntities);
 
