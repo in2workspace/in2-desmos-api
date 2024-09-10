@@ -9,6 +9,7 @@ import es.in2.desmos.domain.models.BlockchainNotification;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.sync.services.impl.DataSyncServiceImpl;
 import es.in2.desmos.infrastructure.configs.ApiConfig;
+import es.in2.desmos.infrastructure.security.JwtTokenProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -99,6 +100,10 @@ class DataSyncServiceImplTests {
     private AuditRecordService auditRecordService;
     @Mock
     private WebClient webClientMock;
+
+    @Mock
+    private JwtTokenProvider jwtTokenProvider;
+
     @InjectMocks
     private DataSyncServiceImpl dataSyncService;
 
@@ -157,6 +162,7 @@ class DataSyncServiceImplTests {
         Mono<String> monoMockResponse = Mono.just(mockResponse);
 
         when(apiConfig.webClient()).thenReturn(webClientMock);
+        when(apiConfig.getExternalDomain()).thenReturn("http://my-domain.org");
         when(webClientMock.get()).thenReturn(webClientRequestHeadersUriSpecMock);
         when(webClientRequestHeadersUriSpecMock.uri(anyString())).thenReturn(webClientRequestHeadersSpecMock);
         when(webClientRequestHeadersSpecMock.accept(any(MediaType.class))).thenReturn(webClientRequestHeadersSpecMock);
@@ -183,6 +189,7 @@ class DataSyncServiceImplTests {
         Mono<String> monoMockResponse = Mono.just(mockResponse);
 
         when(apiConfig.webClient()).thenReturn(webClientMock);
+        when(apiConfig.getExternalDomain()).thenReturn("http://my-domain.org");
         when(webClientMock.get()).thenReturn(webClientRequestHeadersUriSpecMock);
         when(webClientRequestHeadersUriSpecMock.uri(anyString())).thenReturn(webClientRequestHeadersSpecMock);
         when(webClientRequestHeadersSpecMock.accept(any(MediaType.class))).thenReturn(webClientRequestHeadersSpecMock);
@@ -214,6 +221,7 @@ class DataSyncServiceImplTests {
     void getEntityFromExternalSource_WhenStatusIs4xx() {
         //Arrange
         when(apiConfig.webClient()).thenReturn(webClientMock);
+        when(apiConfig.getExternalDomain()).thenReturn("http://my-domain.org");
         when(webClientMock.get()).thenReturn(webClientRequestHeadersUriSpecMock);
         when(webClientRequestHeadersUriSpecMock.uri(anyString())).thenReturn(webClientRequestHeadersSpecMock);
         when(webClientRequestHeadersSpecMock.accept(any(MediaType.class))).thenReturn(webClientRequestHeadersSpecMock);
@@ -240,6 +248,7 @@ class DataSyncServiceImplTests {
     void getEntityFromExternalSource_WhenStatusIs5xx() {
         //Arrange
         when(apiConfig.webClient()).thenReturn(webClientMock);
+        when(apiConfig.getExternalDomain()).thenReturn("http://my-domain.org");
         when(webClientMock.get()).thenReturn(webClientRequestHeadersUriSpecMock);
         when(webClientRequestHeadersUriSpecMock.uri(anyString())).thenReturn(webClientRequestHeadersSpecMock);
         when(webClientRequestHeadersSpecMock.accept(any(MediaType.class))).thenReturn(webClientRequestHeadersSpecMock);
