@@ -172,17 +172,17 @@ class P2PDataSyncJobTests {
         }
         Mono<List<String>> localEntitiesMono = Mono.just(localEntities);
 
-        List<String> expectedLocalEntities = new ArrayList<>();
+        List<Entity> expectedLocalEntities = new ArrayList<>();
         for (var item : localEntities) {
             String encodedItem = Base64.getEncoder().encodeToString(item.getBytes());
 
-            expectedLocalEntities.add(encodedItem);
+            expectedLocalEntities.add(new Entity(encodedItem));
         }
 
         String processId = "0";
         when(brokerPublisherService.findAllById(eq(processId), any(), any())).thenReturn(localEntitiesMono);
 
-        Mono<List<String>> result = p2PDataSyncJob.getLocalEntitiesByIdInBase64(processId, idsMono);
+        Mono<List<Entity>> result = p2PDataSyncJob.getLocalEntitiesByIdInBase64(processId, idsMono);
 
         System.out.println(expectedLocalEntities);
 

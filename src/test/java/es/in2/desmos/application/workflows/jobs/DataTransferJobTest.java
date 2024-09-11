@@ -1,10 +1,7 @@
 package es.in2.desmos.application.workflows.jobs;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.application.workflows.jobs.impl.DataTransferJobImpl;
-import es.in2.desmos.domain.exceptions.InvalidSyncResponseException;
 import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.sync.EntitySyncWebClient;
@@ -15,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -62,8 +60,6 @@ class DataTransferJobTest {
     @Captor
     private ArgumentCaptor<Mono<Map<Id, Entity>>> entitiesByIdCaptor;
 
-    private static int objectMapperReadTreeCounter = 0;
-
     @Test
     void itShouldRequestEntitiesToExternalAccessNodeFromMultipleIssuers() throws IOException, JSONException, NoSuchAlgorithmException {
         String issuer1 = "https://example1.org";
@@ -74,8 +70,8 @@ class DataTransferJobTest {
         Id[] entitySyncRequest1 = EntitySyncRequestMother.createFromDataNegotiationResult(dataNegotiationResults.get(0));
         Id[] entitySyncRequest2 = EntitySyncRequestMother.createFromDataNegotiationResult(dataNegotiationResults.get(1));
 
-        Mono<String> entitySyncResponseMono2 = Mono.just(EntitySyncResponseMother.getSample2Base64());
-        Mono<String> entitySyncResponseMono4 = Mono.just(EntitySyncResponseMother.getSample4Base64());
+        Flux<String> entitySyncResponseMono2 = Flux.fromIterable(EntitySyncResponseMother.getSample2Base64());
+        Flux<String> entitySyncResponseMono4 = Flux.fromIterable(EntitySyncResponseMother.getSample4Base64());
 
         String processId = "0";
         when(entitySyncWebClient.makeRequest(eq(processId), any(), any()))
@@ -144,7 +140,7 @@ class DataTransferJobTest {
                                 dataNegotiationResult.existingEntitiesToSync().stream().map(x -> new Id(x.id())))
                         .toArray(Id[]::new);
 
-        Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.getSampleBase64());
+        Flux<String> entitySyncResponseMono = Flux.fromIterable(EntitySyncResponseMother.getSampleBase64());
 
         String processId = "0";
         when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
@@ -182,7 +178,7 @@ class DataTransferJobTest {
         DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.badHash();
         Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
 
-        Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.getSampleBase64());
+        Flux<String> entitySyncResponseMono = Flux.fromIterable(EntitySyncResponseMother.getSampleBase64());
 
         String processId = "0";
         when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
@@ -216,119 +212,6 @@ class DataTransferJobTest {
     }
 
     @Test
-    void itShouldReturnBadEntitySyncResponseExceptionWhenSyncResponseJsonHasNotArray() throws IOException, JSONException, NoSuchAlgorithmException {
-        DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
-        Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
-
-        Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.getEmptySampleBase64());
-
-        String processId = "0";
-        when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
-
-        Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
-
-        StepVerifier.
-                create(result)
-                .expectErrorMatches(throwable -> throwable instanceof InvalidSyncResponseException &&
-                        throwable.getMessage().equals("Invalid EntitySync response.")
-                )
-                .verify();
-    }
-
-    @Test
-    void itShouldReturnInvalidSyncResponseExceptionWhenJsonArrayHasNotIdField() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
-        DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
-        Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
-
-        Mono<String> entitySyncResponseMono = Mono.just("{}");
-
-        String processId = "0";
-        when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
-
-        Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
-
-        StepVerifier.
-                create(result)
-                .expectErrorMatches(throwable -> throwable instanceof InvalidSyncResponseException &&
-                        throwable.getMessage().equals("Invalid EntitySync response.")
-                )
-                .verify();
-    }
-
-    @Test
-    void itShouldReturnJsonProcessingExceptionWhenDecodedJsonArrayIsNotArray() throws JsonProcessingException, JSONException, NoSuchAlgorithmException {
-        DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
-        Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
-
-        Mono<String> entitySyncResponseMono = Mono.just("{}");
-
-        String processId = "0";
-        when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
-
-        doAnswer(invocation -> {
-            if (objectMapperReadTreeCounter == 2) {
-                throw new JsonProcessingException("") {
-                };
-            } else {
-                objectMapperReadTreeCounter++;
-                return objectMapper.createArrayNode();
-            }
-        })
-                .when(objectMapper).readTree(anyString());
-
-        Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
-
-        StepVerifier.
-                create(result)
-                .expectErrorMatches(throwable -> throwable instanceof JsonProcessingException
-                )
-                .verify();
-    }
-
-    @Test
-    void itShouldReturnJsonProcessingExceptionWhenBadJsonInEntitySyncResponse() throws JsonProcessingException, JSONException, NoSuchAlgorithmException {
-        DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
-        Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
-
-        String processId = "0";
-        Mono<String> entitySyncResponseMono = Mono.just("invalid json");
-
-        when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
-
-        Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
-
-        StepVerifier.
-                create(result)
-                .expectErrorMatches(throwable -> throwable instanceof JsonProcessingException)
-                .verify();
-
-        verify(objectMapper, times(1)).readTree(anyString());
-    }
-
-    @Test
-    void itShouldReturnJsonProcessingExceptionWhenBadJsonSortingEntities() throws IOException, JSONException, NoSuchAlgorithmException {
-        DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
-        Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
-
-        String processId = "0";
-        String entitySyncResponse = EntitySyncResponseMother.getSampleBase64();
-        Mono<String> entitySyncResponseMono = Mono.just(entitySyncResponse);
-        JsonNode entitySyncResponseJsonNode = objectMapper.readTree(entitySyncResponse);
-
-        when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
-        when(objectMapper.readTree(anyString())).thenReturn(entitySyncResponseJsonNode).thenThrow(JsonProcessingException.class);
-
-        Mono<Void> result = dataTransferJob.syncData(processId, dataNegotiationResultMono);
-
-        StepVerifier.
-                create(result)
-                .expectErrorMatches(throwable -> throwable instanceof JsonProcessingException)
-                .verify();
-
-        verify(objectMapper, times(4)).readTree(anyString());
-    }
-
-    @Test
     void itShouldBuildAllMVEntities4DataNegotiation() throws IOException, JSONException, NoSuchAlgorithmException {
         DataNegotiationResult dataNegotiationResult = DataNegotiationResultMother.sample();
         Mono<DataNegotiationResult> dataNegotiationResultMono = Mono.just(dataNegotiationResult);
@@ -336,7 +219,7 @@ class DataTransferJobTest {
         var allMVEntities4DataNegotiation = Stream.concat(dataNegotiationResult.newEntitiesToSync().stream(), dataNegotiationResult.existingEntitiesToSync().stream()).toList();
         List<MVEntity4DataNegotiation> expectedMVEntities4DataNegotiation = new ArrayList<>(allMVEntities4DataNegotiation);
 
-        Mono<String> entitySyncResponseMono = Mono.just(EntitySyncResponseMother.getSampleBase64());
+        Flux<String> entitySyncResponseMono = Flux.fromIterable(EntitySyncResponseMother.getSampleBase64());
 
         String processId = "0";
         when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
@@ -383,7 +266,9 @@ class DataTransferJobTest {
     void itShouldCreateReceivedAuditRecord() throws JSONException, NoSuchAlgorithmException, IOException {
         String processId = "0";
 
-        when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(Mono.just(EntitySyncResponseMother.getSampleBase64()));
+        Flux<String> entitySyncResponseMono = Flux.fromIterable(EntitySyncResponseMother.getSampleBase64());
+
+        when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
 
         when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any())).thenReturn(Mono.empty());
 
@@ -416,7 +301,9 @@ class DataTransferJobTest {
     void itShouldFilterEntitiesWithBadHash() throws JSONException, NoSuchAlgorithmException, IOException {
         String processId = "0";
 
-        when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(Mono.just(EntitySyncResponseMother.getSampleBase64()));
+        Flux<String> entitySyncResponseMono = Flux.fromIterable(EntitySyncResponseMother.getSampleBase64());
+
+        when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
 
         when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any())).thenReturn(Mono.empty());
 
@@ -463,7 +350,9 @@ class DataTransferJobTest {
     void itShouldAddSubEntities() throws JSONException, NoSuchAlgorithmException, IOException {
         String processId = "0";
 
-        when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(Mono.just(EntitySyncResponseMother.getSampleWithCategoryBase64()));
+        Flux<String> entitySyncResponseMono = Flux.fromIterable(EntitySyncResponseMother.getSampleWithCategoryBase64());
+
+        when(entitySyncWebClient.makeRequest(eq(processId), any(), any())).thenReturn(entitySyncResponseMono);
 
         when(auditRecordService.buildAndSaveAuditRecordFromDataSync(any(), any(), any(), any())).thenReturn(Mono.empty());
 

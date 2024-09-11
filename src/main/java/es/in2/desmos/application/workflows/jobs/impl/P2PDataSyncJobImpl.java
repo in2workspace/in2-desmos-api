@@ -74,8 +74,6 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                             .map(resultList -> {
                                 log.debug("ProcessID: {} - Get DiscoverySync Response. [issuer={}, response={}]", processId, externalAccessNode, resultList);
 
-                                System.out.println("AAA DiscoverySync Response: " + resultList);
-
                                 Issuer issuer = new Issuer(externalAccessNode);
 
                                 var filteredEntitiesByType =
@@ -101,7 +99,6 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                 .concatMap(entityType ->
                         createLocalMvEntitiesByType(processId, entityType)
                                 .flatMap(localMvEntities4DataNegotiation -> {
-                                    System.out.println("AAA Local Entities: " + localMvEntities4DataNegotiation);
                                     log.debug("ProcessID: {} - Local MV Entities 4 Data Negotiation: {}", processId, localMvEntities4DataNegotiation);
 
                                     return externalMvEntities4DataNegotiationMono
@@ -126,12 +123,17 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
     }
 
     @Override
-    public Mono<List<String>> getLocalEntitiesByIdInBase64(String processId, Mono<List<Id>> ids) {
+    public Mono<List<Entity>> getLocalEntitiesByIdInBase64(String processId, Mono<List<Id>> ids) {
         return brokerPublisherService
                 .findAllById(processId, ids, new ArrayList<>())
                 .doOnSuccess(allEntitiesAndSubEntities ->
                         log.debug("ProcessID: {} - Found all local entities with sub-entities in Scorpio. [entities={}]", processId, allEntitiesAndSubEntities))
-                .map(Base64Converter::convertStringListToBase64List)
+                .flatMap(items -> {
+                    var entities = Base64Converter.convertStringListToBase64List(items);
+                    return Flux.fromIterable(entities)
+                            .map(Entity::new)
+                            .collectList();
+                })
                 .doOnSuccess(base64Entities ->
                         log.debug("ProcessID: {} - Convert all local entities with sub-entities in Scorpio to Base64. [entities={}]", processId, base64Entities));
     }
@@ -144,13 +146,11 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
         return brokerPublisherService.findAllIdTypeAndAttributesByType(processId, entityType, "lastUpdate", "version", "lifecycleStatus", "validFor", BrokerEntityWithIdTypeLastUpdateAndVersion[].class)
                 .flatMap(mvBrokerEntities -> {
                     log.debug("ProcessID: {} - MV Broker Entities 4 Data Negotiation: {}", processId, mvBrokerEntities);
-                    System.out.println("AAA Broker Entities: " + mvBrokerEntities);
 
                     Mono<List<String>> entitiesIdsMono = getEntitiesIds(Mono.just(mvBrokerEntities));
 
                     return auditRecordService.findCreateOrUpdateAuditRecordsByEntityIds(processId, entityType, entitiesIdsMono)
                             .flatMap(mvAuditEntities -> {
-                                System.out.println("AAA AuditServices: " + mvAuditEntities);
 
                                 log.debug("ProcessID: {} - MV Audit Service Entities 4 Data Negotiation: {}", processId, mvAuditEntities);
 

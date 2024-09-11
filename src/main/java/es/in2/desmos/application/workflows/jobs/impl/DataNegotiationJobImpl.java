@@ -83,8 +83,6 @@ public class DataNegotiationJobImpl implements DataNegotiationJob {
             Mono<List<MVEntity4DataNegotiation>> localEntityIds) {
         return externalEntityIds.zipWith(localEntityIds)
                 .map(tuple -> {
-                    System.out.println("AAA DN External entities: " + tuple.getT1());
-                    System.out.println("AAA DN Local entities: " + tuple.getT2());
 
                     List<MVEntity4DataNegotiation> originalList = tuple.getT1();
                     Set<String> idsToCheck = tuple.getT2().stream()

@@ -63,8 +63,9 @@ public class DataTransferJobImpl implements DataTransferJob {
 
 
                 return entitiesToRequest.flatMap(entities -> entitySyncWebClient.makeRequest(processId, issuer, entitiesToRequest)
+                        .collectList()
                         .flatMap(entitySyncResponse -> {
-                            Mono<String> entitySyncResponseMono = Mono.just(entitySyncResponse);
+                            Mono<List<String>> entitySyncResponseMono = Mono.just(entitySyncResponse);
 
                             return decodeEntitySyncResponse(entitySyncResponseMono)
                                     .flatMap(decodedEntitySyncResponse -> {
@@ -148,34 +149,22 @@ public class DataTransferJobImpl implements DataTransferJob {
                 });
     }
 
-    private Mono<String> decodeEntitySyncResponse(Mono<String> entitySyncResponseMono) {
-        return entitySyncResponseMono.flatMap(entitySyncResponse -> {
-            try {
-                JsonNode entitiesJsonNode = objectMapper.readTree(entitySyncResponse);
-
-                if (entitiesJsonNode.isArray()) {
-                    return Mono.just(entitiesJsonNode)
-                            .flatMapIterable(jsonNodes -> jsonNodes)
-                            .map(entityNode -> Base64Converter.convertBase64ToString(entityNode.asText()))
-                            .collectList()
-                            .flatMap(decodedList -> Mono.just(decodedList)
-                                    .flatMapIterable(entities -> entities)
-                                    .map(entity -> JsonParser.parseString(entity).getAsJsonObject())
-                                    .collectList()
-                                    .flatMap(jsonObjects -> {
-                                        try {
-                                            return Mono.just(objectMapper.readTree(jsonObjects.toString()).toString());
-                                        } catch (JsonProcessingException e) {
-                                            return Mono.error(e);
-                                        }
-                                    }));
-                } else {
-                    return Mono.error(new InvalidSyncResponseException(INVALID_ENTITY_SYNC_RESPONSE));
-                }
-            } catch (JsonProcessingException e) {
-                return Mono.error(e);
-            }
-        });
+    private Mono<String> decodeEntitySyncResponse(Mono<List<String>> entitySyncResponseMono) {
+        return entitySyncResponseMono
+                .flatMapIterable(entitySyncResponse -> entitySyncResponse)
+                .map(Base64Converter::convertBase64ToString)
+                .collectList()
+                .flatMap(decodedList -> Mono.just(decodedList)
+                        .flatMapIterable(entities -> entities)
+                        .map(entity -> JsonParser.parseString(entity).getAsJsonObject())
+                        .collectList()
+                        .flatMap(jsonObjects -> {
+                            try {
+                                return Mono.just(objectMapper.readTree(jsonObjects.toString()).toString());
+                            } catch (JsonProcessingException e) {
+                                return Mono.error(e);
+                            }
+                        }));
     }
 
     private Mono<Id[]> buildAllEntitiesToRequest(Mono<List<MVEntity4DataNegotiation>> newEntitiesToSyncMono, Mono<List<MVEntity4DataNegotiation>> existingEntitiesToSyncMono) {

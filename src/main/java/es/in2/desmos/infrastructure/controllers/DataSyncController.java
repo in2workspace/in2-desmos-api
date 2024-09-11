@@ -1,10 +1,7 @@
 package es.in2.desmos.infrastructure.controllers;
 
 import es.in2.desmos.application.workflows.jobs.P2PDataSyncJob;
-import es.in2.desmos.domain.models.DiscoverySyncRequest;
-import es.in2.desmos.domain.models.DiscoverySyncResponse;
-import es.in2.desmos.domain.models.Id;
-import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
+import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.services.sync.services.DataSyncService;
 import es.in2.desmos.infrastructure.configs.ApiConfig;
 import es.in2.desmos.infrastructure.configs.BrokerConfig;
@@ -63,19 +60,20 @@ public class DataSyncController {
 
     @PostMapping(value = "/entities")
     @ResponseStatus(HttpStatus.OK)
-    public Mono<List<String>> entitiesSync(@RequestBody @Valid Mono<@NotNull Id[]> entitySyncRequest) {
+    public Flux<Entity> entitiesSync(@RequestBody @Valid Mono<@NotNull Id[]> entitySyncRequest) {
         String processId = UUID.randomUUID().toString();
         log.info("ProcessID: {} - Starting P2P Entities Synchronization Controller", processId);
 
         return entitySyncRequest.flatMapMany(Flux::fromArray)
                 .collectList()
-                .flatMap(ids -> {
+                .flatMapMany(ids -> {
                     log.debug("ProcessID: {} - Starting P2P Entities Synchronization: {}", processId, ids);
 
                     Mono<List<Id>> idsMono = Mono.just(ids);
-                    return p2PDataSyncJob.getLocalEntitiesByIdInBase64(processId, idsMono);
+                    return p2PDataSyncJob.getLocalEntitiesByIdInBase64(processId, idsMono)
+                            .flatMapMany(Flux::fromIterable);
                 })
-                .doOnSuccess(success -> log.info("ProcessID: {} - P2P Entities Synchronization successfully.", processId))
+                .doOnComplete(() -> log.info("ProcessID: {} - P2P Entities Synchronization successfully.", processId))
                 .doOnError(error -> log.error("ProcessID: {} - Error occurred while processing the P2P Entities Synchronization Controller: {}", processId, error.getMessage()));
     }
 

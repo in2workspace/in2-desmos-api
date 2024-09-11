@@ -2,6 +2,7 @@ package es.in2.desmos.domain.services.sync.impl;
 
 import com.nimbusds.jose.JOSEException;
 import es.in2.desmos.domain.exceptions.InvalidTokenException;
+import es.in2.desmos.domain.models.Entity;
 import es.in2.desmos.domain.models.Id;
 import es.in2.desmos.domain.services.sync.EntitySyncWebClient;
 import es.in2.desmos.infrastructure.configs.ApiConfig;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 
@@ -25,7 +27,7 @@ public class EntitySyncWebClientImpl implements EntitySyncWebClient {
     private final JwtTokenProvider jwtTokenProvider;
     private final ApiConfig apiConfig;
 
-    public Mono<String> makeRequest(String processId, Mono<String> issuerMono, Mono<Id[]> entitySyncRequest) {
+    public Flux<String> makeRequest(String processId, Mono<String> issuerMono, Mono<Id[]> entitySyncRequest) {
         log.info("ProcessID: {} - Making a Entity Sync Web Client request", processId);
 
 
@@ -36,7 +38,7 @@ public class EntitySyncWebClientImpl implements EntitySyncWebClient {
             throw new InvalidTokenException(e.getMessage());
         }
 
-        return issuerMono.flatMap(issuer -> webClient
+        return issuerMono.flatMapMany(issuer -> webClient
                 .post()
                 .uri(issuer + "/api/v1/sync/p2p/entities")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
@@ -44,7 +46,8 @@ public class EntitySyncWebClientImpl implements EntitySyncWebClient {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(entitySyncRequest, Id[].class)
                 .retrieve()
-                .bodyToMono(String.class)
-                .retryWhen(Retry.backoff(3, Duration.ofSeconds(2))));
+                .bodyToFlux(Entity.class)
+                .retryWhen(Retry.backoff(3, Duration.ofSeconds(2)))
+                .flatMap(x -> Flux.just(x.value())));
     }
 }
