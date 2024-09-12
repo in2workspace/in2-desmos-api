@@ -25,19 +25,14 @@ As a Blockchain Connector, it is a crucial part within the Access Node architect
 facilitating interaction between the Off-Chain Storage and the On-Chain Storage. 
 This RESTFul API exposes a set of endpoints designed for seamless communication between a Context Broker and a Blockchain Adapter.
 
-# Architecture
-![Architecture](docs/images/desmos-architecture.png)
-
-# Functionalities
 
 # Installation
 
 We offer a Docker image to run the application. You can find it in [Docker Hub](https://hub.docker.com/repository/docker/in2kizuna/desmos/general).
 
-Here, you can find the [docker-compose.yml](config/docker/compose.yml) file to run the application with all the required dependencies (Context Broker and Blockchain Adapter).
+Here, you can find the docker-compose.yml file to run the application with all the required dependencies (Context Broker and Blockchain Adapter).
 
 ## Running the application (the easy way)
-```bash
 ```bash
 cd config/docker
 docker-compose up -d
@@ -51,7 +46,7 @@ docker-compose up -d
 If you want to contribute to this project, please read the [CONTRIBUTING.md](CONTRIBUTING.md) file.
 
 ## License
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache License 2.0 — see the [LICENSE](LICENSE) file for details.
 
 ## Project/Component Status
 This project is currently in development.
@@ -64,4 +59,4 @@ For any inquiries or further information, feel free to reach out to us:
 - **Website:** [https://in2.es](https://in2.es)
 
 ## Acknowledgments
-This project is part of the IN2 strategic R&D, which has received funding from the [DOME](https://dome-marketplace.eu/) project within the European Union’s Horizon Europe Research and Innovation programme under the Grant Agreement No 101084071.
+This project is part of the IN2 strategic R&D, which has received funding from the [DOME](https://dome-marketplace.eu/) project within the European Union’s Horizon Europe Research and Innovation program under the Grant Agreement No. 101084071.

@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]: v0.6.0
 - Retry mechanism for Blockchain Adapter and Context Broker.
-- Recover after failure mechanism for Blockchain Adapter and Context Broker.
+- Recover after a failure mechanism for Blockchain Adapter and Context Broker.
 - Hash intertwining between Blockchain Events.
 - Hash intertwining between Transactions.
 
