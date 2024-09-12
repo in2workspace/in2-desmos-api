@@ -6,6 +6,8 @@ jobs:
   release-local:
     name: release-local
     runs-on: ubuntu-latest
+    needs: build
+    if: success()
     environment: local
     steps:
       - name: Checkout Repository
