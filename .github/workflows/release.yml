@@ -1,13 +1,14 @@
 name: Release
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+  workflow_run:
+    workflows:
+      - Build
+    types:
+      - completed
 jobs:
   release-local:
     name: release-local
     runs-on: ubuntu-latest
-    needs: build
-    if: success()
     environment: local
     steps:
       - name: Checkout Repository
