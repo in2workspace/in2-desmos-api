@@ -119,7 +119,7 @@ public class DataTransferJobImpl implements DataTransferJob {
                         }
 
                         return Flux.fromIterable(entitiesJsonNode)
-                                .flatMap(entityNode -> {
+                                .concatMap(entityNode -> {
                                     if (!entityNode.has("id") || !entityNode.has("type")) {
                                         return Mono.error(new InvalidSyncResponseException(INVALID_ENTITY_SYNC_RESPONSE));
                                     }
