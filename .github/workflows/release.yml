@@ -8,6 +8,7 @@ jobs:
   release-local:
     name: release-local
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     environment: local
     steps:
       - name: Checkout Repository
