@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -32,7 +34,14 @@ public class BlockchainListenerServiceImpl implements BlockchainListenerService 
 
     @Override
     public Mono<Void> createSubscription(String processId, BlockchainSubscription blockchainSubscription) {
-        return blockchainAdapterService.createSubscription(processId, blockchainSubscription);
+        return checkIfSubscriptionExists(processId, Mono.just(blockchainSubscription))
+                .flatMap(x -> {
+                    if (Boolean.TRUE.equals(x)) {
+                        return Mono.empty();
+                    } else {
+                        return blockchainAdapterService.createSubscription(processId, blockchainSubscription);
+                    }
+                });
     }
 
     @Override
@@ -52,6 +61,34 @@ public class BlockchainListenerServiceImpl implements BlockchainListenerService 
                                     .build());
                         })
                 );
+    }
+
+    private Mono<Boolean> checkIfSubscriptionExists(String processId, Mono<BlockchainSubscription> subscriptionToCreateMono) {
+        return blockchainAdapterService
+                .getSubscriptions(processId)
+                .flatMap(existingSubscription ->
+                        checkIfTwoSubscriptionsAreEquals(subscriptionToCreateMono, Mono.just(existingSubscription))
+                                .filter(Boolean::booleanValue)
+                                .hasElement()
+                ).any(Boolean::booleanValue)
+                .defaultIfEmpty(false);
+    }
+
+    private Mono<Boolean> checkIfTwoSubscriptionsAreEquals(
+            Mono<BlockchainSubscription> sub1Mono,
+            Mono<BlockchainSubscription> sub2Mono) {
+
+        return Mono.zip(sub1Mono, sub2Mono)
+                .map(tuple -> {
+                    BlockchainSubscription sub1 = tuple.getT1();
+                    BlockchainSubscription sub2 = tuple.getT2();
+
+                    boolean areEventTypesEqual = new HashSet<>(sub1.eventTypes()).equals(new HashSet<>(sub2.eventTypes()));
+
+                    boolean isNotificationEndpointEqual = sub1.notificationEndpoint().equals(sub2.notificationEndpoint());
+
+                    return areEventTypesEqual && isNotificationEndpointEqual;
+                });
     }
 
 }
