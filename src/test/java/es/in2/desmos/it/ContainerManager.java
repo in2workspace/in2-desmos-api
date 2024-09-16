@@ -54,7 +54,7 @@ public class ContainerManager {
                 .withNetworkAliases("scorpio-node-a");
         scorpioContainerA.start();
 
-        blockchainAdapterContainerA = new GenericContainer<>(DockerImageName.parse("quay.io/digitelts/dlt-adapter:1.3"))
+        blockchainAdapterContainerA = new GenericContainer<>(DockerImageName.parse("quay.io/digitelts/dlt-adapter:1.5.1"))
                 .withExposedPorts(8080)
                 .withEnv("PRIVATE_KEY", "0x304d170fb355df65cc17ef7934404fe9baee73a1244380076436dec6fafb1e1f")
                 .withEnv("DOME_EVENTS_CONTRACT_ADDRESS", "")
@@ -96,7 +96,7 @@ public class ContainerManager {
                 .withNetworkAliases("scorpio-node-b");
         scorpioContainerB.start();
 
-        blockchainAdapterContainerB = new GenericContainer<>(DockerImageName.parse("quay.io/digitelts/dlt-adapter:1.3"))
+        blockchainAdapterContainerB = new GenericContainer<>(DockerImageName.parse("quay.io/digitelts/dlt-adapter:1.5.1"))
                 .withExposedPorts(8080)
                 .withEnv("PRIVATE_KEY", "0x304d170fb355df65cc17ef7934404fe9baee73a1244380076436dec6fafb1e1f")
                 .withEnv("DOME_EVENTS_CONTRACT_ADDRESS", "")
