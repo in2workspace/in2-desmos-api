@@ -43,4 +43,15 @@ public final class BlockchainSubscriptionMother {
 
         return new BlockchainSubscription(sample().eventTypes(), sample().metadata(), notificationEndpoint);
     }
+
+    public static BlockchainSubscription defaultConfigured() {
+        List<String> eventTypes = List.of(
+                "ProductOffering", "Category", "Catalogue");
+
+        List<String> metadata = List.of("local");
+
+        String notificationEndpoint = "http://localhost:8081/api/v1/notifications/dlt";
+
+        return new BlockchainSubscription(eventTypes, metadata, notificationEndpoint);
+    }
 }

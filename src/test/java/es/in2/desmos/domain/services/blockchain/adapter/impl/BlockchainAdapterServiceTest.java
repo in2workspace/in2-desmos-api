@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Testcontainers
-class BlockchainAdapterServiceImplTest {
+class BlockchainAdapterServiceTest {
 
     @Autowired
     private BlockchainAdapterService blockchainAdapterService;
@@ -28,10 +28,12 @@ class BlockchainAdapterServiceImplTest {
 
     @Test
     void itShouldGetSubscriptions() {
-        BlockchainSubscription expected1 = BlockchainSubscriptionMother.sample();
-        BlockchainSubscription expected2 = BlockchainSubscriptionMother.otherEventTypesSubscription();
 
-        createSubscriptions(expected1, expected2);
+        BlockchainSubscription expected1 = BlockchainSubscriptionMother.defaultConfigured();
+        BlockchainSubscription expected2 = BlockchainSubscriptionMother.sample();
+        BlockchainSubscription expected3 = BlockchainSubscriptionMother.otherEventTypesSubscription();
+
+        createSubscriptions(expected2, expected3);
 
         var resultMono = blockchainAdapterService.getSubscriptions("0");
 
@@ -39,6 +41,7 @@ class BlockchainAdapterServiceImplTest {
                 .create(resultMono)
                 .assertNext(result -> assertThat(result).isEqualTo(expected1))
                 .assertNext(result -> assertThat(result).isEqualTo(expected2))
+                .assertNext(result -> assertThat(result).isEqualTo(expected3))
                 .verifyComplete();
     }
 
