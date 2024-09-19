@@ -1,21 +1,39 @@
 package es.in2.desmos.domain.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import es.in2.desmos.objectmothers.JsonNotificationMother;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
+import java.util.stream.Stream;
 
 import static es.in2.desmos.domain.utils.ApplicationUtils.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class ApplicationUtilsTests {
+
+    private static Stream<Arguments> provideTestData() {
+        return Stream.of(
+                Arguments.of(JsonNotificationMother.getObjectInput(), JsonNotificationMother.getObjectInputExpected()),
+                Arguments.of(JsonNotificationMother.getArrayInput(), JsonNotificationMother.getArrayInputExpected()),
+                Arguments.of(JsonNotificationMother.getPrimitiveInput(), JsonNotificationMother.getPrimitiveInputExpected()),
+                Arguments.of(JsonNotificationMother.getArrayInput2(), JsonNotificationMother.getArrayInput2Expected())
+        );
+    }
 
     @Test
     void testConstructorThrowsException() throws NoSuchMethodException {
@@ -52,20 +70,92 @@ class ApplicationUtilsTests {
     }
 
     @Test
-    void testCalculateSHA256_ValidData() throws NoSuchAlgorithmException {
+    void testCalculateSHA256_ValidData() {
         // Arrange
-        String data = "test";
-        MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-        byte[] expectedHash = messageDigest.digest(data.getBytes(StandardCharsets.UTF_8));
-        String expectedHashString = HexFormat.of().formatHex(expectedHash);
-        // Act
-        String actualHashString = calculateSHA256(data);
-        // Assert
-        assertEquals(expectedHashString, actualHashString);
+        String data = """
+                {
+                   "id": "notification:-5106976853901020699",
+                   "type": "Notification",
+                   "data": [
+                     {
+                       "id": "urn:ngsi-ld:ProductOffering:122355255",
+                       "type": "ProductOffering",
+                       "description": {
+                         "type": "Property",
+                         "value": "Example of a Product offering for cloud services suite"
+                       },
+                       "notifiedAt": "2024-04-10T11:33:43.807Z"
+                     }
+                   ],
+                   "subscriptionId": "urn:ngsi-ld:Subscription:122355255",
+                   "notifiedAt": "2023-03-14T16:38:15.123456Z"
+                 }
+                """;
+        // Act & Assert
+        assertDoesNotThrow(() -> calculateSHA256(data));
     }
 
     @Test
-    void testCalculateHashLink_ValidHashes() throws NoSuchAlgorithmException {
+    void itShouldCalculateCorrectSHA256() throws NoSuchAlgorithmException, JsonProcessingException {
+        // Arrange
+        String data = """
+                {
+                   "id": "notification:-5106976853901020699",
+                   "type": "Notification",
+                   "data": [
+                     {
+                       "id": "urn:ngsi-ld:ProductOffering:122355255",
+                       "type": "ProductOffering",
+                       "description": {
+                         "type": "Property",
+                         "value": "Example of a Product offering for cloud services suite"
+                       },
+                       "notifiedAt": "2024-04-10T11:33:43.807Z"
+                     }
+                   ],
+                   "subscriptionId": "urn:ngsi-ld:Subscription:122355255",
+                   "notifiedAt": "2023-03-14T16:38:15.123456Z"
+                 }
+                """;
+
+        String result = calculateSHA256(data);
+
+        String expectedSha256 = "08aec4a32245954733602f864acfed6a8fe733d387b9bcd4217cdc07ee6198b8";
+
+        assertThat(result).isEqualTo(expectedSha256);
+    }
+
+    @Test
+    void itShouldCalculateSHA256ForAJsonWithArray() throws NoSuchAlgorithmException, JsonProcessingException {
+        // Arrange
+        String jsonToCalculateSha256 = """
+                {
+                    "people": [
+                      {
+                        "name": "John",
+                        "age": 30
+                      },
+                      {
+                        "name": "Mary",
+                        "age": 25
+                      },
+                      {
+                        "name": "Peter",
+                        "age": 35
+                      }
+                    ]
+                  }
+                """;
+
+        String expectedSha256 = "4f62b08ecde7e75bdafd7d7b3ec8ac43ce8698be1ce8ecf6114ba642a6fe5298";
+
+        var result = calculateSHA256(jsonToCalculateSha256);
+
+        assertThat(result).isEqualTo(expectedSha256);
+    }
+
+    @Test
+    void testCalculateHashLink_ValidHashes() throws NoSuchAlgorithmException, JsonProcessingException {
         // Arrange
         String previousHash = "5d41402abc4b2a76b9719d911017c592";
         String entityHash = "098f6bcd4621d373cade4e832627b4f6";
@@ -129,5 +219,21 @@ class ApplicationUtilsTests {
         // Assert
         assertEquals(expectedUrl, actualUrl);
     }
+
+    @ParameterizedTest
+    @MethodSource("provideTestData")
+    void testVerifySortAttributesAlphabetically(String input, String expected) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        //Arrange
+        ObjectMapper objectMapper = new ObjectMapper();
+        Method method = ApplicationUtils.class.getDeclaredMethod("sortAttributesAlphabetically", String.class, ObjectMapper.class);
+        method.setAccessible(true);
+        //Act
+        String result = (String) method.invoke(null, input, objectMapper);
+        //Assert
+        String normalizedExpected = expected.replace("\r\n", "\n");
+        String normalizedResult = result.replace("\r\n", "\n");
+        assertEquals(normalizedExpected, normalizedResult);
+    }
+
 
 }

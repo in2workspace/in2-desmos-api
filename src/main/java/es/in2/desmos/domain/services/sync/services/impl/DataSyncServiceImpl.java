@@ -1,17 +1,22 @@
 package es.in2.desmos.domain.services.sync.services.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import es.in2.desmos.infrastructure.configs.ApiConfig;
+import com.nimbusds.jose.JOSEException;
+import es.in2.desmos.application.workflows.jobs.P2PDataSyncJob;
 import es.in2.desmos.domain.exceptions.BrokerEntityRetrievalException;
 import es.in2.desmos.domain.exceptions.HashLinkException;
+import es.in2.desmos.domain.exceptions.InvalidTokenException;
 import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.BlockchainNotification;
 import es.in2.desmos.domain.services.api.AuditRecordService;
+import es.in2.desmos.domain.services.api.QueueService;
 import es.in2.desmos.domain.services.sync.services.DataSyncService;
+import es.in2.desmos.infrastructure.configs.ApiConfig;
+import es.in2.desmos.infrastructure.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -29,6 +34,9 @@ public class DataSyncServiceImpl implements DataSyncService {
     private final ApiConfig apiConfig;
     private final ObjectMapper objectMapper;
     private final AuditRecordService auditRecordService;
+    private final P2PDataSyncJob p2PDataSyncJob;
+    private final QueueService queueServiceImpl;
+    private final JwtTokenProvider jwtTokenProvider;
 
     /*
      *  Workflow steps:
@@ -42,7 +50,16 @@ public class DataSyncServiceImpl implements DataSyncService {
     @Override
     public Mono<Void> synchronizeData(String processId) {
         log.debug("ProcessID: {} - Synchronizing data...", processId);
-        return Mono.empty();
+
+        queueServiceImpl.pause();
+
+        return p2PDataSyncJob.synchronizeData(processId)
+                .doOnTerminate(() -> {
+                    log.info("ProcessID: {} - DataSyncWorkflow completed. Restarting queues...", processId);
+
+                    queueServiceImpl.resume();
+                })
+                .then();
     }
 
     /*
@@ -58,12 +75,20 @@ public class DataSyncServiceImpl implements DataSyncService {
         log.debug("ProcessID: {} - External Broker URL: {}", processId, externalBrokerURL);
         // Retrieve entity from the External Broker
 
+        String token;
+        try {
+            token = jwtTokenProvider.generateToken("/api/v1/sync/p2p/entities");
+        } catch (JOSEException e) {
+            throw new InvalidTokenException(e.getMessage());
+        }
+
         return apiConfig.webClient()
                 .get()
                 .uri(externalBrokerURL)
                 .accept(MediaType.APPLICATION_JSON)
                 // todo: need to add authorization header to the request when it will be implemented in DOME (M2M Communication)
-                .header("Authorization", "Bearer ")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .header("external-node-url", apiConfig.getExternalDomain())
                 .retrieve()
                 .onStatus(status -> status != null && status.isSameCodeAs(HttpStatusCode.valueOf(200)),
                         clientResponse -> {
@@ -96,14 +121,14 @@ public class DataSyncServiceImpl implements DataSyncService {
         log.debug("ProcessID: {} - Verifying the data integrity of the retrieved entity...", processId);
         try {
             // Get the hash of the retrieved entity
-            String retrievedEntityHash = calculateSHA256(sortAttributesAlphabetically(retrievedBrokerEntity));
-            // To verify the data integrity: hash(previousEntityHash + retrievedEntityHash) = dataLocationHashLink
-            String previousEntityHash = blockchainNotification.previousEntityHash().substring(2);
+            String retrievedEntityHash = calculateSHA256(retrievedBrokerEntity);
+            // To verify the data integrity: hash(previousEntityHashLink + retrievedEntityHash) = dataLocationHashLink
+            String previousEntityHashLink = blockchainNotification.previousEntityHashLink().substring(2);
             String dataLocationHashLink = extractHashLinkFromDataLocation(blockchainNotification.dataLocation());
-            if(dataLocationHashLink.equals(previousEntityHash)) {
+            if (dataLocationHashLink.equals(previousEntityHashLink)) {
                 // It is the first entity in the chain, and we need to verify that
                 // the hash of the retrieved entity is equal to the hash in the dataLocation
-                if(!retrievedEntityHash.equals(dataLocationHashLink)) {
+                if (!retrievedEntityHash.equals(dataLocationHashLink)) {
                     log.error("ProcessID: {} - Error occurred while verifying the data integrity of the retrieved entity: Hash verification failed", processId);
                     return Mono.error(new HashLinkException("Hash verification failed"));
                 }
@@ -111,14 +136,14 @@ public class DataSyncServiceImpl implements DataSyncService {
                 // It is not the first entity in the chain, and we need to verify that
                 // the hash of the retrieved entity plus the previousEntitytHash is equal
                 // to the hashLink in the dataLocation
-                String calculatedEntityHasLink = calculateHashLink(previousEntityHash, retrievedEntityHash);
-                if(!calculatedEntityHasLink.equals(dataLocationHashLink)) {
+                String calculatedEntityHasLink = calculateHashLink(previousEntityHashLink, retrievedEntityHash);
+                if (!calculatedEntityHasLink.equals(dataLocationHashLink)) {
                     log.error("ProcessID: {} - Error occurred while verifying the data integrity of the retrieved entity: HashLink verification failed", processId);
                     return Mono.error(new HashLinkException("HashLink verification failed"));
                 }
             }
             return Mono.just(retrievedBrokerEntity);
-        } catch (JsonProcessingException | NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException | JsonProcessingException e) {
             log.warn("ProcessID: {} - Error occurred while sorting the attributes of the retrieved entity: {}", processId, e.getMessage());
             return Mono.error(new HashLinkException("Integrity of the retrieved entity verification failed"));
         }
@@ -145,20 +170,14 @@ public class DataSyncServiceImpl implements DataSyncService {
     }
 
     private Mono<String> verifyDataConsistency(String processId, AuditRecord auditRecord, BlockchainNotification blockchainNotification, String retrievedBrokerEntity) {
-        String previousEntityHash = blockchainNotification.previousEntityHash().substring(2);
-        if(auditRecord.getEntityHashLink().equals(previousEntityHash)) {
+        String previousEntityHash = blockchainNotification.previousEntityHashLink().substring(2);
+        if (auditRecord.getEntityHashLink().equals(previousEntityHash)) {
             log.info("ProcessID: {} - Data consistency verification passed successfully", processId);
             return Mono.just(retrievedBrokerEntity);
         } else {
             log.warn("ProcessID: {} - Error occurred while verifying the data consistency of the retrieved entity: Data consistency verification failed", processId);
             return Mono.error(new HashLinkException("Data consistency verification failed"));
         }
-    }
-
-    private String sortAttributesAlphabetically(String retrievedBrokerEntity) throws JsonProcessingException {
-        // Sort alphabetically the attributes of the retrieved broker entity
-        JsonNode retrievedBrokerEntityJson = objectMapper.readTree(retrievedBrokerEntity);
-        return objectMapper.writeValueAsString(retrievedBrokerEntityJson);
     }
 
 }

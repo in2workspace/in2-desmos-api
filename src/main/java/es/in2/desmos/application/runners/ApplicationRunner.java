@@ -8,6 +8,7 @@ import es.in2.desmos.domain.models.BlockchainSubscription;
 import es.in2.desmos.domain.models.BrokerSubscription;
 import es.in2.desmos.domain.services.blockchain.BlockchainListenerService;
 import es.in2.desmos.domain.services.broker.BrokerListenerService;
+import es.in2.desmos.domain.services.sync.services.ExternalYamlService;
 import es.in2.desmos.infrastructure.configs.ApiConfig;
 import es.in2.desmos.infrastructure.configs.BlockchainConfig;
 import es.in2.desmos.infrastructure.configs.BrokerConfig;
@@ -42,10 +43,12 @@ public class ApplicationRunner {
     private final BlockchainConfig blockchainConfig;
     private final BrokerListenerService brokerListenerService;
     private final BlockchainListenerService blockchainListenerService;
+    private final ExternalYamlService externalYamlService;
     private final DataSyncWorkflow dataSyncWorkflow;
     private final PublishWorkflow publishWorkflow;
     private final SubscribeWorkflow subscribeWorkflow;
     private final AtomicBoolean isQueueAuthorizedForEmit = new AtomicBoolean(false);
+    private final String getCurrentEnvironment;
     private Disposable publishQueueDisposable;
     private Disposable subscribeQueueDisposable;
 
@@ -56,6 +59,7 @@ public class ApplicationRunner {
         return setBrokerSubscription(processId)
                 .then(setBlockchainSubscription(processId))
                 .thenMany(initializeDataSync(processId))
+                .then(setAccessNodePublicKeysFromExternalYaml(processId))
                 .then();
     }
 
@@ -67,8 +71,9 @@ public class ApplicationRunner {
         brokerConfig.getEntityTypes().forEach(entityType -> entities.add(BrokerSubscription.Entity.builder()
                 .type(entityType).build()));
         // Create the Broker Subscription object
+        String brokerSubscriptionid = SUBSCRIPTION_ID_PREFIX + UUID.randomUUID();
         BrokerSubscription brokerSubscription = BrokerSubscription.builder()
-                .id(SUBSCRIPTION_ID_PREFIX + UUID.randomUUID())
+                .id(brokerSubscriptionid)
                 .type(SUBSCRIPTION_TYPE)
                 .entities(entities)
                 .notification(BrokerSubscription.SubscriptionNotification.builder()
@@ -103,14 +108,26 @@ public class ApplicationRunner {
                 .doOnError(e -> log.error("ProcessID: {} - Error creating Blockchain Subscription", processId, e));
     }
 
+    @Retryable(retryFor = RequestErrorException.class, maxAttempts = 4, backoff = @Backoff(delay = 2000))
+    private Mono<Void> setAccessNodePublicKeysFromExternalYaml(String processId) {
+        log.info("ProcessID: {} - Setting Access Node Public Keys into Memory...", processId);
+
+        // Get public keys
+        return externalYamlService.getAccessNodeYamlDataFromExternalSource(processId)
+                .doOnSuccess(response -> log.info("ProcessID: {} - Public keys loaded successfully in memory.", processId))
+                .doOnError(e -> log.error("ProcessID: {} - Error setting public keys from access node repository", processId, e));
+    }
+
     private Flux<Void> initializeDataSync(String processId) {
         log.info("ProcessID: {} - Initializing Data Synchronization Workflow...", processId);
         // Start data synchronization process
         return dataSyncWorkflow.startDataSyncWorkflow(processId)
-                .doOnTerminate(() -> {
+                .doOnComplete(() -> {
                     log.info("ProcessID: {} - Data Synchronization Workflow has finished.", processId);
                     log.info("ProcessID: {} - Authorizing queues for Pub-Sub Workflows...", processId);
                     isQueueAuthorizedForEmit.set(true);
+                })
+                .doOnTerminate(() -> {
                     initializeQueueProcessing(processId);
                     log.info("ProcessID: {} - Queues have been authorized and enabled.", processId);
                 });
@@ -165,5 +182,4 @@ public class ApplicationRunner {
                         () -> log.info("ProcessID: {} - Subscribe Workflow completed", processId)
                 );
     }
-
 }

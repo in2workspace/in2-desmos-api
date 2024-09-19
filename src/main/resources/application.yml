@@ -83,13 +83,17 @@ openapi:
 operator:
   organizationIdentifier: "VATES-S9999999E"
 
+# Desmos Configuration
+api:
+  externalDomain: "http://localhost:8080"
+
 # Context Broker Configuration
 broker:
   provider: "scorpio"
   internalDomain: "http://scorpio:9090"
-  externalDomain: "http://localhost:9090"
   paths:
     entities: "/ngsi-ld/v1/entities"
+    entityOperations: "/ngsi-ld/v1/entityOperations"
     subscriptions: "/ngsi-ld/v1/subscriptions"
     temporal: "/ngsi-ld/v1/temporal/entities"
 
@@ -112,3 +116,13 @@ dlt-adapter:
 tx-subscription:
   notificationEndpoint: "http://localhost:8081/api/v1/notifications/dlt"
   entityTypes: "ProductOffering,Category,Catalogue"
+
+security:
+  privateKey: "0x1aff50dca1ac463a5af99a858c2eef7517b8e46d3bf84723ff6dcfead7dc8db6"
+
+# Access Node
+access-node:
+  prefixDirectory: "https://raw.githubusercontent.com/DOME-Marketplace/dome-access-node-directory/main/access-node-directory-"
+
+external-access-nodes:
+  urls: "https://desmos.dome-marketplace-sbx.org"

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.domain.exceptions.JsonReadingException;
 import es.in2.desmos.domain.exceptions.RequestErrorException;
 import es.in2.desmos.domain.exceptions.SubscriptionCreationException;
+import es.in2.desmos.domain.models.BrokerEntityWithIdAndType;
 import es.in2.desmos.domain.models.BrokerSubscription;
 import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import es.in2.desmos.infrastructure.configs.BrokerConfig;
@@ -39,7 +40,7 @@ public class ScorpioAdapter implements BrokerAdapterService {
 
     @PostConstruct
     public void init() {
-        this.webClient = WebClient.builder().baseUrl(brokerConfig.getExternalDomain()).build();
+        this.webClient = WebClient.builder().baseUrl(brokerConfig.getInternalDomain()).build();
     }
 
     @Override
@@ -70,7 +71,6 @@ public class ScorpioAdapter implements BrokerAdapterService {
                 .retry(3);
     }
 
-
     @Override
     public Mono<String> getEntityById(String processId, String entityId) {
         return webClient.get()
@@ -79,7 +79,7 @@ public class ScorpioAdapter implements BrokerAdapterService {
                 .retrieve()
                 .onStatus(status -> status.isSameCodeAs(HttpStatusCode.valueOf(404)),
                         response -> {
-                            log.debug("ProcessId: {}, Entity not found", processId);
+                            log.debug("ProcessId: {}, Entity not found: {}", processId, entityId);
                             return response.bodyToMono(String.class).flatMap(body -> Mono.empty());
                         }
                 )
@@ -177,8 +177,7 @@ public class ScorpioAdapter implements BrokerAdapterService {
                 .uri(brokerConfig.getSubscriptionsPath())
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<List<BrokerSubscription>>() {
-                })
+                .bodyToMono(new ParameterizedTypeReference<List<BrokerSubscription>>() {})
                 .onErrorMap(error -> new SubscriptionCreationException("Error fetching subscriptions from broker"));
     }
 
@@ -199,6 +198,40 @@ public class ScorpioAdapter implements BrokerAdapterService {
                 .uri(brokerConfig.getSubscriptionsPath() + "/" + subscriptionId)
                 .retrieve()
                 .bodyToMono(Void.class);
+    }
+
+    @Override
+    public <T extends BrokerEntityWithIdAndType> Mono<T[]> findAllIdTypeAndAttributesByType(String processId, String type, String firstAttribute, String secondAttribute, String thirdAttribute, String forthAttribute, Class<T[]> responseClass) {
+        log.info("ProcessID: {} - Getting Entities With Version And Last Update", processId);
+
+        String uri = brokerConfig.getEntitiesPath() + "/" + String.format("?type=%s&options=keyValues&limit=1000",type);
+
+        return webClient
+                .get()
+                .uri(uri)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(responseClass)
+                .retry(3);
+    }
+
+    @Override
+    public Mono<Void> batchUpsertEntities(String processId, String requestBody) {
+        log.info("ProcessID: {} - Upserting entities to Scorpio", processId);
+        log.debug("ProcessID: {} - Upserting entities to Scorpio: {}", processId, requestBody);
+
+        String uri = brokerConfig.getEntityOperationsPath() + "/" + "upsert";
+
+        var acceptContentType = getContentTypeAndAcceptMediaType(requestBody);
+
+        return webClient.post()
+                .uri(uri)
+                .accept(acceptContentType)
+                .contentType(acceptContentType)
+                .bodyValue(requestBody)
+                .retrieve()
+                .bodyToMono(Void.class)
+                .retry(3);
     }
 
     private Mono<Void> postSubscription(BrokerSubscription brokerSubscription) {
@@ -243,6 +276,10 @@ public class ScorpioAdapter implements BrokerAdapterService {
     private MediaType getContentTypeAndAcceptMediaType(String requestBody) {
         try {
             JsonNode jsonNode = objectMapper.readTree(requestBody);
+            if (jsonNode.isArray()) {
+                jsonNode = jsonNode.get(0);
+            }
+
             if (jsonNode.has("@context")) {
                 return MediaType.valueOf("application/ld+json");
             } else {

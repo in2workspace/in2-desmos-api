@@ -6,6 +6,7 @@ import es.in2.desmos.application.workflows.SubscribeWorkflow;
 import es.in2.desmos.domain.models.BlockchainSubscription;
 import es.in2.desmos.domain.services.blockchain.BlockchainListenerService;
 import es.in2.desmos.domain.services.broker.BrokerListenerService;
+import es.in2.desmos.domain.services.sync.services.ExternalYamlService;
 import es.in2.desmos.infrastructure.configs.ApiConfig;
 import es.in2.desmos.infrastructure.configs.BlockchainConfig;
 import es.in2.desmos.infrastructure.configs.BrokerConfig;
@@ -55,6 +56,9 @@ class ApplicationRunnerTests {
     @Mock
     private BlockchainListenerService blockchainListenerService;
 
+    @Mock
+    private ExternalYamlService externalYamlService;
+
     @InjectMocks
     private ApplicationRunner applicationRunner;
 
@@ -63,6 +67,7 @@ class ApplicationRunnerTests {
         // Arrange
         when(brokerListenerService.createSubscription(anyString(), any())).thenReturn(Mono.empty());
         when(blockchainListenerService.createSubscription(anyString(), any(BlockchainSubscription.class))).thenReturn(Mono.empty());
+        when(externalYamlService.getAccessNodeYamlDataFromExternalSource(anyString())).thenReturn(Mono.empty());
         when(dataSyncWorkflow.startDataSyncWorkflow(anyString())).thenReturn(Flux.empty());
         when(publishWorkflow.startPublishWorkflow(anyString())).thenReturn(Flux.empty());
         when(subscribeWorkflow.startSubscribeWorkflow(anyString())).thenReturn(Flux.empty());
@@ -76,13 +81,15 @@ class ApplicationRunnerTests {
     @Test
     void whenDisposeIsActive() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         // Arrange
-        ApplicationRunner applicationRunnerTest = new ApplicationRunner(apiConfig, brokerConfig, blockchainConfig, brokerListenerService, blockchainListenerService, dataSyncWorkflow, publishWorkflow, subscribeWorkflow);
+        String getCurrentEnvironment = "dev";
+        ApplicationRunner localApplicationRunner  = new ApplicationRunner(apiConfig, brokerConfig, blockchainConfig, brokerListenerService, blockchainListenerService,  externalYamlService, dataSyncWorkflow, publishWorkflow, subscribeWorkflow, getCurrentEnvironment);
         Method disposeIfActive = ApplicationRunner.class.getDeclaredMethod("disposeIfActive", Disposable.class);
         disposeIfActive.setAccessible(true);
         Disposable disposable = mock(Disposable.class);
-        disposeIfActive.invoke(applicationRunnerTest, disposable);
+        disposeIfActive.invoke(localApplicationRunner , disposable);
         when(brokerListenerService.createSubscription(anyString(), any())).thenReturn(Mono.empty());
         when(blockchainListenerService.createSubscription(anyString(), any(BlockchainSubscription.class))).thenReturn(Mono.empty());
+        when(externalYamlService.getAccessNodeYamlDataFromExternalSource(anyString())).thenReturn(Mono.empty());
         when(dataSyncWorkflow.startDataSyncWorkflow(anyString())).thenReturn(Flux.empty());
         when(publishWorkflow.startPublishWorkflow(anyString())).thenReturn(Flux.empty());
         when(subscribeWorkflow.startSubscribeWorkflow(anyString())).thenReturn(Flux.empty());
@@ -90,7 +97,7 @@ class ApplicationRunnerTests {
         // Act
         mock(ApplicationReadyEvent.class);
         //Assert
-        StepVerifier.create(applicationRunnerTest.onApplicationReady()).verifyComplete();
+        StepVerifier.create(localApplicationRunner .onApplicationReady()).verifyComplete();
     }
-
 }
+

@@ -5,18 +5,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.repositories.AuditRecordRepository;
 import es.in2.desmos.domain.services.api.AuditRecordService;
+import es.in2.desmos.domain.services.broker.BrokerPublisherService;
+import es.in2.desmos.domain.utils.ApplicationUtils;
+import es.in2.desmos.infrastructure.configs.ApiConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.UUID;
+import java.util.*;
 
+import static es.in2.desmos.domain.utils.ApplicationConstants.HASHLINK_PREFIX;
 import static es.in2.desmos.domain.utils.ApplicationUtils.*;
 
 @Slf4j
@@ -26,6 +29,10 @@ public class AuditRecordServiceImpl implements AuditRecordService {
 
     private final ObjectMapper objectMapper;
     private final AuditRecordRepository auditRecordRepository;
+    private final BrokerPublisherService brokerPublisherService;
+    private final ApiConfig apiConfig;
+
+    private final List<String> auditRecordsInUse = Collections.synchronizedList(new ArrayList<>());
 
     /**
      * Create a new AuditRecord with status CREATED or PUBLISHED and trader CONSUMER
@@ -145,6 +152,58 @@ public class AuditRecordServiceImpl implements AuditRecordService {
     }
 
     /**
+     * Create a new AuditRecord with status RETRIEVED and trader CONSUMER
+     * from the retrieved external sync entity in string format.
+     * If the retrievedBrokerEntity is null or blank, the status will be RECEIVED.
+     */
+    @Override
+    public Mono<Void> buildAndSaveAuditRecordFromDataSync(String processId, String issuer, MVAuditServiceEntity4DataNegotiation mvAuditServiceEntity4DataNegotiation, AuditRecordStatus status) {
+        return fetchMostRecentAuditRecord()
+                .flatMap(lastAuditRecordRegistered -> {
+                    try {
+                        String entityHash = mvAuditServiceEntity4DataNegotiation.hash();
+                        String entityHashLink = mvAuditServiceEntity4DataNegotiation.hashlink();
+
+                        AuditRecord auditRecord =
+                                AuditRecord.builder()
+                                        .id(UUID.randomUUID())
+                                        .processId(processId)
+                                        .createdAt(Timestamp.from(Instant.now()))
+                                        .entityId(mvAuditServiceEntity4DataNegotiation.id())
+                                        .entityType(mvAuditServiceEntity4DataNegotiation.type())
+                                        .entityHash(entityHash)
+                                        .entityHashLink(entityHashLink)
+                                        .dataLocation("")
+                                        .status(status)
+                                        .trader(AuditRecordTrader.CONSUMER)
+                                        .hash("")
+                                        .hashLink("")
+                                        .newTransaction(true)
+                                        .build();
+
+                        String auditRecordHash = calculateSHA256(objectMapper.writeValueAsString(auditRecord));
+                        auditRecord.setHash(auditRecordHash);
+                        auditRecord.setHashLink(setAuditRecordHashLink(lastAuditRecordRegistered, auditRecordHash));
+
+                        log.debug("ProcessID: {} - Audit Record to save: {}", processId, auditRecord);
+
+                        return auditRecordRepository.save(auditRecord).then();
+
+                    } catch (JsonProcessingException | NoSuchAlgorithmException e) {
+                        return Mono.error(e);
+                    }
+                });
+    }
+
+    private static String getDataLocationForProducedEntity(String issuer, MVAuditServiceEntity4DataNegotiation mvAuditServiceEntity4DataNegotiation) {
+        return issuer +
+                "/api/v1/entities/" +
+                mvAuditServiceEntity4DataNegotiation.id() +
+                HASHLINK_PREFIX
+                + mvAuditServiceEntity4DataNegotiation.hashlink();
+    }
+
+    /**
      * Fetches the most recently registered audit record. If no Audit Record exists, then
      * checks if the AuditRecord table is empty. If it is, then return a Mono.empty() because
      * understand that there are no Audit Records to fetch. If the table is not empty, then
@@ -180,10 +239,10 @@ public class AuditRecordServiceImpl implements AuditRecordService {
     }
 
     @Override
-    public Mono<String> fetchLatestProducerEntityHashByEntityId(String processId, String entityId) {
+    public Mono<String> fetchLatestProducerEntityHashLinkByEntityId(String processId, String entityId) {
         return getLastPublishedAuditRecordForProducerByEntityId(processId, entityId)
                 .flatMap(auditRecord -> auditRecord != null
-                        ? Mono.just(auditRecord.getEntityHash())
+                        ? Mono.just(auditRecord.getEntityHashLink())
                         : Mono.error(new NoSuchElementException()));
     }
 
@@ -199,10 +258,155 @@ public class AuditRecordServiceImpl implements AuditRecordService {
         return auditRecordRepository.findLastPublishedConsumerAuditRecord();
     }
 
+    @Override
+    public Mono<List<MVAuditServiceEntity4DataNegotiation>> findCreateOrUpdateAuditRecordsByEntityIds(String processId, String entityType, Mono<List<String>> entityIdsMono) {
+        return entityIdsMono.flatMap(entityIds ->
+                Flux.fromIterable(entityIds)
+                        .flatMap(id -> getEntityHash(processId, Mono.just(id))
+                                .flatMap(entityHash -> auditRecordRepository.findMostRecentPublishedAuditRecordByEntityId(id)
+                                        .flatMap(auditRecord -> {
+                                                    if (entityHash.equals(auditRecord.getEntityHash())) {
+                                                        return Mono.just(new MVAuditServiceEntity4DataNegotiation(
+                                                                auditRecord.getEntityId(),
+                                                                auditRecord.getEntityType(),
+                                                                auditRecord.getEntityHash(),
+                                                                auditRecord.getEntityHashLink()
+                                                        ));
+                                                    } else {
+                                                        return calculateHashLink(Mono.just(auditRecord.getEntityHashLink()), Mono.just(entityHash))
+                                                                .flatMap(calculatedHashLink -> {
+
+                                                                    String newAuditRecordDataLocation =
+                                                                            auditRecord.getTrader().equals(AuditRecordTrader.CONSUMER)
+                                                                                    ? ""
+                                                                                    : auditRecord.getDataLocation();
+
+                                                                    return buildAndSaveAuditRecordFromUnregisteredOrOutdatedEntity(
+                                                                            processId,
+                                                                            new MVAuditServiceEntity4DataNegotiation(
+                                                                                    auditRecord.getEntityId(),
+                                                                                    auditRecord.getEntityType(),
+                                                                                    entityHash,
+                                                                                    calculatedHashLink
+                                                                            ),
+                                                                            auditRecord.getTrader(),
+                                                                            newAuditRecordDataLocation);
+                                                                });
+                                                    }
+                                                }
+                                        ).switchIfEmpty(Mono.defer(() ->
+                                                buildAndSaveAuditRecordFromUnregisteredOrOutdatedEntity(
+                                                        processId,
+                                                        new MVAuditServiceEntity4DataNegotiation(
+                                                                id,
+                                                                entityType,
+                                                                entityHash,
+                                                                entityHash
+                                                        ),
+                                                        AuditRecordTrader.PRODUCER,
+                                                        null
+                                                )))
+                                ))
+                        .collectList()
+        );
+    }
+
+    @Override
+    public Mono<Void> setAuditRecordLock(String processId, String id, boolean hasToBeLocked) {
+        return Mono.fromRunnable(() -> {
+            if (hasToBeLocked) {
+                auditRecordsInUse.add(id);
+            } else {
+                auditRecordsInUse.remove(id);
+            }
+        });
+    }
+
+    @Override
+    public void unlockAuditRecords(String processId) {
+        auditRecordsInUse.clear();
+
+        log.debug("ProcessID: {} - Unlocked all Audit Records.", processId);
+    }
+
+    @Override
+    public Mono<Boolean> isAuditRecordUnlocked(String processId, String id) {
+        return Mono.fromCallable(() -> !auditRecordsInUse.contains(id));
+    }
+
+    private Mono<MVAuditServiceEntity4DataNegotiation> buildAndSaveAuditRecordFromUnregisteredOrOutdatedEntity(String processId, MVAuditServiceEntity4DataNegotiation mvAuditServiceEntity4DataNegotiation, AuditRecordTrader trader, String dataLocation) {
+        return fetchMostRecentAuditRecord()
+                .flatMap(lastAuditRecordRegistered -> {
+                    String newDataLocation = Objects.requireNonNullElseGet(
+                            dataLocation,
+                            () ->
+                                    getDataLocationForProducedEntity(apiConfig.getExternalDomain(), mvAuditServiceEntity4DataNegotiation));
+                    try {
+                        AuditRecord auditRecord =
+                                AuditRecord.builder()
+                                        .id(UUID.randomUUID())
+                                        .processId(processId)
+                                        .createdAt(Timestamp.from(Instant.now()))
+                                        .entityId(mvAuditServiceEntity4DataNegotiation.id())
+                                        .entityType(mvAuditServiceEntity4DataNegotiation.type())
+                                        .entityHash(mvAuditServiceEntity4DataNegotiation.hash())
+                                        .entityHashLink(mvAuditServiceEntity4DataNegotiation.hashlink())
+                                        .dataLocation(newDataLocation)
+                                        .status(AuditRecordStatus.PUBLISHED)
+                                        .trader(trader)
+                                        .hash("")
+                                        .hashLink("")
+                                        .newTransaction(true)
+                                        .build();
+
+                        String auditRecordHash = calculateSHA256(objectMapper.writeValueAsString(auditRecord));
+                        auditRecord.setHash(auditRecordHash);
+                        auditRecord.setHashLink(setAuditRecordHashLink(lastAuditRecordRegistered, auditRecordHash));
+
+                        log.debug("ProcessID: {} - Audit Record from unregistered or outdated entity to save: {}", processId, auditRecord);
+
+                        return auditRecordRepository.save(auditRecord)
+                                .thenReturn(new MVAuditServiceEntity4DataNegotiation(
+                                        auditRecord.getEntityId(),
+                                        auditRecord.getEntityType(),
+                                        auditRecord.getEntityHash(),
+                                        auditRecord.getEntityHashLink()));
+
+                    } catch (JsonProcessingException | NoSuchAlgorithmException e) {
+                        return Mono.error(e);
+                    }
+                });
+    }
+
     private String setAuditRecordHashLink(AuditRecord lastAuditRecordRegistered, String auditRecordHash)
-            throws NoSuchAlgorithmException {
+            throws NoSuchAlgorithmException, JsonProcessingException {
         return lastAuditRecordRegistered.getHashLink() == null ? auditRecordHash
-                : calculateHashLink(lastAuditRecordRegistered.getHashLink(), auditRecordHash);
+                : ApplicationUtils.calculateHashLink(lastAuditRecordRegistered.getHashLink(), auditRecordHash);
+    }
+
+    private Mono<String> getEntityHash(String processId, Mono<String> entityIdMono) {
+        return entityIdMono.flatMap(entityId ->
+                brokerPublisherService.getEntityById(processId, entityId)
+                        .flatMap(entity -> {
+                            try {
+                                String hash = ApplicationUtils.calculateSHA256(entity);
+                                return Mono.just(hash);
+                            } catch (NoSuchAlgorithmException | JsonProcessingException e) {
+                                return Mono.error(e);
+                            }
+                        }));
+    }
+
+    private Mono<String> calculateHashLink(Mono<String> previousHashlink, Mono<String> currentHash) {
+        return previousHashlink
+                .zipWith(currentHash)
+                .flatMap(tuple -> {
+                    try {
+                        return Mono.just(ApplicationUtils.calculateHashLink(tuple.getT1(), tuple.getT2()));
+                    } catch (NoSuchAlgorithmException | JsonProcessingException e) {
+                        return Mono.error(e);
+                    }
+                });
     }
 
 }

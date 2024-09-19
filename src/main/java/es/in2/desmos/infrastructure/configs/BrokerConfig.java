@@ -24,14 +24,14 @@ public class BrokerConfig {
         return ngsiLdSubscriptionProperties.entityTypes();
     }
 
-    public String getEntitiesExternalDomain() { return brokerProperties.externalDomain() + brokerProperties.paths().entities();}
-
-    public String getExternalDomain() {
-        return brokerProperties.externalDomain();
-    }
+    public String getEntitiesExternalDomain() { return brokerProperties.internalDomain() + brokerProperties.paths().entities();}
 
     public String getEntitiesPath() {
         return brokerProperties.paths().entities();
+    }
+
+    public String getEntityOperationsPath() {
+        return brokerProperties.paths().entityOperations();
     }
 
     public String getSubscriptionsPath() {
@@ -41,5 +41,7 @@ public class BrokerConfig {
     public String getTemporalPath() {
         return brokerProperties.paths().temporal();
     }
+
+    public String getInternalDomain() { return brokerProperties.internalDomain(); }
 
 }

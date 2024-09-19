@@ -10,7 +10,7 @@ public record BlockchainTxPayload(
         @JsonProperty("eventType") String eventType,
         @JsonProperty("iss") String organizationIdentifier,
         @JsonProperty("entityId") String entityId,
-        @JsonProperty("previousEntityHash") String previousEntityHash,
+        @JsonProperty("previousEntityHash") String previousEntityHashLink,
         @JsonProperty("dataLocation") String dataLocation,
         @JsonProperty("relevantMetadata") List<String> metadata
 ) {

@@ -6,6 +6,8 @@ public class ApplicationConstants {
     public static final String HASHLINK_PREFIX = "?hl=";
     public static final String SUBSCRIPTION_ID_PREFIX = "urn:ngsi-ld:Subscription:";
     public static final String SUBSCRIPTION_TYPE = "Subscription";
+    public static final String YAML_FILE_SUFFIX = ".yaml";
+
 
     private ApplicationConstants() {
         throw new IllegalStateException("Utility class");
