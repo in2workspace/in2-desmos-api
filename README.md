@@ -1,21 +1,21 @@
 <div align="center">
-<h1>Desmos API</h1>
+<h1>IN2 Desmos API</h1>
 <span>by </span><a href="https://in2.es">in2.es</a>
 <p><p>
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=in2workspace_desmos&metric=alert_status)](https://sonarcloud.io/dashboard?id=in2workspace_desmos)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=in2workspace_in2-desmos-api&metric=alert_status)](https://sonarcloud.io/dashboard?id=in2workspace_in2-desmos-api)
 
-[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=in2workspace_desmos&metric=bugs)](https://sonarcloud.io/summary/new_code?id=in2workspace_desmos)
-[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=in2workspace_desmos&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=in2workspace_desmos)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=in2workspace_desmos&metric=security_rating)](https://sonarcloud.io/dashboard?id=in2workspace_desmos)
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=in2workspace_desmos&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=in2workspace_desmos)
-[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=in2workspace_desmos&metric=ncloc)](https://sonarcloud.io/dashboard?id=in2workspace_desmos)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=in2workspace_in2-desmos-api&metric=bugs)](https://sonarcloud.io/summary/new_code?id=in2workspace_in2-desmos-api)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=in2workspace_in2-desmos-api&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=in2workspace_in2-desmos-api)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=in2workspace_in2-desmos-api&metric=security_rating)](https://sonarcloud.io/dashboard?id=in2workspace_in2-desmos-api)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=in2workspace_in2-desmos-api&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=in2workspace_in2-desmos-api)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=in2workspace_in2-desmos-api&metric=ncloc)](https://sonarcloud.io/dashboard?id=in2workspace_in2-desmos-api)
 
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=in2workspace_desmos&metric=coverage)](https://sonarcloud.io/summary/new_code?id=in2workspace_desmos)
-[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=in2workspace_desmos&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=in2workspace_desmos)
-[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=in2workspace_desmos&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=in2workspace_desmos)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=in2workspace_desmos&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=in2workspace_desmos)
-[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=in2workspace_desmos&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=in2workspace_desmos)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=in2workspace_in2-desmos-api&metric=coverage)](https://sonarcloud.io/summary/new_code?id=in2workspace_in2-desmos-api)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=in2workspace_in2-desmos-api&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=in2workspace_in2-desmos-api)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=in2workspace_in2-desmos-api&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=in2workspace_in2-desmos-api)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=in2workspace_in2-desmos-api&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=in2workspace_in2-desmos-api)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=in2workspace_in2-desmos-api&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=in2workspace_in2-desmos-api)
 
 </div>
 
