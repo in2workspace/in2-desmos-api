@@ -69,7 +69,6 @@ public class ContainerManager {
 
     static {
         // Node B
-
         postgresContainerB = new PostgreSQLContainer<>("postgres:latest")
                 .withDatabaseName("it_db")
                 .withUsername("postgres")
@@ -108,7 +107,7 @@ public class ContainerManager {
                 .waitingFor(Wait.forHttp("/health").forStatusCode(200));
         blockchainAdapterContainerB.start();
 
-        desmosContainerB = new GenericContainer<>(DockerImageName.parse("in2-desmos-api:latest"))
+        desmosContainerB = new GenericContainer<>(DockerImageName.parse("in2workspace/in2-desmos-api:v1.0.0-snapshot"))
                 .withExposedPorts(8080)
                 .withEnv("SPRING_PROFILES_ACTIVE", "test")
                 .withEnv("LOGGING_LEVEL_ES_IN2_DESMOS", "DEBUG")
@@ -184,4 +183,5 @@ public class ContainerManager {
     public static String getSecurityPrivateKey() {
         return "0x1aff50dca1ac463a5af99a858c2eef7517b8e46d3bf84723ff6dcfead7dc8db6";
     }
+
 }
