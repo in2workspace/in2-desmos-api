@@ -108,7 +108,7 @@ public class ContainerManager {
                 .waitingFor(Wait.forHttp("/health").forStatusCode(200));
         blockchainAdapterContainerB.start();
 
-        desmosContainerB = new GenericContainer<>(DockerImageName.parse("desmos-api:latest"))
+        desmosContainerB = new GenericContainer<>(DockerImageName.parse("in2-desmos-api:latest"))
                 .withExposedPorts(8080)
                 .withEnv("SPRING_PROFILES_ACTIVE", "test")
                 .withEnv("LOGGING_LEVEL_ES_IN2_DESMOS", "DEBUG")
