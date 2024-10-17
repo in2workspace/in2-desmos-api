@@ -13,7 +13,7 @@ import reactor.test.StepVerifier;
 
 @SpringBootTest
 @Testcontainers
-class QueueServiceTest extends MockCorsTrustedAccessNodesListServerBase {
+class QueueServiceTest {
 
     @Autowired
     private QueueService queueServiceImpl;

@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @Testcontainers
 @SpringBootTest
 @TestPropertySource(properties = {"external-access-nodes.urls=https://example1.org, https://example2.org"})
-class ExternalAccessNodesPropertiesTests extends MockCorsTrustedAccessNodesListServerBase {
+class ExternalAccessNodesPropertiesTests {
     @Autowired
     private ExternalAccessNodesProperties externalAccessNodesProperties;
 

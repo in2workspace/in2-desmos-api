@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class AuditRecordRepositoryIT extends MockCorsTrustedAccessNodesListServerBase {
+class AuditRecordRepositoryIT {
 
     @Autowired
     private AuditRecordRepository auditRecordRepository;

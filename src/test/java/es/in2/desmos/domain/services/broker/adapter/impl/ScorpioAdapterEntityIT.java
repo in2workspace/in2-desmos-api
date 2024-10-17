@@ -27,7 +27,7 @@ import static org.mockito.Mockito.when;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class ScorpioAdapterEntityIT extends MockCorsTrustedAccessNodesListServerBase {
+class ScorpioAdapterEntityIT {
 
     String requestBody = """
             {

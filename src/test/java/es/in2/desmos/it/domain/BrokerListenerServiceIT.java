@@ -25,7 +25,7 @@ import static es.in2.desmos.it.ContainerManager.getBaseUriForScorpioA;
 @SpringBootTest
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class BrokerListenerServiceIT extends MockCorsTrustedAccessNodesListServerBase {
+class BrokerListenerServiceIT {
 
     private final ObjectMapper objectMapper = JsonMapper.builder().enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES).build();
 

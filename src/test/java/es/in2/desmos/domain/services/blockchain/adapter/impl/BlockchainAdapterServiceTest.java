@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Testcontainers
-class BlockchainAdapterServiceTest extends MockCorsTrustedAccessNodesListServerBase {
+class BlockchainAdapterServiceTest {
 
     @Autowired
     private BlockchainAdapterService blockchainAdapterService;

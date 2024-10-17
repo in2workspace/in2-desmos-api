@@ -24,7 +24,7 @@ import java.util.List;
 @SpringBootTest
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class PublishWorkflowBehaviorTest extends MockCorsTrustedAccessNodesListServerBase {
+class PublishWorkflowBehaviorTest {
 
     private final Logger log = LoggerFactory.getLogger(PublishWorkflowBehaviorTest.class);
 

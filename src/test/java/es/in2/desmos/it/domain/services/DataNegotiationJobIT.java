@@ -21,7 +21,7 @@ import static org.mockito.Mockito.*;
 @SpringBootTest
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class DataNegotiationJobIT extends MockCorsTrustedAccessNodesListServerBase {
+class DataNegotiationJobIT {
     @Autowired
     private DataNegotiationEventPublisher dataNegotiationEventPublisher;
 

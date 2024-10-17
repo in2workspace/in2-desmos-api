@@ -1,11 +1,7 @@
 package es.in2.desmos.infrastructure.security;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import es.in2.desmos.domain.models.AccessNodeOrganization;
 import es.in2.desmos.domain.models.AccessNodeYamlData;
-import es.in2.desmos.infrastructure.configs.ApiConfig;
 import es.in2.desmos.infrastructure.configs.BrokerConfig;
 import es.in2.desmos.infrastructure.configs.cache.AccessNodeMemoryStore;
 import es.in2.desmos.infrastructure.configs.properties.AccessNodeProperties;
@@ -29,10 +25,8 @@ public class CorsConfig {
 
     private final AccessNodeMemoryStore accessNodeMemoryStore;
     private final AccessNodeProperties accessNodeProperties;
-    private final ApiConfig apiConfig;
     private final BrokerConfig brokerConfig;
     private final DLTAdapterProperties dltAdapterProperties;
-    private final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -81,23 +75,6 @@ public class CorsConfig {
 
         log.debug("External URL: {}", repoPath);
         // Retrieve YAML data from the External URL
-
-        apiConfig.webClient().get()
-                .uri(repoPath)
-                .retrieve()
-                .bodyToMono(String.class)
-                .handle((yamlContent, sink) -> {
-                    AccessNodeYamlData data;
-                    try {
-                        data = yamlMapper.readValue(yamlContent, AccessNodeYamlData.class);
-                    } catch (JsonProcessingException e) {
-                        sink.error(new RuntimeException(e));
-                        return;
-                    }
-                    log.debug("AccessNodeYamlData: {}", data);
-                    accessNodeMemoryStore.setOrganizations(data);
-                }).block();
-
 
         List<String> urls = new ArrayList<>();
         AccessNodeYamlData yamlData = accessNodeMemoryStore.getOrganizations();

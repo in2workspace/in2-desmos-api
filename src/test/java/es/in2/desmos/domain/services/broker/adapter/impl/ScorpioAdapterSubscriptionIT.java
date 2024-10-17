@@ -23,7 +23,7 @@ import java.util.List;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class ScorpioAdapterSubscriptionIT extends MockCorsTrustedAccessNodesListServerBase {
+class ScorpioAdapterSubscriptionIT {
 
     BrokerSubscription brokerSubscription = BrokerSubscription.builder()
             .id("urn:subscription:b74a701a-9a3b-4eff-982e-744652fc2abf")

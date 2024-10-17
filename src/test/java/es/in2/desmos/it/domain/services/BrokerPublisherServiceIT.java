@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class BrokerPublisherServiceIT extends MockCorsTrustedAccessNodesListServerBase {
+class BrokerPublisherServiceIT {
 
     @Autowired
     private ObjectMapper objectMapper;

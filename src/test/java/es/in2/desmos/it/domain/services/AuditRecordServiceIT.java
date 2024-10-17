@@ -33,7 +33,7 @@ import static org.awaitility.Awaitility.await;
 @SpringBootTest
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class AuditRecordServiceIT extends MockCorsTrustedAccessNodesListServerBase {
+class AuditRecordServiceIT {
     @Autowired
     AuditRecordService auditRecordService;
 
