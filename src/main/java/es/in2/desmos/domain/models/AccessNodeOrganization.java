@@ -19,5 +19,6 @@ public class AccessNodeOrganization {
     private String name;
     private String publicKey;
     private String url;
+    private String dltAddress;
 }
 

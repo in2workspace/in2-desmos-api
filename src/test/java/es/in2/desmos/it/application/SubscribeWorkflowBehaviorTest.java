@@ -5,16 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.BlockchainNotification;
-import es.in2.desmos.domain.models.DomeParticipant;
 import es.in2.desmos.domain.repositories.AuditRecordRepository;
-import es.in2.desmos.domain.repositories.DomeParticipantRepository;
 import es.in2.desmos.domain.services.api.QueueService;
 import es.in2.desmos.infrastructure.controllers.NotificationController;
 import es.in2.desmos.it.ContainerManager;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import es.in2.desmos.testsbase.MockCorsTrustedAccessNodesListServerBase;
+import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +29,7 @@ import java.util.List;
 @SpringBootTest
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class SubscribeWorkflowBehaviorTest {
+class SubscribeWorkflowBehaviorTest extends MockCorsTrustedAccessNodesListServerBase {
 
     private final Logger log = LoggerFactory.getLogger(SubscribeWorkflowBehaviorTest.class);
 
@@ -78,9 +74,6 @@ class SubscribeWorkflowBehaviorTest {
 
     @Autowired
     private QueueService pendingSubscribeEventsQueue;
-
-    @Autowired
-    private DomeParticipantRepository domeParticipantRepository;
 
     @DynamicPropertySource
     static void setDynamicProperties(DynamicPropertyRegistry registry) {
@@ -128,11 +121,6 @@ class SubscribeWorkflowBehaviorTest {
     @Order(0)
     @Test
     void subscribeWorkflowBehaviorTest() {
-        // Need to insert a DomeParticipant in the database, if not, the test will fail because of the validation
-        domeParticipantRepository.save(DomeParticipant.builder()
-                .ethereumAddress("0x40b0ab9dfd960064fb7e9fdf77f889c71569e349055ff563e8d699d8fa97fa90")
-                .build()).block();
-
         log.info("Starting Subscribe Workflow Behavior Test...");
         log.info("1. Send a POST request to the external broker in order to retrieve the entity later");
         WebClient.create().post()

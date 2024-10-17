@@ -34,7 +34,7 @@ public class ExternalYamlServiceImpl implements ExternalYamlService {
 
         log.debug("ProcessID: {} - Retrieving YAML data from the external source repository...", processId);
         // Get the External URL from configuration
-        String repoPath = accessNodeProperties.prefixDirectory() + getExternalYamlProfile() + YAML_FILE_SUFFIX;
+        String repoPath = accessNodeProperties.trustedAccessNodesList() + getExternalYamlProfile() + YAML_FILE_SUFFIX;
 
         log.debug("ProcessID: {} - External URL: {}", processId, repoPath);
         // Retrieve YAML data from the External URL

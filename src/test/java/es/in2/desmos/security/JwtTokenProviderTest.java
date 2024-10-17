@@ -65,7 +65,7 @@ class JwtTokenProviderTest {
 
         AccessNodeYamlData organizations = new AccessNodeYamlData();
         List<AccessNodeOrganization> orgList = new ArrayList<>();
-        AccessNodeOrganization org = new AccessNodeOrganization("test","0x0486573f96a9e5a0007855cba27af53d2d73d69cc143266bc336e361d2f5124f6639c813e62a1c8642132de455b72d65c620f18d69c09e30123d420fcb85de361d","origin");
+        AccessNodeOrganization org = new AccessNodeOrganization("test","0x0486573f96a9e5a0007855cba27af53d2d73d69cc143266bc336e361d2f5124f6639c813e62a1c8642132de455b72d65c620f18d69c09e30123d420fcb85de361d","origin", "");
         orgList.add(org);
         organizations.setOrganizations(orgList);
 

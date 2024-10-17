@@ -3,7 +3,6 @@ package es.in2.desmos.infrastructure.security;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import es.in2.desmos.domain.exceptions.InvalidProfileException;
 import es.in2.desmos.domain.models.AccessNodeOrganization;
 import es.in2.desmos.domain.models.AccessNodeYamlData;
 import es.in2.desmos.infrastructure.configs.ApiConfig;
@@ -22,8 +21,6 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static es.in2.desmos.domain.utils.ApplicationConstants.YAML_FILE_SUFFIX;
 
 @Slf4j
 @Configuration
@@ -80,7 +77,7 @@ public class CorsConfig {
 
         log.debug("Retrieving YAML data from the external source repository...");
         // Get the External URL from configuration
-        String repoPath = accessNodeProperties.prefixDirectory() + getExternalYamlProfile() + YAML_FILE_SUFFIX;
+        String repoPath = accessNodeProperties.trustedAccessNodesList();
 
         log.debug("External URL: {}", repoPath);
         // Retrieve YAML data from the External URL
@@ -113,20 +110,5 @@ public class CorsConfig {
         }
 
         return urls;
-    }
-
-    private String getExternalYamlProfile() {
-        String profile = apiConfig.getCurrentEnvironment();
-
-        if (profile == null) {
-            throw new InvalidProfileException("Environment variable SPRING_PROFILES_ACTIVE is not set");
-        }
-
-        return switch (profile) {
-            case "default", "dev" -> "sbx";
-            case "test" -> "dev";
-            case "prod" -> "prd";
-            default -> throw new InvalidProfileException("Invalid profile: " + profile);
-        };
     }
 }
