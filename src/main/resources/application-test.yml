@@ -123,7 +123,7 @@ security:
 
 # Access Node
 access-node:
-  trustedAccessNodesList:
+  trustedAccessNodesList: "https://raw.githubusercontent.com/DOME-Marketplace/trust-framework/refs/heads/main/dev/trusted_access_nodes_list.yaml"
 
 external-access-nodes:
   urls: "https://desmos.dome-marketplace-dev2.org"
