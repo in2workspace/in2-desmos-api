@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.domain.models.BrokerSubscription;
 import es.in2.desmos.infrastructure.configs.BrokerConfig;
 import es.in2.desmos.it.ContainerManager;
+import es.in2.desmos.testsbase.MockCorsTrustedAccessNodesListServerBase;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,7 +23,7 @@ import java.util.List;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class ScorpioAdapterSubscriptionIT {
+class ScorpioAdapterSubscriptionIT extends MockCorsTrustedAccessNodesListServerBase {
 
     BrokerSubscription brokerSubscription = BrokerSubscription.builder()
             .id("urn:subscription:b74a701a-9a3b-4eff-982e-744652fc2abf")

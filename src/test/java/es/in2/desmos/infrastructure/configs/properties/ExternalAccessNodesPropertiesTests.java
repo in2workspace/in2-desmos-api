@@ -2,6 +2,7 @@ package es.in2.desmos.infrastructure.configs.properties;
 
 import es.in2.desmos.it.ContainerManager;
 import es.in2.desmos.objectmothers.UrlMother;
+import es.in2.desmos.testsbase.MockCorsTrustedAccessNodesListServerBase;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @Testcontainers
 @SpringBootTest
 @TestPropertySource(properties = {"external-access-nodes.urls=https://example1.org, https://example2.org"})
-class ExternalAccessNodesPropertiesTests {
+class ExternalAccessNodesPropertiesTests extends MockCorsTrustedAccessNodesListServerBase {
     @Autowired
     private ExternalAccessNodesProperties externalAccessNodesProperties;
 

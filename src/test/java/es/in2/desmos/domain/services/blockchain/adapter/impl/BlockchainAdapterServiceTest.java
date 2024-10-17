@@ -4,6 +4,7 @@ import es.in2.desmos.domain.models.BlockchainSubscription;
 import es.in2.desmos.domain.services.blockchain.adapter.BlockchainAdapterService;
 import es.in2.desmos.it.ContainerManager;
 import es.in2.desmos.objectmothers.BlockchainSubscriptionMother;
+import es.in2.desmos.testsbase.MockCorsTrustedAccessNodesListServerBase;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Testcontainers
-class BlockchainAdapterServiceTest {
+class BlockchainAdapterServiceTest extends MockCorsTrustedAccessNodesListServerBase {
 
     @Autowired
     private BlockchainAdapterService blockchainAdapterService;

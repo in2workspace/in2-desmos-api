@@ -10,6 +10,7 @@ import es.in2.desmos.it.ContainerManager;
 import es.in2.desmos.objectmothers.AuditRecordMother;
 import es.in2.desmos.objectmothers.MVAuditServiceEntity4DataNegotiationMother;
 import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
+import es.in2.desmos.testsbase.MockCorsTrustedAccessNodesListServerBase;
 import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
@@ -32,7 +33,7 @@ import static org.awaitility.Awaitility.await;
 @SpringBootTest
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class AuditRecordServiceIT {
+class AuditRecordServiceIT extends MockCorsTrustedAccessNodesListServerBase {
     @Autowired
     AuditRecordService auditRecordService;
 

@@ -3,6 +3,7 @@ package es.in2.desmos.domain.services.broker.adapter.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.infrastructure.configs.BrokerConfig;
 import es.in2.desmos.it.ContainerManager;
+import es.in2.desmos.testsbase.MockCorsTrustedAccessNodesListServerBase;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,7 +27,7 @@ import static org.mockito.Mockito.when;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class ScorpioAdapterEntityIT {
+class ScorpioAdapterEntityIT extends MockCorsTrustedAccessNodesListServerBase {
 
     String requestBody = """
             {

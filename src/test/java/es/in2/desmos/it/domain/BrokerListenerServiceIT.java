@@ -8,6 +8,7 @@ import es.in2.desmos.domain.models.BrokerSubscription;
 import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import es.in2.desmos.domain.services.broker.adapter.factory.BrokerAdapterFactory;
 import es.in2.desmos.it.ContainerManager;
+import es.in2.desmos.testsbase.MockCorsTrustedAccessNodesListServerBase;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,7 +25,7 @@ import static es.in2.desmos.it.ContainerManager.getBaseUriForScorpioA;
 @SpringBootTest
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class BrokerListenerServiceIT {
+class BrokerListenerServiceIT extends MockCorsTrustedAccessNodesListServerBase {
 
     private final ObjectMapper objectMapper = JsonMapper.builder().enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES).build();
 

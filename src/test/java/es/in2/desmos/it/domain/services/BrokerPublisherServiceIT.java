@@ -8,6 +8,7 @@ import es.in2.desmos.inflators.ScorpioInflator;
 import es.in2.desmos.it.ContainerManager;
 import es.in2.desmos.objectmothers.MVBrokerEntity4DataNegotiationMother;
 import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
+import es.in2.desmos.testsbase.MockCorsTrustedAccessNodesListServerBase;
 import org.json.JSONException;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class BrokerPublisherServiceIT {
+class BrokerPublisherServiceIT extends MockCorsTrustedAccessNodesListServerBase {
 
     @Autowired
     private ObjectMapper objectMapper;
