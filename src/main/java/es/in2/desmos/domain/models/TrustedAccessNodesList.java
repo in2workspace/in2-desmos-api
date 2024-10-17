@@ -1,5 +1,6 @@
 package es.in2.desmos.domain.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,6 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
-public class AccessNodeYamlData {
-    private List<AccessNodeOrganization> organizations;
+public class TrustedAccessNodesList {
+    @JsonProperty("organizations")
+    private List<TrustedAccessNode> organizations;
 }

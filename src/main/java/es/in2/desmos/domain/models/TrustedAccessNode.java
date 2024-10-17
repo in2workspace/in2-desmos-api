@@ -15,7 +15,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class AccessNodeOrganization {
+public class TrustedAccessNode {
     private String name;
     private String publicKey;
     private String url;

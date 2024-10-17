@@ -1,14 +1,16 @@
 package es.in2.desmos.application.runners;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import es.in2.desmos.application.workflows.DataSyncWorkflow;
 import es.in2.desmos.application.workflows.PublishWorkflow;
 import es.in2.desmos.application.workflows.SubscribeWorkflow;
 import es.in2.desmos.domain.exceptions.RequestErrorException;
 import es.in2.desmos.domain.models.BlockchainSubscription;
 import es.in2.desmos.domain.models.BrokerSubscription;
+import es.in2.desmos.domain.models.TrustedAccessNodesList;
 import es.in2.desmos.domain.services.blockchain.BlockchainListenerService;
 import es.in2.desmos.domain.services.broker.BrokerListenerService;
-import es.in2.desmos.domain.services.sync.services.ExternalYamlService;
+import es.in2.desmos.infrastructure.trustframework.cache.TrustedAccessNodesListCacheInitializator;
 import es.in2.desmos.infrastructure.configs.ApiConfig;
 import es.in2.desmos.infrastructure.configs.BlockchainConfig;
 import es.in2.desmos.infrastructure.configs.BrokerConfig;
@@ -43,7 +45,7 @@ public class ApplicationRunner {
     private final BlockchainConfig blockchainConfig;
     private final BrokerListenerService brokerListenerService;
     private final BlockchainListenerService blockchainListenerService;
-    private final ExternalYamlService externalYamlService;
+    private final TrustedAccessNodesListCacheInitializator trustedAccessNodesListCacheInitializator;
     private final DataSyncWorkflow dataSyncWorkflow;
     private final PublishWorkflow publishWorkflow;
     private final SubscribeWorkflow subscribeWorkflow;
@@ -58,8 +60,8 @@ public class ApplicationRunner {
         log.info("ProcessID: {} - Setting initial configurations...", processId);
         return setBrokerSubscription(processId)
                 .then(setBlockchainSubscription(processId))
-                .thenMany(initializeDataSync(processId))
                 .then(setAccessNodePublicKeysFromExternalYaml(processId))
+                .thenMany(initializeDataSync(processId))
                 .then();
     }
 
@@ -112,8 +114,7 @@ public class ApplicationRunner {
     private Mono<Void> setAccessNodePublicKeysFromExternalYaml(String processId) {
         log.info("ProcessID: {} - Setting Access Node Public Keys into Memory...", processId);
 
-        // Get public keys
-        return externalYamlService.getAccessNodeYamlDataFromExternalSource(processId)
+        return trustedAccessNodesListCacheInitializator.initialize(processId)
                 .doOnSuccess(response -> log.info("ProcessID: {} - Public keys loaded successfully in memory.", processId))
                 .doOnError(e -> log.error("ProcessID: {} - Error setting public keys from access node repository", processId, e));
     }

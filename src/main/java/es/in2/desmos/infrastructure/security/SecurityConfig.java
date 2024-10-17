@@ -1,6 +1,6 @@
 package es.in2.desmos.infrastructure.security;
 
-import es.in2.desmos.infrastructure.configs.cache.AccessNodeMemoryStore;
+import es.in2.desmos.domain.repositories.TrustedAccessNodesListRepository;
 import es.in2.desmos.infrastructure.security.filters.BearerTokenReactiveAuthenticationManager;
 import es.in2.desmos.infrastructure.security.filters.ServerHttpBearerAuthenticationConverter;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ import java.util.function.Function;
 public class SecurityConfig {
 
     private final JwtTokenProvider jwtVerifier;
-    private final AccessNodeMemoryStore accessNodeMemoryStore;
+    private final TrustedAccessNodesListRepository trustedAccessNodesListRepository;
     private final CorsConfig corsConfig;
 
 
@@ -78,7 +78,7 @@ public class SecurityConfig {
         ReactiveAuthenticationManager authManager;
         authManager = new BearerTokenReactiveAuthenticationManager();
         bearerAuthenticationFilter = new AuthenticationWebFilter(authManager);
-        bearerConverter = new ServerHttpBearerAuthenticationConverter(accessNodeMemoryStore, jwtVerifier);
+        bearerConverter = new ServerHttpBearerAuthenticationConverter(trustedAccessNodesListRepository, jwtVerifier);
         bearerAuthenticationFilter
                 .setAuthenticationConverter(bearerConverter);
         bearerAuthenticationFilter

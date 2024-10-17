@@ -5,9 +5,8 @@ import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
 import com.nimbusds.jose.jca.JCASupport;
 import com.nimbusds.jwt.SignedJWT;
-import es.in2.desmos.domain.models.AccessNodeOrganization;
-import es.in2.desmos.domain.models.AccessNodeYamlData;
-import es.in2.desmos.infrastructure.configs.cache.AccessNodeMemoryStore;
+import es.in2.desmos.domain.models.TrustedAccessNode;
+import es.in2.desmos.domain.models.TrustedAccessNodesList;
 import es.in2.desmos.infrastructure.security.JwtTokenProvider;
 import es.in2.desmos.infrastructure.security.SecurityProperties;
 import org.junit.jupiter.api.Assertions;
@@ -37,9 +36,6 @@ class JwtTokenProviderTest {
     @Mock
     private SecurityProperties securityProperties;
 
-    @Mock
-    private AccessNodeMemoryStore accessNodeMemoryStore;
-
     @BeforeEach
     void setUp() throws InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException {
         MockitoAnnotations.openMocks(this);
@@ -63,18 +59,15 @@ class JwtTokenProviderTest {
     @Test
     void testValidateSignedJwt() throws JOSEException {
 
-        AccessNodeYamlData organizations = new AccessNodeYamlData();
-        List<AccessNodeOrganization> orgList = new ArrayList<>();
-        AccessNodeOrganization org = new AccessNodeOrganization("test","0x0486573f96a9e5a0007855cba27af53d2d73d69cc143266bc336e361d2f5124f6639c813e62a1c8642132de455b72d65c620f18d69c09e30123d420fcb85de361d","origin", "");
+        TrustedAccessNodesList organizations = new TrustedAccessNodesList();
+        List<TrustedAccessNode> orgList = new ArrayList<>();
+        TrustedAccessNode org = new TrustedAccessNode("test","0x0486573f96a9e5a0007855cba27af53d2d73d69cc143266bc336e361d2f5124f6639c813e62a1c8642132de455b72d65c620f18d69c09e30123d420fcb85de361d","origin", "");
         orgList.add(org);
         organizations.setOrganizations(orgList);
 
-        when(accessNodeMemoryStore.getOrganizations())
-                .thenReturn(organizations);
-
         String jwtString = jwtTokenProvider.generateToken(resourceURI);
         System.out.println(jwtString);
-        SignedJWT result = jwtTokenProvider.validateSignedJwt(jwtString,"origin",accessNodeMemoryStore).block();
+        SignedJWT result = jwtTokenProvider.validateSignedJwt(jwtString,"origin", organizations).block();
         assert result != null;
         Assertions.assertEquals(jwtString, result.serialize());
     }
@@ -82,7 +75,7 @@ class JwtTokenProviderTest {
     @Test
     void testInvalidJwt() {
         String invalidJwt = "invalid.jwt.token";
-        assertThrows(Exception.class, () -> jwtTokenProvider.validateSignedJwt(invalidJwt,"origin",accessNodeMemoryStore).block());
+        assertThrows(Exception.class, () -> jwtTokenProvider.validateSignedJwt(invalidJwt,"origin", new TrustedAccessNodesList()).block());
 
     }
 

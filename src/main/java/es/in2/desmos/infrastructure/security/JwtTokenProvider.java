@@ -12,9 +12,8 @@ import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import es.in2.desmos.domain.models.AccessNodeOrganization;
-import es.in2.desmos.domain.models.AccessNodeYamlData;
-import es.in2.desmos.infrastructure.configs.cache.AccessNodeMemoryStore;
+import es.in2.desmos.domain.models.TrustedAccessNode;
+import es.in2.desmos.domain.models.TrustedAccessNodesList;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -108,12 +107,12 @@ public class JwtTokenProvider {
 
 
     // Use public keys from Access Node Directory in memory
-    public Mono<SignedJWT> validateSignedJwt(String jwtString, String externalNodeUrl, AccessNodeMemoryStore accessNodeMemoryStore) {
+    public Mono<SignedJWT> validateSignedJwt(String jwtString, String externalNodeUrl, TrustedAccessNodesList trustedAccessNodesList) {
 
         try {
 
             // Retrieve the public key from AccessNodeMemoryStore
-            String publicKeyHex = getPublicKeyFromAccessNodeMemory(externalNodeUrl, accessNodeMemoryStore);
+            String publicKeyHex = getPublicKeyFromAccessNodeMemory(externalNodeUrl, trustedAccessNodesList);
             if (publicKeyHex == null) {
                 return Mono.error(new InvalidKeyException("Public key not found for origin: " + externalNodeUrl));
             }
@@ -141,17 +140,16 @@ public class JwtTokenProvider {
         }
     }
 
-    private String getPublicKeyFromAccessNodeMemory(String origin, AccessNodeMemoryStore accessNodeMemoryStore) {
+    private String getPublicKeyFromAccessNodeMemory(String origin, TrustedAccessNodesList trustedAccessNodesList) {
         log.info("JwtTokenProvider -- Init -- getPublicKeyFromAccessNodeMemory()");
 
         // Retrieve the organizations data from AccessNodeMemoryStore
-        AccessNodeYamlData yamlData = accessNodeMemoryStore.getOrganizations();
-        if (yamlData == null || yamlData.getOrganizations() == null) {
+        if (trustedAccessNodesList == null || trustedAccessNodesList.getOrganizations() == null) {
             log.warn("No organizations data available in AccessNodeMemoryStore.");
             return null;
         }
         // Search for the organization with the matching URL
-        for (AccessNodeOrganization org : yamlData.getOrganizations()) {
+        for (TrustedAccessNode org : trustedAccessNodesList.getOrganizations()) {
             if (org.getUrl().equals(origin)) {
                 log.info("Found public key for origin: {}", origin);
                 return org.getPublicKey();
