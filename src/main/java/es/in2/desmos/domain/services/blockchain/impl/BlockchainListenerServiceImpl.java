@@ -1,8 +1,9 @@
 package es.in2.desmos.domain.services.blockchain.impl;
 
+import es.in2.desmos.domain.exceptions.UnauthorizedDomeParticipantException;
 import es.in2.desmos.domain.models.*;
+import es.in2.desmos.domain.repositories.TrustedAccessNodesListRepository;
 import es.in2.desmos.domain.services.api.AuditRecordService;
-import es.in2.desmos.domain.services.api.DomeParticipantService;
 import es.in2.desmos.domain.services.api.QueueService;
 import es.in2.desmos.domain.services.blockchain.BlockchainListenerService;
 import es.in2.desmos.domain.services.blockchain.adapter.BlockchainAdapterService;
@@ -13,7 +14,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 
 @Slf4j
 @Service
@@ -22,14 +22,15 @@ public class BlockchainListenerServiceImpl implements BlockchainListenerService 
     private final BlockchainAdapterService blockchainAdapterService;
     private final AuditRecordService auditRecordService;
     private final QueueService pendingSubscribeEventsQueue;
-    private final DomeParticipantService domeParticipantService;
+    private final TrustedAccessNodesListRepository trustedAccessNodesListRepository;
 
     public BlockchainListenerServiceImpl(BlockchainAdapterFactory blockchainAdapterFactory, AuditRecordService auditRecordService,
-                                         QueueService pendingSubscribeEventsQueue, DomeParticipantService domeParticipantService) {
+                                         QueueService pendingSubscribeEventsQueue,
+                                         TrustedAccessNodesListRepository trustedAccessNodesListRepository) {
         this.blockchainAdapterService = blockchainAdapterFactory.getBlockchainAdapter();
         this.auditRecordService = auditRecordService;
         this.pendingSubscribeEventsQueue = pendingSubscribeEventsQueue;
-        this.domeParticipantService = domeParticipantService;
+        this.trustedAccessNodesListRepository = trustedAccessNodesListRepository;
     }
 
     @Override
@@ -47,7 +48,7 @@ public class BlockchainListenerServiceImpl implements BlockchainListenerService 
     @Override
     public Mono<Void> processBlockchainNotification(String processId, BlockchainNotification blockchainNotification) {
         // Create and AuditRecord with status RECEIVED
-        return domeParticipantService.validateDomeParticipant(processId, blockchainNotification.ethereumAddress())
+        return checkIfParticipantExistsInTrustedList(processId, blockchainNotification.ethereumAddress())
                 .flatMap(domeParticipant -> auditRecordService.buildAndSaveAuditRecordFromBlockchainNotification(processId, blockchainNotification,
                                 null, AuditRecordStatus.RECEIVED)
                         // Set priority for the pendingSubscribeEventsQueue event
@@ -89,6 +90,16 @@ public class BlockchainListenerServiceImpl implements BlockchainListenerService 
 
                     return areEventTypesEqual && isNotificationEndpointEqual;
                 });
+    }
+
+    private Mono<Void> checkIfParticipantExistsInTrustedList(String processId, String dltAddress) {
+        log.info("ProcessID: {} - Validating Dome Participant: {}", processId, dltAddress);
+        return trustedAccessNodesListRepository.existsDltAddressByValue(Mono.just(dltAddress))
+                .switchIfEmpty(Mono.error(new UnauthorizedDomeParticipantException("Dome Participant not found because empty")))
+                .flatMap(exists ->
+                        Boolean.TRUE.equals(exists) ?
+                                Mono.empty() :
+                                Mono.error(new UnauthorizedDomeParticipantException("Dome Participant not found")));
     }
 
 }
