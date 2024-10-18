@@ -10,7 +10,6 @@ import es.in2.desmos.it.ContainerManager;
 import es.in2.desmos.objectmothers.AuditRecordMother;
 import es.in2.desmos.objectmothers.MVAuditServiceEntity4DataNegotiationMother;
 import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
-import es.in2.desmos.testsbase.MockCorsTrustedAccessNodesListServerBase;
 import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;

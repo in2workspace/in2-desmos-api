@@ -4,7 +4,6 @@ import es.in2.desmos.application.workflows.jobs.DataNegotiationJob;
 import es.in2.desmos.domain.events.DataNegotiationEventPublisher;
 import es.in2.desmos.it.ContainerManager;
 import es.in2.desmos.objectmothers.DataNegotiationEventMother;
-import es.in2.desmos.testsbase.MockCorsTrustedAccessNodesListServerBase;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;

@@ -8,7 +8,6 @@ import es.in2.desmos.inflators.ScorpioInflator;
 import es.in2.desmos.it.ContainerManager;
 import es.in2.desmos.objectmothers.MVBrokerEntity4DataNegotiationMother;
 import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
-import es.in2.desmos.testsbase.MockCorsTrustedAccessNodesListServerBase;
 import org.json.JSONException;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;

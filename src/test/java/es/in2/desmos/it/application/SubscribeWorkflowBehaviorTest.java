@@ -9,7 +9,11 @@ import es.in2.desmos.domain.repositories.AuditRecordRepository;
 import es.in2.desmos.domain.services.api.QueueService;
 import es.in2.desmos.infrastructure.controllers.NotificationController;
 import es.in2.desmos.it.ContainerManager;
-import es.in2.desmos.testsbase.MockCorsTrustedAccessNodesListServerBase;
+import okhttp3.mockwebserver.Dispatcher;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,19 +21,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.io.IOException;
 import java.util.List;
+
+import static org.springframework.test.annotation.DirtiesContext.ClassMode.BEFORE_CLASS;
 
 @SpringBootTest
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class SubscribeWorkflowBehaviorTest extends MockCorsTrustedAccessNodesListServerBase {
+@DirtiesContext(classMode = BEFORE_CLASS)
+@TestExecutionListeners({DirtiesContextTestExecutionListener.class})
+class SubscribeWorkflowBehaviorTest {
 
     private final Logger log = LoggerFactory.getLogger(SubscribeWorkflowBehaviorTest.class);
 
@@ -75,9 +87,43 @@ class SubscribeWorkflowBehaviorTest extends MockCorsTrustedAccessNodesListServer
     @Autowired
     private QueueService pendingSubscribeEventsQueue;
 
+    private static MockWebServer mockWebServer;
+
+    @BeforeAll
+    static void beforeAll() throws IOException {
+        mockWebServer = new MockWebServer();
+        mockWebServer.start();
+        mockWebServer.setDispatcher(trustedAccessNodesListServerDispatcher());
+    }
+
+    @AfterAll
+    static void afterAll() throws IOException {
+        if (mockWebServer != null) {
+            mockWebServer.shutdown();
+        }
+    }
+
+    private static Dispatcher trustedAccessNodesListServerDispatcher() {
+        return new Dispatcher() {
+            @NotNull
+            @Override
+            public MockResponse dispatch(@NotNull RecordedRequest recordedRequest) {
+                return new MockResponse()
+                        .setBody("""
+                                organizations:
+                                  - name: DOME
+                                    publicKey: 0x0486573f96a9e5a0007855cba27af53d2d73d69cc143266bc336e361d2f5124f6639c813e62a1c8642132de455b72d65c620f18d69c09e30123d420fcb85de361d
+                                    url: https://desmos.dome-marketplace-sbx.org
+                                    dlt_address: 0x40b0ab9dfd960064fb7e9fdf77f889c71569e349055ff563e8d699d8fa97fa90""")
+                        .addHeader("Content-Type", "application/json");
+            }
+        };
+    }
+
     @DynamicPropertySource
     static void setDynamicProperties(DynamicPropertyRegistry registry) {
         ContainerManager.postgresqlProperties(registry);
+        registry.add("access-node.trustedAccessNodesList", () -> mockWebServer.url("").toString());
     }
 
     private static String getString() {
@@ -123,6 +169,7 @@ class SubscribeWorkflowBehaviorTest extends MockCorsTrustedAccessNodesListServer
     void subscribeWorkflowBehaviorTest() {
         log.info("Starting Subscribe Workflow Behavior Test...");
         log.info("1. Send a POST request to the external broker in order to retrieve the entity later");
+
         WebClient.create().post()
                 .uri(ContainerManager.getBaseUriForScorpioA() + "/ngsi-ld/v1/entities")
                 .accept(MediaType.APPLICATION_JSON)

@@ -9,7 +9,6 @@ import es.in2.desmos.domain.models.AuditRecordStatus;
 import es.in2.desmos.domain.models.AuditRecordTrader;
 import es.in2.desmos.domain.repositories.AuditRecordRepository;
 import es.in2.desmos.it.ContainerManager;
-import es.in2.desmos.testsbase.MockCorsTrustedAccessNodesListServerBase;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

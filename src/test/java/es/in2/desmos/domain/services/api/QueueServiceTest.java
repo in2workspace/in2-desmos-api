@@ -2,7 +2,6 @@ package es.in2.desmos.domain.services.api;
 
 import es.in2.desmos.it.ContainerManager;
 import es.in2.desmos.objectmothers.EventQueueMother;
-import es.in2.desmos.testsbase.MockCorsTrustedAccessNodesListServerBase;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
