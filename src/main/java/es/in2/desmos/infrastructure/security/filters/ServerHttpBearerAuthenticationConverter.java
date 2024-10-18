@@ -1,7 +1,7 @@
 package es.in2.desmos.infrastructure.security.filters;
 
 import com.nimbusds.jwt.SignedJWT;
-import es.in2.desmos.domain.repositories.TrustedAccessNodesListRepository;
+import es.in2.desmos.infrastructure.configs.TrustFrameworkConfig;
 import es.in2.desmos.infrastructure.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +12,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +30,7 @@ public class ServerHttpBearerAuthenticationConverter implements Function<ServerW
     private static final String BEARER = "Bearer ";
     private static final Predicate<String> matchBearerLength = authValue -> authValue.length() > BEARER.length();
     private static final Function<String,Mono<String>> isolateBearerValue = authValue -> Mono.justOrEmpty(authValue.substring(BEARER.length()));
-    private final TrustedAccessNodesListRepository trustedAccessNodesListRepository;
+    private final TrustFrameworkConfig trustFrameworkConfig;
 
     private final JwtTokenProvider jwtVerifier;
 
@@ -43,7 +42,7 @@ public class ServerHttpBearerAuthenticationConverter implements Function<ServerW
                 .filter(matchBearerLength)
                 .flatMap(isolateBearerValue)
                 .flatMap(jwtString ->
-                        jwtVerifier.validateSignedJwt(jwtString, serverWebExchange.getRequest().getHeaders().getFirst("external-node-url"), trustedAccessNodesListRepository.getTrustedAccessNodeList().block()))
+                        jwtVerifier.validateSignedJwt(jwtString, serverWebExchange.getRequest().getHeaders().getFirst("external-node-url"), trustFrameworkConfig.find().block()))
                 .flatMap(ServerHttpBearerAuthenticationConverter::create).log();
     }
 

@@ -2,8 +2,8 @@ package es.in2.desmos.infrastructure.security;
 
 import es.in2.desmos.domain.models.TrustedAccessNode;
 import es.in2.desmos.domain.models.TrustedAccessNodesList;
-import es.in2.desmos.domain.repositories.TrustedAccessNodesListRepository;
 import es.in2.desmos.infrastructure.configs.BrokerConfig;
+import es.in2.desmos.infrastructure.configs.TrustFrameworkConfig;
 import es.in2.desmos.infrastructure.configs.properties.AccessNodeProperties;
 import es.in2.desmos.infrastructure.configs.properties.DLTAdapterProperties;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
-import reactor.core.scheduler.Schedulers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CorsConfig {
 
-    private final TrustedAccessNodesListRepository trustedAccessNodesListRepository;
+    private final TrustFrameworkConfig trustFrameworkConfig;
     private final AccessNodeProperties accessNodeProperties;
     private final BrokerConfig brokerConfig;
     private final DLTAdapterProperties dltAdapterProperties;
@@ -78,7 +77,7 @@ public class CorsConfig {
         // Retrieve YAML data from the External URL
 
         List<String> urls = new ArrayList<>();
-        TrustedAccessNodesList yamlData = trustedAccessNodesListRepository.getTrustedAccessNodeList().block();
+        TrustedAccessNodesList yamlData = trustFrameworkConfig.find().block();
         if (yamlData == null || yamlData.getOrganizations() == null) {
             log.warn("No organizations data available in AccessNodeMemoryStore.");
             return urls;

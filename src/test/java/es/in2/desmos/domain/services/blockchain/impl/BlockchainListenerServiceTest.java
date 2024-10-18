@@ -1,11 +1,11 @@
 package es.in2.desmos.domain.services.blockchain.impl;
 
 import es.in2.desmos.domain.models.BlockchainSubscription;
-import es.in2.desmos.domain.repositories.TrustedAccessNodesListRepository;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.api.QueueService;
 import es.in2.desmos.domain.services.blockchain.adapter.BlockchainAdapterService;
 import es.in2.desmos.domain.services.blockchain.adapter.factory.BlockchainAdapterFactory;
+import es.in2.desmos.infrastructure.configs.TrustFrameworkConfig;
 import es.in2.desmos.objectmothers.BlockchainSubscriptionMother;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,12 +42,12 @@ class BlockchainListenerServiceTest {
     private BlockchainListenerServiceImpl blockchainListenerService;
 
     @Mock
-    private TrustedAccessNodesListRepository trustedAccessNodesListRepository;
+    private TrustFrameworkConfig trustFrameworkConfig;
 
     @BeforeEach
     void init() {
         when(blockchainAdapterFactory.getBlockchainAdapter()).thenReturn(blockchainAdapterService);
-        blockchainListenerService = new BlockchainListenerServiceImpl(blockchainAdapterFactory, auditRecordService, pendingSubscribeEventsQueue, trustedAccessNodesListRepository);
+        blockchainListenerService = new BlockchainListenerServiceImpl(blockchainAdapterFactory, auditRecordService, pendingSubscribeEventsQueue, trustFrameworkConfig);
     }
 
     @Test
