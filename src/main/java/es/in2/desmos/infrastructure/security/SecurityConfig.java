@@ -1,6 +1,5 @@
 package es.in2.desmos.infrastructure.security;
 
-import es.in2.desmos.domain.repositories.TrustedAccessNodesListRepository;
 import es.in2.desmos.infrastructure.configs.TrustFrameworkConfig;
 import es.in2.desmos.infrastructure.security.filters.BearerTokenReactiveAuthenticationManager;
 import es.in2.desmos.infrastructure.security.filters.ServerHttpBearerAuthenticationConverter;

@@ -1,10 +1,9 @@
 package es.in2.desmos.infrastructure.configs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import es.in2.desmos.domain.models.TrustedAccessNode;
-import es.in2.desmos.domain.models.TrustedAccessNodesList;
 import es.in2.desmos.infrastructure.configs.properties.AccessNodeProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,8 +17,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Configuration
@@ -46,12 +46,14 @@ public class TrustFrameworkConfig {
         // Retrieve YAML data from the External URL
 
         return getAccessNodesListContent()
-                .flatMap(accessNodesListYaml -> deserializeYaml(accessNodesListYaml)
-                        .flatMap(accessNodesList -> {
-                            savePublicKeysByUrlRef(Mono.just(accessNodesList));
-                            saveDltAddressesRef(Mono.just(accessNodesList));
-                            return Mono.empty();
-                        }));
+                .flatMap(yamlAccessNodesList -> {
+                    HashMap<String, String> publicKeysByUrl = deserializePublicKeysByUrl(yamlAccessNodesList);
+                    savePublicKeysByUrlRef(Mono.just(publicKeysByUrl));
+
+                    HashSet<String> dltAddresses = deserializeDltAddress(yamlAccessNodesList);
+                    saveDltAddressesRef(Mono.just(dltAddresses));
+                    return Mono.empty();
+                });
     }
 
     @Bean
@@ -66,31 +68,17 @@ public class TrustFrameworkConfig {
         return Mono.justOrEmpty(dltAddresses);
     }
 
-    private void savePublicKeysByUrlRef(Mono<TrustedAccessNodesList> trustedAccessNodesListMono) {
-        trustedAccessNodesListMono
-                .map(trustedAccessNodesList ->
-                        trustedAccessNodesList
-                                .getOrganizations()
-                                .stream()
-                                .collect(Collectors
-                                        .toMap(TrustedAccessNode::getUrl, TrustedAccessNode::getPublicKey,
-                                                (a, b) -> b, HashMap::new))
-                )
+    private void savePublicKeysByUrlRef(Mono<HashMap<String, String>> publicKeysByUrl) {
+        publicKeysByUrl
                 .publishOn(scheduler)
                 .subscribe(publicKeysByUrlRef::set);
     }
 
-    private void saveDltAddressesRef(Mono<TrustedAccessNodesList> trustedAccessNodesListMono) {
-        trustedAccessNodesListMono
-                .map(trustedAccessNodesList -> trustedAccessNodesList.getOrganizations()
-                        .stream()
-                        .map(TrustedAccessNode::getDltAddress)
-                        .collect(Collectors.toCollection(HashSet::new))
-                )
+    private void saveDltAddressesRef(Mono<HashSet<String>> dltAddresses) {
+        dltAddresses
                 .publishOn(scheduler)
                 .subscribe(dltAddressesRef::set);
     }
-
 
     private Mono<String> getAccessNodesListContent() {
         try {
@@ -106,11 +94,48 @@ public class TrustFrameworkConfig {
         }
     }
 
-    private Mono<TrustedAccessNodesList> deserializeYaml(String yamlContent) {
+    private HashMap<String, String> deserializePublicKeysByUrl(String yamlContent) {
         try {
-            return Mono.just(yamlMapper.readValue(yamlContent, TrustedAccessNodesList.class));
+            var data = yamlMapper.readValue(yamlContent, new TypeReference<Map<String, Object>>() {
+            });
+
+            List<Map<String, String>> organizations = yamlMapper.convertValue(data.get("organizations"),
+                    new TypeReference<>() {
+                    });
+            HashMap<String, String> resultMap = new HashMap<>();
+
+            for (Map<String, String> node : organizations) {
+                String url = node.get("url");
+                String publicKey = node.get("publicKey");
+                resultMap.put(url, publicKey);
+            }
+
+            return resultMap;
+
         } catch (JsonProcessingException e) {
-            return Mono.error(new RuntimeException(e));
+            throw new RuntimeException(e);
+        }
+    }
+
+    private HashSet<String> deserializeDltAddress(String yamlContent) {
+        try {
+            var data = yamlMapper.readValue(yamlContent, new TypeReference<Map<String, Object>>() {
+            });
+
+            List<Map<String, String>> organizations = yamlMapper.convertValue(data.get("organizations"),
+                    new TypeReference<>() {
+                    });
+            HashSet<String> resultSet = new HashSet<>();
+
+            for (Map<String, String> node : organizations) {
+                String dltAddress = node.get("dlt_address");
+                resultSet.add(dltAddress);
+            }
+
+            return resultSet;
+
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
     }
 }
