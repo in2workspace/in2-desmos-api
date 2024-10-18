@@ -22,6 +22,7 @@ import java.security.NoSuchProviderException;
 import java.security.Provider;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -65,9 +66,13 @@ class JwtTokenProviderTest {
         orgList.add(org);
         organizations.setOrganizations(orgList);
 
+        HashMap<String, String> publicKeysByUrl = new HashMap<>();
+        publicKeysByUrl.put(org.getUrl(), org.getPublicKey());
+
+
         String jwtString = jwtTokenProvider.generateToken(resourceURI);
         System.out.println(jwtString);
-        SignedJWT result = jwtTokenProvider.validateSignedJwt(jwtString,"origin", organizations).block();
+        SignedJWT result = jwtTokenProvider.validateSignedJwt(jwtString,"origin", publicKeysByUrl).block();
         assert result != null;
         Assertions.assertEquals(jwtString, result.serialize());
     }
@@ -75,7 +80,7 @@ class JwtTokenProviderTest {
     @Test
     void testInvalidJwt() {
         String invalidJwt = "invalid.jwt.token";
-        assertThrows(Exception.class, () -> jwtTokenProvider.validateSignedJwt(invalidJwt,"origin", new TrustedAccessNodesList()).block());
+        assertThrows(Exception.class, () -> jwtTokenProvider.validateSignedJwt(invalidJwt,"origin", new HashMap<>()).block());
 
     }
 

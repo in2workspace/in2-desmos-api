@@ -34,6 +34,7 @@ import java.security.spec.ECPublicKeySpec;
 import java.security.spec.EllipticCurve;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.UUID;
 
 @Slf4j
@@ -107,12 +108,12 @@ public class JwtTokenProvider {
 
 
     // Use public keys from Access Node Directory in memory
-    public Mono<SignedJWT> validateSignedJwt(String jwtString, String externalNodeUrl, TrustedAccessNodesList trustedAccessNodesList) {
+    public Mono<SignedJWT> validateSignedJwt(String jwtString, String externalNodeUrl, HashMap<String, String> publicKeysByUrl) {
 
         try {
 
             // Retrieve the public key from AccessNodeMemoryStore
-            String publicKeyHex = getPublicKeyFromAccessNodeMemory(externalNodeUrl, trustedAccessNodesList);
+            String publicKeyHex = getPublicKeyFromAccessNodeMemory(externalNodeUrl, publicKeysByUrl);
             if (publicKeyHex == null) {
                 return Mono.error(new InvalidKeyException("Public key not found for origin: " + externalNodeUrl));
             }
@@ -140,25 +141,21 @@ public class JwtTokenProvider {
         }
     }
 
-    private String getPublicKeyFromAccessNodeMemory(String origin, TrustedAccessNodesList trustedAccessNodesList) {
+    private String getPublicKeyFromAccessNodeMemory(String origin, HashMap<String, String> publicKeysByUrl) {
         log.info("JwtTokenProvider -- Init -- getPublicKeyFromAccessNodeMemory()");
 
-        // Retrieve the organizations data from AccessNodeMemoryStore
-        if (trustedAccessNodesList == null || trustedAccessNodesList.getOrganizations() == null) {
+        if(publicKeysByUrl == null || publicKeysByUrl.isEmpty()){
             log.warn("No organizations data available in AccessNodeMemoryStore.");
             return null;
-        }
-        // Search for the organization with the matching URL
-        for (TrustedAccessNode org : trustedAccessNodesList.getOrganizations()) {
-            if (org.getUrl().equals(origin)) {
-                log.info("Found public key for origin: {}", origin);
-                return org.getPublicKey();
-            }
-        }
+        } else {
+            var publicKey =  publicKeysByUrl.get(origin);
 
-        // No matching organization found
-        log.warn("Public key not found for origin: {}", origin);
-        return null;
+            if(publicKey == null){
+                log.warn("Public key not found for origin: {}", origin);
+            }
+
+            return publicKey;
+        }
     }
 
     public ECPublicKey convertHexPublicKeyToECPublicKey(String hexPublicKey)

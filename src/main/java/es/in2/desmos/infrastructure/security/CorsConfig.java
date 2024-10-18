@@ -1,7 +1,5 @@
 package es.in2.desmos.infrastructure.security;
 
-import es.in2.desmos.domain.models.TrustedAccessNode;
-import es.in2.desmos.domain.models.TrustedAccessNodesList;
 import es.in2.desmos.infrastructure.configs.BrokerConfig;
 import es.in2.desmos.infrastructure.configs.TrustFrameworkConfig;
 import es.in2.desmos.infrastructure.configs.properties.AccessNodeProperties;
@@ -16,6 +14,7 @@ import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Slf4j
@@ -77,15 +76,12 @@ public class CorsConfig {
         // Retrieve YAML data from the External URL
 
         List<String> urls = new ArrayList<>();
-        TrustedAccessNodesList yamlData = trustFrameworkConfig.find().block();
-        if (yamlData == null || yamlData.getOrganizations() == null) {
+        HashMap<String, String> publicKeysByUrl = trustFrameworkConfig.publicKeysByUrl().block();
+        if (publicKeysByUrl == null || publicKeysByUrl.isEmpty()) {
             log.warn("No organizations data available in AccessNodeMemoryStore.");
-            return urls;
+        } else {
+            urls.addAll(publicKeysByUrl.keySet());
         }
-        for (TrustedAccessNode org : yamlData.getOrganizations()) {
-            urls.add(org.getUrl());
-        }
-
         return urls;
     }
 }

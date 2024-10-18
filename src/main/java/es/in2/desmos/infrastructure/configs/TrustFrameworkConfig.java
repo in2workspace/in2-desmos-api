@@ -3,6 +3,7 @@ package es.in2.desmos.infrastructure.configs;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import es.in2.desmos.domain.models.TrustedAccessNode;
 import es.in2.desmos.domain.models.TrustedAccessNodesList;
 import es.in2.desmos.infrastructure.configs.properties.AccessNodeProperties;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,10 @@ import reactor.core.scheduler.Schedulers;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Configuration
@@ -27,7 +31,10 @@ public class TrustFrameworkConfig {
     private final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
 
     private final Scheduler scheduler = Schedulers.boundedElastic();
-    private final AtomicReference<TrustedAccessNodesList> trustedAccessNodesListRef = new AtomicReference<>();
+
+    private final AtomicReference<HashMap<String, String>> publicKeysByUrlRef = new AtomicReference<>();
+
+    private final AtomicReference<HashSet<String>> dltAddressesRef = new AtomicReference<>();
 
     @Bean
     public Mono<Void> initialize() {
@@ -41,22 +48,49 @@ public class TrustFrameworkConfig {
         return getAccessNodesListContent()
                 .flatMap(accessNodesListYaml -> deserializeYaml(accessNodesListYaml)
                         .flatMap(accessNodesList -> {
-                            save(Mono.just(accessNodesList));
+                            savePublicKeysByUrlRef(Mono.just(accessNodesList));
+                            saveDltAddressesRef(Mono.just(accessNodesList));
                             return Mono.empty();
                         }));
     }
 
     @Bean
-    public Mono<TrustedAccessNodesList> find() {
-        TrustedAccessNodesList currentValue = trustedAccessNodesListRef.get();
-        return Mono.justOrEmpty(currentValue);
+    public Mono<HashMap<String, String>> publicKeysByUrl() {
+        HashMap<String, String> publicKeysByUrl = publicKeysByUrlRef.get();
+        return Mono.justOrEmpty(publicKeysByUrl);
     }
 
-    private void save(Mono<TrustedAccessNodesList> trustedAccessNodesList){
-        trustedAccessNodesList
-                .publishOn(scheduler)
-                .subscribe(trustedAccessNodesListRef::set);
+    @Bean
+    public Mono<HashSet<String>> getDltAddresses() {
+        HashSet<String> dltAddresses = dltAddressesRef.get();
+        return Mono.justOrEmpty(dltAddresses);
     }
+
+    private void savePublicKeysByUrlRef(Mono<TrustedAccessNodesList> trustedAccessNodesListMono) {
+        trustedAccessNodesListMono
+                .map(trustedAccessNodesList ->
+                        trustedAccessNodesList
+                                .getOrganizations()
+                                .stream()
+                                .collect(Collectors
+                                        .toMap(TrustedAccessNode::getUrl, TrustedAccessNode::getPublicKey,
+                                                (a, b) -> b, HashMap::new))
+                )
+                .publishOn(scheduler)
+                .subscribe(publicKeysByUrlRef::set);
+    }
+
+    private void saveDltAddressesRef(Mono<TrustedAccessNodesList> trustedAccessNodesListMono) {
+        trustedAccessNodesListMono
+                .map(trustedAccessNodesList -> trustedAccessNodesList.getOrganizations()
+                        .stream()
+                        .map(TrustedAccessNode::getDltAddress)
+                        .collect(Collectors.toCollection(HashSet::new))
+                )
+                .publishOn(scheduler)
+                .subscribe(dltAddressesRef::set);
+    }
+
 
     private Mono<String> getAccessNodesListContent() {
         try {
