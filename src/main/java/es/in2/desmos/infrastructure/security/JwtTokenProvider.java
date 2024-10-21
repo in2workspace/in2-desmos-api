@@ -12,9 +12,6 @@ import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import es.in2.desmos.domain.models.AccessNodeOrganization;
-import es.in2.desmos.domain.models.AccessNodeYamlData;
-import es.in2.desmos.infrastructure.configs.cache.AccessNodeMemoryStore;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -35,6 +32,7 @@ import java.security.spec.ECPublicKeySpec;
 import java.security.spec.EllipticCurve;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.UUID;
 
 @Slf4j
@@ -108,12 +106,12 @@ public class JwtTokenProvider {
 
 
     // Use public keys from Access Node Directory in memory
-    public Mono<SignedJWT> validateSignedJwt(String jwtString, String externalNodeUrl, AccessNodeMemoryStore accessNodeMemoryStore) {
+    public Mono<SignedJWT> validateSignedJwt(String jwtString, String externalNodeUrl, HashMap<String, String> publicKeysByUrl) {
 
         try {
 
             // Retrieve the public key from AccessNodeMemoryStore
-            String publicKeyHex = getPublicKeyFromAccessNodeMemory(externalNodeUrl, accessNodeMemoryStore);
+            String publicKeyHex = getPublicKeyFromAccessNodeMemory(externalNodeUrl, publicKeysByUrl);
             if (publicKeyHex == null) {
                 return Mono.error(new InvalidKeyException("Public key not found for origin: " + externalNodeUrl));
             }
@@ -141,26 +139,21 @@ public class JwtTokenProvider {
         }
     }
 
-    private String getPublicKeyFromAccessNodeMemory(String origin, AccessNodeMemoryStore accessNodeMemoryStore) {
+    private String getPublicKeyFromAccessNodeMemory(String origin, HashMap<String, String> publicKeysByUrl) {
         log.info("JwtTokenProvider -- Init -- getPublicKeyFromAccessNodeMemory()");
 
-        // Retrieve the organizations data from AccessNodeMemoryStore
-        AccessNodeYamlData yamlData = accessNodeMemoryStore.getOrganizations();
-        if (yamlData == null || yamlData.getOrganizations() == null) {
+        if(publicKeysByUrl == null || publicKeysByUrl.isEmpty()){
             log.warn("No organizations data available in AccessNodeMemoryStore.");
             return null;
-        }
-        // Search for the organization with the matching URL
-        for (AccessNodeOrganization org : yamlData.getOrganizations()) {
-            if (org.getUrl().equals(origin)) {
-                log.info("Found public key for origin: {}", origin);
-                return org.getPublicKey();
-            }
-        }
+        } else {
+            var publicKey =  publicKeysByUrl.get(origin);
 
-        // No matching organization found
-        log.warn("Public key not found for origin: {}", origin);
-        return null;
+            if(publicKey == null){
+                log.warn("Public key not found for origin: {}", origin);
+            }
+
+            return publicKey;
+        }
     }
 
     public ECPublicKey convertHexPublicKeyToECPublicKey(String hexPublicKey)

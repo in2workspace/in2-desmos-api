@@ -36,7 +36,8 @@ public class ApiConfig {
     public String organizationIdHash() {
         try {
             return calculateSHA256(operatorProperties.organizationIdentifier());
-        } catch (NoSuchAlgorithmException | JsonProcessingException e) {
+        } catch (Exception e) {
+            log.warn("WARN - {}", e.getMessage());
             throw new HashCreationException("Error creating organizationIdentifier hash: " + e.getMessage());
         }
     }

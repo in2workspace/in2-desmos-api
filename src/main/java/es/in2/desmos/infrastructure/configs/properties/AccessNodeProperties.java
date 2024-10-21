@@ -5,8 +5,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 /**
  * Access Node Properties
  *
- * @param prefixDirectory - endpoint to notify on events
+ * @param trustedAccessNodesList - endpoint to notify on events
  */
 @ConfigurationProperties(prefix = "access-node")
-public record AccessNodeProperties(String prefixDirectory) {
+public record AccessNodeProperties(String trustedAccessNodesList) {
 }

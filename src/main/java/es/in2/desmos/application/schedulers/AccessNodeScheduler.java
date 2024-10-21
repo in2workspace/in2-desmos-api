@@ -1,6 +1,6 @@
 package es.in2.desmos.application.schedulers;
 
-import es.in2.desmos.domain.services.sync.services.ExternalYamlService;
+import es.in2.desmos.infrastructure.configs.TrustFrameworkConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -13,7 +13,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AccessNodeScheduler {
 
-    private final ExternalYamlService externalYamlService;
+    private final TrustFrameworkConfig trustFrameworkConfig;
 
     @Scheduled(cron = "0 0 3 * * *")
     public void getPublicKeyFromAccessNodeRepository() {
@@ -21,6 +21,6 @@ public class AccessNodeScheduler {
 
         log.info("ProcessID: {} - Starting cron Access Node Schedule cron job...", processId);
 
-        externalYamlService.getAccessNodeYamlDataFromExternalSource(processId).subscribe();
+        trustFrameworkConfig.initialize().subscribe();
     }
 }
