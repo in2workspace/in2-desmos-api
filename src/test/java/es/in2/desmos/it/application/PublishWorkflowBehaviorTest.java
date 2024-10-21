@@ -45,21 +45,24 @@ class PublishWorkflowBehaviorTest {
         ContainerManager.postgresqlProperties(registry);
     }
 
+    @BeforeEach
     @AfterEach
     public void cleanUp() {
         auditRecordRepository.deleteAll().block();
     }
 
-    /*
-     *  Given a BrokerNotification, we will send a POST request emulating the broker behavior.
-     *  When the POST request is received, the application will create a BlockchainTxPayload,
-     *  and publish it into the blockchain. During the process, three AuditRecord will be created
-     *  with the information of the transaction; RECEIVED, CREATED, and PUBLISHED.
-     */
     @Order(1)
     @Test
     void publishWorkflowBehaviorTest() {
         log.info("Starting Publish Workflow Behavior Test...");
+        /*
+            Given a BrokerNotification, we will send a POST request emulating the broker behavior.
+            When the POST request is received, the application will create a BlockchainTxPayload,
+            and publish it into the blockchain.
+            During the process, three AuditRecord will be created with the information of the transaction;
+            RECEIVED, CREATED, and PUBLISHED.
+         */
+
         // Given
         String brokerNotificationJSON = """
                 {
@@ -159,10 +162,12 @@ class PublishWorkflowBehaviorTest {
                     "subscriptionId": "urn:ngsi-ld:subscription:43109437-bbee-4187-9892-e325210d7ca4"
                 }
                 """;
+
         // When
         try {
             log.info("1. Create a BrokerNotification and send a POST request to the application");
             BrokerNotification brokerNotification = objectMapper.readValue(brokerNotificationJSON, BrokerNotification.class);
+
             notificationController.postBrokerNotification(brokerNotification).block();
             log.info("1.1. Get the event stream from the pendingPublishEventsQueue and subscribe to it.");
             pendingPublishEventsQueue.getEventStream().subscribe(event -> log.info("Event: {}", event));

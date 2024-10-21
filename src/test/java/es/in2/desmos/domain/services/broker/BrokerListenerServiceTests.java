@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.when;
 
@@ -43,8 +44,8 @@ class BrokerListenerServiceTests {
             .processId(UUID.randomUUID().toString())
             .entityId(UUID.randomUUID().toString())
             .entityType("ProductOffering")
-            .entityHash("9b8685970e0de1f72c586bf5176dda04e0e6c891714f0e55a2d7745b77edfbd4")
-            .entityHashLink("9b8685970e0de1f72c586bf5176dda04e0e6c891714f0e55a2d7745b77edfbd4")
+            .entityHash("08aec4a32245954733602f864acfed6a8fe733d387b9bcd4217cdc07ee6198b8")
+            .entityHashLink("08aec4a32245954733602f864acfed6a8fe733d387b9bcd4217cdc07ee6198b8")
             .status(AuditRecordStatus.PUBLISHED)
             .hash("hash")
             .createdAt(Timestamp.from(Instant.now()))
@@ -81,6 +82,7 @@ class BrokerListenerServiceTests {
                 .build();
         // Act
         when(auditRecordService.findLatestAuditRecordForEntity(anyString(), any())).thenReturn(Mono.empty());
+        when(auditRecordService.isAuditRecordUnlocked(eq(processId), anyString())).thenReturn(Mono.just(true));
         when(auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(anyString(), any(), any(), any())).thenReturn(Mono.empty());
         when(queueService.enqueueEvent(any())).thenReturn(Mono.empty());
         // Assert
@@ -104,6 +106,7 @@ class BrokerListenerServiceTests {
                 .build();
         // Act
         when(auditRecordService.findLatestAuditRecordForEntity(anyString(), any())).thenReturn(Mono.just(auditRecord));
+        when(auditRecordService.isAuditRecordUnlocked(eq(processId), anyString())).thenReturn(Mono.just(true));
         when(objectMapper.writer()).thenReturn(objectWriter);
         when(objectWriter.writeValueAsString(any())).thenReturn("""
                 {
@@ -165,6 +168,7 @@ class BrokerListenerServiceTests {
                   "notifiedAt": "2023-03-14T16:38:15.123456Z"
                 }""");
         when(auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(anyString(), any(), any(), any())).thenReturn(Mono.empty());
+        when(auditRecordService.isAuditRecordUnlocked(eq(processId), anyString())).thenReturn(Mono.just(true));
         when(queueService.enqueueEvent(any())).thenReturn(Mono.empty());
         // Assert
         StepVerifier.create(brokerListenerService.processBrokerNotification(processId, brokerNotification))
@@ -187,6 +191,7 @@ class BrokerListenerServiceTests {
                 .build();
 
         when(auditRecordService.findLatestAuditRecordForEntity(anyString(), any())).thenReturn(Mono.just(auditRecord));
+        when(auditRecordService.isAuditRecordUnlocked(eq(processId), anyString())).thenReturn(Mono.just(true));
         when(objectMapper.writer()).thenReturn(objectWriter);
         when(objectWriter.writeValueAsString(any())).thenReturn("""
                 {

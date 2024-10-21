@@ -45,11 +45,11 @@ public class PublishWorkflowImpl implements PublishWorkflow {
                                 // Create an event from the BrokerNotification
                                 .flatMap(brokerNotification ->
                                         // Get the last AuditRecord stored for the same entityId; it is used to calculate the hashLink
-                                        auditRecordService.fetchLatestProducerEntityHashByEntityId(processId, brokerNotification.data().get(0).get("id").toString())
+                                        auditRecordService.fetchLatestProducerEntityHashLinkByEntityId(processId, brokerNotification.data().get(0).get("id").toString())
                                                 .switchIfEmpty(blockchainTxPayloadFactory.calculatePreviousHashIfEmpty(processId, brokerNotification.data().get(0)))
                                                 // Build the BlockchainTxPayload object
-                                                .flatMap(previousHash ->
-                                                        blockchainTxPayloadFactory.buildBlockchainTxPayload(processId, brokerNotification.data().get(0), previousHash))
+                                                .flatMap(previousHashLink ->
+                                                        blockchainTxPayloadFactory.buildBlockchainTxPayload(processId, brokerNotification.data().get(0), previousHashLink))
                                                 // Save a new Audit Record with status CREATED
                                                 .flatMap(blockchainTxPayload ->
                                                         auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(processId, brokerNotification.data().get(0), AuditRecordStatus.CREATED, blockchainTxPayload)

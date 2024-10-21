@@ -1,8 +1,8 @@
 package es.in2.desmos.domain.services.blockchain.adapter.factory;
 
-import es.in2.desmos.infrastructure.configs.properties.DLTAdapterProperties;
 import es.in2.desmos.domain.services.blockchain.adapter.BlockchainAdapterService;
 import es.in2.desmos.domain.services.blockchain.adapter.impl.BlockchainAdapterServiceImpl;
+import es.in2.desmos.infrastructure.configs.properties.DLTAdapterProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

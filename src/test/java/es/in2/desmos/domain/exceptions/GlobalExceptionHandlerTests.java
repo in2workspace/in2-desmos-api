@@ -45,7 +45,8 @@ class GlobalExceptionHandlerTests {
                 RequestErrorException.class,
                 BrokerEntityRetrievalException.class,
                 BrokerNotificationSelfGeneratedException.class,
-                UnauthorizedDomeParticipantException.class
+                UnauthorizedDomeParticipantException.class,
+                UnauthorizedBrokerSubscriptionException.class
         ));
         List<String> messages = new ArrayList<>(List.of(
                 "SubscriptionCreationException",
@@ -57,7 +58,8 @@ class GlobalExceptionHandlerTests {
                 "RequestErrorException",
                 "BrokerEntityRetrievalException",
                 "BrokerNotificationSelfGeneratedException",
-                "UnauthorizedDomeParticipantException"
+                "UnauthorizedDomeParticipantException",
+                "UnauthorizedBrokerSubscriptionException"
         ));
         List<Throwable> nullCauseThrowableList = new ArrayList<>();
         List<Throwable> exceptionCauseThrowableList = new ArrayList<>();
@@ -80,7 +82,8 @@ class GlobalExceptionHandlerTests {
                 (ex, req) -> globalExceptionHandler.handleRequestErrorException((RequestErrorException) ex, req),
                 (ex, req) -> globalExceptionHandler.handleBrokerEntityRetrievalException((BrokerEntityRetrievalException) ex, req),
                 (ex, req) -> globalExceptionHandler.handleBrokerNotificationSelfGeneratedException((BrokerNotificationSelfGeneratedException) ex, req),
-                (ex, req) -> globalExceptionHandler.handleUnauthorizedDomeParticipantException((UnauthorizedDomeParticipantException) ex, req)
+                (ex, req) -> globalExceptionHandler.handleUnauthorizedDomeParticipantException((UnauthorizedDomeParticipantException) ex, req),
+                (ex, req) -> globalExceptionHandler.handleUnauthorizedBrokerSubscriptionException((UnauthorizedBrokerSubscriptionException) ex, req)
         ));
         classes.addAll(new ArrayList<>(classes));
         messages.addAll(new ArrayList<>(messages));

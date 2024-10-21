@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
 
@@ -46,27 +47,33 @@ public class BrokerListenerServiceImpl implements BrokerListenerService {
     public Mono<Void> processBrokerNotification(String processId, BrokerNotification brokerNotification) {
         log.info("ProcessID: {} - Processing Broker Notification...", processId);
         // Validate BrokerNotification is not null and has data
-        return getDataFromBrokerNotification(brokerNotification)
-                // Validate if BrokerNotification is from an external source or self-generated
-                .flatMap(dataMap -> isBrokerNotificationFromExternalSource(processId, dataMap))
-                // Create and AuditRecord with status RECEIVED
-                .flatMap(dataMap -> auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(processId, dataMap,
-                        AuditRecordStatus.RECEIVED, null))
-                // Set priority for the pendingSubscribeEventsQueue event
-                .then(Mono.just(EventQueuePriority.MEDIUM))
-                // Enqueue BrokerNotification to DataPublicationQueue
-                .flatMap(eventQueuePriority -> pendingPublishEventsQueue.enqueueEvent(EventQueue.builder()
-                        .event(Collections.singletonList(brokerNotification))
-                        .priority(eventQueuePriority)
-                        .build()))
-                .doOnSuccess(unused -> log.info("ProcessID: {} - Broker Notification processed successfully.", processId))
-                .doOnError(throwable -> {
-                    if (throwable instanceof BrokerNotificationSelfGeneratedException) {
-                        log.info("ProcessID: {} - Self-Generated Broker Notification. It does not need to do nothing.", processId);
-                    } else {
-                        log.error("ProcessID: {} - Error processing Broker Notification: {}", processId, throwable.getMessage());
-                    }
-                });
+        return
+                getDataFromBrokerNotification(brokerNotification)
+                        // Validate if BrokerNotification is from an external source or self-generated
+                        .flatMap(dataMap -> isBrokerNotificationFromExternalSource(processId, dataMap))
+                        // Create and AuditRecord with status RECEIVED
+                        .flatMap(dataMap -> auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(processId, dataMap,
+                                AuditRecordStatus.RECEIVED, null))
+                        // Set priority for the pendingSubscribeEventsQueue event
+                        .then(Mono.just(EventQueuePriority.MEDIUM))
+                        // Enqueue BrokerNotification to DataPublicationQueue
+                        .flatMap(eventQueuePriority -> pendingPublishEventsQueue.enqueueEvent(EventQueue.builder()
+                                .event(Collections.singletonList(brokerNotification))
+                                .priority(eventQueuePriority)
+                                .build()))
+                        .doOnSuccess(unused -> log.info("ProcessID: {} - Broker Notification processed successfully.", processId))
+                        .doOnError(throwable -> {
+                            if (throwable instanceof BrokerNotificationSelfGeneratedException) {
+                                log.info("ProcessID: {} - Self-Generated Broker Notification. It does not need to do nothing.", processId);
+                            } else {
+                                log.error("ProcessID: {} - Error processing Broker Notification: {}", processId, throwable.getMessage());
+                            }
+                        });
+    }
+
+    @Override
+    public Mono<String> getEntityById(String processId, String entityId) {
+        return brokerAdapter.getEntityById(processId, entityId);
     }
 
     private Mono<Map<String, Object>> getDataFromBrokerNotification(BrokerNotification brokerNotification) {
@@ -76,24 +83,39 @@ public class BrokerListenerServiceImpl implements BrokerListenerService {
     }
 
     private Mono<Map<String, Object>> isBrokerNotificationFromExternalSource(String processId, Map<String, Object> dataMap) {
-        return auditRecordService.findLatestAuditRecordForEntity(processId, dataMap.get("id").toString())
-                .flatMap(auditRecordFound -> {
-                    try {
-                        String newEntityHash = calculateSHA256(objectMapper.writer().writeValueAsString(dataMap));
-                        if (auditRecordFound.getEntityHash().equals(newEntityHash)) {
-                            return Mono.error(new BrokerNotificationSelfGeneratedException("BrokerNotification is self-generated"));
-                        }
-                    } catch (JsonProcessingException | NoSuchAlgorithmException e) {
-                        log.warn("ProcessID: {} - Error processing JSON: {}", processId, e.getMessage());
-                        return Mono.error(new BrokerNotificationParserException("Error processing JSON"));
+        String id = dataMap.get("id").toString();
+
+        return waitForUnlock(processId, id)
+                .then(auditRecordService.findLatestAuditRecordForEntity(processId, id)
+                        .flatMap(auditRecordFound -> {
+                            try {
+                                String newEntityHash = calculateSHA256(objectMapper.writer().writeValueAsString(dataMap));
+                                if (auditRecordFound.getEntityHash().equals(newEntityHash)) {
+                                    return Mono.error(new BrokerNotificationSelfGeneratedException("BrokerNotification is self-generated"));
+                                }
+                            } catch (JsonProcessingException | NoSuchAlgorithmException e) {
+                                log.warn("ProcessID: {} - Error processing JSON: {}", processId, e.getMessage());
+                                return Mono.error(new BrokerNotificationParserException("Error processing JSON"));
+                            }
+                            log.debug("ProcessID: {} - BrokerNotification is from external source", processId);
+                            return Mono.just(dataMap);
+                        })
+                        .switchIfEmpty(Mono.defer(() -> {
+                            log.debug("ProcessID: {} - No audit record found; assuming BrokerNotification is from external source", processId);
+                            return Mono.just(dataMap);
+                        })));
+    }
+
+    private Mono<Void> waitForUnlock(String processId, String id) {
+        return auditRecordService.isAuditRecordUnlocked(processId, id)
+                .flatMap(isAuditRecordUnlocked -> {
+                    if (Boolean.TRUE.equals(isAuditRecordUnlocked)) {
+                        return Mono.empty();
+                    } else {
+                        return Mono.delay(Duration.ofMillis(100))
+                                .then(waitForUnlock(processId, id));
                     }
-                    log.debug("ProcessID: {} - BrokerNotification is from external source", processId);
-                    return Mono.just(dataMap);
-                })
-                .switchIfEmpty(Mono.defer(() -> {
-                    log.debug("ProcessID: {} - No audit record found; assuming BrokerNotification is from external source", processId);
-                    return Mono.just(dataMap);
-                }));
+                });
     }
 
 }

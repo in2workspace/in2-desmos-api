@@ -10,4 +10,8 @@ public interface QueueService {
 
     Flux<EventQueue> getEventStream();
 
+    void pause();
+
+    void resume();
+
 }

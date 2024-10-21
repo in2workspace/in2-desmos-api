@@ -10,4 +10,6 @@ public interface BrokerListenerService {
 
     Mono<Void> processBrokerNotification(String processId, BrokerNotification brokerNotification);
 
+    Mono<String> getEntityById(String processId, String entityId);
+
 }

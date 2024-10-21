@@ -2,6 +2,7 @@ package es.in2.desmos.infrastructure.configs;
 
 import es.in2.desmos.domain.exceptions.HashCreationException;
 import es.in2.desmos.domain.utils.ApplicationUtils;
+import es.in2.desmos.infrastructure.configs.properties.ApiProperties;
 import es.in2.desmos.infrastructure.configs.properties.OpenApiProperties;
 import es.in2.desmos.infrastructure.configs.properties.OperatorProperties;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -21,7 +22,7 @@ import java.security.NoSuchAlgorithmException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ApiConfigTests {
@@ -31,6 +32,9 @@ class ApiConfigTests {
 
     @Mock
     private OperatorProperties operatorProperties;
+
+    @Mock
+    private ApiProperties apiProperties;
 
     @Mock
     private Environment environment;
@@ -115,6 +119,17 @@ class ApiConfigTests {
         String result = apiConfig.getCurrentEnvironment();
         // Assert
         assertEquals("dev", result);
+    }
+
+    @Test
+    void getExternalDomain(){
+        String externalDomain = "http://my-domain.org";
+        when(apiProperties.externalDomain()).thenReturn(externalDomain);
+
+        assertEquals(externalDomain, apiConfig.getExternalDomain());
+
+        verify(apiProperties, times(1)).externalDomain();
+        verifyNoMoreInteractions(apiProperties);
     }
 
 }

@@ -7,6 +7,9 @@ import reactor.core.publisher.Mono;
 
 public interface BlockchainAdapterService {
     Mono<Void> createSubscription(String processId, BlockchainSubscription blockchainSubscription);
+
+    Flux<BlockchainSubscription> getSubscriptions(String processId);
+
     Mono<Void> postTxPayload(String processId, BlockchainTxPayload blockchainTxPayload);
     Flux<String> getEventsFromRangeOfTime(String processId, long from, long to);
 }
