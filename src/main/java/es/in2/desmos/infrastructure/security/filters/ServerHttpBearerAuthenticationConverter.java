@@ -14,6 +14,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -29,7 +30,7 @@ public class ServerHttpBearerAuthenticationConverter implements Function<ServerW
 
     private static final String BEARER = "Bearer ";
     private static final Predicate<String> matchBearerLength = authValue -> authValue.length() > BEARER.length();
-    private static final Function<String,Mono<String>> isolateBearerValue = authValue -> Mono.justOrEmpty(authValue.substring(BEARER.length()));
+    private static final Function<String, Mono<String>> isolateBearerValue = authValue -> Mono.justOrEmpty(authValue.substring(BEARER.length()));
     private final TrustFrameworkConfig trustFrameworkConfig;
 
     private final JwtTokenProvider jwtVerifier;
@@ -37,12 +38,14 @@ public class ServerHttpBearerAuthenticationConverter implements Function<ServerW
     @Override
     public Mono<Authentication> apply(ServerWebExchange serverWebExchange) {
 
+        HashMap<String, String> publicKeysByUrl = trustFrameworkConfig.getPublicKeysByUrl();
+
         return Mono.justOrEmpty(serverWebExchange)
                 .flatMap(ServerHttpBearerAuthenticationConverter::extract)
                 .filter(matchBearerLength)
                 .flatMap(isolateBearerValue)
                 .flatMap(jwtString ->
-                        jwtVerifier.validateSignedJwt(jwtString, serverWebExchange.getRequest().getHeaders().getFirst("external-node-url"), trustFrameworkConfig.publicKeysByUrl().block()))
+                        jwtVerifier.validateSignedJwt(jwtString, serverWebExchange.getRequest().getHeaders().getFirst("external-node-url"), publicKeysByUrl))
                 .flatMap(ServerHttpBearerAuthenticationConverter::create).log();
     }
 
@@ -60,7 +63,7 @@ public class ServerHttpBearerAuthenticationConverter implements Function<ServerW
             return Mono.empty();
         }
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        return  Mono.justOrEmpty(new UsernamePasswordAuthenticationToken(subject, null, authorities));
+        return Mono.justOrEmpty(new UsernamePasswordAuthenticationToken(subject, null, authorities));
     }
 
 }

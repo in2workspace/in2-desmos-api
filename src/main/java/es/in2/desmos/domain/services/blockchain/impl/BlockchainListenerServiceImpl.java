@@ -94,14 +94,16 @@ public class BlockchainListenerServiceImpl implements BlockchainListenerService 
 
     private Mono<Void> checkIfParticipantExistsInTrustedList(String processId, String currentDltAddress) {
         log.info("ProcessID: {} - Validating Dome Participant: {}", processId, currentDltAddress);
-        return trustFrameworkConfig.getDltAddresses()
-                .flatMap(dltAddresses -> {
-                    boolean exists = dltAddresses
-                            .stream()
-                            .anyMatch(validAddress -> validAddress.equals(currentDltAddress));
-                    return Boolean.TRUE.equals(exists) ?
-                            Mono.empty() :
-                            Mono.error(new UnauthorizedDomeParticipantException("Dome Participant not found"));
-                });
+        return Mono.fromRunnable(() -> {
+            var dltAddresses = trustFrameworkConfig.getDltAddresses();
+
+            boolean exists = dltAddresses
+                    .stream()
+                    .anyMatch(validAddress -> validAddress.equals(currentDltAddress));
+
+            if (!exists) {
+                throw new UnauthorizedDomeParticipantException("Dome Participant not found");
+            }
+        });
     }
 }

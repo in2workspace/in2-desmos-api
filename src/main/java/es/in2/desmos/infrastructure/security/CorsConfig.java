@@ -76,7 +76,7 @@ public class CorsConfig {
         // Retrieve YAML data from the External URL
 
         List<String> urls = new ArrayList<>();
-        HashMap<String, String> publicKeysByUrl = trustFrameworkConfig.publicKeysByUrl().block();
+        HashMap<String, String> publicKeysByUrl = trustFrameworkConfig.getPublicKeysByUrl();
         if (publicKeysByUrl == null || publicKeysByUrl.isEmpty()) {
             log.warn("No organizations data available in AccessNodeMemoryStore.");
         } else {

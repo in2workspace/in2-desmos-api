@@ -1,7 +1,7 @@
 package es.in2.desmos.infrastructure.configs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import es.in2.desmos.infrastructure.configs.properties.AccessNodeProperties;
@@ -13,12 +13,10 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
+import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
@@ -56,16 +54,22 @@ public class TrustFrameworkConfig {
                 });
     }
 
-    @Bean
-    public Mono<HashMap<String, String>> publicKeysByUrl() {
-        HashMap<String, String> publicKeysByUrl = publicKeysByUrlRef.get();
-        return Mono.justOrEmpty(publicKeysByUrl);
+    public HashMap<String, String> getPublicKeysByUrl() {
+        var publicKeysByUrl = publicKeysByUrlRef.get();
+        if (publicKeysByUrl == null || publicKeysByUrl.isEmpty()) {
+            return null;
+        } else {
+            return publicKeysByUrl;
+        }
     }
 
-    @Bean
-    public Mono<HashSet<String>> getDltAddresses() {
+    public HashSet<String> getDltAddresses() {
         HashSet<String> dltAddresses = dltAddressesRef.get();
-        return Mono.justOrEmpty(dltAddresses);
+        if (dltAddresses == null || dltAddresses.isEmpty()) {
+            return null;
+        } else {
+            return dltAddresses;
+        }
     }
 
     private void savePublicKeysByUrlRef(Mono<HashMap<String, String>> publicKeysByUrl) {
@@ -96,18 +100,18 @@ public class TrustFrameworkConfig {
 
     private HashMap<String, String> deserializePublicKeysByUrl(String yamlContent) {
         try {
-            var data = yamlMapper.readValue(yamlContent, new TypeReference<Map<String, Object>>() {
-            });
+            JsonNode rootNode = yamlMapper.readTree(yamlContent);
 
-            List<Map<String, String>> organizations = yamlMapper.convertValue(data.get("organizations"),
-                    new TypeReference<>() {
-                    });
             HashMap<String, String> resultMap = new HashMap<>();
 
-            for (Map<String, String> node : organizations) {
-                String url = node.get("url");
-                String publicKey = node.get("publicKey");
-                resultMap.put(url, publicKey);
+            JsonNode organizations = rootNode.path("organizations");
+            if (organizations.isArray()) {
+                for (JsonNode organization : organizations) {
+                    String url = organization.path("url").asText();
+                    String publicKeyDecimalString = organization.path("publicKey").asText();
+                    String hexString = decimalToHex64(publicKeyDecimalString, 130);
+                    resultMap.put(url, hexString);
+                }
             }
 
             return resultMap;
@@ -117,19 +121,30 @@ public class TrustFrameworkConfig {
         }
     }
 
+    private static String decimalToHex64(String publicKeyString, int desiredLength) {
+        BigInteger publicKeyBigInteger = new BigInteger(publicKeyString);
+        StringBuilder hexString = new StringBuilder(publicKeyBigInteger.toString(16));
+        while (hexString.length() < desiredLength) {
+            hexString.insert(0, "0");
+        }
+
+        hexString.insert(0, "0x");
+        return hexString.toString();
+    }
+
     private HashSet<String> deserializeDltAddress(String yamlContent) {
         try {
-            var data = yamlMapper.readValue(yamlContent, new TypeReference<Map<String, Object>>() {
-            });
+            JsonNode rootNode = yamlMapper.readTree(yamlContent);
 
-            List<Map<String, String>> organizations = yamlMapper.convertValue(data.get("organizations"),
-                    new TypeReference<>() {
-                    });
             HashSet<String> resultSet = new HashSet<>();
 
-            for (Map<String, String> node : organizations) {
-                String dltAddress = node.get("dlt_address");
-                resultSet.add(dltAddress);
+            JsonNode organizations = rootNode.path("organizations");
+            if (organizations.isArray()) {
+                for (JsonNode organization : organizations) {
+                    String dltAddressDecimalString = organization.path("dlt_address").asText();
+                    String dltAddress = decimalToHex64(dltAddressDecimalString, 40);
+                    resultSet.add(dltAddress);
+                }
             }
 
             return resultSet;
