@@ -15,3 +15,9 @@ CREATE TABLE IF NOT EXISTS audit_records
     hash            varchar(256),
     hashlink        varchar(256)
 );
+
+CREATE TABLE IF NOT EXISTS dome_participants
+(
+    id               uuid PRIMARY KEY UNIQUE DEFAULT uuid_generate_v4(),
+    ethereum_address varchar(256)
+);
