@@ -1,1 +1,1 @@
-DELETE TABLE IF EXISTS dome_participants;
+DROP TABLE IF EXISTS dome_participants;
