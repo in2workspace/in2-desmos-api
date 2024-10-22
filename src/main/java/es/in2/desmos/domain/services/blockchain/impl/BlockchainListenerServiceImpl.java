@@ -99,7 +99,7 @@ public class BlockchainListenerServiceImpl implements BlockchainListenerService 
 
             boolean exists = dltAddresses
                     .stream()
-                    .anyMatch(validAddress -> validAddress.equals(currentDltAddress));
+                    .anyMatch(validAddress -> validAddress.equals(currentDltAddress.toLowerCase()));
 
             if (!exists) {
                 throw new UnauthorizedDomeParticipantException("Dome Participant not found");
