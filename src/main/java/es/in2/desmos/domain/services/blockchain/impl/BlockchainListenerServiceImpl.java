@@ -49,7 +49,7 @@ public class BlockchainListenerServiceImpl implements BlockchainListenerService 
     public Mono<Void> processBlockchainNotification(String processId, BlockchainNotification blockchainNotification) {
         // Create and AuditRecord with status RECEIVED
         return checkIfParticipantExistsInTrustedList(processId, blockchainNotification.ethereumAddress())
-                .flatMap(domeParticipant -> auditRecordService.buildAndSaveAuditRecordFromBlockchainNotification(processId, blockchainNotification,
+                .then(auditRecordService.buildAndSaveAuditRecordFromBlockchainNotification(processId, blockchainNotification,
                                 null, AuditRecordStatus.RECEIVED)
                         // Set priority for the pendingSubscribeEventsQueue event
                         .then(Mono.just(EventQueuePriority.MEDIUM))
