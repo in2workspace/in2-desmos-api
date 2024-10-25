@@ -48,11 +48,14 @@ public class JwtTokenProvider {
     // Build a useful Private Key from the hexadecimal private key set in the application.properties
     public JwtTokenProvider(SecurityProperties securityProperties) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
         Security.addProvider(BouncyCastleProviderSingleton.getInstance());
-        // Convert the private key from hexadecimal to BigInteger
+
         String privateKeyHex = securityProperties.privateKey().replace("0x", "");
+
+        // Convert the private key from hexadecimal to BigInteger
         BigInteger privateKeyInt = new BigInteger(privateKeyHex, 16);
-        // Create a Private Key from the BigInteger
-        org.bouncycastle.jce.spec.ECParameterSpec bcEcSpec = ECNamedCurveTable.getParameterSpec("secp256k1");
+
+        // Get the curve parameters for secp256r1
+        org.bouncycastle.jce.spec.ECParameterSpec bcEcSpec = ECNamedCurveTable.getParameterSpec("secp256r1");
         ECCurve bcCurve = bcEcSpec.getCurve();
         EllipticCurve curve = new EllipticCurve(
                 new java.security.spec.ECFieldFp(bcCurve.getField().getCharacteristic()),
@@ -61,25 +64,29 @@ public class JwtTokenProvider {
         );
         ECPoint bcG = bcEcSpec.getG();
         java.security.spec.ECPoint g = new java.security.spec.ECPoint(bcG.getAffineXCoord().toBigInteger(), bcG.getAffineYCoord().toBigInteger());
-        // Convertir el cofactor a int
+
+        // Convert the cofactor to int
         int h = bcEcSpec.getH().intValue();
         java.security.spec.ECParameterSpec ecSpec = new java.security.spec.ECParameterSpec(curve, g, bcEcSpec.getN(), h);
+
         KeyFactory keyFactory = KeyFactory.getInstance("EC", "BC");
         ECPrivateKey privateKey = (ECPrivateKey) keyFactory.generatePrivate(new ECPrivateKeySpec(privateKeyInt, bcEcSpec));
-        // Obtener el punto público Q multiplicando el generador G por la clave privada
+
+        // Obtain the public point Q by multiplying the generator G by the private key
         ECPoint q = bcEcSpec.getG().multiply(privateKeyInt);
-        q = q.normalize(); // Normalizar el punto público
+        q = q.normalize(); // Normalize the public point
         java.security.spec.ECPoint w = new java.security.spec.ECPoint(q.getAffineXCoord().toBigInteger(), q.getAffineYCoord().toBigInteger());
-        // Generar la clave pública a partir del punto público
+
+        // Generate the public key from the public point
         ECPublicKey ecPublicKey = (ECPublicKey) keyFactory.generatePublic(new ECPublicKeySpec(w, ecSpec));
-        this.ecJWK = new ECKey.Builder(Curve.SECP256K1, ecPublicKey)
+        this.ecJWK = new ECKey.Builder(Curve.P_256, ecPublicKey)  // Changed to P-256
                 .privateKey(privateKey)
                 .keyUse(KeyUse.SIGNATURE)
                 .build();
     }
 
-    // Generate JWT + SEP256K1 signature
-    // https://connect2id.com/products/nimbus-jose-jwt/examples/jwt-with-es256k-signature
+    // Generate JWT + SEP256R1 signature
+    // https://connect2id.com/products/nimbus-jose-jwt/examples/jwt-with-es256-signature
     public String generateToken(String resourceURI) throws JOSEException {
 
         // Sample JWT claims
@@ -89,42 +96,39 @@ public class JwtTokenProvider {
                 .claim("htu", resourceURI)
                 .issueTime(new Date())
                 .build();
-        // Importing new Provider to work with ECDSA and Java 17
+        // Import new Provider to work with ECDSA and Java 17
         ECDSASigner signer = new ECDSASigner(ecJWK);
         signer.getJCAContext().setProvider(BouncyCastleProviderSingleton.getInstance());
-        // Create JWT for ES256K alg
+
+        // Create JWT for the ES256 algorithm (P-256)
         SignedJWT jwt = new SignedJWT(
-                new JWSHeader.Builder(JWSAlgorithm.ES256K)
+                new JWSHeader.Builder(JWSAlgorithm.ES256)  // Changed to ES256
                         .type(new JOSEObjectType("dpop+jwt"))
                         .jwk(ecJWK.toPublicJWK())
                         .build(),
                 claimsSet);
+
         // Sign with a private EC key
         jwt.sign(signer);
         return jwt.serialize();
     }
 
-
     // Use public keys from Access Node Directory in memory
     public Mono<SignedJWT> validateSignedJwt(String jwtString, String externalNodeUrl, HashMap<String, String> publicKeysByUrl) {
-
         try {
-
             // Retrieve the public key from AccessNodeMemoryStore
             String publicKeyHex = getPublicKeyFromAccessNodeMemory(externalNodeUrl, publicKeysByUrl);
             if (publicKeyHex == null) {
                 return Mono.error(new InvalidKeyException("Public key not found for origin: " + externalNodeUrl));
             }
 
-            // Convert the PEM public key to ECPublicKey
+            // Convert the hexadecimal public key to ECPublicKey
             ECPublicKey ecPublicKey = convertHexPublicKeyToECPublicKey(publicKeyHex);
 
             ECDSAVerifier verifier = new ECDSAVerifier(ecPublicKey);
-
             verifier.getJCAContext().setProvider(BouncyCastleProviderSingleton.getInstance());
 
             SignedJWT jwt = SignedJWT.parse(jwtString);
-
             boolean verified = jwt.verify(verifier);
             if (verified) {
                 log.info("VERIFIED OK? {}", jwt.verify(verifier));
@@ -132,7 +136,6 @@ public class JwtTokenProvider {
             } else {
                 return Mono.error(new Exception("JWT verification failed"));
             }
-
         } catch (Exception e) {
             log.warn("Error parsing JWT", e);
             return Mono.error(new InvalidKeyException());
@@ -142,13 +145,13 @@ public class JwtTokenProvider {
     private String getPublicKeyFromAccessNodeMemory(String origin, HashMap<String, String> publicKeysByUrl) {
         log.info("JwtTokenProvider -- Init -- getPublicKeyFromAccessNodeMemory()");
 
-        if(publicKeysByUrl == null || publicKeysByUrl.isEmpty()){
+        if (publicKeysByUrl == null || publicKeysByUrl.isEmpty()) {
             log.warn("No organizations data available in AccessNodeMemoryStore.");
             return null;
         } else {
-            var publicKey =  publicKeysByUrl.get(origin);
+            var publicKey = publicKeysByUrl.get(origin);
 
-            if(publicKey == null){
+            if (publicKey == null) {
                 log.warn("Public key not found for origin: {}", origin);
             }
 
@@ -161,11 +164,11 @@ public class JwtTokenProvider {
 
         String replacedPublicKeyHex = hexPublicKey.replace("0x", "");
 
-        // Parse the hexadecimal string into a BigInteger
+        // Convert the public key from hexadecimal to BigInteger
         BigInteger publicKeyInt = new BigInteger(replacedPublicKeyHex, 16);
 
-        // Get the curve specification for secp256k1
-        ECParameterSpec bcEcSpec = ECNamedCurveTable.getParameterSpec("secp256k1");
+        // Get the curve specification for secp256r1
+        ECParameterSpec bcEcSpec = ECNamedCurveTable.getParameterSpec("secp256r1");
         ECCurve bcCurve = bcEcSpec.getCurve();
 
         // Convert BigInteger to ECPoint (this is a raw public key)
@@ -200,7 +203,4 @@ public class JwtTokenProvider {
         ECPublicKeySpec ecPublicKeySpec = new ECPublicKeySpec(w, ecSpec);
         return (ECPublicKey) keyFactory.generatePublic(ecPublicKeySpec);
     }
-
-
-
 }

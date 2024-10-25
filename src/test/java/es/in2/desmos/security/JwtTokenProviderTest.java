@@ -37,14 +37,14 @@ class JwtTokenProviderTest {
     void setUp() throws InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException {
         MockitoAnnotations.openMocks(this);
         when(securityProperties.privateKey())
-                .thenReturn("0x1aff50dca1ac463a5af99a858c2eef7517b8e46d3bf84723ff6dcfead7dc8db6");
+                .thenReturn("0xd1d346bbb4e3748b370c5985face9a4e5b402dcf41d3f715a455d08144b2327f");
         jwtTokenProvider = new JwtTokenProvider(securityProperties);
     }
 
     @Test
     void testSecurityProvider() {
         Provider bc = BouncyCastleProviderSingleton.getInstance();
-        Assertions.assertTrue(JCASupport.isSupported(JWSAlgorithm.ES256K, bc));
+        Assertions.assertTrue(JCASupport.isSupported(JWSAlgorithm.ES256, bc));
     }
 
     @Test
@@ -57,7 +57,7 @@ class JwtTokenProviderTest {
     void testValidateSignedJwt() throws JOSEException {
 
         HashMap<String, String> publicKeysByUrl = new HashMap<>();
-        publicKeysByUrl.put("origin", "0x0486573f96a9e5a0007855cba27af53d2d73d69cc143266bc336e361d2f5124f6639c813e62a1c8642132de455b72d65c620f18d69c09e30123d420fcb85de361d");
+        publicKeysByUrl.put("origin", "0x045d016daba10ba4216c39c9d9f8aa0cae37f5acdbe14b3de78badfff0172f4ac2093896458ed17a28c559d7c915dfaf3d106e821c7415fecffc6c991f155a2c69");
 
 
         String jwtString = jwtTokenProvider.generateToken(resourceURI);
