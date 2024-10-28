@@ -18,7 +18,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-import static es.in2.desmos.domain.utils.ApplicationUtils.extractEntityIdFromDataLocation;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -79,8 +78,6 @@ class SubscribeWorkflowTests {
         when(brokerPublisherService.publishDataToBroker(processId, blockchainNotification, retrievedBrokerEntity))
                 .thenReturn(Mono.empty());
         when(auditRecordService.buildAndSaveAuditRecordFromBlockchainNotification(processId, blockchainNotification, retrievedBrokerEntity, AuditRecordStatus.PUBLISHED))
-                .thenReturn(Mono.empty());
-        when(auditRecordService.setAuditRecordLock(processId, extractEntityIdFromDataLocation(blockchainNotification.dataLocation()), true))
                 .thenReturn(Mono.empty());
 
         // Act
