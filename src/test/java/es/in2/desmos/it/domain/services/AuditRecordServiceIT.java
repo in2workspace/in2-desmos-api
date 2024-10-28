@@ -51,7 +51,7 @@ class AuditRecordServiceIT {
         String processId = "0";
         String issuer = "http://example.org";
         MVAuditServiceEntity4DataNegotiation mvAuditServiceEntity4DataNegotiationMother = MVAuditServiceEntity4DataNegotiationMother.sample1();
-        AuditRecordStatus status = AuditRecordStatus.PUBLISHED;
+        AuditRecordStatus status = AuditRecordStatus.RETRIEVED;
 
         Mono<Void> result = auditRecordService.buildAndSaveAuditRecordFromDataSync(processId, issuer, mvAuditServiceEntity4DataNegotiationMother, status);
 
@@ -65,14 +65,14 @@ class AuditRecordServiceIT {
     private void assertAuditRecordEntityIsExpected(String entityId, MVEntity4DataNegotiation expectedMVEntity4DataNegotiation) {
         await().atMost(10, TimeUnit.SECONDS).ignoreExceptions().until(() -> {
             String processId = "0";
-            Mono<AuditRecord> auditRecordMono = auditRecordService.findLatestAuditRecordForEntity(processId, entityId);
+            Mono<AuditRecord> auditRecordMono = auditRecordService.findMostRecentRetrievedOrDeletedByEntityId(processId, entityId);
 
             StepVerifier
                     .create(auditRecordMono)
                     .consumeNextWith(auditRecord -> {
                         System.out.println("Entity audit record AuditRecord entity check: " + auditRecord);
 
-                        AuditRecord expectedAuditRecord = AuditRecordMother.createAuditRecordFromMVEntity4DataNegotiation(expectedMVEntity4DataNegotiation, AuditRecordStatus.PUBLISHED);
+                        AuditRecord expectedAuditRecord = AuditRecordMother.createAuditRecordFromMVEntity4DataNegotiation(expectedMVEntity4DataNegotiation, AuditRecordStatus.RETRIEVED);
 
                         assertThat(auditRecord)
                                 .usingRecursiveComparison()

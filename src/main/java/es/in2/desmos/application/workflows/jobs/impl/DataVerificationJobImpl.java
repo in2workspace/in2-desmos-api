@@ -34,10 +34,8 @@ public class DataVerificationJobImpl implements DataVerificationJob {
 
         return validateConsistency(processId, entitiesByIdMono, existingEntitiesOriginalValidationDataById)
                 .then(buildAndSaveAuditRecordFromDataSync(processId, issuer, entitiesByIdMono, allMVEntity4DataNegotiation, AuditRecordStatus.RETRIEVED))
-                .then(lockAuditRecords(processId, entitiesByIdMono))
                 .then(batchUpsertEntitiesToContextBroker(processId, entitiesByIdMono))
-                .then(buildAndSaveAuditRecordFromDataSync(processId, issuer, entitiesByIdMono, allMVEntity4DataNegotiation, AuditRecordStatus.PUBLISHED))
-                .doOnTerminate(() -> unlockAuditRecords(processId));
+                .then(buildAndSaveAuditRecordFromDataSync(processId, issuer, entitiesByIdMono, allMVEntity4DataNegotiation, AuditRecordStatus.PUBLISHED));
     }
 
     private Mono<Void> validateConsistency(String processId, Mono<Map<Id, Entity>> rcvdEntitiesByIdMono, Mono<Map<Id, HashAndHashLink>> existingEntitiesValidationDataByIdMono) {
@@ -154,7 +152,7 @@ public class DataVerificationJobImpl implements DataVerificationJob {
             try {
                 ArrayNode arrayNode = objectMapper.createArrayNode();
 
-                for (var entityJson: entities){
+                for (var entityJson : entities) {
                     ObjectNode objectNode = (ObjectNode) objectMapper.readTree(entityJson.value());
                     arrayNode.add(objectNode);
                 }
@@ -177,20 +175,5 @@ public class DataVerificationJobImpl implements DataVerificationJob {
                 return Mono.error(e);
             }
         });
-    }
-
-    private Mono<Void> lockAuditRecords(String processId, Mono<Map<Id, Entity>> entitiesByIdMono) {
-        return entitiesByIdMono
-                .flatMapIterable(Map::entrySet)
-                .flatMap(entityWithId -> {
-                    String id = entityWithId.getKey().id();
-                    return auditRecordService.setAuditRecordLock(processId, id, true);
-                })
-                .collectList()
-                .then();
-    }
-
-    private void unlockAuditRecords(String processId) {
-        auditRecordService.unlockAuditRecords(processId);
     }
 }

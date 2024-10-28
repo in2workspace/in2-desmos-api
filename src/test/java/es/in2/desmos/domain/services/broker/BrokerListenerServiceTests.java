@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.when;
 
@@ -81,8 +80,7 @@ class BrokerListenerServiceTests {
                 .notifiedAt(Instant.now().toString())
                 .build();
         // Act
-        when(auditRecordService.findLatestAuditRecordForEntity(anyString(), any())).thenReturn(Mono.empty());
-        when(auditRecordService.isAuditRecordUnlocked(eq(processId), anyString())).thenReturn(Mono.just(true));
+        when(auditRecordService.findMostRecentRetrievedOrDeletedByEntityId(anyString(), any())).thenReturn(Mono.empty());
         when(auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(anyString(), any(), any(), any())).thenReturn(Mono.empty());
         when(queueService.enqueueEvent(any())).thenReturn(Mono.empty());
         // Assert
@@ -105,8 +103,7 @@ class BrokerListenerServiceTests {
                 .notifiedAt(Instant.now().toString())
                 .build();
         // Act
-        when(auditRecordService.findLatestAuditRecordForEntity(anyString(), any())).thenReturn(Mono.just(auditRecord));
-        when(auditRecordService.isAuditRecordUnlocked(eq(processId), anyString())).thenReturn(Mono.just(true));
+        when(auditRecordService.findMostRecentRetrievedOrDeletedByEntityId(anyString(), any())).thenReturn(Mono.just(auditRecord));
         when(objectMapper.writer()).thenReturn(objectWriter);
         when(objectWriter.writeValueAsString(any())).thenReturn("""
                 {
@@ -147,7 +144,7 @@ class BrokerListenerServiceTests {
                 .notifiedAt(Instant.now().toString())
                 .build();
         // Act
-        when(auditRecordService.findLatestAuditRecordForEntity(anyString(), any())).thenReturn(Mono.just(auditRecord));
+        when(auditRecordService.findMostRecentRetrievedOrDeletedByEntityId(anyString(), any())).thenReturn(Mono.just(auditRecord));
         when(objectMapper.writer()).thenReturn(objectWriter);
         when(objectWriter.writeValueAsString(any())).thenReturn("""
                 {
@@ -168,7 +165,6 @@ class BrokerListenerServiceTests {
                   "notifiedAt": "2023-03-14T16:38:15.123456Z"
                 }""");
         when(auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(anyString(), any(), any(), any())).thenReturn(Mono.empty());
-        when(auditRecordService.isAuditRecordUnlocked(eq(processId), anyString())).thenReturn(Mono.just(true));
         when(queueService.enqueueEvent(any())).thenReturn(Mono.empty());
         // Assert
         StepVerifier.create(brokerListenerService.processBrokerNotification(processId, brokerNotification))
@@ -190,8 +186,7 @@ class BrokerListenerServiceTests {
                 .notifiedAt(Instant.now().toString())
                 .build();
 
-        when(auditRecordService.findLatestAuditRecordForEntity(anyString(), any())).thenReturn(Mono.just(auditRecord));
-        when(auditRecordService.isAuditRecordUnlocked(eq(processId), anyString())).thenReturn(Mono.just(true));
+        when(auditRecordService.findMostRecentRetrievedOrDeletedByEntityId(anyString(), any())).thenReturn(Mono.just(auditRecord));
         when(objectMapper.writer()).thenReturn(objectWriter);
         when(objectWriter.writeValueAsString(any())).thenReturn("""
                 {

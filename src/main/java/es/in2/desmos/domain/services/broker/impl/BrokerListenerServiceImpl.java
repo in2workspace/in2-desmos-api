@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.security.NoSuchAlgorithmException;
-import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
 
@@ -85,37 +84,23 @@ public class BrokerListenerServiceImpl implements BrokerListenerService {
     private Mono<Map<String, Object>> isBrokerNotificationFromExternalSource(String processId, Map<String, Object> dataMap) {
         String id = dataMap.get("id").toString();
 
-        return waitForUnlock(processId, id)
-                .then(auditRecordService.findLatestAuditRecordForEntity(processId, id)
-                        .flatMap(auditRecordFound -> {
-                            try {
-                                String newEntityHash = calculateSHA256(objectMapper.writer().writeValueAsString(dataMap));
-                                if (auditRecordFound.getEntityHash().equals(newEntityHash)) {
-                                    return Mono.error(new BrokerNotificationSelfGeneratedException("BrokerNotification is self-generated"));
-                                }
-                            } catch (JsonProcessingException | NoSuchAlgorithmException e) {
-                                log.warn("ProcessID: {} - Error processing JSON: {}", processId, e.getMessage());
-                                return Mono.error(new BrokerNotificationParserException("Error processing JSON"));
-                            }
-                            log.debug("ProcessID: {} - BrokerNotification is from external source", processId);
-                            return Mono.just(dataMap);
-                        })
-                        .switchIfEmpty(Mono.defer(() -> {
-                            log.debug("ProcessID: {} - No audit record found; assuming BrokerNotification is from external source", processId);
-                            return Mono.just(dataMap);
-                        })));
-    }
-
-    private Mono<Void> waitForUnlock(String processId, String id) {
-        return auditRecordService.isAuditRecordUnlocked(processId, id)
-                .flatMap(isAuditRecordUnlocked -> {
-                    if (Boolean.TRUE.equals(isAuditRecordUnlocked)) {
-                        return Mono.empty();
-                    } else {
-                        return Mono.delay(Duration.ofMillis(100))
-                                .then(waitForUnlock(processId, id));
+        return auditRecordService.findMostRecentRetrievedOrDeletedByEntityId(processId, id)
+                .flatMap(auditRecordFound -> {
+                    try {
+                        String newEntityHash = calculateSHA256(objectMapper.writer().writeValueAsString(dataMap));
+                        if (auditRecordFound.getEntityHash().equals(newEntityHash)) {
+                            return Mono.error(new BrokerNotificationSelfGeneratedException("BrokerNotification is self-generated"));
+                        }
+                    } catch (JsonProcessingException | NoSuchAlgorithmException e) {
+                        log.warn("ProcessID: {} - Error processing JSON: {}", processId, e.getMessage());
+                        return Mono.error(new BrokerNotificationParserException("Error processing JSON"));
                     }
-                });
+                    log.debug("ProcessID: {} - BrokerNotification is from external source", processId);
+                    return Mono.just(dataMap);
+                })
+                .switchIfEmpty(Mono.defer(() -> {
+                    log.debug("ProcessID: {} - No audit record found; assuming BrokerNotification is from external source", processId);
+                    return Mono.just(dataMap);
+                }));
     }
-
 }
