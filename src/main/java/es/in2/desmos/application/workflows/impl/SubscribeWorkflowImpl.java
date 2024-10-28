@@ -15,6 +15,8 @@ import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 
+import static es.in2.desmos.domain.utils.ApplicationUtils.extractEntityIdFromDataLocation;
+
 /*
  *  Workflow steps:
  *  1. Get the event from the SubscribeQueue.
@@ -51,10 +53,12 @@ public class SubscribeWorkflowImpl implements SubscribeWorkflow {
                                                         dataSyncService.verifyRetrievedEntityData(processId, blockchainNotification, retrievedBrokerEntity)
                                                                 // Build and save the audit record for RETRIEVED status
                                                                 .then(auditRecordService.buildAndSaveAuditRecordFromBlockchainNotification(processId, blockchainNotification, retrievedBrokerEntity, AuditRecordStatus.RETRIEVED))
+                                                                .then(auditRecordService.setAuditRecordLock(processId, extractEntityIdFromDataLocation(blockchainNotification.dataLocation()), true))
                                                                 // Publish the retrieved entity to the local broker
                                                                 .then(brokerPublisherService.publishDataToBroker(processId, blockchainNotification, retrievedBrokerEntity))
                                                                 // Build and save the audit record for PUBLISHED status
                                                                 .then(auditRecordService.buildAndSaveAuditRecordFromBlockchainNotification(processId, blockchainNotification, retrievedBrokerEntity, AuditRecordStatus.PUBLISHED))
+                                                                .doOnTerminate(() -> auditRecordService.unlockAuditRecords(processId))
                                                 )
                                 )
                                 .doOnSuccess(success -> log.info("ProcessID: {} - Subscribe Workflow completed successfully.", processId))
