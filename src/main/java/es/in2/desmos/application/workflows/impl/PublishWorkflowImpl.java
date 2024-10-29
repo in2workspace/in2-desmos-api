@@ -58,8 +58,11 @@ public class PublishWorkflowImpl implements PublishWorkflow {
                                                                 .then(auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(processId, brokerNotification.data().get(0), AuditRecordStatus.PUBLISHED, blockchainTxPayload))))
                                 .doOnSuccess(success ->
                                         log.info("ProcessID: {} - Publish Workflow completed successfully.", processId))
-                                .doOnError(error ->
-                                        log.error("ProcessID: {} - Error occurred while processing the Publish Workflow: {}", processId, error.getMessage()))
+                                .onErrorResume(error ->
+                                        Mono.just(error)
+                                                .doOnNext(errorObject ->
+                                                        log.error("ProcessID: {} - Error occurred while processing the Publish Workflow: {}", processId, errorObject.getMessage()))
+                                                .then(Mono.empty()))
                 );
     }
 
