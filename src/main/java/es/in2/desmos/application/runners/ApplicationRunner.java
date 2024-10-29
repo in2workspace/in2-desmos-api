@@ -96,6 +96,7 @@ public class ApplicationRunner {
     @Retryable(retryFor = RequestErrorException.class, maxAttempts = 4, backoff = @Backoff(delay = 2000))
     private Mono<Void> setBlockchainSubscription(String processId) {
         log.info("ProcessID: {} - Setting Blockchain Subscription...", processId);
+        // Check Subscription
         // Create the Blockchain Subscription object
         BlockchainSubscription blockchainSubscription = BlockchainSubscription.builder()
                 .eventTypes(blockchainConfig.getEntityTypes())
