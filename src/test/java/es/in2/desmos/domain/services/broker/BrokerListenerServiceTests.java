@@ -3,8 +3,7 @@ package es.in2.desmos.domain.services.broker;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import es.in2.desmos.domain.exceptions.BrokerNotificationParserException;
-import es.in2.desmos.domain.exceptions.BrokerNotificationSelfGeneratedException;
+import es.in2.desmos.domain.exceptions.JsonReadingException;
 import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.AuditRecordStatus;
 import es.in2.desmos.domain.models.BrokerNotification;
@@ -32,8 +31,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class BrokerListenerServiceTests {
@@ -125,8 +123,11 @@ class BrokerListenerServiceTests {
                 }""");
         // Assert
         StepVerifier.create(brokerListenerService.processBrokerNotification(processId, brokerNotification))
-                .expectError(BrokerNotificationSelfGeneratedException.class)
+                .expectComplete()
                 .verify();
+
+        verify(auditRecordService, never()).buildAndSaveAuditRecordFromBrokerNotification(eq(processId), any(), any(), any());
+        verify(queueService, never()).enqueueEvent(any());
     }
 
     @Test
@@ -212,8 +213,11 @@ class BrokerListenerServiceTests {
 
             // Act & Assert
             StepVerifier.create(brokerListenerService.processBrokerNotification(processId, brokerNotification))
-                    .expectErrorMatches(throwable -> throwable instanceof BrokerNotificationParserException)
+                    .expectErrorMatches(throwable -> throwable instanceof JsonReadingException)
                     .verify();
+
+            verify(auditRecordService, never()).buildAndSaveAuditRecordFromBrokerNotification(eq(processId), any(), any(), any());
+            verify(queueService, never()).enqueueEvent(any());
         }
     }
 
