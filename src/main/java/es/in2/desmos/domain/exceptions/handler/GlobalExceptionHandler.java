@@ -3,6 +3,8 @@ package es.in2.desmos.domain.exceptions.handler;
 import es.in2.desmos.domain.exceptions.*;
 import es.in2.desmos.domain.models.GlobalErrorMessage;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.buffer.DataBufferLimitException;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import reactor.core.publisher.Mono;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -155,4 +158,29 @@ public class GlobalExceptionHandler {
         return Mono.just(GlobalErrorMessage.builder().title("InvalidTokenException").message(invalidTokenException.getMessage()).path(path).build());
     }
 
+
+    @ExceptionHandler(DataBufferLimitException.class)
+    @ResponseStatus(HttpStatus.PAYLOAD_TOO_LARGE)
+    @ResponseBody
+    public Mono<GlobalErrorMessage> handleDataBufferLimitException(DataBufferLimitException dataBufferLimitException, ServerHttpRequest request) {
+        String path = String.valueOf(request.getPath());
+        return request.getBody()
+                .map(buffer -> {
+                    if(buffer != null){
+                        StringBuilder sb = new StringBuilder();
+                        byte[] bytes = new byte[buffer.readableByteCount()];
+                        buffer.read(bytes);
+                        DataBufferUtils.release(buffer);
+                        String bodyString = new String(bytes, StandardCharsets.UTF_8);
+                        sb.append(bodyString);
+                        return sb.toString();
+                    } else {
+                        return "";
+                    }
+                }).collectList()
+                .flatMap(payload -> {
+                    log.error("DataLimitBufferException: {}, Payload: {}", dataBufferLimitException.getMessage(), payload);
+                    return Mono.just(GlobalErrorMessage.builder().title("DataBufferLimitException").message(dataBufferLimitException.getMessage()).path(path).build());
+                });
+    }
 }
