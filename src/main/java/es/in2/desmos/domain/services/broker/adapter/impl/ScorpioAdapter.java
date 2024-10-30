@@ -45,6 +45,8 @@ public class ScorpioAdapter implements BrokerAdapterService {
 
     @Override
     public Mono<Void> postEntity(String processId, String requestBody) {
+        log.info("ProcessID: {} - Posting entity to Scorpio", processId);
+        log.debug("ProcessID: {} - Posting entity to Scorpio: {}", processId, requestBody);
         MediaType mediaType = getContentTypeAndAcceptMediaType(requestBody);
         return webClient.post()
                 .uri(brokerConfig.getEntitiesPath())
@@ -212,25 +214,6 @@ public class ScorpioAdapter implements BrokerAdapterService {
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(responseClass)
-                .retry(3);
-    }
-
-    @Override
-    public Mono<Void> batchUpsertEntities(String processId, String requestBody) {
-        log.info("ProcessID: {} - Upserting entities to Scorpio", processId);
-        log.debug("ProcessID: {} - Upserting entities to Scorpio: {}", processId, requestBody);
-
-        String uri = brokerConfig.getEntityOperationsPath() + "/" + "upsert";
-
-        var acceptContentType = getContentTypeAndAcceptMediaType(requestBody);
-
-        return webClient.post()
-                .uri(uri)
-                .accept(acceptContentType)
-                .contentType(acceptContentType)
-                .bodyValue(requestBody)
-                .retrieve()
-                .bodyToMono(Void.class)
                 .retry(3);
     }
 

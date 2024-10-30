@@ -61,7 +61,4 @@ public class OrionLdAdapter implements BrokerAdapterService {
         return null;
     }
 
-    @Override
-    public Mono<Void> batchUpsertEntities(String processId, String requestBody) { return null; }
-
 }
