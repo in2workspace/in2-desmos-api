@@ -157,30 +157,4 @@ public class GlobalExceptionHandler {
         String path = String.valueOf(request.getPath());
         return Mono.just(GlobalErrorMessage.builder().title("InvalidTokenException").message(invalidTokenException.getMessage()).path(path).build());
     }
-
-
-    @ExceptionHandler(DataBufferLimitException.class)
-    @ResponseStatus(HttpStatus.PAYLOAD_TOO_LARGE)
-    @ResponseBody
-    public Mono<GlobalErrorMessage> handleDataBufferLimitException(DataBufferLimitException dataBufferLimitException, ServerHttpRequest request) {
-        String path = String.valueOf(request.getPath());
-        return request.getBody()
-                .map(buffer -> {
-                    if(buffer != null){
-                        StringBuilder sb = new StringBuilder();
-                        byte[] bytes = new byte[buffer.readableByteCount()];
-                        buffer.read(bytes);
-                        DataBufferUtils.release(buffer);
-                        String bodyString = new String(bytes, StandardCharsets.UTF_8);
-                        sb.append(bodyString);
-                        return sb.toString();
-                    } else {
-                        return "";
-                    }
-                }).collectList()
-                .flatMap(payload -> {
-                    log.error("DataLimitBufferException: {}, Payload: {}", dataBufferLimitException.getMessage(), payload);
-                    return Mono.just(GlobalErrorMessage.builder().title("DataBufferLimitException").message(dataBufferLimitException.getMessage()).path(path).build());
-                });
-    }
 }
