@@ -54,6 +54,13 @@ public class ScorpioAdapter implements BrokerAdapterService {
                 .contentType(mediaType)
                 .bodyValue(requestBody)
                 .retrieve()
+                .onStatus(
+                        status -> status.value() == 409,
+                        clientResponse -> {
+                            log.info("ProcessID: {} - 409 Conflict from POSTing entity to Scorpio", processId);
+                            return Mono.empty();
+                        }
+                )
                 .bodyToMono(Void.class)
                 .retry(3);
     }
@@ -179,7 +186,8 @@ public class ScorpioAdapter implements BrokerAdapterService {
                 .uri(brokerConfig.getSubscriptionsPath())
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<List<BrokerSubscription>>() {})
+                .bodyToMono(new ParameterizedTypeReference<List<BrokerSubscription>>() {
+                })
                 .onErrorMap(error -> new SubscriptionCreationException("Error fetching subscriptions from broker"));
     }
 
@@ -206,7 +214,7 @@ public class ScorpioAdapter implements BrokerAdapterService {
     public <T extends BrokerEntityWithIdAndType> Mono<T[]> findAllIdTypeAndAttributesByType(String processId, String type, String firstAttribute, String secondAttribute, String thirdAttribute, String forthAttribute, Class<T[]> responseClass) {
         log.info("ProcessID: {} - Getting Entities With Version And Last Update", processId);
 
-        String uri = brokerConfig.getEntitiesPath() + "/" + String.format("?type=%s&options=keyValues&limit=1000",type);
+        String uri = brokerConfig.getEntitiesPath() + "/" + String.format("?type=%s&options=keyValues&limit=1000", type);
 
         return webClient
                 .get()
