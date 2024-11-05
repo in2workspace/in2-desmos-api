@@ -48,7 +48,7 @@ jobs:
     # Este job se ejecuta si el evento es un 'push' y ocurre en las ramas 'release' y 'hotfix'.
     # Este job depende del resultado del job anterior, 'release-local', si la rama del evento es 'hotfix', no 'release'.
     # Este job jamás se ejecutará por una 'pull_request'.
-    if: ${{ github.event_name == 'push' && (startsWith(github.ref, 'refs/heads/release/') || (startsWith(github.ref, 'refs/heads/hotfix/') && success())) }}
+    if: ${{ github.event_name == 'push' && contains(github.event.pull_request.head.ref, 'release/') || (startsWith(github.ref, 'refs/heads/hotfix/') && success()) }}
     environment: dev
     steps:
       - name: Checkout Repository
