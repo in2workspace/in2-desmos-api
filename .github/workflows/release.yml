@@ -14,10 +14,9 @@ on:
 
 jobs:
   release:
-    name: Generate Release
+    name: Generate release
     runs-on: ubuntu-latest
     if: ${{ (github.event_name == 'pull_request' && startsWith(github.event.pull_request.head.ref, 'feature/')) || (github.event_name == 'push' && (startsWith(github.ref, 'refs/heads/release/') || startsWith(github.ref, 'refs/heads/hotfix/'))) }}
-    environment: release
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -42,6 +41,6 @@ jobs:
           echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
           docker push $DOCKER_HUB_CLIENT_NAME/$IMAGE_TAG
         env:
-          DOCKER_USERNAME: ${{ vars.DOCKER_USERNAME }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_TOKEN }}
           DOCKER_HUB_CLIENT_NAME: in2workspace
