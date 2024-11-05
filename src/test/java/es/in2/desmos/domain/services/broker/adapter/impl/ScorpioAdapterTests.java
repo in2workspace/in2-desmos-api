@@ -71,10 +71,10 @@ class ScorpioAdapterTests {
     private WebClient.RequestBodyUriSpec requestBodyUriMock;
 
     @Mock
-    private WebClient.RequestBodySpec PatchRequestBodyMock;
+    private WebClient.RequestBodySpec patchRequestBodyMock;
 
     @Mock
-    private WebClient.RequestBodySpec AcceptedRequestBodyMock;
+    private WebClient.RequestBodySpec acceptedRequestBodyMock;
 
     @InjectMocks
     private ScorpioAdapter scorpioAdapter;
@@ -108,11 +108,11 @@ class ScorpioAdapterTests {
     @Test
     void testUpdateSubscription() throws Exception {
         // Arrange
-        when(PatchRequestBodyMock.accept(any(MediaType.class))).thenReturn(AcceptedRequestBodyMock);
-        when(AcceptedRequestBodyMock.contentType(any(MediaType.class))).thenReturn(PatchRequestBodyMock);
+        when(patchRequestBodyMock.accept(any(MediaType.class))).thenReturn(acceptedRequestBodyMock);
+        when(acceptedRequestBodyMock.contentType(any(MediaType.class))).thenReturn(patchRequestBodyMock);
         when(webClientMock.patch()).thenReturn(requestBodyUriMock);
-        when(requestBodyUriMock.uri(anyString())).thenReturn(PatchRequestBodyMock);
-        when(PatchRequestBodyMock.bodyValue(any())).thenReturn(requestHeadersMock);
+        when(requestBodyUriMock.uri(anyString())).thenReturn(patchRequestBodyMock);
+        when(patchRequestBodyMock.bodyValue(any())).thenReturn(requestHeadersMock);
         when(requestHeadersMock.retrieve()).thenReturn(responseMock);
         when(responseMock.bodyToMono(Void.class)).thenReturn(Mono.empty());
 

@@ -59,7 +59,7 @@ class PublishWorkflowBehaviorTest {
             Given a BrokerNotification, we will send a POST request emulating the broker behavior.
             When the POST request is received, the application will create a BlockchainTxPayload,
             and publish it into the blockchain.
-            During the process, three AuditRecord will be created with the information of the transaction;
+            During the process, three AuditRecord will be created with the information of the transaction:
             RECEIVED, CREATED, and PUBLISHED.
          */
 
