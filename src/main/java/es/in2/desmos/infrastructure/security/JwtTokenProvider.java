@@ -33,6 +33,7 @@ import java.security.spec.EllipticCurve;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -114,7 +115,7 @@ public class JwtTokenProvider {
     }
 
     // Use public keys from Access Node Directory in memory
-    public Mono<SignedJWT> validateSignedJwt(String jwtString, String externalNodeUrl, HashMap<String, String> publicKeysByUrl) {
+    public Mono<SignedJWT> validateSignedJwt(String jwtString, String externalNodeUrl, Map<String, String> publicKeysByUrl) {
         try {
             // Retrieve the public key from AccessNodeMemoryStore
             String publicKeyHex = getPublicKeyFromAccessNodeMemory(externalNodeUrl, publicKeysByUrl);
@@ -142,7 +143,7 @@ public class JwtTokenProvider {
         }
     }
 
-    private String getPublicKeyFromAccessNodeMemory(String origin, HashMap<String, String> publicKeysByUrl) {
+    private String getPublicKeyFromAccessNodeMemory(String origin, Map<String, String> publicKeysByUrl) {
         log.info("JwtTokenProvider -- Init -- getPublicKeyFromAccessNodeMemory()");
 
         if (publicKeysByUrl == null || publicKeysByUrl.isEmpty()) {
