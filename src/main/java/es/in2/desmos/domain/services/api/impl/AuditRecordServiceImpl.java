@@ -32,8 +32,6 @@ public class AuditRecordServiceImpl implements AuditRecordService {
     private final BrokerPublisherService brokerPublisherService;
     private final ApiConfig apiConfig;
 
-    private final List<String> auditRecordsInUse = Collections.synchronizedList(new ArrayList<>());
-
     /**
      * Create a new AuditRecord with status CREATED or PUBLISHED and trader CONSUMER
      * from the data received in the broker notification.
@@ -227,9 +225,9 @@ public class AuditRecordServiceImpl implements AuditRecordService {
      * @return A Mono emitting the latest published or deleted audit record for the given entity, if available.
      */
     @Override
-    public Mono<AuditRecord> findLatestAuditRecordForEntity(String processId, String entityId) {
+    public Mono<AuditRecord> findMostRecentRetrievedOrDeletedByEntityId(String processId, String entityId) {
         log.debug("ProcessID: {} - Fetching latest audit record for entity ID: {}", processId, entityId);
-        return auditRecordRepository.findMostRecentPublishedOrDeletedByEntityId(entityId);
+        return auditRecordRepository.findMostRecentRetrievedOrDeletedByEntityId(entityId);
     }
 
     @Override
@@ -309,29 +307,6 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                                 ))
                         .collectList()
         );
-    }
-
-    @Override
-    public Mono<Void> setAuditRecordLock(String processId, String id, boolean hasToBeLocked) {
-        return Mono.fromRunnable(() -> {
-            if (hasToBeLocked) {
-                auditRecordsInUse.add(id);
-            } else {
-                auditRecordsInUse.remove(id);
-            }
-        });
-    }
-
-    @Override
-    public void unlockAuditRecords(String processId) {
-        auditRecordsInUse.clear();
-
-        log.debug("ProcessID: {} - Unlocked all Audit Records.", processId);
-    }
-
-    @Override
-    public Mono<Boolean> isAuditRecordUnlocked(String processId, String id) {
-        return Mono.fromCallable(() -> !auditRecordsInUse.contains(id));
     }
 
     private Mono<MVAuditServiceEntity4DataNegotiation> buildAndSaveAuditRecordFromUnregisteredOrOutdatedEntity(String processId, MVAuditServiceEntity4DataNegotiation mvAuditServiceEntity4DataNegotiation, AuditRecordTrader trader, String dataLocation) {

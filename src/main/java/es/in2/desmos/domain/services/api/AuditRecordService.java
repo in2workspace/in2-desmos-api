@@ -16,7 +16,7 @@ public interface AuditRecordService {
 
     Mono<AuditRecord> fetchMostRecentAuditRecord();
 
-    Mono<AuditRecord> findLatestAuditRecordForEntity(String processId, String entityId);
+    Mono<AuditRecord> findMostRecentRetrievedOrDeletedByEntityId(String processId, String entityId);
 
     Mono<AuditRecord> getLastPublishedAuditRecordForProducerByEntityId(String processId, String entityId);
 
@@ -27,10 +27,4 @@ public interface AuditRecordService {
     Mono<AuditRecord> findLatestConsumerPublishedAuditRecord(String processId);
 
     Mono<List<MVAuditServiceEntity4DataNegotiation>> findCreateOrUpdateAuditRecordsByEntityIds(String processId, String entityType, Mono<List<String>> entityIdsMono);
-
-    Mono<Void> setAuditRecordLock(String processId, String id, boolean lock);
-
-    void unlockAuditRecords(String processId);
-
-    Mono<Boolean> isAuditRecordUnlocked(String processId, String id);
 }

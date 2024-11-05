@@ -118,11 +118,11 @@ tx-subscription:
   entityTypes: "ProductOffering,Category,Catalogue"
 
 security:
-  privateKey: "0x1aff50dca1ac463a5af99a858c2eef7517b8e46d3bf84723ff6dcfead7dc8db6"
+  privateKey: "0xd1d346bbb4e3748b370c5985face9a4e5b402dcf41d3f715a455d08144b2327f"
 
 # Access Node
 access-node:
-  prefixDirectory: "https://raw.githubusercontent.com/DOME-Marketplace/dome-access-node-directory/main/access-node-directory-"
+  trustedAccessNodesList: "https://raw.githubusercontent.com/DOME-Marketplace/trust-framework/refs/heads/main/sbx/trusted_access_nodes_list.yaml"
 
 external-access-nodes:
   urls: "https://desmos.dome-marketplace-sbx.org"

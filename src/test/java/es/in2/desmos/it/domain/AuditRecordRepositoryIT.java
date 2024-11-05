@@ -165,12 +165,12 @@ class AuditRecordRepositoryIT {
 
     @Order(4)
     @Test
-    void shouldFindLatestPublishedTransactionByEntityId() {
-        auditRecord.setStatus(AuditRecordStatus.PUBLISHED);
+    void shouldFindMostRecentRetrievedOrDeletedByEntityId() {
+        auditRecord.setStatus(AuditRecordStatus.RETRIEVED);
         auditRecord.setNewTransaction(false);
         auditRecordRepository.save(auditRecord).block();
         AuditRecord auditRecordMono = auditRecordRepository
-                .findMostRecentPublishedOrDeletedByEntityId("urn:ngsi-ld:ProductOffering:6e00d349-4c49-4bbe-83a9-65115f144908")
+                .findMostRecentRetrievedOrDeletedByEntityId("urn:ngsi-ld:ProductOffering:6e00d349-4c49-4bbe-83a9-65115f144908")
                 .block();
         assert auditRecordMono != null;
         assertEquals(auditRecord.getProcessId(), auditRecordMono.getProcessId());
@@ -183,7 +183,7 @@ class AuditRecordRepositoryIT {
         auditRecord.setNewTransaction(false);
         auditRecordRepository.save(auditRecord).block();
         AuditRecord auditRecordMono = auditRecordRepository
-                .findMostRecentPublishedOrDeletedByEntityId("urn:ngsi-ld:ProductOffering:6e00d349-4c49-4bbe-83a9-65115f144908")
+                .findMostRecentRetrievedOrDeletedByEntityId("urn:ngsi-ld:ProductOffering:6e00d349-4c49-4bbe-83a9-65115f144908")
                 .block();
         assert auditRecordMono != null;
         assertEquals(auditRecord.getProcessId(), auditRecordMono.getProcessId());
@@ -195,7 +195,7 @@ class AuditRecordRepositoryIT {
     @Test
     void shouldVerifyLatestTransactionIsNotPublished() {
         AuditRecord auditRecordMono = auditRecordRepository
-                .findMostRecentPublishedOrDeletedByEntityId("urn:ngsi-ld:ProductOffering:6e00d349-4c49-4bbe-83a9-65115f144908")
+                .findMostRecentRetrievedOrDeletedByEntityId("urn:ngsi-ld:ProductOffering:6e00d349-4c49-4bbe-83a9-65115f144908")
                 .block();
         assert auditRecordMono != null;
         // In the database, we have a transaction which status is DELETED and PUBLISHED, the last one is DELETED (@Order(5))

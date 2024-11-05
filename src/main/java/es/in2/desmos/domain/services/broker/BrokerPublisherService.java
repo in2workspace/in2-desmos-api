@@ -13,9 +13,9 @@ public interface BrokerPublisherService {
 
     <T extends BrokerEntityWithIdAndType> Mono<List<T>> findAllIdTypeAndAttributesByType(String processId, String type, String firstAttribute, String secondAttribute, String thirdAttribute, String forthAttribute, Class<T[]> responseClassArray);
 
-    Mono<Void> batchUpsertEntitiesToContextBroker(String processId, String retrievedBrokerEntities);
-
     Mono<List<String>> findAllById(String processId, Mono<List<Id>> ids, List<Id> processedEntities);
 
     Mono<String> getEntityById(String processId, String entityId);
+
+    Mono<Void> postEntity(String processId, String requestBody);
 }

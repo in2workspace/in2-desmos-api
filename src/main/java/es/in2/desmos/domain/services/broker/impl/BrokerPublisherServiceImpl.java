@@ -61,11 +61,6 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
     }
 
     @Override
-    public Mono<Void> batchUpsertEntitiesToContextBroker(String processId, String retrievedBrokerEntities) {
-        return batchUpsertEntities(processId, retrievedBrokerEntities);
-    }
-
-    @Override
     public Mono<List<String>> findAllById(String processId, Mono<List<Id>> idsMono, List<Id> processedEntities) {
         return idsMono.flatMapMany(Flux::fromIterable)
                 .flatMap(id -> {
@@ -102,6 +97,11 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
     @Override
     public Mono<String> getEntityById(String processId, String entityId) {
         return brokerAdapterService.getEntityById(processId, entityId);
+    }
+
+    @Override
+    public Mono<Void> postEntity(String processId, String requestBody) {
+        return brokerAdapterService.postEntity(processId, requestBody);
     }
 
     private Mono<List<Id>> getEntityRelationshipIds(Mono<String> entityMono) {
@@ -167,14 +167,6 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
                 return Mono.error(e);
             }
         });
-    }
-
-    private Mono<Void> batchUpsertEntities(String processId, String requestBody) {
-        return brokerAdapterService.batchUpsertEntities(processId, requestBody);
-    }
-
-    private Mono<Void> postEntity(String processId, String requestBody) {
-        return brokerAdapterService.postEntity(processId, requestBody);
     }
 
     private Mono<Void> updateEntity(String processId, String requestBody) {

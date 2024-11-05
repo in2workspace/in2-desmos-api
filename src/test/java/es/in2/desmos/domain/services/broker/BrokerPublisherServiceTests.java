@@ -11,7 +11,6 @@ import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import es.in2.desmos.domain.services.broker.adapter.factory.BrokerAdapterFactory;
 import es.in2.desmos.domain.services.broker.impl.BrokerPublisherServiceImpl;
 import es.in2.desmos.objectmothers.BrokerDataMother;
-import es.in2.desmos.objectmothers.EntityMother;
 import es.in2.desmos.objectmothers.IdMother;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -99,24 +98,6 @@ class BrokerPublisherServiceTests {
         //Assert
         StepVerifier.create(brokerPublisherService.publishDataToBroker(processId, blockchainNotification, retrievedBrokerEntity))
                 .verifyComplete();
-    }
-
-    @Test
-    void itShouldBatchUpsertEntitiesToContextBroker() throws JsonProcessingException, JSONException {
-        String processId = "0";
-
-        String retrievedBrokerEntities = EntityMother.getFullJsonList();
-
-        when(brokerAdapterService.batchUpsertEntities(processId, retrievedBrokerEntities)).thenReturn(Mono.empty());
-
-        Mono<Void> result = brokerPublisherService.batchUpsertEntitiesToContextBroker(processId, retrievedBrokerEntities);
-
-        StepVerifier
-                .create(result)
-                .verifyComplete();
-
-        verify(brokerAdapterService, times(1)).batchUpsertEntities(processId, retrievedBrokerEntities);
-        verifyNoMoreInteractions(brokerAdapterService);
     }
 
     @ParameterizedTest

@@ -12,17 +12,11 @@ import reactor.core.publisher.Flux;
 @RequiredArgsConstructor
 public class DataSyncWorkflowImpl implements DataSyncWorkflow {
 
-    @SuppressWarnings({"GrazieInspection", "java:S125"})
-    // private final BlockchainDataSyncJob blockchainDataSyncJob;
-
     private final P2PDataSyncJob p2PDataSyncJob;
 
     @Override
     public Flux<Void> startDataSyncWorkflow(String processId) {
-        // TODO: We have not yet decided which job will be applied, so for the moment we will keep both options in the code
-
-        // return blockchainDataSyncJob.startBlockchainDataSyncJob(processId); // NOSONAR
-
         return p2PDataSyncJob.synchronizeData(processId).flux();
     }
+
 }

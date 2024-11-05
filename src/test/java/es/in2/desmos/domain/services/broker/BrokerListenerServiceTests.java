@@ -3,8 +3,7 @@ package es.in2.desmos.domain.services.broker;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import es.in2.desmos.domain.exceptions.BrokerNotificationParserException;
-import es.in2.desmos.domain.exceptions.BrokerNotificationSelfGeneratedException;
+import es.in2.desmos.domain.exceptions.JsonReadingException;
 import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.AuditRecordStatus;
 import es.in2.desmos.domain.models.BrokerNotification;
@@ -32,9 +31,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class BrokerListenerServiceTests {
@@ -81,8 +78,7 @@ class BrokerListenerServiceTests {
                 .notifiedAt(Instant.now().toString())
                 .build();
         // Act
-        when(auditRecordService.findLatestAuditRecordForEntity(anyString(), any())).thenReturn(Mono.empty());
-        when(auditRecordService.isAuditRecordUnlocked(eq(processId), anyString())).thenReturn(Mono.just(true));
+        when(auditRecordService.findMostRecentRetrievedOrDeletedByEntityId(anyString(), any())).thenReturn(Mono.empty());
         when(auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(anyString(), any(), any(), any())).thenReturn(Mono.empty());
         when(queueService.enqueueEvent(any())).thenReturn(Mono.empty());
         // Assert
@@ -105,8 +101,7 @@ class BrokerListenerServiceTests {
                 .notifiedAt(Instant.now().toString())
                 .build();
         // Act
-        when(auditRecordService.findLatestAuditRecordForEntity(anyString(), any())).thenReturn(Mono.just(auditRecord));
-        when(auditRecordService.isAuditRecordUnlocked(eq(processId), anyString())).thenReturn(Mono.just(true));
+        when(auditRecordService.findMostRecentRetrievedOrDeletedByEntityId(anyString(), any())).thenReturn(Mono.just(auditRecord));
         when(objectMapper.writer()).thenReturn(objectWriter);
         when(objectWriter.writeValueAsString(any())).thenReturn("""
                 {
@@ -128,8 +123,11 @@ class BrokerListenerServiceTests {
                 }""");
         // Assert
         StepVerifier.create(brokerListenerService.processBrokerNotification(processId, brokerNotification))
-                .expectError(BrokerNotificationSelfGeneratedException.class)
+                .expectComplete()
                 .verify();
+
+        verify(auditRecordService, never()).buildAndSaveAuditRecordFromBrokerNotification(eq(processId), any(), any(), any());
+        verify(queueService, never()).enqueueEvent(any());
     }
 
     @Test
@@ -147,7 +145,7 @@ class BrokerListenerServiceTests {
                 .notifiedAt(Instant.now().toString())
                 .build();
         // Act
-        when(auditRecordService.findLatestAuditRecordForEntity(anyString(), any())).thenReturn(Mono.just(auditRecord));
+        when(auditRecordService.findMostRecentRetrievedOrDeletedByEntityId(anyString(), any())).thenReturn(Mono.just(auditRecord));
         when(objectMapper.writer()).thenReturn(objectWriter);
         when(objectWriter.writeValueAsString(any())).thenReturn("""
                 {
@@ -168,7 +166,6 @@ class BrokerListenerServiceTests {
                   "notifiedAt": "2023-03-14T16:38:15.123456Z"
                 }""");
         when(auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(anyString(), any(), any(), any())).thenReturn(Mono.empty());
-        when(auditRecordService.isAuditRecordUnlocked(eq(processId), anyString())).thenReturn(Mono.just(true));
         when(queueService.enqueueEvent(any())).thenReturn(Mono.empty());
         // Assert
         StepVerifier.create(brokerListenerService.processBrokerNotification(processId, brokerNotification))
@@ -190,8 +187,7 @@ class BrokerListenerServiceTests {
                 .notifiedAt(Instant.now().toString())
                 .build();
 
-        when(auditRecordService.findLatestAuditRecordForEntity(anyString(), any())).thenReturn(Mono.just(auditRecord));
-        when(auditRecordService.isAuditRecordUnlocked(eq(processId), anyString())).thenReturn(Mono.just(true));
+        when(auditRecordService.findMostRecentRetrievedOrDeletedByEntityId(anyString(), any())).thenReturn(Mono.just(auditRecord));
         when(objectMapper.writer()).thenReturn(objectWriter);
         when(objectWriter.writeValueAsString(any())).thenReturn("""
                 {
@@ -217,8 +213,11 @@ class BrokerListenerServiceTests {
 
             // Act & Assert
             StepVerifier.create(brokerListenerService.processBrokerNotification(processId, brokerNotification))
-                    .expectErrorMatches(throwable -> throwable instanceof BrokerNotificationParserException)
+                    .expectErrorMatches(throwable -> throwable instanceof JsonReadingException)
                     .verify();
+
+            verify(auditRecordService, never()).buildAndSaveAuditRecordFromBrokerNotification(eq(processId), any(), any(), any());
+            verify(queueService, never()).enqueueEvent(any());
         }
     }
 
