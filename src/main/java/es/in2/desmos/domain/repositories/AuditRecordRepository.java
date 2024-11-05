@@ -37,9 +37,6 @@ public interface AuditRecordRepository extends ReactiveCrudRepository<AuditRecor
     @Query("SELECT * FROM audit_records WHERE entity_id = :entityId AND status = 'PUBLISHED' ORDER BY created_at DESC LIMIT 1")
     Mono<AuditRecord> findMostRecentPublishedAuditRecordByEntityId(String entityId);
 
-    @Query("SELECT * FROM audit_records WHERE entity_id = :entityId AND status = 'PUBLISHED' ORDER BY created_at DESC LIMIT 1")
-    Mono<AuditRecord> findMostRecentPublishedAuditRecordByEntityId(String entityId);
-
     @Query("SELECT * FROM audit_records WHERE entity_id = :entityId AND status = 'PUBLISHED' AND trader = 'PRODUCER' ORDER BY created_at DESC LIMIT 1")
     Mono<AuditRecord> findLatestPublishedAuditRecordForProducerByEntityId(String entityId);
 
