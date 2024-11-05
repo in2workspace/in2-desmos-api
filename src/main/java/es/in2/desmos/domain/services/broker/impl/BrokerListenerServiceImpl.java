@@ -51,7 +51,7 @@ public class BrokerListenerServiceImpl implements BrokerListenerService {
                         // Validate if BrokerNotification is from an external source or self-generated
                         .flatMap(dataMap -> isBrokerNotificationSelfGenerated(processId, dataMap)
                                 .flatMap(isSelfGenerated -> {
-                                    if (isSelfGenerated) {
+                                    if (Boolean.TRUE.equals(isSelfGenerated)) {
                                         log.info("ProcessID: {} - Broker Notification is self-generated.", processId);
                                         return Mono.empty();
                                     } else {
