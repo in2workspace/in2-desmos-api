@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import es.in2.desmos.domain.exceptions.DeserializeAccessNodesListException;
 import es.in2.desmos.infrastructure.configs.properties.AccessNodeProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,22 +55,14 @@ public class TrustFrameworkConfig {
                 });
     }
 
-    public HashMap<String, String> getPublicKeysByUrl() {
+    public Map<String, String> getPublicKeysByUrl() {
         var publicKeysByUrl = publicKeysByUrlRef.get();
-        if (publicKeysByUrl == null || publicKeysByUrl.isEmpty()) {
-            return null;
-        } else {
-            return publicKeysByUrl;
-        }
+        return Objects.requireNonNullElse(publicKeysByUrl, Collections.emptyMap());
     }
 
-    public HashSet<String> getDltAddresses() {
+    public Set<String> getDltAddresses() {
         HashSet<String> dltAddresses = dltAddressesRef.get();
-        if (dltAddresses == null || dltAddresses.isEmpty()) {
-            return null;
-        } else {
-            return dltAddresses;
-        }
+        return Objects.requireNonNullElse(dltAddresses, Collections.emptySet());
     }
 
     private void savePublicKeysByUrlRef(Mono<HashMap<String, String>> publicKeysByUrl) {
@@ -117,7 +110,7 @@ public class TrustFrameworkConfig {
             return resultMap;
 
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new DeserializeAccessNodesListException("Can't deserialize Access Nodes List");
         }
     }
 
@@ -150,7 +143,7 @@ public class TrustFrameworkConfig {
             return resultSet;
 
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new DeserializeAccessNodesListException("Can't deserialize Access Nodes List");
         }
     }
 }

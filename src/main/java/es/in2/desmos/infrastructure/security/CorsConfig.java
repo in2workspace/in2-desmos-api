@@ -16,6 +16,7 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Configuration
@@ -76,7 +77,7 @@ public class CorsConfig {
         // Retrieve YAML data from the External URL
 
         List<String> urls = new ArrayList<>();
-        HashMap<String, String> publicKeysByUrl = trustFrameworkConfig.getPublicKeysByUrl();
+        Map<String, String> publicKeysByUrl = trustFrameworkConfig.getPublicKeysByUrl();
         if (publicKeysByUrl == null || publicKeysByUrl.isEmpty()) {
             log.warn("No organizations data available in AccessNodeMemoryStore.");
         } else {

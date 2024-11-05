@@ -14,8 +14,8 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -38,7 +38,7 @@ public class ServerHttpBearerAuthenticationConverter implements Function<ServerW
     @Override
     public Mono<Authentication> apply(ServerWebExchange serverWebExchange) {
 
-        HashMap<String, String> publicKeysByUrl = trustFrameworkConfig.getPublicKeysByUrl();
+        Map<String, String> publicKeysByUrl = trustFrameworkConfig.getPublicKeysByUrl();
 
         return Mono.justOrEmpty(serverWebExchange)
                 .flatMap(ServerHttpBearerAuthenticationConverter::extract)
