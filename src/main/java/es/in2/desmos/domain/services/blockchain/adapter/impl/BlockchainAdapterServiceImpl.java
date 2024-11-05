@@ -49,6 +49,19 @@ public class BlockchainAdapterServiceImpl implements BlockchainAdapterService {
                 .bodyToMono(Void.class);
     }
 
+    @Override
+    public Flux<BlockchainSubscription> getSubscriptions(String processId) {
+        log.debug("ProcessId: {} - Getting subscriptions...", processId);
+        return webClient.get()
+                .uri(dltAdapterProperties.paths()
+                        .subscription())
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(BlockchainSubscription[].class)
+                .retry(3)
+                .flatMapMany(Flux::fromArray);
+    }
+
     public Mono<Void> postTxPayload(String processId, BlockchainTxPayload blockchainTxPayload) {
         return webClient.post()
                 .uri(dltAdapterProperties.paths().publication())

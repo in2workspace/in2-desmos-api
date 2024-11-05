@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.domain.exceptions.HashLinkException;
 import es.in2.desmos.domain.models.BlockchainTxPayload;
 import es.in2.desmos.infrastructure.configs.ApiConfig;
-import es.in2.desmos.infrastructure.configs.BrokerConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -26,25 +25,24 @@ public class BlockchainTxPayloadFactory {
 
     private final ObjectMapper objectMapper;
     private final ApiConfig apiConfig;
-    private final BrokerConfig brokerConfig;
 
-    public Mono<BlockchainTxPayload> buildBlockchainTxPayload(String processId, Map<String, Object> dataMap, String previousHash) {
+    public Mono<BlockchainTxPayload> buildBlockchainTxPayload(String processId, Map<String, Object> dataMap, String previousHashLink) {
         log.debug("ProcessID: {} - Building blockchain data...", processId);
         try {
             String entityId = dataMap.get("id").toString();
             String entityIdHash = HASH_PREFIX + calculateSHA256(entityId);
             String entityType = (String) dataMap.get("type");
             String entityHash = calculateSHA256(objectMapper.writeValueAsString(dataMap));
-            String entityHashLink = entityHash.equals(previousHash) ? previousHash : calculateHashLink(previousHash, entityHash);
-            String dataLocation = brokerConfig.getEntitiesExternalDomain() + "/" + entityId + HASHLINK_PREFIX + entityHashLink;
+            String entityHashLink = entityHash.equals(previousHashLink) ? previousHashLink : calculateHashLink(previousHashLink, entityHash);
+            String dataLocation = apiConfig.getExternalDomain() + "/api/v1/entities/" + entityId + HASHLINK_PREFIX + entityHashLink;
             String organizationIdentifier = HASH_PREFIX + apiConfig.organizationIdHash();
-            String previousEntityHash = HASH_PREFIX + previousHash;
+            String previousEntityHashLink = HASH_PREFIX + previousHashLink;
             List<String> metadataList = List.of(getEnvironmentMetadata(apiConfig.getCurrentEnvironment()));
             return Mono.just(BlockchainTxPayload.builder()
                     .eventType(entityType)
                     .organizationIdentifier(organizationIdentifier)
                     .entityId(entityIdHash)
-                    .previousEntityHash(previousEntityHash)
+                    .previousEntityHashLink(previousEntityHashLink)
                     .dataLocation(dataLocation)
                     .metadata(metadataList)
                     .build());

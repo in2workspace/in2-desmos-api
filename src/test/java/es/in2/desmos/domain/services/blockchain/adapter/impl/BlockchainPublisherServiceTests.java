@@ -33,7 +33,7 @@ class BlockchainPublisherServiceTests {
             .eventType(eventType)
             .organizationIdentifier(organizationIdentifier)
             .entityId(entityId)
-            .previousEntityHash(previousEntityHash)
+            .previousEntityHashLink(previousEntityHash)
             .dataLocation(dataLocation)
             .metadata(metadata)
             .build();

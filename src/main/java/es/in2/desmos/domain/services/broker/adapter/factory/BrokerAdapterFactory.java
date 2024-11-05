@@ -1,8 +1,8 @@
 package es.in2.desmos.domain.services.broker.adapter.factory;
 
 import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
-import es.in2.desmos.domain.services.broker.adapter.impl.ScorpioAdapter;
 import es.in2.desmos.domain.services.broker.adapter.impl.OrionLdAdapter;
+import es.in2.desmos.domain.services.broker.adapter.impl.ScorpioAdapter;
 import es.in2.desmos.infrastructure.configs.properties.BrokerProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

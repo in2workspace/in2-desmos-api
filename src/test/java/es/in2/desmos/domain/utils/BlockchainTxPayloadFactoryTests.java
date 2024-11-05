@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.domain.exceptions.HashLinkException;
 import es.in2.desmos.domain.models.BlockchainTxPayload;
 import es.in2.desmos.infrastructure.configs.ApiConfig;
-import es.in2.desmos.infrastructure.configs.BrokerConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -39,9 +38,6 @@ class BlockchainTxPayloadFactoryTests {
     @Mock
     private ApiConfig apiConfig;
 
-    @Mock
-    private BrokerConfig brokerConfig;
-
     @InjectMocks
     private BlockchainTxPayloadFactory blockchainTxPayloadFactory;
 
@@ -51,7 +47,6 @@ class BlockchainTxPayloadFactoryTests {
         String previousHash = "5077272d496c8afd1af9d3740f9e5f11837089b5952d577eff4c20509e6e199e";
         when(objectMapper.writeValueAsString(dataMap)).thenReturn("dataMapString");
         when(apiConfig.organizationIdHash()).thenReturn("381d18e478b9ae6e67b1bf48c9f3bcaf246d53c4311bfe81f46e63aa18167c89");
-        when(brokerConfig.getEntitiesExternalDomain()).thenReturn("http://localhost:8080/entities");
         when(apiConfig.getCurrentEnvironment()).thenReturn("test");
         // Act
         Mono<BlockchainTxPayload> resultMono = blockchainTxPayloadFactory.buildBlockchainTxPayload(processId, dataMap, previousHash);
@@ -68,7 +63,6 @@ class BlockchainTxPayloadFactoryTests {
         String previousHash = "22d0ef4e87a39c52191998f4fbf32ff672f82ed5a2b4c9902371a161402a0faf";
         when(objectMapper.writeValueAsString(dataMap)).thenReturn("dataMapString");
         when(apiConfig.organizationIdHash()).thenReturn("381d18e478b9ae6e67b1bf48c9f3bcaf246d53c4311bfe81f46e63aa18167c89");
-        when(brokerConfig.getEntitiesExternalDomain()).thenReturn("http://localhost:8080/entities");
         when(apiConfig.getCurrentEnvironment()).thenReturn("test");
         Mono<BlockchainTxPayload> resultMono = blockchainTxPayloadFactory.buildBlockchainTxPayload(processId, dataMap, previousHash);
         // Assert
@@ -79,7 +73,7 @@ class BlockchainTxPayloadFactoryTests {
                     try {
                         assertEquals(calculateHashLink(previousHash, calculateSHA256("dataMapString")),
                                 extractHashLinkFromDataLocation(blockchainTxPayload.dataLocation()));
-                    } catch (NoSuchAlgorithmException e) {
+                    } catch (NoSuchAlgorithmException | JsonProcessingException e) {
                         throw new HashLinkException("Error while calculating hash link on test");
                     }
                 }).verifyComplete();
@@ -111,7 +105,7 @@ class BlockchainTxPayloadFactoryTests {
                 .assertNext(previousHash -> {
                     try {
                         assertEquals(calculateSHA256("dataMapString"), previousHash);
-                    } catch (NoSuchAlgorithmException e) {
+                    } catch (NoSuchAlgorithmException | JsonProcessingException e) {
                         throw new HashLinkException("Error while calculating hash link on test");
                     }
                 }).verifyComplete();

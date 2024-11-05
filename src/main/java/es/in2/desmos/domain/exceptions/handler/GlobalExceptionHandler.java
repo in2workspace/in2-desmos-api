@@ -3,6 +3,8 @@ package es.in2.desmos.domain.exceptions.handler;
 import es.in2.desmos.domain.exceptions.*;
 import es.in2.desmos.domain.models.GlobalErrorMessage;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.buffer.DataBufferLimitException;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import reactor.core.publisher.Mono;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -128,4 +131,30 @@ public class GlobalExceptionHandler {
         return Mono.just(GlobalErrorMessage.builder().title("UnauthorizedDomeParticipantException").message(unauthorizedDomeParticipantException.getMessage()).path(path).build());
     }
 
+    @ExceptionHandler(UnauthorizedBrokerSubscriptionException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ResponseBody
+    public Mono<GlobalErrorMessage> handleUnauthorizedBrokerSubscriptionException(UnauthorizedBrokerSubscriptionException unauthorizedBrokerSubscriptionException, ServerHttpRequest request) {
+        log.error("UnauthorizedBrokerSubscriptionException: {}", unauthorizedBrokerSubscriptionException.getMessage());
+        String path = String.valueOf(request.getPath());
+        return Mono.just(GlobalErrorMessage.builder().title("UnauthorizedBrokerSubscriptionException").message(unauthorizedBrokerSubscriptionException.getMessage()).path(path).build());
+    }
+
+    @ExceptionHandler(InvalidProfileException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody
+    public Mono<GlobalErrorMessage> handleInvalidProfileException(InvalidProfileException invalidProfileException, ServerHttpRequest request) {
+        log.error("InvalidProfileException: {}", invalidProfileException.getMessage());
+        String path = String.valueOf(request.getPath());
+        return Mono.just(GlobalErrorMessage.builder().title("InvalidProfileException").message(invalidProfileException.getMessage()).path(path).build());
+    }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody
+    public Mono<GlobalErrorMessage> handleInvalidTokenException(InvalidTokenException invalidTokenException, ServerHttpRequest request) {
+        log.error("InvalidTokenException: {}", invalidTokenException.getMessage());
+        String path = String.valueOf(request.getPath());
+        return Mono.just(GlobalErrorMessage.builder().title("InvalidTokenException").message(invalidTokenException.getMessage()).path(path).build());
+    }
 }
