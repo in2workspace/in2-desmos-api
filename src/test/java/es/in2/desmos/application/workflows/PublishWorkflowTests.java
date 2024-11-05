@@ -29,7 +29,6 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class PublishWorkflowTests {
 
-    private final String processId = "processId";
     private final String id = "1234";
     private final String type = "TestType";
     private final List<Map<String, Object>> originalData = List.of(Collections.singletonMap("id", "123"));
@@ -68,6 +67,7 @@ class PublishWorkflowTests {
         when(eventQueueMock.getEvent()).thenReturn(List.of(brokerNotification));
         when(pendingPublishEventsQueue.getEventStream()).thenReturn(Flux.just(eventQueueMock));
         when(eventQueueMock.getEvent().get(0)).thenReturn(List.of(brokerNotification));
+        String processId = "processId";
         when(auditRecordService.fetchLatestProducerEntityHashLinkByEntityId(processId, "123")).thenReturn(Mono.empty());
         when(blockchainTxPayloadFactory.calculatePreviousHashIfEmpty(eq(processId), any())).thenReturn(Mono.just(previousHash));
         when(blockchainTxPayloadFactory.buildBlockchainTxPayload(anyString(), anyMap(), anyString()))

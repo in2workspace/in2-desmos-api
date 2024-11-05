@@ -99,9 +99,7 @@ class ScorpioAdapterTests {
 
         //Assert
         StepVerifier.create(result)
-                .expectNextMatches(entity -> {
-                    return entity.contains("urn:ngsi-ld:ProductOffering:122355255");
-                })
+                .expectNextMatches(entity -> entity.contains("urn:ngsi-ld:ProductOffering:122355255"))
                 .verifyComplete();
     }
 
