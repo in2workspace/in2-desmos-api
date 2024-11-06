@@ -43,7 +43,7 @@ class ScorpioAdapterEntityIT {
             }""";
 
     @Autowired
-    private ScorpioAdapter scorpioAdapter;
+    private ScorpioAdapterImpl scorpioAdapter;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -103,9 +103,7 @@ class ScorpioAdapterEntityIT {
         Mono<String> result = scorpioAdapter.getEntityById("processId", entityId);
 
         StepVerifier.create(result)
-                .expectNextMatches(entity -> {
-                    return entity.contains(entityId);
-                })
+                .expectNextMatches(entity -> entity.contains(entityId))
                 .verifyComplete();
     }
 

@@ -77,12 +77,12 @@ class ScorpioAdapterTests {
     private WebClient.RequestBodySpec acceptedRequestBodyMock;
 
     @InjectMocks
-    private ScorpioAdapter scorpioAdapter;
+    private ScorpioAdapterImpl scorpioAdapter;
 
     @Test
     void getEntitiesByTimeRangeTest() throws IllegalAccessException, NoSuchFieldException {
         //Arrange
-        Field field = ScorpioAdapter.class.getDeclaredField("webClient");
+        Field field = ScorpioAdapterImpl.class.getDeclaredField("webClient");
         field.setAccessible(true);
         field.set(scorpioAdapter, webClientMock);
         String mockResponse = "[{ \"id\": \"urn:ngsi-ld:ProductOffering:122355255\" }]";
@@ -116,7 +116,7 @@ class ScorpioAdapterTests {
 
         ReflectionTestUtils.setField(scorpioAdapter, "webClient", webClientMock);
 
-        Method method = ScorpioAdapter.class.getDeclaredMethod("updateSubscription", BrokerSubscription.class);
+        Method method = ScorpioAdapterImpl.class.getDeclaredMethod("updateSubscription", BrokerSubscription.class);
 
         method.setAccessible(true);
 

@@ -44,7 +44,7 @@ class ScorpioAdapterSubscriptionIT {
             .build();
 
     @Autowired
-    private ScorpioAdapter scorpioAdapter;
+    private ScorpioAdapterImpl scorpioAdapter;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -79,24 +79,20 @@ class ScorpioAdapterSubscriptionIT {
                 .retrieve()
                 .bodyToMono(BrokerSubscription.class)
                 .retry(3)
-                .flatMap(existingSubscription -> {
-                    return webClient.patch()
-                            .uri(brokerConfig.getSubscriptionsPath() + "/" + brokerSubscription.id())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .bodyValue(brokerSubscription)
-                            .retrieve()
-                            .bodyToMono(Void.class)
-                            .retry(3);
-                })
-                .onErrorResume(WebClientResponseException.NotFound.class, ex -> {
-                    return webClient.post()
-                            .uri(brokerConfig.getSubscriptionsPath())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .bodyValue(brokerSubscription)
-                            .retrieve()
-                            .bodyToMono(Void.class)
-                            .retry(3);
-                });
+                .flatMap(existingSubscription -> webClient.patch()
+                        .uri(brokerConfig.getSubscriptionsPath() + "/" + brokerSubscription.id())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(brokerSubscription)
+                        .retrieve()
+                        .bodyToMono(Void.class)
+                        .retry(3))
+                .onErrorResume(WebClientResponseException.NotFound.class, ex -> webClient.post()
+                        .uri(brokerConfig.getSubscriptionsPath())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(brokerSubscription)
+                        .retrieve()
+                        .bodyToMono(Void.class)
+                        .retry(3));
 
         Mono<Void> result = scorpioAdapter.createSubscription("processId", brokerSubscription);
 

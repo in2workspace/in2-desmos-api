@@ -8,7 +8,7 @@ import es.in2.desmos.domain.exceptions.RequestErrorException;
 import es.in2.desmos.domain.exceptions.SubscriptionCreationException;
 import es.in2.desmos.domain.models.BrokerEntityWithIdAndType;
 import es.in2.desmos.domain.models.BrokerSubscription;
-import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
+import es.in2.desmos.domain.services.broker.adapter.ScorpioAdapter;
 import es.in2.desmos.infrastructure.configs.BrokerConfig;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +31,7 @@ import static es.in2.desmos.domain.utils.MessageUtils.*;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ScorpioAdapter implements BrokerAdapterService {
+public class ScorpioAdapterImpl implements ScorpioAdapter {
 
     private final ObjectMapper objectMapper;
     private final BrokerConfig brokerConfig;

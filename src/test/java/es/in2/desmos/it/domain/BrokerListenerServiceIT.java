@@ -5,8 +5,7 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import es.in2.desmos.domain.models.BrokerSubscription;
-import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
-import es.in2.desmos.domain.services.broker.adapter.factory.BrokerAdapterFactory;
+import es.in2.desmos.domain.services.broker.adapter.ScorpioAdapter;
 import es.in2.desmos.it.ContainerManager;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,22 +28,13 @@ class BrokerListenerServiceIT {
     private final ObjectMapper objectMapper = JsonMapper.builder().enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES).build();
 
     @Autowired
-    private BrokerAdapterFactory brokerAdapterFactory;
+    private ScorpioAdapter scorpioAdapter;
 
-    private BrokerAdapterService brokerAdapterService;
-
-    private WebClient webClient;
+    private final WebClient webClient = WebClient.builder().baseUrl(getBaseUriForScorpioA()).build();
 
     @DynamicPropertySource
     static void setDynamicProperties(DynamicPropertyRegistry registry) {
         ContainerManager.postgresqlProperties(registry);
-    }
-
-    @BeforeEach
-    void setUp() {
-        brokerAdapterService = brokerAdapterFactory.getBrokerAdapter();
-        // Ensure WebClient is set up with the correct base URL if it's not already configured in the setup method
-        webClient = WebClient.builder().baseUrl(getBaseUriForScorpioA()).build();
     }
 
     // Create a subscription to the Context Broker
@@ -71,7 +61,7 @@ class BrokerListenerServiceIT {
                         .build())
                 .build();
         // Act
-        brokerAdapterService.createSubscription("08b0f80f-9098-47bf-a4f4-244210d532d5", brokerSubscription).block();
+        scorpioAdapter.createSubscription("08b0f80f-9098-47bf-a4f4-244210d532d5", brokerSubscription).block();
         // Assert
         String response = webClient.get()
                 .uri("/ngsi-ld/v1/subscriptions/urn:subscription:b74a701a-9a3b-4eff-982e-744652fc2abd")

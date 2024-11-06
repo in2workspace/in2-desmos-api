@@ -7,8 +7,8 @@ import es.in2.desmos.domain.models.BlockchainNotification;
 import es.in2.desmos.domain.models.BrokerEntityWithIdAndType;
 import es.in2.desmos.domain.models.Id;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
-import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
-import es.in2.desmos.domain.services.broker.adapter.factory.BrokerAdapterFactory;
+import es.in2.desmos.domain.services.broker.adapter.ScorpioAdapter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -21,17 +21,13 @@ import static es.in2.desmos.domain.utils.ApplicationUtils.extractEntityIdFromDat
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class BrokerPublisherServiceImpl implements BrokerPublisherService {
 
     private static final String VALUE_FIELD_NAME = "value";
-    private final BrokerAdapterService brokerAdapterService;
+    private final ScorpioAdapter scorpioAdapter;
 
     private final ObjectMapper objectMapper;
-
-    public BrokerPublisherServiceImpl(BrokerAdapterFactory brokerAdapterFactory, ObjectMapper objectMapper) {
-        this.brokerAdapterService = brokerAdapterFactory.getBrokerAdapter();
-        this.objectMapper = objectMapper;
-    }
 
     @Override
     public Mono<Void> publishDataToBroker(String processId, BlockchainNotification blockchainNotification, String retrievedBrokerEntity) {
@@ -56,7 +52,7 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
 
     @Override
     public <T extends BrokerEntityWithIdAndType> Mono<List<T>> findAllIdTypeAndAttributesByType(String processId, String type, String firstAttribute, String secondAttribute, String thirdAttribute, String forthAttribute, Class<T[]> responseClassArray) {
-        return brokerAdapterService.findAllIdTypeAndAttributesByType(processId, type, firstAttribute, secondAttribute, thirdAttribute, forthAttribute, responseClassArray)
+        return scorpioAdapter.findAllIdTypeAndAttributesByType(processId, type, firstAttribute, secondAttribute, thirdAttribute, forthAttribute, responseClassArray)
                 .map(array -> Arrays.stream(array).toList());
     }
 
@@ -65,7 +61,7 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
         return idsMono.flatMapMany(Flux::fromIterable)
                 .flatMap(id -> {
                     if (!processedEntities.contains(id)) {
-                        return brokerAdapterService.getEntityById(processId, id.id())
+                        return scorpioAdapter.getEntityById(processId, id.id())
                                 .flatMap(entity -> {
                                     processedEntities.add(id);
                                     return getEntityRelationshipIds(Mono.just(entity))
@@ -96,12 +92,12 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
 
     @Override
     public Mono<String> getEntityById(String processId, String entityId) {
-        return brokerAdapterService.getEntityById(processId, entityId);
+        return scorpioAdapter.getEntityById(processId, entityId);
     }
 
     @Override
     public Mono<Void> postEntity(String processId, String requestBody) {
-        return brokerAdapterService.postEntity(processId, requestBody);
+        return scorpioAdapter.postEntity(processId, requestBody);
     }
 
     private Mono<List<Id>> getEntityRelationshipIds(Mono<String> entityMono) {
@@ -170,7 +166,7 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
     }
 
     private Mono<Void> updateEntity(String processId, String requestBody) {
-        return brokerAdapterService.updateEntity(processId, requestBody);
+        return scorpioAdapter.updateEntity(processId, requestBody);
     }
 
 }

@@ -9,8 +9,7 @@ import es.in2.desmos.domain.models.AuditRecordStatus;
 import es.in2.desmos.domain.models.BrokerNotification;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.api.QueueService;
-import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
-import es.in2.desmos.domain.services.broker.adapter.factory.BrokerAdapterFactory;
+import es.in2.desmos.domain.services.broker.adapter.ScorpioAdapter;
 import es.in2.desmos.domain.services.broker.impl.BrokerListenerServiceImpl;
 import es.in2.desmos.domain.utils.ApplicationUtils;
 import org.junit.jupiter.api.Test;
@@ -49,15 +48,13 @@ class BrokerListenerServiceTests {
             .build();
 
     @Mock
-    private BrokerAdapterFactory brokerAdapterFactory;
-    @Mock
     private ObjectMapper objectMapper;
     @Mock
     private AuditRecordService auditRecordService;
     @Mock
     private QueueService queueService;
     @Mock
-    private BrokerAdapterService brokerAdapterService;
+    private ScorpioAdapter scorpioAdapter;
     @InjectMocks
     private BrokerListenerServiceImpl brokerListenerService;
     @Mock

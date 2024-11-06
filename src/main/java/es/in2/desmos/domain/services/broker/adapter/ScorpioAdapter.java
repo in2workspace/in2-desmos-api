@@ -7,7 +7,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-public interface BrokerAdapterService {
+public interface ScorpioAdapter {
     Mono<Void> postEntity(String processId, String requestBody);
     Flux<String> getEntitiesByTimeRange(String processId, String timestamp);
     Mono<String> getEntityById(String processId, String entityId);

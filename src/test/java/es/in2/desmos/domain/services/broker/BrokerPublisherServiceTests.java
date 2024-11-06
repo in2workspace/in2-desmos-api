@@ -7,19 +7,19 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import es.in2.desmos.domain.models.BlockchainNotification;
 import es.in2.desmos.domain.models.Id;
-import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
-import es.in2.desmos.domain.services.broker.adapter.factory.BrokerAdapterFactory;
+import es.in2.desmos.domain.services.broker.adapter.ScorpioAdapter;
 import es.in2.desmos.domain.services.broker.impl.BrokerPublisherServiceImpl;
 import es.in2.desmos.objectmothers.BrokerDataMother;
 import es.in2.desmos.objectmothers.IdMother;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 import reactor.core.publisher.Mono;
@@ -36,21 +36,14 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class BrokerPublisherServiceTests {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    @Spy
+    private static ObjectMapper objectMapper = new ObjectMapper();
 
     @Mock
-    private BrokerAdapterFactory brokerAdapterFactory;
+    private ScorpioAdapter scorpioAdapter;
 
-    @Mock
-    private BrokerAdapterService brokerAdapterService;
-
+    @InjectMocks
     private BrokerPublisherServiceImpl brokerPublisherService;
-
-    @BeforeEach
-    void init() {
-        when(brokerAdapterFactory.getBrokerAdapter()).thenReturn(brokerAdapterService);
-        brokerPublisherService = new BrokerPublisherServiceImpl(brokerAdapterFactory, objectMapper);
-    }
 
     private final long id = 1234;
     private final String publisherAddress = "http://blockchain-testnode.infra.svc.cluster.local:8545/";
@@ -80,8 +73,8 @@ class BrokerPublisherServiceTests {
         String processId = "processId";
         String retrievedBrokerEntity = "retrievedBrokerEntity";
         //Act
-        when(brokerAdapterService.getEntityById(eq(processId), anyString())).thenReturn(Mono.just(""));
-        when(brokerAdapterService.postEntity(processId, retrievedBrokerEntity)).thenReturn(Mono.empty());
+        when(scorpioAdapter.getEntityById(eq(processId), anyString())).thenReturn(Mono.just(""));
+        when(scorpioAdapter.postEntity(processId, retrievedBrokerEntity)).thenReturn(Mono.empty());
         //Assert
         StepVerifier.create(brokerPublisherService.publishDataToBroker(processId, blockchainNotification, retrievedBrokerEntity))
                 .verifyComplete();
@@ -93,8 +86,8 @@ class BrokerPublisherServiceTests {
         String processId = "processId";
         String retrievedBrokerEntity = "retrievedBrokerEntity";
         //Act
-        when(brokerAdapterService.getEntityById(eq(processId), anyString())).thenReturn(Mono.just("entityId"));
-        when(brokerAdapterService.updateEntity(processId, retrievedBrokerEntity)).thenReturn(Mono.empty());
+        when(scorpioAdapter.getEntityById(eq(processId), anyString())).thenReturn(Mono.just("entityId"));
+        when(scorpioAdapter.updateEntity(processId, retrievedBrokerEntity)).thenReturn(Mono.empty());
         //Assert
         StepVerifier.create(brokerPublisherService.publishDataToBroker(processId, blockchainNotification, retrievedBrokerEntity))
                 .verifyComplete();
@@ -117,7 +110,7 @@ class BrokerPublisherServiceTests {
             localEntities.add(entity);
         }
         JsonNode rootEntityJsonNode = objectMapper.readValue(brokerJson, JsonNode.class);
-        when(brokerAdapterService.getEntityById(eq(processId), any())).thenAnswer(invocation -> {
+        when(scorpioAdapter.getEntityById(eq(processId), any())).thenAnswer(invocation -> {
             String entityId = invocation.getArgument(1);
             for (JsonNode rootEntityNodeChildren : rootEntityJsonNode) {
                 if (rootEntityNodeChildren.has("id") && rootEntityNodeChildren.get("id").asText().equals(entityId)) {
@@ -169,7 +162,7 @@ class BrokerPublisherServiceTests {
         }
 
         JsonNode rootEntityJsonNode = objectMapper.readValue(brokerJson, JsonNode.class);
-        when(brokerAdapterService.getEntityById(eq(processId), any())).thenAnswer(invocation -> {
+        when(scorpioAdapter.getEntityById(eq(processId), any())).thenAnswer(invocation -> {
             String entityId = invocation.getArgument(1);
             for (JsonNode rootEntityNodeChildren : rootEntityJsonNode) {
                 if (rootEntityNodeChildren.has("id") && rootEntityNodeChildren.get("id").asText().equals(entityId)) {
@@ -207,7 +200,7 @@ class BrokerPublisherServiceTests {
         var brokerJson = """
                 [""";
 
-        when(brokerAdapterService.getEntityById(eq(processId), any())).thenReturn(Mono.just(brokerJson));
+        when(scorpioAdapter.getEntityById(eq(processId), any())).thenReturn(Mono.just(brokerJson));
 
 
         var resultMono = brokerPublisherService.findAllById(processId, idsMono, new ArrayList<>());

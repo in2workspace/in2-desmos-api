@@ -8,8 +8,8 @@ import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.api.QueueService;
 import es.in2.desmos.domain.services.broker.BrokerListenerService;
-import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
-import es.in2.desmos.domain.services.broker.adapter.factory.BrokerAdapterFactory;
+import es.in2.desmos.domain.services.broker.adapter.ScorpioAdapter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -22,24 +22,17 @@ import static es.in2.desmos.domain.utils.ApplicationUtils.calculateSHA256;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class BrokerListenerServiceImpl implements BrokerListenerService {
 
     private final ObjectMapper objectMapper;
-    private final BrokerAdapterService brokerAdapter;
+    private final ScorpioAdapter scorpioAdapter;
     private final AuditRecordService auditRecordService;
     private final QueueService pendingPublishEventsQueue;
 
-    public BrokerListenerServiceImpl(BrokerAdapterFactory brokerAdapterFactory, ObjectMapper objectMapper,
-                                     AuditRecordService auditRecordService, QueueService pendingPublishEventsQueue) {
-        this.brokerAdapter = brokerAdapterFactory.getBrokerAdapter();
-        this.objectMapper = objectMapper;
-        this.auditRecordService = auditRecordService;
-        this.pendingPublishEventsQueue = pendingPublishEventsQueue;
-    }
-
     @Override
     public Mono<Void> createSubscription(String processId, BrokerSubscription brokerSubscription) {
-        return brokerAdapter.createSubscription(processId, brokerSubscription);
+        return scorpioAdapter.createSubscription(processId, brokerSubscription);
     }
 
     @Override
@@ -78,7 +71,7 @@ public class BrokerListenerServiceImpl implements BrokerListenerService {
 
     @Override
     public Mono<String> getEntityById(String processId, String entityId) {
-        return brokerAdapter.getEntityById(processId, entityId);
+        return scorpioAdapter.getEntityById(processId, entityId);
     }
 
     private Mono<Map<String, Object>> getDataFromBrokerNotification(BrokerNotification brokerNotification) {
