@@ -8,6 +8,9 @@ on:
       - main
     types: [ opened, synchronize, reopened ]
 
+permissions:
+  contents: write
+
 jobs:
   release-snapshot:
     if: github.event_name == 'pull_request'
