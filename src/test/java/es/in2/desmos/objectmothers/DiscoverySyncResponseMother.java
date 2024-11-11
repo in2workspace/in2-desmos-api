@@ -15,10 +15,10 @@ public final class DiscoverySyncResponseMother {
     }
 
     public static @NotNull DiscoverySyncResponse list3And4(String contextBrokerExternalDomain) throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
-        List<MVEntity4DataNegotiation> MVEntity4DataNegotiationList = new ArrayList<>();
-        MVEntity4DataNegotiationList.add(MVEntity4DataNegotiationMother.sample3());
-        MVEntity4DataNegotiationList.add(MVEntity4DataNegotiationMother.sample4());
-        return new DiscoverySyncResponse(contextBrokerExternalDomain, MVEntity4DataNegotiationList);
+        List<MVEntity4DataNegotiation> mvEntities4DataNegotiation = new ArrayList<>();
+        mvEntities4DataNegotiation.add(MVEntity4DataNegotiationMother.sample3());
+        mvEntities4DataNegotiation.add(MVEntity4DataNegotiationMother.sample4());
+        return new DiscoverySyncResponse(contextBrokerExternalDomain, mvEntities4DataNegotiation);
     }
 
     public static @NotNull DiscoverySyncResponse fromList(String contextBrokerExternalDomain, List<MVEntity4DataNegotiation> entities) {
