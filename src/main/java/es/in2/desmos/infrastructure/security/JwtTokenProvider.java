@@ -12,6 +12,7 @@ import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import es.in2.desmos.domain.exceptions.ConvertPublicKeyFromHexToEcException;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -32,7 +33,6 @@ import java.security.spec.ECPublicKeySpec;
 import java.security.spec.EllipticCurve;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -116,92 +116,111 @@ public class JwtTokenProvider {
 
     // Use public keys from Access Node Directory in memory
     public Mono<SignedJWT> validateSignedJwt(String jwtString, String externalNodeUrl, Map<String, String> publicKeysByUrl) {
+        String processId = UUID.randomUUID().toString();
         try {
+            log.info("ProcessID: {} - Starting validation of signed JWT from external node URL: {}", processId, externalNodeUrl);
+            log.debug("ProcessID: {} - JWT content: {}", processId, jwtString);
+
             // Retrieve the public key from AccessNodeMemoryStore
-            String publicKeyHex = getPublicKeyFromAccessNodeMemory(externalNodeUrl, publicKeysByUrl);
+            String publicKeyHex = getPublicKeyFromAccessNodeMemory(processId, externalNodeUrl, publicKeysByUrl);
             if (publicKeyHex == null) {
-                return Mono.error(new InvalidKeyException("Public key not found for origin: " + externalNodeUrl));
+                log.warn("ProcessID: {} - Public key not found for external node URL: {}", processId, externalNodeUrl);
+                return Mono.error(new InvalidKeyException("Public key not found for external node: "
+                        + externalNodeUrl));
+            } else {
+                log.debug("ProcessID: {} - Public key successfully checked for external node URL: {}", processId,
+                        externalNodeUrl);
             }
 
             // Convert the hexadecimal public key to ECPublicKey
-            ECPublicKey ecPublicKey = convertHexPublicKeyToECPublicKey(publicKeyHex);
+            log.debug("ProcessID: {} - Converting public key from hex to EC format", processId);
+            ECPublicKey ecPublicKey = convertHexPublicKeyToECPublicKey(processId, publicKeyHex);
 
             ECDSAVerifier verifier = new ECDSAVerifier(ecPublicKey);
             verifier.getJCAContext().setProvider(BouncyCastleProviderSingleton.getInstance());
 
+            log.debug("ProcessID: {} - Parsing and verifying JWT", processId);
             SignedJWT jwt = SignedJWT.parse(jwtString);
+
             boolean verified = jwt.verify(verifier);
             if (verified) {
-                log.info("VERIFIED OK? {}", jwt.verify(verifier));
+                log.info("ProcessID: {} - JWT verification successful for URL: {}", processId, externalNodeUrl);
                 return Mono.just(jwt);
             } else {
-                return Mono.error(new Exception("JWT verification failed"));
+                log.warn("ProcessID: {} - JWT verification failed for URL: {}", processId, externalNodeUrl);
+                return Mono.error(new InvalidKeyException("ProcessID: " + processId +
+                        " - JWT verification failed for external access node: " + externalNodeUrl));
             }
         } catch (Exception e) {
-            log.warn("Error parsing JWT", e);
+            log.warn("ProcessID: {} - Error during JWT validation process: {}", processId, e.getMessage());
             return Mono.error(new InvalidKeyException());
         }
     }
 
-    private String getPublicKeyFromAccessNodeMemory(String origin, Map<String, String> publicKeysByUrl) {
-        log.info("JwtTokenProvider -- Init -- getPublicKeyFromAccessNodeMemory()");
-
+    private String getPublicKeyFromAccessNodeMemory(String processId, String origin, Map<String, String> publicKeysByUrl) {
         if (publicKeysByUrl == null || publicKeysByUrl.isEmpty()) {
-            log.warn("No organizations data available in AccessNodeMemoryStore.");
+            log.warn("ProcessID: {} - No organizations data available in the cached Trusted Access Nodes List.",
+                    processId);
             return null;
         } else {
             var publicKey = publicKeysByUrl.get(origin);
 
             if (publicKey == null) {
-                log.warn("Public key not found for origin: {}", origin);
+                log.warn("ProcessID: {} - Public key not found for external access node: {}", processId, origin);
             }
 
             return publicKey;
         }
     }
 
-    public ECPublicKey convertHexPublicKeyToECPublicKey(String hexPublicKey)
-            throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
+    public ECPublicKey convertHexPublicKeyToECPublicKey(String processId, String hexPublicKey) {
+        try {
+            String replacedPublicKeyHex = hexPublicKey.replace("0x", "");
 
-        String replacedPublicKeyHex = hexPublicKey.replace("0x", "");
+            // Convert the public key from hexadecimal to BigInteger
+            BigInteger publicKeyInt = new BigInteger(replacedPublicKeyHex, 16);
 
-        // Convert the public key from hexadecimal to BigInteger
-        BigInteger publicKeyInt = new BigInteger(replacedPublicKeyHex, 16);
+            // Get the curve specification for secp256r1
+            ECParameterSpec bcEcSpec = ECNamedCurveTable.getParameterSpec("secp256r1");
+            ECCurve bcCurve = bcEcSpec.getCurve();
 
-        // Get the curve specification for secp256r1
-        ECParameterSpec bcEcSpec = ECNamedCurveTable.getParameterSpec("secp256r1");
-        ECCurve bcCurve = bcEcSpec.getCurve();
+            // Convert BigInteger to ECPoint (this is a raw public key)
+            ECPoint q = bcCurve.decodePoint(publicKeyInt.toByteArray());
+            q = q.normalize();  // Ensure the point is normalized
 
-        // Convert BigInteger to ECPoint (this is a raw public key)
-        ECPoint q = bcCurve.decodePoint(publicKeyInt.toByteArray());
-        q = q.normalize();  // Ensure the point is normalized
+            // Convert BouncyCastle ECPoint to standard ECPoint
+            java.security.spec.ECPoint w = new java.security.spec.ECPoint(
+                    q.getAffineXCoord().toBigInteger(),
+                    q.getAffineYCoord().toBigInteger()
+            );
 
-        // Convert BouncyCastle ECPoint to standard ECPoint
-        java.security.spec.ECPoint w = new java.security.spec.ECPoint(
-                q.getAffineXCoord().toBigInteger(),
-                q.getAffineYCoord().toBigInteger()
-        );
+            // Construct the EllipticCurve and ECParameterSpec using Java's standard classes
+            EllipticCurve curve = new EllipticCurve(
+                    new ECFieldFp(bcCurve.getField().getCharacteristic()),
+                    bcCurve.getA().toBigInteger(),
+                    bcCurve.getB().toBigInteger()
+            );
 
-        // Construct the EllipticCurve and ECParameterSpec using Java's standard classes
-        EllipticCurve curve = new EllipticCurve(
-                new ECFieldFp(bcCurve.getField().getCharacteristic()),
-                bcCurve.getA().toBigInteger(),
-                bcCurve.getB().toBigInteger()
-        );
+            java.security.spec.ECParameterSpec ecSpec = new java.security.spec.ECParameterSpec(
+                    curve,
+                    new java.security.spec.ECPoint(
+                            bcEcSpec.getG().getAffineXCoord().toBigInteger(),
+                            bcEcSpec.getG().getAffineYCoord().toBigInteger()
+                    ),
+                    bcEcSpec.getN(),
+                    bcEcSpec.getH().intValue()
+            );
 
-        java.security.spec.ECParameterSpec ecSpec = new java.security.spec.ECParameterSpec(
-                curve,
-                new java.security.spec.ECPoint(
-                        bcEcSpec.getG().getAffineXCoord().toBigInteger(),
-                        bcEcSpec.getG().getAffineYCoord().toBigInteger()
-                ),
-                bcEcSpec.getN(),
-                bcEcSpec.getH().intValue()
-        );
+            // Create the public key from the ECPoint and specification
+            KeyFactory keyFactory = null;
 
-        // Create the public key from the ECPoint and specification
-        KeyFactory keyFactory = KeyFactory.getInstance("EC", "BC");
-        ECPublicKeySpec ecPublicKeySpec = new ECPublicKeySpec(w, ecSpec);
-        return (ECPublicKey) keyFactory.generatePublic(ecPublicKeySpec);
+            keyFactory = KeyFactory.getInstance("EC", "BC");
+            ECPublicKeySpec ecPublicKeySpec = new ECPublicKeySpec(w, ecSpec);
+            return (ECPublicKey) keyFactory.generatePublic(ecPublicKeySpec);
+
+        } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeySpecException e) {
+            log.warn("ProcessID: {} - Error during the hex public key to EC public key conversion: {}", processId, e.getMessage());
+            throw new ConvertPublicKeyFromHexToEcException(e.getMessage());
+        }
     }
 }
