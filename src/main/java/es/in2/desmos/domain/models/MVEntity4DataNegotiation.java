@@ -1,18 +1,20 @@
 package es.in2.desmos.domain.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotBlank;
 
 import java.time.Instant;
 
 public record MVEntity4DataNegotiation(
-        String id,
-        String type,
-        String version,
-        String lastUpdate,
-        String lifecycleStatus,
-        String startDateTime,
-        String hash,
-        String hashlink) {
+        @JsonProperty("id") @NotBlank String id,
+        @JsonProperty("type") @NotBlank String type,
+        @JsonProperty("version") @NotBlank String version,
+        @JsonProperty("lastUpdate") @NotBlank String lastUpdate,
+        @JsonProperty("lifecycleStatus") @NotBlank String lifecycleStatus,
+        @JsonProperty("validFor") @NotBlank String startDateTime,
+        @JsonProperty("hash") @NotBlank String hash,
+        @JsonProperty("hashlink") @NotBlank String hashlink) {
 
     @JsonIgnore
     public Float getFloatVersion() {
