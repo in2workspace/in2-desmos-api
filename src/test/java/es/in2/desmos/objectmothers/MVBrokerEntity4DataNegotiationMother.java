@@ -19,8 +19,8 @@ public final class MVBrokerEntity4DataNegotiationMother {
         List<BrokerEntityWithIdTypeLastUpdateAndVersion> mVEntity4DataNegotiationList = new ArrayList<>();
         var sample3 = MVEntity4DataNegotiationMother.sample3();
         var sample4 = MVEntity4DataNegotiationMother.sample4();
-        mVEntity4DataNegotiationList.add(new BrokerEntityWithIdTypeLastUpdateAndVersion(sample3.id(), sample3.type(), sample3.version(), sample3.lastUpdate(), sample3.lifecycleStatus(), new BrokerEntityValidFor(sample4.validFor())));
-        mVEntity4DataNegotiationList.add(new BrokerEntityWithIdTypeLastUpdateAndVersion(sample4.id(), sample4.type(), sample4.version(), sample4.lastUpdate(), sample4.lifecycleStatus(), new BrokerEntityValidFor(sample4.validFor())));
+        mVEntity4DataNegotiationList.add(new BrokerEntityWithIdTypeLastUpdateAndVersion(sample3.id(), sample3.type(), sample3.version(), sample3.lastUpdate(), sample3.lifecycleStatus(), new BrokerEntityValidFor(sample4.startDateTime())));
+        mVEntity4DataNegotiationList.add(new BrokerEntityWithIdTypeLastUpdateAndVersion(sample4.id(), sample4.type(), sample4.version(), sample4.lastUpdate(), sample4.lifecycleStatus(), new BrokerEntityValidFor(sample4.startDateTime())));
         return mVEntity4DataNegotiationList;
     }
 
@@ -28,8 +28,8 @@ public final class MVBrokerEntity4DataNegotiationMother {
         var category1 = MVEntity4DataNegotiationMother.category1();
         var category2 = MVEntity4DataNegotiationMother.category2();
         return List.of(
-                new BrokerEntityWithIdTypeLastUpdateAndVersion(category1.id(), category1.type(), category1.version(), category1.lastUpdate(), category1.lifecycleStatus(), new BrokerEntityValidFor(category1.validFor())),
-                new BrokerEntityWithIdTypeLastUpdateAndVersion(category2.id(), category2.type(), category2.version(), category2.lastUpdate(), category2.lifecycleStatus(), new BrokerEntityValidFor(category2.validFor()))
+                new BrokerEntityWithIdTypeLastUpdateAndVersion(category1.id(), category1.type(), category1.version(), category1.lastUpdate(), category1.lifecycleStatus(), new BrokerEntityValidFor(category1.startDateTime())),
+                new BrokerEntityWithIdTypeLastUpdateAndVersion(category2.id(), category2.type(), category2.version(), category2.lastUpdate(), category2.lifecycleStatus(), new BrokerEntityValidFor(category2.startDateTime()))
         );
     }
 
@@ -37,8 +37,8 @@ public final class MVBrokerEntity4DataNegotiationMother {
         var catalog1 = MVEntity4DataNegotiationMother.catalog1();
         var catalog2 = MVEntity4DataNegotiationMother.catalog2();
         return List.of(
-                new BrokerEntityWithIdTypeLastUpdateAndVersion(catalog1.id(), catalog1.type(), catalog1.version(), catalog1.lastUpdate(), catalog1.lifecycleStatus(), new BrokerEntityValidFor(catalog1.validFor())),
-                new BrokerEntityWithIdTypeLastUpdateAndVersion(catalog2.id(), catalog2.type(), catalog2.version(), catalog2.lastUpdate(), catalog2.lifecycleStatus(), new BrokerEntityValidFor(catalog2.validFor()))
+                new BrokerEntityWithIdTypeLastUpdateAndVersion(catalog1.id(), catalog1.type(), catalog1.version(), catalog1.lastUpdate(), catalog1.lifecycleStatus(), new BrokerEntityValidFor(catalog1.startDateTime())),
+                new BrokerEntityWithIdTypeLastUpdateAndVersion(catalog2.id(), catalog2.type(), catalog2.version(), catalog2.lastUpdate(), catalog2.lifecycleStatus(), new BrokerEntityValidFor(catalog2.startDateTime()))
         );
     }
 
@@ -55,7 +55,7 @@ public final class MVBrokerEntity4DataNegotiationMother {
                         x.version(),
                         x.lastUpdate(),
                         x.lifecycleStatus(),
-                        new BrokerEntityValidFor(x.validFor())
+                        new BrokerEntityValidFor(x.startDateTime())
                 ))
                 .toList();
     }
