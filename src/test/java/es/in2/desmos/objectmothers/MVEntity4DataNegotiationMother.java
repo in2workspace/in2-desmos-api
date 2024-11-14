@@ -78,6 +78,10 @@ public final class MVEntity4DataNegotiationMother {
         return new MVEntity4DataNegotiation("urn:" + PRODUCT_OFFERING_TYPE_NAME + ":1", PRODUCT_OFFERING_TYPE_NAME, "1.9", "2024-06-02T12:00:00Z", LAUNCHED, VALID_FOR, null, null);
     }
 
+    public static @NotNull MVEntity4DataNegotiation sampleNullValidFor() {
+        return new MVEntity4DataNegotiation("urn:" + PRODUCT_OFFERING_TYPE_NAME + ":1", PRODUCT_OFFERING_TYPE_NAME, "1.9", "2024-06-02T12:00:00Z", LAUNCHED, null, null, null);
+    }
+
     public static @NotNull MVEntity4DataNegotiation sampleIncorrectValidFor() {
         return new MVEntity4DataNegotiation("urn:" + PRODUCT_OFFERING_TYPE_NAME + ":1", PRODUCT_OFFERING_TYPE_NAME, "1.9", "2024-06-02T12:00:00Z", LAUNCHED, "2100-01-01T00:00:00.000Z", null, null);
     }
