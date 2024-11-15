@@ -115,7 +115,11 @@ public class DataNegotiationJobImpl implements DataNegotiationJob {
 
     private Mono<Boolean> isValidFor(Mono<MVEntity4DataNegotiation> mvEntityMono) {
         return mvEntityMono.flatMap(mvEntity -> {
-            ZonedDateTime startDateTime = ZonedDateTime.parse(mvEntity.validFor(), DateTimeFormatter.ISO_DATE_TIME);
+            if (mvEntity.startDateTime() == null) {
+                return Mono.just(true);
+            }
+
+            ZonedDateTime startDateTime = ZonedDateTime.parse(mvEntity.startDateTime(), DateTimeFormatter.ISO_DATE_TIME);
 
             ZonedDateTime now = ZonedDateTime.now();
 

@@ -35,13 +35,13 @@ public final class MVEntity4DataNegotiationMother {
 
     public static @NotNull MVEntity4DataNegotiation sample1BadHash() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         var sample = createSampleWithSameHashAndHashlink(EntityMother.PRODUCT_OFFERING_1);
-        return new MVEntity4DataNegotiation(sample.id(), sample.type(), sample.version(), sample.lastUpdate(), sample.lifecycleStatus(), sample.validFor(), "8ce0461d10e02556d3f16e21c8ac662c037f8b39efd059186b070f9aad8c00f0", null);
+        return new MVEntity4DataNegotiation(sample.id(), sample.type(), sample.version(), sample.lastUpdate(), sample.lifecycleStatus(), sample.startDateTime(), "8ce0461d10e02556d3f16e21c8ac662c037f8b39efd059186b070f9aad8c00f0", null);
     }
 
     public static @NotNull MVEntity4DataNegotiation sample2() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         var sample = createSampleWithSameHashAndHashlink(EntityMother.PRODUCT_OFFERING_2);
         var hashlink = ApplicationUtils.calculateHashLink(sample2VersionOld().hashlink(), sample.hash());
-        return new MVEntity4DataNegotiation(sample.id(), sample.type(), sample.version(), sample.lastUpdate(), sample.lifecycleStatus(), sample.validFor(), sample.hash(), hashlink);
+        return new MVEntity4DataNegotiation(sample.id(), sample.type(), sample.version(), sample.lastUpdate(), sample.lifecycleStatus(), sample.startDateTime(), sample.hash(), hashlink);
     }
 
     public static @NotNull MVEntity4DataNegotiation sample2VersionOld() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
@@ -51,7 +51,7 @@ public final class MVEntity4DataNegotiationMother {
     public static @NotNull MVEntity4DataNegotiation sample3() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         var sample = createSampleWithSameHashAndHashlink(EntityMother.PRODUCT_OFFERING_3);
         var hashlink = ApplicationUtils.calculateHashLink(sample3TimestampOld().hashlink(), sample.hash());
-        return new MVEntity4DataNegotiation(sample.id(), sample.type(), sample.version(), sample.lastUpdate(), sample.lifecycleStatus(), sample.validFor(), sample.hash(), hashlink);
+        return new MVEntity4DataNegotiation(sample.id(), sample.type(), sample.version(), sample.lastUpdate(), sample.lifecycleStatus(), sample.startDateTime(), sample.hash(), hashlink);
     }
 
     public static @NotNull MVEntity4DataNegotiation sample3TimestampOld() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
@@ -76,6 +76,10 @@ public final class MVEntity4DataNegotiationMother {
 
     public static @NotNull MVEntity4DataNegotiation sampleCorrectValidFor() {
         return new MVEntity4DataNegotiation("urn:" + PRODUCT_OFFERING_TYPE_NAME + ":1", PRODUCT_OFFERING_TYPE_NAME, "1.9", "2024-06-02T12:00:00Z", LAUNCHED, VALID_FOR, null, null);
+    }
+
+    public static @NotNull MVEntity4DataNegotiation sampleNullValidFor() {
+        return new MVEntity4DataNegotiation("urn:" + PRODUCT_OFFERING_TYPE_NAME + ":1", PRODUCT_OFFERING_TYPE_NAME, "1.9", "2024-06-02T12:00:00Z", LAUNCHED, null, null, null);
     }
 
     public static @NotNull MVEntity4DataNegotiation sampleIncorrectValidFor() {

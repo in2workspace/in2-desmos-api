@@ -168,7 +168,9 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                                                             mvBrokerEntity.getVersion(),
                                                             mvBrokerEntity.getLastUpdate(),
                                                             mvBrokerEntity.getLifecycleStatus(),
-                                                            mvBrokerEntity.getValidFor().startDateTime(),
+                                                            mvBrokerEntity.getValidFor() != null
+                                                                    ? mvBrokerEntity.getValidFor().startDateTime()
+                                                                    : null,
                                                             mvAuditEntity.hash(),
                                                             mvAuditEntity.hashlink()
                                                     );
