@@ -1,9 +1,7 @@
 name: Pull Request Stats
-
 on:
   pull_request:
-    types: [opened]
-
+    types: [ opened ]
 jobs:
   stats:
     runs-on: ubuntu-latest
@@ -12,8 +10,10 @@ jobs:
         uses: flowwer-dev/pull-request-stats@master
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          organization: 'in2workspace'
+          repositories: 'in2workspace/in2-desmos-api'
+#          organization: 'in2workspace'
           period: 7
           charts: true
           disableLinks: true
           sortBy: 'COMMENTS'
+          publishAs: 'DESCRIPTION'
