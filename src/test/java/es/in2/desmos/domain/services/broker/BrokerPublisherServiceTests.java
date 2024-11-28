@@ -145,6 +145,48 @@ class BrokerPublisherServiceTests {
                 .verifyComplete();
     }
 
+    @Test
+    void itShouldFindTheEntityAndItsSubEntities() throws JSONException, JsonProcessingException {
+        String processId = "0";
+        Mono<List<Id>> idsMono = Mono.just(Arrays.stream(IdMother.firstIdEntityRequest).toList());
+
+        String brokerJson = BrokerDataMother.GET_ENTITY_REQUEST_BROKER_JSON;
+
+        JSONArray expectedResponseJsonArray = new JSONArray(brokerJson);
+        List<String> localEntities = new ArrayList<>();
+        localEntities.add(expectedResponseJsonArray.getString(0));
+        localEntities.add(expectedResponseJsonArray.getString(5));
+        localEntities.add(expectedResponseJsonArray.getString(10));
+
+        JsonNode rootEntityJsonNode = objectMapper.readValue(brokerJson, JsonNode.class);
+        when(brokerAdapterService.getEntityById(eq(processId), any())).thenAnswer(invocation -> {
+            String entityId = invocation.getArgument(1);
+            for (JsonNode rootEntityNodeChildren : rootEntityJsonNode) {
+                if (rootEntityNodeChildren.has("id") && rootEntityNodeChildren.get("id").asText().equals(entityId)) {
+                    return Mono.just(rootEntityNodeChildren.toString());
+                }
+            }
+            return Mono.empty();
+        });
+
+
+        var resultMono = brokerPublisherService.findAllById(processId, idsMono, new ArrayList<>());
+
+        StepVerifier
+                .create(resultMono)
+                .consumeNextWith(result -> {
+                    try {
+                        String localEntitiesJson = getJsonNodeFromStringsList(localEntities).toString();
+                        String resultJson = getJsonNodeFromStringsList(result).toString();
+
+                        JSONAssert.assertEquals(localEntitiesJson, resultJson, false);
+                    } catch (JsonProcessingException | JSONException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .verifyComplete();
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {
             BrokerDataMother.GET_ENTITY_REQUEST_BROKER_NO_TYPE_JSON,

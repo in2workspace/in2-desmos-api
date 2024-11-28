@@ -1,11 +1,9 @@
 package es.in2.desmos.infrastructure.controllers;
 
-import es.in2.desmos.domain.services.broker.BrokerListenerService;
+import es.in2.desmos.domain.services.broker.BrokerPublisherService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
@@ -15,12 +13,13 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class EntitiesController {
 
-    private final BrokerListenerService brokerListenerService;
+    private final BrokerPublisherService brokerPublisherService;
 
     @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
     public Mono<String> getEntities(@PathVariable String id) {
         String processId = UUID.randomUUID().toString();
-        return brokerListenerService.getEntityById(processId, id);
+        return brokerPublisherService.getEntityById(processId, id);
     }
 
 }
