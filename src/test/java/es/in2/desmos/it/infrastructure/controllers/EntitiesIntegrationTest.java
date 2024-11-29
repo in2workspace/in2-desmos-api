@@ -3,6 +3,7 @@ package es.in2.desmos.it.infrastructure.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import es.in2.desmos.domain.models.Entity;
@@ -117,11 +118,11 @@ public class EntitiesIntegrationTest {
     }
 
     private JsonNode getJsonNodeFromStringsList(List<String> localEntities) throws JsonProcessingException {
-        List<JsonObject> localEntitiesObjects = new ArrayList<>();
+        ArrayNode arrayNode = objectMapper.createArrayNode();
         for (var entity : localEntities) {
-            localEntitiesObjects.add(JsonParser.parseString(entity).getAsJsonObject());
+            arrayNode.add(objectMapper.readTree(entity));
         }
-
-        return objectMapper.readTree(localEntitiesObjects.toString());
+        return arrayNode;
     }
+
 }
