@@ -4,8 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import es.in2.desmos.domain.models.Entity;
 import es.in2.desmos.domain.utils.Base64Converter;
 import es.in2.desmos.inflators.ScorpioInflator;
@@ -47,14 +45,14 @@ public class EntitiesIntegrationTest {
 
     private WebTestClient webTestClient;
 
+    private static final String brokerEntitiesJson =
+            BrokerDataMother.GET_ENTITY_REQUEST_WITH_SUB_ENTITIES_ARRAY_JSON_VARIABLE;
+
     private static final List<String> brokerEntitiesIds = List.of(
             BrokerDataMother.GET_ENTITY_REQUEST_ENTITY_ID,
             BrokerDataMother.GET_ENTITY_REQUEST_SUBENTITY_1_ID,
             BrokerDataMother.GET_ENTITY_REQUEST_SUBENTITY_2_ID
     );
-
-    private static final String brokerEntitiesJson =
-            BrokerDataMother.GET_ENTITY_REQUEST_WITH_SUB_ENTITIES_ARRAY_JSON_VARIABLE;
 
     @BeforeAll
     static void setup() {
@@ -74,17 +72,14 @@ public class EntitiesIntegrationTest {
     @AfterAll
     static void tearDown() {
         String brokerUrl = ContainerManager.getBaseUriForScorpioA();
-
         ScorpioInflator.deleteInitialEntitiesFromContextBroker(brokerUrl, brokerEntitiesIds);
     }
 
     @Test
     void test() throws JSONException, JsonProcessingException {
-        JSONArray expectedResponseJsonArray = new JSONArray(brokerEntitiesJson);
         List<String> expectedBrokerEntities = new ArrayList<>();
-        for (int i = 0; i < expectedResponseJsonArray.length(); i++) {
-            String entity = expectedResponseJsonArray.getString(i);
-            expectedBrokerEntities.add(entity);
+        for (int i = 0; i < new JSONArray(brokerEntitiesJson).length(); i++) {
+            expectedBrokerEntities.add(new JSONArray(brokerEntitiesJson).getString(i));
         }
 
         String expectedEntitiesJson = getJsonNodeFromStringsList(expectedBrokerEntities).toString();
@@ -97,9 +92,9 @@ public class EntitiesIntegrationTest {
                 .expectBodyList(Entity.class)
                 .consumeWith(response -> {
                     try {
-                        List<Entity> entitiesResponse = response.getResponseBody();
                         String actualEntitiesJson = getJsonNodeFromEntitiesBase64List(
-                                Objects.requireNonNull(entitiesResponse)).toString();
+                                Objects.requireNonNull(response.getResponseBody())
+                        ).toString();
 
                         JSONAssert.assertEquals(expectedEntitiesJson, actualEntitiesJson, false);
                     } catch (JsonProcessingException | JSONException e) {
