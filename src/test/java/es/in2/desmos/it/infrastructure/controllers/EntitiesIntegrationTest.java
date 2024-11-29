@@ -109,12 +109,11 @@ public class EntitiesIntegrationTest {
     }
 
     private JsonNode getJsonNodeFromEntitiesBase64List(List<Entity> localEntities) throws JsonProcessingException {
-        List<String> stringList = localEntities
-                .stream()
-                .map(entity -> Base64Converter.convertBase64ToString(entity.value()))
-                .toList();
-
-        return getJsonNodeFromStringsList(stringList);
+        return getJsonNodeFromStringsList(
+                localEntities.stream()
+                        .map(entity -> Base64Converter.convertBase64ToString(entity.value()))
+                        .toList()
+        );
     }
 
     private JsonNode getJsonNodeFromStringsList(List<String> localEntities) throws JsonProcessingException {
