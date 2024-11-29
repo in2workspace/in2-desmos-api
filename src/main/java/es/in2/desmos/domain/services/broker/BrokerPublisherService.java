@@ -2,6 +2,7 @@ package es.in2.desmos.domain.services.broker;
 
 import es.in2.desmos.domain.models.BlockchainNotification;
 import es.in2.desmos.domain.models.BrokerEntityWithIdAndType;
+import es.in2.desmos.domain.models.Entity;
 import es.in2.desmos.domain.models.Id;
 import reactor.core.publisher.Mono;
 
@@ -13,7 +14,7 @@ public interface BrokerPublisherService {
 
     <T extends BrokerEntityWithIdAndType> Mono<List<T>> findAllIdTypeAndAttributesByType(String processId, String type, String firstAttribute, String secondAttribute, String thirdAttribute, String forthAttribute, Class<T[]> responseClassArray);
 
-    Mono<List<String>> findAllById(String processId, Mono<List<Id>> ids, List<Id> processedEntities);
+    Mono<List<Entity>> findEntitiesAndItsSubentitiesByIdInBase64(String processId, Mono<List<Id>> idsMono, List<Id> processedEntities);
 
     Mono<String> getEntityById(String processId, String entityId);
 

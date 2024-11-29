@@ -1,11 +1,15 @@
 package es.in2.desmos.infrastructure.controllers;
 
+import es.in2.desmos.domain.models.Entity;
+import es.in2.desmos.domain.models.Id;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -17,9 +21,12 @@ public class EntitiesController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Mono<String> getEntities(@PathVariable String id) {
+    public Mono<List<Entity>> getEntities(@PathVariable String id) {
         String processId = UUID.randomUUID().toString();
-        return brokerPublisherService.getEntityById(processId, id);
-    }
 
+        Mono<List<Id>> idsListMono = Mono.just(List.of(new Id(id)));
+
+        return brokerPublisherService
+                .findEntitiesAndItsSubentitiesByIdInBase64(processId, idsListMono, new ArrayList<>());
+    }
 }
