@@ -6,10 +6,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import es.in2.desmos.domain.models.BlockchainNotification;
+import es.in2.desmos.domain.models.Entity;
 import es.in2.desmos.domain.models.Id;
 import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import es.in2.desmos.domain.services.broker.adapter.factory.BrokerAdapterFactory;
 import es.in2.desmos.domain.services.broker.impl.BrokerPublisherServiceImpl;
+import es.in2.desmos.domain.utils.Base64Converter;
 import es.in2.desmos.objectmothers.BrokerDataMother;
 import es.in2.desmos.objectmothers.IdMother;
 import org.json.JSONArray;
@@ -116,6 +118,10 @@ class BrokerPublisherServiceTests {
             String entity = expectedResponseJsonArray.getString(i);
             localEntities.add(entity);
         }
+
+        List<Entity> base64LocalEntities = Base64Converter.convertStringListToBase64List(localEntities)
+                .stream().map(Entity::new).toList();
+
         JsonNode rootEntityJsonNode = objectMapper.readValue(brokerJson, JsonNode.class);
         when(brokerAdapterService.getEntityById(eq(processId), any())).thenAnswer(invocation -> {
             String entityId = invocation.getArgument(1);
@@ -128,14 +134,14 @@ class BrokerPublisherServiceTests {
         });
 
 
-        var resultMono = brokerPublisherService.findAllById(processId, idsMono, new ArrayList<>());
+        var resultMono = brokerPublisherService.findEntitiesAndItsSubentitiesByIdInBase64(processId, idsMono, new ArrayList<>());
 
         StepVerifier
                 .create(resultMono)
                 .consumeNextWith(result -> {
                     try {
-                        String localEntitiesJson = getJsonNodeFromStringsList(localEntities).toString();
-                        String resultJson = getJsonNodeFromStringsList(result).toString();
+                        String localEntitiesJson = getJsonNodeFromEntitiesBase64List(base64LocalEntities).toString();
+                        String resultJson = getJsonNodeFromEntitiesBase64List(result).toString();
 
                         JSONAssert.assertEquals(localEntitiesJson, resultJson, false);
                     } catch (JsonProcessingException | JSONException e) {
@@ -170,14 +176,14 @@ class BrokerPublisherServiceTests {
         });
 
 
-        var resultMono = brokerPublisherService.findAllById(processId, idsMono, new ArrayList<>());
+        var resultMono = brokerPublisherService.findEntitiesAndItsSubentitiesByIdInBase64(processId, idsMono, new ArrayList<>());
 
         StepVerifier
                 .create(resultMono)
                 .consumeNextWith(result -> {
                     try {
                         String localEntitiesJson = getJsonNodeFromStringsList(localEntities).toString();
-                        String resultJson = getJsonNodeFromStringsList(result).toString();
+                        String resultJson = getJsonNodeFromEntitiesBase64List(result).toString();
 
                         JSONAssert.assertEquals(localEntitiesJson, resultJson, false);
                     } catch (JsonProcessingException | JSONException e) {
@@ -222,14 +228,14 @@ class BrokerPublisherServiceTests {
         });
 
 
-        var resultMono = brokerPublisherService.findAllById(processId, idsMono, new ArrayList<>());
+        var resultMono = brokerPublisherService.findEntitiesAndItsSubentitiesByIdInBase64(processId, idsMono, new ArrayList<>());
 
         StepVerifier
                 .create(resultMono)
                 .consumeNextWith(result -> {
                     try {
                         String localEntitiesJson = getJsonNodeFromStringsList(localEntities).toString();
-                        String resultJson = getJsonNodeFromStringsList(result).toString();
+                        String resultJson = getJsonNodeFromEntitiesBase64List(result).toString();
 
                         JSONAssert.assertEquals(localEntitiesJson, resultJson, false);
                     } catch (JsonProcessingException | JSONException e) {
@@ -252,7 +258,7 @@ class BrokerPublisherServiceTests {
         when(brokerAdapterService.getEntityById(eq(processId), any())).thenReturn(Mono.just(brokerJson));
 
 
-        var resultMono = brokerPublisherService.findAllById(processId, idsMono, new ArrayList<>());
+        var resultMono = brokerPublisherService.findEntitiesAndItsSubentitiesByIdInBase64(processId, idsMono, new ArrayList<>());
 
         StepVerifier.
                 create(resultMono)
@@ -267,5 +273,14 @@ class BrokerPublisherServiceTests {
         }
 
         return objectMapper.readTree(localEntitiesObjects.toString());
+    }
+
+    private JsonNode getJsonNodeFromEntitiesBase64List(List<Entity> localEntities) throws JsonProcessingException {
+        List<String> stringList = localEntities
+                .stream()
+                .map(entity -> Base64Converter.convertBase64ToString(entity.value()))
+                .toList();
+
+        return getJsonNodeFromStringsList(stringList);
     }
 }
