@@ -6,6 +6,7 @@ import es.in2.desmos.domain.services.broker.BrokerPublisherService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
@@ -21,12 +22,13 @@ public class EntitiesController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Mono<List<Entity>> getEntities(@PathVariable String id) {
+    public Flux<Entity> getEntities(@PathVariable String id) {
         String processId = UUID.randomUUID().toString();
 
         Mono<List<Id>> idsListMono = Mono.just(List.of(new Id(id)));
 
         return brokerPublisherService
-                .findEntitiesAndItsSubentitiesByIdInBase64(processId, idsListMono, new ArrayList<>());
+                .findEntitiesAndItsSubentitiesByIdInBase64(processId, idsListMono, new ArrayList<>())
+                .flatMapMany(Flux::fromIterable);
     }
 }

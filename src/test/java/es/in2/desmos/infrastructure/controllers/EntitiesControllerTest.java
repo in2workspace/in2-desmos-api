@@ -30,7 +30,9 @@ class EntitiesControllerTest {
     @Test
     void testGetEntitiesSuccess() {
         Mono<List<Id>> entitiesIdsMono = Mono.just(List.of(new Id("123")));
-        List<Entity> expectedEntitiesList = List.of(new Entity("Entity details"));
+        List<Entity> expectedEntitiesList = List.of(
+                new Entity("Entity details"),
+                new Entity("Entity details 2"));
         when(brokerPublisherService.findEntitiesAndItsSubentitiesByIdInBase64(anyString(), any(), any()))
                 .thenReturn(Mono.just(expectedEntitiesList));
 

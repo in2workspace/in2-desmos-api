@@ -168,6 +168,39 @@ public final class BrokerDataMother {
                         }
                     ]""";
 
+    public final static String GET_ENTITY_REQUEST_ENTITY_ID =
+            "urn:productOffering:06f56a54-9be9-4d45-bae7-2a036b721d27";
+    public final static String GET_ENTITY_REQUEST_SUBENTITY_1_ID =
+            "urn:category:ebdaf266-c967-43bc-a469-c6b6498facff";
+    public final static String GET_ENTITY_REQUEST_SUBENTITY_2_ID =
+            "urn:category:363a79ba-38ed-48c4-978c-131521b943ef";
+
+    public static final String GET_ENTITY_REQUEST_WITH_SUB_ENTITIES_ARRAY_JSON_VARIABLE = String.format("""
+                    [
+                        {
+                            "id": "%1$s",
+                            "type": "productOffering",
+                            "category": [
+                                 {
+                                     "type": "Relationship",
+                                     "object": "%2$s"
+                                 },
+                                 {
+                                     "type": "Relationship",
+                                     "object": "%3$s"
+                                 }
+                            ]
+                        },
+                        {
+                            "id": "%2$s",
+                            "type": "category"
+                        },
+                        {
+                            "id": "%3$s",
+                            "type": "category"
+                        }
+                    ]""", GET_ENTITY_REQUEST_ENTITY_ID, GET_ENTITY_REQUEST_SUBENTITY_1_ID, GET_ENTITY_REQUEST_SUBENTITY_2_ID);
+
     public static final String GET_ENTITY_REQUEST_WITH_SUB_ENTITIES_ARRAY_WITH_PROPERTY_JSON =
             """
                     [
