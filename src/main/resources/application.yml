@@ -125,4 +125,4 @@ access-node:
   trustedAccessNodesList: "https://raw.githubusercontent.com/DOME-Marketplace/trust-framework/refs/heads/main/sbx/trusted_access_nodes_list.yaml"
 
 external-access-nodes:
-  urls: "https://desmos.dome-marketplace-sbx.org"
+  urls: ""
