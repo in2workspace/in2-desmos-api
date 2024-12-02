@@ -8,6 +8,7 @@ import es.in2.desmos.domain.models.BlockchainNotification;
 import es.in2.desmos.domain.models.Entity;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.sync.services.impl.DataSyncServiceImpl;
+import es.in2.desmos.domain.utils.Base64Converter;
 import es.in2.desmos.infrastructure.configs.ApiConfig;
 import es.in2.desmos.infrastructure.security.JwtTokenProvider;
 import org.junit.jupiter.api.Test;
@@ -26,9 +27,11 @@ import reactor.test.StepVerifier;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -157,7 +160,10 @@ class DataSyncServiceImplTests {
     @Test
     void getEntityFromExternalSource() {
         //Arrange
-        String mockResponse = "{ \"id\": \"urn:ngsi-ld:ProductOffering:38088145-aef3-440e-ab93-a33bc9bfce69\" }";
+        String mockResponse = Base64Converter
+                .convertStringListToBase64List(
+                        List.of("{ \"id\": \"urn:ngsi-ld:ProductOffering:38088145-aef3-440e-ab93-a33bc9bfce69\" }"))
+                .get(0);
         Flux<Entity> monoMockResponse = Flux.just(new Entity(mockResponse));
 
         when(apiConfig.webClient()).thenReturn(webClientMock);
@@ -175,16 +181,17 @@ class DataSyncServiceImplTests {
 
         //Assert
         StepVerifier.create(result)
-                .expectNextMatches(entity ->
-                        entity
-                                .contains("urn:ngsi-ld:ProductOffering:38088145-aef3-440e-ab93-a33bc9bfce69"))
+                .assertNext(entity -> assertThat(entity).isEqualTo(Base64Converter.convertBase64ToString(mockResponse)))
                 .verifyComplete();
     }
 
     @Test
     void getEntityFromExternalSource_WhenStatusIs200() {
         //Arrange
-        String mockResponse = "{ \"id\": \"urn:ngsi-ld:ProductOffering:38088145-aef3-440e-ab93-a33bc9bfce69\" }";
+        String mockResponse = Base64Converter
+                .convertStringListToBase64List(
+                        List.of("{ \"id\": \"urn:ngsi-ld:ProductOffering:38088145-aef3-440e-ab93-a33bc9bfce69\" }"))
+                .get(0);
         Flux<Entity> monoMockResponse = Flux.just(new Entity(mockResponse));
 
         when(apiConfig.webClient()).thenReturn(webClientMock);
@@ -206,11 +213,11 @@ class DataSyncServiceImplTests {
         });
 
         //Act
-        Flux<String> result = dataSyncService.getEntityFromExternalSource("processId", notification);
+        Flux<String> resultFlux = dataSyncService.getEntityFromExternalSource("processId", notification);
 
         //Assert
-        StepVerifier.create(result)
-                .expectNext(mockResponse)
+        StepVerifier.create(resultFlux)
+                .assertNext(result-> assertThat(result).isEqualTo(Base64Converter.convertBase64ToString(mockResponse)))
                 .verifyComplete();
 
         verify(webClientResponseSpecMock, times(3)).onStatus(any(), any());
