@@ -56,13 +56,14 @@ public class SubscribeWorkflowImpl implements SubscribeWorkflow {
                                                                 // Build and save the audit record for PUBLISHED status
                                                                 .then(auditRecordService.buildAndSaveAuditRecordFromBlockchainNotification(processId, blockchainNotification, retrievedBrokerEntity, AuditRecordStatus.PUBLISHED))
                                                 )
-                                )
-                                .doOnSuccess(success -> log.info("ProcessID: {} - Subscribe Workflow completed successfully.", processId))
-                                .onErrorResume(error ->
-                                        Mono.just(error)
-                                                .doOnNext(errorObject ->
-                                                        log.error("ProcessID: {} - Error occurred while processing the Subscribe Workflow: {}", processId, errorObject.getMessage()))
-                                                .then(Mono.empty())));
+                                                .collectList()
+                                                .then()
+                                                .doOnSuccess(success -> log.info("ProcessID: {} - Subscribe Workflow completed successfully.", processId))
+                                                .onErrorResume(error ->
+                                                        Mono.just(error)
+                                                                .doOnNext(errorObject ->
+                                                                        log.error("ProcessID: {} - Error occurred while processing the Subscribe Workflow: {}", processId, errorObject.getMessage()))
+                                                                .then(Mono.empty()))
+                                ));
     }
-
 }

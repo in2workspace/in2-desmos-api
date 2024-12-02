@@ -1,11 +1,11 @@
 package es.in2.desmos.domain.services.sync.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.domain.exceptions.BrokerEntityRetrievalException;
 import es.in2.desmos.domain.exceptions.HashLinkException;
 import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.AuditRecordStatus;
 import es.in2.desmos.domain.models.BlockchainNotification;
+import es.in2.desmos.domain.models.Entity;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.sync.services.impl.DataSyncServiceImpl;
 import es.in2.desmos.infrastructure.configs.ApiConfig;
@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -95,8 +96,6 @@ class DataSyncServiceImplTests {
     @Mock
     private ApiConfig apiConfig;
     @Mock
-    private ObjectMapper objectMapper;
-    @Mock
     private AuditRecordService auditRecordService;
     @Mock
     private WebClient webClientMock;
@@ -159,7 +158,7 @@ class DataSyncServiceImplTests {
     void getEntityFromExternalSource() {
         //Arrange
         String mockResponse = "{ \"id\": \"urn:ngsi-ld:ProductOffering:38088145-aef3-440e-ab93-a33bc9bfce69\" }";
-        Mono<String> monoMockResponse = Mono.just(mockResponse);
+        Flux<Entity> monoMockResponse = Flux.just(new Entity(mockResponse));
 
         when(apiConfig.webClient()).thenReturn(webClientMock);
         when(apiConfig.getExternalDomain()).thenReturn("http://my-domain.org");
@@ -169,16 +168,16 @@ class DataSyncServiceImplTests {
         when(webClientRequestHeadersSpecMock.header(anyString(), anyString())).thenReturn(webClientRequestHeadersSpecMock);
         when(webClientRequestHeadersSpecMock.retrieve()).thenReturn(webClientResponseSpecMock);
         when(webClientResponseSpecMock.onStatus(any(), any())).thenReturn(webClientResponseSpecMock);
-        when(webClientResponseSpecMock.bodyToMono(String.class)).thenReturn(monoMockResponse);
+        when(webClientResponseSpecMock.bodyToFlux(Entity.class)).thenReturn(monoMockResponse);
 
         //Act
-        Mono<String> result = dataSyncService.getEntityFromExternalSource("processId", notification);
+        Flux<String> result = dataSyncService.getEntityFromExternalSource("processId", notification);
 
         //Assert
         StepVerifier.create(result)
-                .expectNextMatches(entity -> {
-                    return entity.contains("urn:ngsi-ld:ProductOffering:38088145-aef3-440e-ab93-a33bc9bfce69");
-                })
+                .expectNextMatches(entity ->
+                        entity
+                                .contains("urn:ngsi-ld:ProductOffering:38088145-aef3-440e-ab93-a33bc9bfce69"))
                 .verifyComplete();
     }
 
@@ -186,7 +185,7 @@ class DataSyncServiceImplTests {
     void getEntityFromExternalSource_WhenStatusIs200() {
         //Arrange
         String mockResponse = "{ \"id\": \"urn:ngsi-ld:ProductOffering:38088145-aef3-440e-ab93-a33bc9bfce69\" }";
-        Mono<String> monoMockResponse = Mono.just(mockResponse);
+        Flux<Entity> monoMockResponse = Flux.just(new Entity(mockResponse));
 
         when(apiConfig.webClient()).thenReturn(webClientMock);
         when(apiConfig.getExternalDomain()).thenReturn("http://my-domain.org");
@@ -196,7 +195,7 @@ class DataSyncServiceImplTests {
         when(webClientRequestHeadersSpecMock.header(anyString(), anyString())).thenReturn(webClientRequestHeadersSpecMock);
         when(webClientRequestHeadersSpecMock.retrieve()).thenReturn(webClientResponseSpecMock);
         when(webClientResponseSpecMock.onStatus(any(), any())).thenReturn(webClientResponseSpecMock);
-        when(webClientResponseSpecMock.bodyToMono(String.class)).thenReturn(monoMockResponse);
+        when(webClientResponseSpecMock.bodyToFlux(Entity.class)).thenReturn(monoMockResponse);
         when(webClientResponseSpecMock.onStatus(argThat(predicate -> predicate.test(HttpStatus.OK)), any())).thenAnswer(invocation -> {
 
             Function<ClientResponse, Mono<Void>> function = invocation.getArgument(1);
@@ -207,7 +206,7 @@ class DataSyncServiceImplTests {
         });
 
         //Act
-        Mono<String> result = dataSyncService.getEntityFromExternalSource("processId", notification);
+        Flux<String> result = dataSyncService.getEntityFromExternalSource("processId", notification);
 
         //Assert
         StepVerifier.create(result)
@@ -236,7 +235,7 @@ class DataSyncServiceImplTests {
             return webClientResponseSpecMock;
         });
 
-        when(webClientResponseSpecMock.bodyToMono(String.class)).thenThrow(new BrokerEntityRetrievalException("Error occurred while retrieving entity from the external broker"));
+        when(webClientResponseSpecMock.bodyToFlux(Entity.class)).thenThrow(new BrokerEntityRetrievalException("Error occurred while retrieving entity from the external broker"));
 
         //Act & Assert
         assertThrows(BrokerEntityRetrievalException.class, () -> {
@@ -263,12 +262,10 @@ class DataSyncServiceImplTests {
             return webClientResponseSpecMock;
         });
 
-        when(webClientResponseSpecMock.bodyToMono(String.class)).thenThrow(new BrokerEntityRetrievalException("Error occurred while retrieving entity from the external broker"));
+        when(webClientResponseSpecMock.bodyToFlux(Entity.class)).thenThrow(new BrokerEntityRetrievalException("Error occurred while retrieving entity from the external broker"));
 
         //Act & Assert
-        assertThrows(BrokerEntityRetrievalException.class, () -> {
-            dataSyncService.getEntityFromExternalSource("processId", notification);
-        });
+        assertThrows(BrokerEntityRetrievalException.class, () -> dataSyncService.getEntityFromExternalSource("processId", notification));
     }
 
 }

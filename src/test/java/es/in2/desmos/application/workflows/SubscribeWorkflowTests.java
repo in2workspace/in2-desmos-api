@@ -70,7 +70,7 @@ class SubscribeWorkflowTests {
         when(eventQueueMock.getEvent().get(0))
                 .thenReturn(List.of(blockchainNotification));
         when(dataSyncService.getEntityFromExternalSource(processId, blockchainNotification))
-                .thenReturn(Mono.just(retrievedBrokerEntity));
+                .thenReturn(Flux.just(retrievedBrokerEntity));
         when(dataSyncService.verifyRetrievedEntityData(processId, blockchainNotification, retrievedBrokerEntity))
                 .thenReturn(Mono.empty());
         when(auditRecordService.buildAndSaveAuditRecordFromBlockchainNotification(processId, blockchainNotification, retrievedBrokerEntity, AuditRecordStatus.RETRIEVED))
