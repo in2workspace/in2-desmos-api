@@ -12,6 +12,7 @@ import es.in2.desmos.domain.models.Entity;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.api.QueueService;
 import es.in2.desmos.domain.services.sync.services.DataSyncService;
+import es.in2.desmos.domain.utils.Base64Converter;
 import es.in2.desmos.infrastructure.configs.ApiConfig;
 import es.in2.desmos.infrastructure.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -104,7 +105,8 @@ public class DataSyncServiceImpl implements DataSyncService {
                             throw new BrokerEntityRetrievalException("Error occurred while retrieving entity from the external broker");
                         })
                 .bodyToFlux(Entity.class)
-                .map(Entity::value);
+                .map(Entity::value)
+                .map(Base64Converter::convertBase64ToString);
     }
 
     @Override
