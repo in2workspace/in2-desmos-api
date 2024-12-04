@@ -9,6 +9,7 @@ import org.json.JSONObject;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -17,7 +18,8 @@ import java.util.UUID;
 public final class MVEntity4DataNegotiationMother {
 
     public static final String LAUNCHED = "Launched";
-    public static final String VALID_FOR = "2024-01-01T00:00:00.000Z";
+    public static final String START_DATE_TIME = "2024-01-01T00:00:00.000Z";
+    public static final String END_DATE_TIME = "9999-01-01T00:00:00.000Z";
     public static final String PRODUCT_OFFERING_TYPE_NAME = "product-offering";
     public static final String CATEGORY_TYPE_NAME = "category";
     public static final String CATALOG_TYPE_NAME = "catalog";
@@ -35,13 +37,13 @@ public final class MVEntity4DataNegotiationMother {
 
     public static @NotNull MVEntity4DataNegotiation sample1BadHash() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         var sample = createSampleWithSameHashAndHashlink(EntityMother.PRODUCT_OFFERING_1);
-        return new MVEntity4DataNegotiation(sample.id(), sample.type(), sample.version(), sample.lastUpdate(), sample.lifecycleStatus(), sample.startDateTime(), "8ce0461d10e02556d3f16e21c8ac662c037f8b39efd059186b070f9aad8c00f0", null);
+        return new MVEntity4DataNegotiation(sample.id(), sample.type(), sample.version(), sample.lastUpdate(), sample.lifecycleStatus(), sample.startDateTime(), sample.endDateTime(), "8ce0461d10e02556d3f16e21c8ac662c037f8b39efd059186b070f9aad8c00f0", null);
     }
 
     public static @NotNull MVEntity4DataNegotiation sample2() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         var sample = createSampleWithSameHashAndHashlink(EntityMother.PRODUCT_OFFERING_2);
         var hashlink = ApplicationUtils.calculateHashLink(sample2VersionOld().hashlink(), sample.hash());
-        return new MVEntity4DataNegotiation(sample.id(), sample.type(), sample.version(), sample.lastUpdate(), sample.lifecycleStatus(), sample.startDateTime(), sample.hash(), hashlink);
+        return new MVEntity4DataNegotiation(sample.id(), sample.type(), sample.version(), sample.lastUpdate(), sample.lifecycleStatus(), sample.startDateTime(), sample.endDateTime(), sample.hash(), hashlink);
     }
 
     public static @NotNull MVEntity4DataNegotiation sample2VersionOld() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
@@ -51,7 +53,7 @@ public final class MVEntity4DataNegotiationMother {
     public static @NotNull MVEntity4DataNegotiation sample3() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         var sample = createSampleWithSameHashAndHashlink(EntityMother.PRODUCT_OFFERING_3);
         var hashlink = ApplicationUtils.calculateHashLink(sample3TimestampOld().hashlink(), sample.hash());
-        return new MVEntity4DataNegotiation(sample.id(), sample.type(), sample.version(), sample.lastUpdate(), sample.lifecycleStatus(), sample.startDateTime(), sample.hash(), hashlink);
+        return new MVEntity4DataNegotiation(sample.id(), sample.type(), sample.version(), sample.lastUpdate(), sample.lifecycleStatus(), sample.startDateTime(), sample.endDateTime(), sample.hash(), hashlink);
     }
 
     public static @NotNull MVEntity4DataNegotiation sample3TimestampOld() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
@@ -63,43 +65,43 @@ public final class MVEntity4DataNegotiationMother {
     }
 
     public static @NotNull MVEntity4DataNegotiation sampleLaunched() {
-        return new MVEntity4DataNegotiation("urn:" + PRODUCT_OFFERING_TYPE_NAME + ":1", PRODUCT_OFFERING_TYPE_NAME, "1.9", "2024-06-02T12:00:00Z", LAUNCHED, VALID_FOR, null, null);
+        return new MVEntity4DataNegotiation("urn:" + PRODUCT_OFFERING_TYPE_NAME + ":1", PRODUCT_OFFERING_TYPE_NAME, "1.9", "2024-06-02T12:00:00Z", LAUNCHED, START_DATE_TIME, END_DATE_TIME, null, null);
     }
 
     public static @NotNull MVEntity4DataNegotiation sampleRetired() {
-        return new MVEntity4DataNegotiation("urn:" + PRODUCT_OFFERING_TYPE_NAME + ":2", PRODUCT_OFFERING_TYPE_NAME, "1.9", "2024-06-02T12:00:00Z", "Retired", VALID_FOR, null, null);
+        return new MVEntity4DataNegotiation("urn:" + PRODUCT_OFFERING_TYPE_NAME + ":2", PRODUCT_OFFERING_TYPE_NAME, "1.9", "2024-06-02T12:00:00Z", "Retired", START_DATE_TIME, END_DATE_TIME, null, null);
     }
 
     public static @NotNull MVEntity4DataNegotiation sampleActive() {
-        return new MVEntity4DataNegotiation("urn:" + PRODUCT_OFFERING_TYPE_NAME + ":2", PRODUCT_OFFERING_TYPE_NAME, "1.9", "2024-06-02T12:00:00Z", "Active", VALID_FOR, null, null);
+        return new MVEntity4DataNegotiation("urn:" + PRODUCT_OFFERING_TYPE_NAME + ":2", PRODUCT_OFFERING_TYPE_NAME, "1.9", "2024-06-02T12:00:00Z", "Active", START_DATE_TIME, END_DATE_TIME, null, null);
     }
 
     public static @NotNull MVEntity4DataNegotiation sampleCorrectValidFor() {
-        return new MVEntity4DataNegotiation("urn:" + PRODUCT_OFFERING_TYPE_NAME + ":1", PRODUCT_OFFERING_TYPE_NAME, "1.9", "2024-06-02T12:00:00Z", LAUNCHED, VALID_FOR, null, null);
+        return new MVEntity4DataNegotiation("urn:" + PRODUCT_OFFERING_TYPE_NAME + ":1", PRODUCT_OFFERING_TYPE_NAME, "1.9", "2024-06-02T12:00:00Z", LAUNCHED, START_DATE_TIME, END_DATE_TIME, null, null);
     }
 
     public static @NotNull MVEntity4DataNegotiation sampleNullValidFor() {
-        return new MVEntity4DataNegotiation("urn:" + PRODUCT_OFFERING_TYPE_NAME + ":1", PRODUCT_OFFERING_TYPE_NAME, "1.9", "2024-06-02T12:00:00Z", LAUNCHED, null, null, null);
+        return new MVEntity4DataNegotiation("urn:" + PRODUCT_OFFERING_TYPE_NAME + ":1", PRODUCT_OFFERING_TYPE_NAME, "1.9", "2024-06-02T12:00:00Z", LAUNCHED, null, null, null, null);
     }
 
     public static @NotNull MVEntity4DataNegotiation sampleIncorrectValidFor() {
-        return new MVEntity4DataNegotiation("urn:" + PRODUCT_OFFERING_TYPE_NAME + ":1", PRODUCT_OFFERING_TYPE_NAME, "1.9", "2024-06-02T12:00:00Z", LAUNCHED, "2100-01-01T00:00:00.000Z", null, null);
+        return new MVEntity4DataNegotiation("urn:" + PRODUCT_OFFERING_TYPE_NAME + ":1", PRODUCT_OFFERING_TYPE_NAME, "1.9", "2024-06-02T12:00:00Z", LAUNCHED, "2100-01-01T00:00:00.000Z", "2100-01-01T00:00:00.000Z", null, null);
     }
 
     public static @NotNull MVEntity4DataNegotiation category1() {
-        return new MVEntity4DataNegotiation("urn:" + CATEGORY_TYPE_NAME + ":1", CATEGORY_TYPE_NAME, "1.2", "2024-09-05T12:00:00Z", LAUNCHED, VALID_FOR, "prova", "prova");
+        return new MVEntity4DataNegotiation("urn:" + CATEGORY_TYPE_NAME + ":1", CATEGORY_TYPE_NAME, "1.2", "2024-09-05T12:00:00Z", LAUNCHED, START_DATE_TIME, END_DATE_TIME,"prova", "prova");
     }
 
     public static @NotNull MVEntity4DataNegotiation category2() {
-        return new MVEntity4DataNegotiation("urn:" + CATEGORY_TYPE_NAME + ":2", CATEGORY_TYPE_NAME, "1.2", "2024-09-05T12:00:00Z", LAUNCHED, VALID_FOR, "prova", "prova");
+        return new MVEntity4DataNegotiation("urn:" + CATEGORY_TYPE_NAME + ":2", CATEGORY_TYPE_NAME, "1.2", "2024-09-05T12:00:00Z", LAUNCHED, START_DATE_TIME, END_DATE_TIME, "prova", "prova");
     }
 
     public static @NotNull MVEntity4DataNegotiation catalog1() {
-        return new MVEntity4DataNegotiation("urn:" + CATALOG_TYPE_NAME + ":1", CATALOG_TYPE_NAME, "1.2", "2024-09-05T12:00:00Z", LAUNCHED, VALID_FOR, "prova", "prova");
+        return new MVEntity4DataNegotiation("urn:" + CATALOG_TYPE_NAME + ":1", CATALOG_TYPE_NAME, "1.2", "2024-09-05T12:00:00Z", LAUNCHED, START_DATE_TIME, END_DATE_TIME, "prova", "prova");
     }
 
     public static @NotNull MVEntity4DataNegotiation catalog2() {
-        return new MVEntity4DataNegotiation("urn:" + CATALOG_TYPE_NAME + ":2", CATALOG_TYPE_NAME, "1.2", "2024-09-05T12:00:00Z", LAUNCHED, VALID_FOR, "prova", "prova");
+        return new MVEntity4DataNegotiation("urn:" + CATALOG_TYPE_NAME + ":2", CATALOG_TYPE_NAME, "1.2", "2024-09-05T12:00:00Z", LAUNCHED, START_DATE_TIME, END_DATE_TIME, "prova", "prova");
     }
 
     public static @NotNull MVEntity4DataNegotiation randomIdAndVersion() {
@@ -108,7 +110,92 @@ public final class MVEntity4DataNegotiationMother {
         double randomVersion = random.nextDouble() + 1;
         randomVersion = Math.round(randomVersion * 10.0) / 10.0;
 
-        return new MVEntity4DataNegotiation(id, PRODUCT_OFFERING_TYPE_NAME, String.valueOf(randomVersion), "2024-04-01T12:00:00Z", LAUNCHED, VALID_FOR, generateRandomSha256(), generateRandomSha256());
+        return new MVEntity4DataNegotiation(id, PRODUCT_OFFERING_TYPE_NAME, String.valueOf(randomVersion), "2024-04-01T12:00:00Z", LAUNCHED, START_DATE_TIME, END_DATE_TIME, generateRandomSha256(), generateRandomSha256());
+    }
+
+    public static @NotNull MVEntity4DataNegotiation replicationValidFields() {
+        return new MVEntity4DataNegotiation(
+                "entity-1",
+                "type",
+                "Version",
+                "lastUpdate",
+                "Launched",
+                Instant.now().minusSeconds(3600).toString(),
+                Instant.now().plusSeconds(3600000).toString(),
+                "hash",
+                "hashlink"
+        );
+    }
+
+    public static @NotNull MVEntity4DataNegotiation replicationValidFieldsAndNullStartDateTime() {
+        return new MVEntity4DataNegotiation(
+                "entity-1",
+                "type",
+                "Version",
+                "lastUpdate",
+                "Launched",
+                null,
+                Instant.now().plusSeconds(3600000).toString(),
+                "hash",
+                "hashlink"
+        );
+    }
+
+    public static @NotNull MVEntity4DataNegotiation replicationValidFieldsAndNullEndDateTime() {
+        return new MVEntity4DataNegotiation(
+                "entity-1",
+                "type",
+                "Version",
+                "lastUpdate",
+                "Launched",
+                Instant.now().minusSeconds(3600).toString(),
+                null,
+                "hash",
+                "hashlink"
+        );
+    }
+
+    public static @NotNull MVEntity4DataNegotiation replicationInvalidLifecycleStatus() {
+        return new MVEntity4DataNegotiation(
+                "entity-1",
+                "type",
+                "Version",
+                "lastUpdate",
+                "InvalidLifecycleStatus",
+                Instant.now().minusSeconds(3600).toString(),
+                Instant.now().plusSeconds(360000000).toString(),
+                "hash",
+                "hashlink"
+        );
+    }
+
+    public static @NotNull MVEntity4DataNegotiation replicationInvalidFutureStartDateTime() {
+        return new MVEntity4DataNegotiation(
+                "entity-1",
+                "type",
+                "Version",
+                "lastUpdate",
+                "Launched",
+                Instant.now().plusSeconds(3600).toString(),
+                "endDateTime",
+                "hash",
+                "hashlink"
+        );
+    }
+
+    public static @NotNull MVEntity4DataNegotiation replicationInvalidPastEndDateTime() {
+        return new MVEntity4DataNegotiation(
+
+                "entity-1",
+                "type",
+                "Version",
+                "lastUpdate",
+                "Launched",
+                Instant.now().minusSeconds(360000).toString(),
+                Instant.now().minusSeconds(7200).toString(),
+                "hash",
+                "hashlink"
+        );
     }
 
     public static @NotNull List<MVEntity4DataNegotiation> list1And2() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
@@ -183,6 +270,8 @@ public final class MVEntity4DataNegotiationMother {
         return initialEntities;
     }
 
+
+
     private static MVEntity4DataNegotiation createSampleWithSameHashAndHashlink(String entityMotherJson) throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         JSONObject jsonObject = new JSONObject(entityMotherJson);
         String id = jsonObject.getString("id");
@@ -196,9 +285,10 @@ public final class MVEntity4DataNegotiationMother {
         } else {
             lifecycleStatus = null;
         }
-        String validFor = jsonObject.getJSONObject("validFor").getJSONObject("value").getString("startDateTime");
+        String startDateTime = jsonObject.getJSONObject("validFor").getJSONObject("value").getString("startDateTime");
+        String endDateTime = jsonObject.getJSONObject("validFor").getJSONObject("value").getString("endDateTime");
         String hash = ApplicationUtils.calculateSHA256(entityMotherJson);
-        return new MVEntity4DataNegotiation(id, type, version, lastUpdate, lifecycleStatus, validFor, hash, hash);
+        return new MVEntity4DataNegotiation(id, type, version, lastUpdate, lifecycleStatus, startDateTime, endDateTime, hash, hash);
     }
 
     private static String generateRandomSha256() {
