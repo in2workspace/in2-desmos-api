@@ -149,6 +149,54 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                 });
     }
 
+    @Override
+    public Mono<Void> buildAndSaveAuditRecordForSubEntity(String processId, String entityId, String entityType,
+                                                          String retrievedBrokerEntity,
+                                                          AuditRecordStatus status) {
+        // Get the most recent audit record for the entityId and get the most recent audit record overall
+        return fetchMostRecentAuditRecord()
+                .flatMap(lastAuditRecordRegistered ->
+                        getEntityHash(processId, Mono.just(retrievedBrokerEntity))
+                                .flatMap(entityHash ->
+                                        findLatestConsumerPublishedAuditRecordByEntityId(processId, entityId)
+                                                .flatMap(previousAuditRecord -> {
+                                                    String previousHashLink = previousAuditRecord.getEntityHashLink();
+                                                    return calculateHashLink(Mono.just(previousHashLink), Mono.just(entityHash))
+                                                            .flatMap(entityHashLink -> {
+                                                                try {
+                                                                    // Create the new audit record
+                                                                    AuditRecord auditRecord = AuditRecord.builder()
+                                                                            .id(UUID.randomUUID())
+                                                                            .processId(processId)
+                                                                            .createdAt(Timestamp.from(Instant.now()))
+                                                                            .entityId(entityId)
+                                                                            .entityType(entityType)
+                                                                            .entityHash(entityHash)
+                                                                            .entityHashLink(entityHashLink)
+                                                                            .dataLocation("")
+                                                                            .status(status)
+                                                                            .trader(AuditRecordTrader.CONSUMER)
+                                                                            .hash("")
+                                                                            .hashLink("")
+                                                                            .newTransaction(true)
+                                                                            .build();
+                                                                    // Firstly, we calculate the hash of the entity without the hash and hashLink fields
+                                                                    String auditRecordHash = calculateSHA256(objectMapper.writeValueAsString(auditRecord));
+                                                                    auditRecord.setHash(auditRecordHash);
+                                                                    // Then, we calculate the hashLink of the entity concatenating the previous hashLink
+                                                                    // with the hash of the current entity
+                                                                    auditRecord.setHashLink(setAuditRecordHashLink(lastAuditRecordRegistered, auditRecordHash));
+                                                                    return auditRecordRepository.save(auditRecord)
+                                                                            .doOnSuccess(unused -> log.info("ProcessID: {} - Audit record saved successfully. - Status: {}", processId, status))
+                                                                            .then();
+                                                                } catch (JsonProcessingException |
+                                                                         NoSuchAlgorithmException e) {
+                                                                    return Mono.error(e);
+                                                                }
+                                                            });
+                                                })));
+    }
+
     /**
      * Create a new AuditRecord with status RETRIEVED and trader CONSUMER
      * from the retrieved external sync entity in string format.

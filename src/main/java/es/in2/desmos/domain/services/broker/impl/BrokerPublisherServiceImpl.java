@@ -3,7 +3,6 @@ package es.in2.desmos.domain.services.broker.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import es.in2.desmos.domain.models.BlockchainNotification;
 import es.in2.desmos.domain.models.BrokerEntityWithIdAndType;
 import es.in2.desmos.domain.models.Entity;
 import es.in2.desmos.domain.models.Id;
@@ -18,8 +17,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static es.in2.desmos.domain.utils.ApplicationUtils.extractEntityIdFromDataLocation;
 
 @Slf4j
 @Service
@@ -36,11 +33,10 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
     }
 
     @Override
-    public Mono<Void> publishDataToBroker(String processId, BlockchainNotification blockchainNotification, String retrievedBrokerEntity) {
+    public Mono<Void> publishDataToBroker(String processId, String entityId, String retrievedBrokerEntity) {
         // Get the entity ID from the data location in the blockchain notification.
         // This is used to check if the retrieved entity exists in the local broker or not.
         // If it exists, the entity will be updated, otherwise, it will be created.
-        String entityId = extractEntityIdFromDataLocation(blockchainNotification.dataLocation());
         return getEntityById(processId, entityId)
                 .switchIfEmpty(Mono.just(""))
                 .flatMap(response -> {
