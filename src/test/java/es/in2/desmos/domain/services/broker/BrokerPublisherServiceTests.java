@@ -85,7 +85,7 @@ class BrokerPublisherServiceTests {
         when(brokerAdapterService.getEntityById(eq(processId), anyString())).thenReturn(Mono.just(""));
         when(brokerAdapterService.postEntity(processId, retrievedBrokerEntity)).thenReturn(Mono.empty());
         //Assert
-        StepVerifier.create(brokerPublisherService.publishDataToBroker(processId, blockchainNotification, retrievedBrokerEntity))
+        StepVerifier.create(brokerPublisherService.publishDataToBroker(processId, blockchainNotification.entityId(), retrievedBrokerEntity))
                 .verifyComplete();
     }
 
@@ -98,7 +98,7 @@ class BrokerPublisherServiceTests {
         when(brokerAdapterService.getEntityById(eq(processId), anyString())).thenReturn(Mono.just("entityId"));
         when(brokerAdapterService.updateEntity(processId, retrievedBrokerEntity)).thenReturn(Mono.empty());
         //Assert
-        StepVerifier.create(brokerPublisherService.publishDataToBroker(processId, blockchainNotification, retrievedBrokerEntity))
+        StepVerifier.create(brokerPublisherService.publishDataToBroker(processId, blockchainNotification.entityId(), retrievedBrokerEntity))
                 .verifyComplete();
     }
 
