@@ -117,6 +117,7 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                             // SubscribeWorkflowImpl.sortAttributesAlphabetically()
                             entityHash = calculateSHA256(retrievedBrokerEntity);
                             System.out.println("AAA ProcessID: " + processId + " Id: " +entityId + " - Status: " + status + " Entity Hash: " + entityHash);
+                            System.out.println("AAA ProcessID: " + "audiit retrieved entity" + retrievedBrokerEntity);
                             entityHashLink = extractHashLinkFromDataLocation(blockchainNotification.dataLocation());
                         }
                         // Create the new audit record
