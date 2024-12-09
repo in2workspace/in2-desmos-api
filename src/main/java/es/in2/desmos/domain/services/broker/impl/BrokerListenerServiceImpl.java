@@ -55,6 +55,7 @@ public class BrokerListenerServiceImpl implements BrokerListenerService {
                                         log.info("ProcessID: {} - Broker Notification is self-generated.", processId);
                                         return Mono.empty();
                                     } else {
+                                        System.out.println("AAA ProcessID: " + processId + " - Broker Notification is new.");
                                         return auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(processId, dataMap,
                                                         AuditRecordStatus.RECEIVED, null)
                                                 // Set priority for the pendingSubscribeEventsQueue event
@@ -90,18 +91,34 @@ public class BrokerListenerServiceImpl implements BrokerListenerService {
     private Mono<Boolean> isBrokerNotificationSelfGenerated(String processId, Map<String, Object> dataMap) {
         String id = dataMap.get("id").toString();
 
+        System.out.println("ProcessID: " + processId + " - SG check id: + " + id);
+
         return auditRecordService.findMostRecentRetrievedOrDeletedByEntityId(processId, id)
                 .flatMap(auditRecordFound -> {
+                    System.out.println("AAA ProcessID: " + processId + " - SG check Audit record found id: + " + auditRecordFound.getEntityId());
+
                     try {
                         String newEntityHash = calculateSHA256(objectMapper.writer().writeValueAsString(dataMap));
-                        return auditRecordFound.getEntityHash().equals(newEntityHash)
-                                ? Mono.just(true)
-                                : Mono.just(false);
+                        if (auditRecordFound.getEntityHash().equals(newEntityHash)) {
+
+                            System.out.println("AAA ProcessID: " + processId + " - SG check sha256 equals id: + " + auditRecordFound.getEntityId() + " hash: " + auditRecordFound.getEntityHash());
+
+                            return Mono.just(true);
+                        }
+                        System.out.println("AAA ProcessID: " + processId + " - SG check sha256 different id 1: + " + id + " hash: " + newEntityHash);
+                        System.out.println("AAA ProcessID: " + processId + " - SG check sha256 different id 2: + " + auditRecordFound.getEntityId() + " hash: " + auditRecordFound.getEntityHash());
+
+                        return Mono.just(false);
                     } catch (JsonProcessingException | NoSuchAlgorithmException e) {
-                        log.warn("ProcessID: {} - Error processing JSON: {}", processId, e.getMessage());
+                        log.warn("AAA ProcessID: {} - Error processing JSON: {}", processId, e.getMessage());
                         return Mono.error(new JsonReadingException("Error processsing Broker Notification JSON"));
                     }
                 })
-                .switchIfEmpty(Mono.just(false));
+                .switchIfEmpty(
+                        Mono.defer(() -> {
+                            System.out.println("AAA ProcessID: " + processId + " - SG check id: " + id + "No se encontraron elementos, devolviendo false.");
+                            return Mono.just(false);
+                        })
+                );
     }
 }
