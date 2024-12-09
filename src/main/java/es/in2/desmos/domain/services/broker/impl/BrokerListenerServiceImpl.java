@@ -98,6 +98,7 @@ public class BrokerListenerServiceImpl implements BrokerListenerService {
                     System.out.println("AAA ProcessID: " + processId + " - SG check Audit record found id: + " + auditRecordFound.getEntityId());
 
                     try {
+                        String entity = objectMapper.writer().writeValueAsString(dataMap);
                         String newEntityHash = calculateSHA256(objectMapper.writer().writeValueAsString(dataMap));
                         if (auditRecordFound.getEntityHash().equals(newEntityHash)) {
 
@@ -105,7 +106,7 @@ public class BrokerListenerServiceImpl implements BrokerListenerService {
 
                             return Mono.just(true);
                         }
-                        System.out.println("AAA ProcessID: " + processId + " - SG check sha256 different id 1: + " + id + " hash: " + newEntityHash);
+                        System.out.println("AAA ProcessID: " + processId + " - SG check sha256 different id 1: + " + id + " hash: " + newEntityHash + " entity: " + entity);
                         System.out.println("AAA ProcessID: " + processId + " - SG check sha256 different id 2: + " + auditRecordFound.getEntityId() + " hash: " + auditRecordFound.getEntityHash());
 
                         return Mono.just(false);
