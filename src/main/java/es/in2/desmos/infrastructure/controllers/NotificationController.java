@@ -38,6 +38,7 @@ public class NotificationController {
         String processId = UUID.randomUUID().toString();
         log.info("ProcessID: {} - Blockchain Notification received with DataLocation: {}", processId, blockchainNotification.dataLocation());
         log.debug("ProcessID: {}, Blockchain Notification received: {}", processId, blockchainNotification);
+        System.out.println("AAA ProcessID: " + processId + " - Blockchain Notification received : " + blockchainNotification);
         return blockchainListenerService.processBlockchainNotification(processId, blockchainNotification);
     }
 
