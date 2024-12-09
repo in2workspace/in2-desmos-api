@@ -107,9 +107,13 @@ public class BrokerListenerServiceImpl implements BrokerListenerService {
                             return Mono.just(true);
                         }
                         System.out.println("AAA ProcessID: " + processId + " - SG check sha256 different id 1: + " + id + " hash: " + newEntityHash + " entity: " + entity);
-                        System.out.println("AAA ProcessID: " + processId + " - SG check sha256 different id 2: + " + auditRecordFound.getEntityId() + " hash: " + auditRecordFound.getEntityHash());
 
-                        return Mono.just(false);
+                        return brokerAdapter.getEntityById(processId, id)
+                                .flatMap(entityScorpio -> {
+                                    System.out.println("AAA ProcessID: " + processId + " - SG check sha256 different id 2: + " + auditRecordFound.getEntityId() + " hash: " + auditRecordFound.getEntityHash() + " entity: " + entityScorpio);
+
+                                    return Mono.just(false);
+                                });
                     } catch (JsonProcessingException | NoSuchAlgorithmException e) {
                         log.warn("AAA ProcessID: {} - Error processing JSON: {}", processId, e.getMessage());
                         return Mono.error(new JsonReadingException("Error processsing Broker Notification JSON"));
