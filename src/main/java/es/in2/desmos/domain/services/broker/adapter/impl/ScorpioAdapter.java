@@ -45,6 +45,7 @@ public class ScorpioAdapter implements BrokerAdapterService {
 
     @Override
     public Mono<Void> postEntity(String processId, String requestBody) {
+        System.out.println("CREATE request body: " + requestBody);
         log.info("ProcessID: {} - Posting entity to Scorpio", processId);
         log.debug("ProcessID: {} - Posting entity to Scorpio: {}", processId, requestBody);
         MediaType mediaType = getContentTypeAndAcceptMediaType(requestBody);
@@ -100,6 +101,7 @@ public class ScorpioAdapter implements BrokerAdapterService {
 
     @Override
     public Mono<Void> updateEntity(String processId, String requestBody) {
+        System.out.println("UPDATE request body: " + requestBody);
         return extractEntityIdFromRequestBody(processId, requestBody)
                 .flatMap(entityId -> {
                     MediaType mediaType = getContentTypeAndAcceptMediaType(requestBody);
