@@ -101,15 +101,16 @@ public class ScorpioAdapter implements BrokerAdapterService {
 
     @Override
     public Mono<Void> updateEntity(String processId, String requestBody) {
-        System.out.println("UPDATE request body: " + requestBody);
+        String requestBodyAsArray = "[" + requestBody + "]";
+        System.out.println("UPDATE request body: " + requestBodyAsArray);
         return extractEntityIdFromRequestBody(processId, requestBody)
                 .flatMap(entityId -> {
-                    MediaType mediaType = getContentTypeAndAcceptMediaType(requestBody);
-                    return webClient.patch()
-                            .uri(brokerConfig.getEntitiesPath() + "/" + entityId)
+                    MediaType mediaType = getContentTypeAndAcceptMediaType(requestBodyAsArray);
+                    return webClient.post()
+                            .uri(brokerConfig.getEntityOperationsPath() + "/update?options=replace")
                             .accept(mediaType)
                             .contentType(mediaType)
-                            .bodyValue(requestBody)
+                            .bodyValue(requestBodyAsArray)
                             .retrieve()
                             .bodyToMono(Void.class)
                             .retry(3);
