@@ -104,7 +104,7 @@ public class ScorpioAdapter implements BrokerAdapterService {
                 .flatMap(entityId -> {
                     MediaType mediaType = getContentTypeAndAcceptMediaType(requestBody);
                     return webClient.patch()
-                            .uri(brokerConfig.getEntitiesPath() + "/" + entityId + "/attrs")
+                            .uri(brokerConfig.getEntitiesPath() + "/" + entityId)
                             .accept(mediaType)
                             .contentType(mediaType)
                             .bodyValue(requestBody)
