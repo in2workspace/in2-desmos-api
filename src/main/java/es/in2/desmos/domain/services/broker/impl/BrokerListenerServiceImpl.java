@@ -93,6 +93,7 @@ public class BrokerListenerServiceImpl implements BrokerListenerService {
         return auditRecordService.findMostRecentRetrievedOrDeletedForConsumerByEntityId(processId, id)
                 .flatMap(auditRecordFound -> {
                     try {
+                        System.out.println("SF AuditRecordFound: " + auditRecordFound);
                         String newEntityHash = calculateSHA256(objectMapper.writer().writeValueAsString(dataMap));
                         return auditRecordFound.getEntityHash().equals(newEntityHash)
                                 ? Mono.just(true)
