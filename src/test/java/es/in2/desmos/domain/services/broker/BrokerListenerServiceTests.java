@@ -78,7 +78,7 @@ class BrokerListenerServiceTests {
                 .notifiedAt(Instant.now().toString())
                 .build();
         // Act
-        when(auditRecordService.findMostRecentRetrievedOrDeletedByEntityId(anyString(), any())).thenReturn(Mono.empty());
+        when(auditRecordService.findMostRecentRetrievedOrDeletedForConsumerByEntityId(anyString(), any())).thenReturn(Mono.empty());
         when(auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(anyString(), any(), any(), any())).thenReturn(Mono.empty());
         when(queueService.enqueueEvent(any())).thenReturn(Mono.empty());
         // Assert
@@ -101,7 +101,7 @@ class BrokerListenerServiceTests {
                 .notifiedAt(Instant.now().toString())
                 .build();
         // Act
-        when(auditRecordService.findMostRecentRetrievedOrDeletedByEntityId(anyString(), any())).thenReturn(Mono.just(auditRecord));
+        when(auditRecordService.findMostRecentRetrievedOrDeletedForConsumerByEntityId(anyString(), any())).thenReturn(Mono.just(auditRecord));
         when(objectMapper.writer()).thenReturn(objectWriter);
         when(objectWriter.writeValueAsString(any())).thenReturn("""
                 {
@@ -145,7 +145,7 @@ class BrokerListenerServiceTests {
                 .notifiedAt(Instant.now().toString())
                 .build();
         // Act
-        when(auditRecordService.findMostRecentRetrievedOrDeletedByEntityId(anyString(), any())).thenReturn(Mono.just(auditRecord));
+        when(auditRecordService.findMostRecentRetrievedOrDeletedForConsumerByEntityId(anyString(), any())).thenReturn(Mono.just(auditRecord));
         when(objectMapper.writer()).thenReturn(objectWriter);
         when(objectWriter.writeValueAsString(any())).thenReturn("""
                 {
@@ -187,7 +187,7 @@ class BrokerListenerServiceTests {
                 .notifiedAt(Instant.now().toString())
                 .build();
 
-        when(auditRecordService.findMostRecentRetrievedOrDeletedByEntityId(anyString(), any())).thenReturn(Mono.just(auditRecord));
+        when(auditRecordService.findMostRecentRetrievedOrDeletedForConsumerByEntityId(anyString(), any())).thenReturn(Mono.just(auditRecord));
         when(objectMapper.writer()).thenReturn(objectWriter);
         when(objectWriter.writeValueAsString(any())).thenReturn("""
                 {

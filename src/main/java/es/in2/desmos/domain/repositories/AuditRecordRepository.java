@@ -31,8 +31,8 @@ public interface AuditRecordRepository extends ReactiveCrudRepository<AuditRecor
      * @param entityId The ID of the entity for which the audit record is being searched.
      * @return A Mono that emits the most recent published or deleted audit record for the specified entity ID, if found.
      */
-    @Query("SELECT * FROM audit_records WHERE entity_id = :entityId AND status = 'RETRIEVED' OR status = 'DELETED' ORDER BY created_at DESC LIMIT 1")
-    Mono<AuditRecord> findMostRecentRetrievedOrDeletedByEntityId(String entityId);
+    @Query("SELECT * FROM audit_records WHERE entity_id = :entityId AND status = 'RETRIEVED' OR status = 'DELETED'  AND trader = 'CONSUMER' ORDER BY created_at DESC LIMIT 1")
+    Mono<AuditRecord> findMostRecentRetrievedOrDeletedForConsumerByEntityId(String entityId);
 
     @Query("SELECT * FROM audit_records WHERE entity_id = :entityId AND status = 'PUBLISHED' ORDER BY created_at DESC LIMIT 1")
     Mono<AuditRecord> findMostRecentPublishedAuditRecordByEntityId(String entityId);

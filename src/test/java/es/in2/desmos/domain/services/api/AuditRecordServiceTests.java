@@ -292,9 +292,9 @@ class AuditRecordServiceTests {
         String entityId = "entityId";
         AuditRecord auditRecord = new AuditRecord();
         auditRecord.setEntityHash("entityHash");
-        when(auditRecordRepository.findMostRecentRetrievedOrDeletedByEntityId(entityId)).thenReturn(Mono.just(auditRecord));
+        when(auditRecordRepository.findMostRecentRetrievedOrDeletedForConsumerByEntityId(entityId)).thenReturn(Mono.just(auditRecord));
         // Act
-        AuditRecord actualAuditRecord = auditRecordService.findMostRecentRetrievedOrDeletedByEntityId(processId, entityId).block();
+        AuditRecord actualAuditRecord = auditRecordService.findMostRecentRetrievedOrDeletedForConsumerByEntityId(processId, entityId).block();
         // Assert
         assertEquals(auditRecord, actualAuditRecord);
     }

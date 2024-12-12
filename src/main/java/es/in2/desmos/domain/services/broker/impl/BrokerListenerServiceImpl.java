@@ -90,7 +90,7 @@ public class BrokerListenerServiceImpl implements BrokerListenerService {
     private Mono<Boolean> isBrokerNotificationSelfGenerated(String processId, Map<String, Object> dataMap) {
         String id = dataMap.get("id").toString();
 
-        return auditRecordService.findMostRecentRetrievedOrDeletedByEntityId(processId, id)
+        return auditRecordService.findMostRecentRetrievedOrDeletedForConsumerByEntityId(processId, id)
                 .flatMap(auditRecordFound -> {
                     try {
                         String newEntityHash = calculateSHA256(objectMapper.writer().writeValueAsString(dataMap));

@@ -16,7 +16,7 @@ public interface AuditRecordService {
 
     Mono<AuditRecord> fetchMostRecentAuditRecord();
 
-    Mono<AuditRecord> findMostRecentRetrievedOrDeletedByEntityId(String processId, String entityId);
+    Mono<AuditRecord> findMostRecentRetrievedOrDeletedForConsumerByEntityId(String processId, String entityId);
 
     Mono<AuditRecord> getLastPublishedAuditRecordForProducerByEntityId(String processId, String entityId);
 

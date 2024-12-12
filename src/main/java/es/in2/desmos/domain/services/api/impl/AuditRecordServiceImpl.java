@@ -225,9 +225,9 @@ public class AuditRecordServiceImpl implements AuditRecordService {
      * @return A Mono emitting the latest published or deleted audit record for the given entity, if available.
      */
     @Override
-    public Mono<AuditRecord> findMostRecentRetrievedOrDeletedByEntityId(String processId, String entityId) {
+    public Mono<AuditRecord> findMostRecentRetrievedOrDeletedForConsumerByEntityId(String processId, String entityId) {
         log.debug("ProcessID: {} - Fetching latest audit record for entity ID: {}", processId, entityId);
-        return auditRecordRepository.findMostRecentRetrievedOrDeletedByEntityId(entityId);
+        return auditRecordRepository.findMostRecentRetrievedOrDeletedForConsumerByEntityId(entityId);
     }
 
     @Override
