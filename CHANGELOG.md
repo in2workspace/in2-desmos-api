@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Retry mechanism for Blockchain Adapter and Context Broker.
 - Recover after a failure mechanism for Blockchain Adapter and Context Broker.
 
+## [Released]: v1.0.2
+- Change the update entity to allow adding new attributes to the entity.
+
+## [Released]: v1.0.1
+- Set startDateTime as non required
+
+
 ## [Released]: v1.0.0
 - DOME Participant validation
 - P2P synchronization
