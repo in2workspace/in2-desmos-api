@@ -14,7 +14,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Released]: v1.0.1
 - Set startDateTime as non required
 
-
 ## [Released]: v1.0.0
 - DOME Participant validation
 - P2P synchronization
