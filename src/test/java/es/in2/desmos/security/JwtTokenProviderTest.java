@@ -37,7 +37,7 @@ class JwtTokenProviderTest {
     void setUp() throws InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException {
         MockitoAnnotations.openMocks(this);
         when(securityProperties.privateKey())
-                .thenReturn("0xd1d346bbb4e3748b370c5985face9a4e5b402dcf41d3f715a455d08144b2327f");
+                .thenReturn("0x7c8afd9cb9c67cdbe2961e380b52c4206fca5a81d05e4d426975822ff28605db");
         jwtTokenProvider = new JwtTokenProvider(securityProperties);
     }
 
@@ -57,7 +57,7 @@ class JwtTokenProviderTest {
     void testValidateSignedJwt() throws JOSEException {
 
         HashMap<String, String> publicKeysByUrl = new HashMap<>();
-        publicKeysByUrl.put("origin", "0x045d016daba10ba4216c39c9d9f8aa0cae37f5acdbe14b3de78badfff0172f4ac2093896458ed17a28c559d7c915dfaf3d106e821c7415fecffc6c991f155a2c69");
+        publicKeysByUrl.put("origin", "0x041f813b948021acb2d0f7fbe1247f925f9491db60f3ae33be4f0da89739e10d98928552055281119906705b54805cf41be10a855d673b0f0305c028adb55a9450");
 
 
         String jwtString = jwtTokenProvider.generateToken(resourceURI);
