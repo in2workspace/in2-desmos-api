@@ -6,6 +6,7 @@ import es.in2.desmos.domain.models.DataNegotiationEvent;
 import es.in2.desmos.domain.models.DataNegotiationResult;
 import es.in2.desmos.domain.models.Issuer;
 import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
+import es.in2.desmos.domain.services.policies.ReplicationPoliciesService;
 import es.in2.desmos.objectmothers.DataNegotiationResultMother;
 import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
 import org.json.JSONException;
@@ -36,6 +37,9 @@ class DataNegotiationJobTests {
     @Mock
     private DataTransferJob dataTransferJob;
 
+    @Mock
+    private ReplicationPoliciesService replicationPoliciesService;
+
     @Captor
     private ArgumentCaptor<Mono<DataNegotiationResult>> dataNegotiationResultCaptor;
 
@@ -62,6 +66,8 @@ class DataNegotiationJobTests {
         Mono<List<MVEntity4DataNegotiation>> localEntityIdsMono = Mono.just(MVEntity4DataNegotiationMother.list1And2OldAnd3());
 
         when(dataTransferJob.syncDataFromList(eq(processId), any())).thenReturn(Mono.empty());
+
+        when(replicationPoliciesService.isMVEntityReplicable(any(), any())).thenReturn(Mono.just(true));
 
 
         var result = dataNegotiationJob.negotiateDataSyncWithMultipleIssuers(processId, Mono.just(externalMVENtities4DataNegotiationByIssuer), localEntityIdsMono);
@@ -103,43 +109,7 @@ class DataNegotiationJobTests {
 
         when(dataTransferJob.syncData(any(), any())).thenReturn(Mono.empty());
 
-        var result = dataNegotiationJob.negotiateDataSyncFromEvent(dataNegotiationEvent);
-
-        StepVerifier
-                .create(result)
-                .verifyComplete();
-
-        verify(dataTransferJob, times(1)).syncData(eq(processId), dataNegotiationResultCaptor.capture());
-        verifyNoMoreInteractions(dataTransferJob);
-
-        Mono<DataNegotiationResult> dataNegotiationResultCaptured = dataNegotiationResultCaptor.getValue();
-
-        StepVerifier
-                .create(dataNegotiationResultCaptured)
-                .expectNext(expectedDataNegotiationResult)
-                .verifyComplete();
-    }
-
-    @Test
-    void itShouldNotSyncWhenLifecyclestatusIsNull() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
-        String issuer = "http://example.org";
-        Mono<String> issuerMono = Mono.just(issuer);
-
-        List<MVEntity4DataNegotiation> externalEntityIds = MVEntity4DataNegotiationMother.sample1NullLifecyclestatusAnd2();
-        Mono<List<MVEntity4DataNegotiation>> externalEntityIdsMono = Mono.just(externalEntityIds);
-
-        Mono<List<MVEntity4DataNegotiation>> localEntityIdsMono = Mono.just(new ArrayList<>());
-
-        String processId = "0";
-        DataNegotiationEvent dataNegotiationEvent = new DataNegotiationEvent(processId, issuerMono, externalEntityIdsMono, localEntityIdsMono);
-
-        List<MVEntity4DataNegotiation> expectedNewEntitiesToSync = List.of(MVEntity4DataNegotiationMother.sample2());
-
-        List<MVEntity4DataNegotiation> expectedExistingEntitiesToSync = new ArrayList<>();
-
-        DataNegotiationResult expectedDataNegotiationResult = new DataNegotiationResult(issuer, expectedNewEntitiesToSync, expectedExistingEntitiesToSync);
-
-        when(dataTransferJob.syncData(any(), any())).thenReturn(Mono.empty());
+        when(replicationPoliciesService.isMVEntityReplicable(any(), any())).thenReturn(Mono.just(true));
 
         var result = dataNegotiationJob.negotiateDataSyncFromEvent(dataNegotiationEvent);
 
@@ -179,6 +149,8 @@ class DataNegotiationJobTests {
 
         when(dataTransferJob.syncData(any(), any())).thenReturn(Mono.empty());
 
+        when(replicationPoliciesService.isMVEntityReplicable(any(), any())).thenReturn(Mono.just(true));
+
         var result = dataNegotiationJob.negotiateDataSyncFromEvent(dataNegotiationEvent);
 
         StepVerifier
@@ -216,6 +188,8 @@ class DataNegotiationJobTests {
         DataNegotiationResult expectedDataNegotiationResult = new DataNegotiationResult(issuer, expectedNewEntitiesToSync, expectedExistingEntitiesToSync);
 
         when(dataTransferJob.syncData(any(), any())).thenReturn(Mono.empty());
+
+        when(replicationPoliciesService.isMVEntityReplicable(any(), any())).thenReturn(Mono.just(true));
 
         var result = dataNegotiationJob.negotiateDataSyncFromEvent(dataNegotiationEvent);
 
@@ -255,42 +229,7 @@ class DataNegotiationJobTests {
 
         when(dataTransferJob.syncData(any(), any())).thenReturn(Mono.empty());
 
-        var result = dataNegotiationJob.negotiateDataSyncFromEvent(dataNegotiationEvent);
-
-        StepVerifier
-                .create(result)
-                .verifyComplete();
-
-        verify(dataTransferJob, times(1)).syncData(eq(processId), dataNegotiationResultCaptor.capture());
-        verifyNoMoreInteractions(dataTransferJob);
-
-        Mono<DataNegotiationResult> dataNegotiationResultCaptured = dataNegotiationResultCaptor.getValue();
-
-        StepVerifier
-                .create(dataNegotiationResultCaptured)
-                .expectNext(expectedDataNegotiationResult)
-                .verifyComplete();
-    }
-
-    @Test
-    void itShouldSyncDataWhenCorrectLifecycle() {
-        String issuer = "http://example.org";
-        Mono<String> issuerMono = Mono.just(issuer);
-
-        Mono<List<MVEntity4DataNegotiation>> externalEntityIdsMono = Mono.just(MVEntity4DataNegotiationMother.listLaunchedAndRetired());
-
-        Mono<List<MVEntity4DataNegotiation>> localEntityIdsMono = Mono.just(new ArrayList<>());
-
-        String processId = "0";
-        DataNegotiationEvent dataNegotiationEvent = new DataNegotiationEvent(processId, issuerMono, externalEntityIdsMono, localEntityIdsMono);
-
-        List<MVEntity4DataNegotiation> expectedNewEntitiesToSync = MVEntity4DataNegotiationMother.listLaunchedAndRetired();
-
-        List<MVEntity4DataNegotiation> expectedExistingEntitiesToSync = new ArrayList<>();
-
-        DataNegotiationResult expectedDataNegotiationResult = new DataNegotiationResult(issuer, expectedNewEntitiesToSync, expectedExistingEntitiesToSync);
-
-        when(dataTransferJob.syncData(any(), any())).thenReturn(Mono.empty());
+        when(replicationPoliciesService.isMVEntityReplicable(any(), any())).thenReturn(Mono.just(true));
 
         var result = dataNegotiationJob.negotiateDataSyncFromEvent(dataNegotiationEvent);
 
@@ -310,18 +249,19 @@ class DataNegotiationJobTests {
     }
 
     @Test
-    void itShouldSyncDataWhenIncorrectLifecycle() {
+    void itShouldSyncOnlyValidEntities() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {
         String issuer = "http://example.org";
         Mono<String> issuerMono = Mono.just(issuer);
 
-        Mono<List<MVEntity4DataNegotiation>> externalEntityIdsMono = Mono.just(List.of(MVEntity4DataNegotiationMother.sampleActive()));
+        List<MVEntity4DataNegotiation> externalEntityIds = MVEntity4DataNegotiationMother.fullList();
+        Mono<List<MVEntity4DataNegotiation>> externalEntityIdsMono = Mono.just(externalEntityIds);
 
-        Mono<List<MVEntity4DataNegotiation>> localEntityIdsMono = Mono.just(new ArrayList<>());
+        Mono<List<MVEntity4DataNegotiation>> localEntityIdsMono = Mono.just(MVEntity4DataNegotiationMother.list3And4());
 
         String processId = "0";
         DataNegotiationEvent dataNegotiationEvent = new DataNegotiationEvent(processId, issuerMono, externalEntityIdsMono, localEntityIdsMono);
 
-        List<MVEntity4DataNegotiation> expectedNewEntitiesToSync = new ArrayList<>();
+        List<MVEntity4DataNegotiation> expectedNewEntitiesToSync = List.of(MVEntity4DataNegotiationMother.sample2());
 
         List<MVEntity4DataNegotiation> expectedExistingEntitiesToSync = new ArrayList<>();
 
@@ -329,116 +269,8 @@ class DataNegotiationJobTests {
 
         when(dataTransferJob.syncData(any(), any())).thenReturn(Mono.empty());
 
-        var result = dataNegotiationJob.negotiateDataSyncFromEvent(dataNegotiationEvent);
-
-        StepVerifier
-                .create(result)
-                .verifyComplete();
-
-        verify(dataTransferJob, times(1)).syncData(eq(processId), dataNegotiationResultCaptor.capture());
-        verifyNoMoreInteractions(dataTransferJob);
-
-        Mono<DataNegotiationResult> dataNegotiationResultCaptured = dataNegotiationResultCaptor.getValue();
-
-        StepVerifier
-                .create(dataNegotiationResultCaptured)
-                .expectNext(expectedDataNegotiationResult)
-                .verifyComplete();
-    }
-
-    @Test
-    void itShouldSyncDataWhenCorrectValidFor() {
-        String issuer = "http://example.org";
-        Mono<String> issuerMono = Mono.just(issuer);
-
-        Mono<List<MVEntity4DataNegotiation>> externalEntityIdsMono = Mono.just(List.of(MVEntity4DataNegotiationMother.sampleCorrectValidFor()));
-
-        Mono<List<MVEntity4DataNegotiation>> localEntityIdsMono = Mono.just(new ArrayList<>());
-
-        String processId = "0";
-        DataNegotiationEvent dataNegotiationEvent = new DataNegotiationEvent(processId, issuerMono, externalEntityIdsMono, localEntityIdsMono);
-
-        List<MVEntity4DataNegotiation> expectedNewEntitiesToSync = List.of(MVEntity4DataNegotiationMother.sampleCorrectValidFor());
-
-        List<MVEntity4DataNegotiation> expectedExistingEntitiesToSync = new ArrayList<>();
-
-        DataNegotiationResult expectedDataNegotiationResult = new DataNegotiationResult(issuer, expectedNewEntitiesToSync, expectedExistingEntitiesToSync);
-
-        when(dataTransferJob.syncData(any(), any())).thenReturn(Mono.empty());
-
-        var result = dataNegotiationJob.negotiateDataSyncFromEvent(dataNegotiationEvent);
-
-        StepVerifier
-                .create(result)
-                .verifyComplete();
-
-        verify(dataTransferJob, times(1)).syncData(eq(processId), dataNegotiationResultCaptor.capture());
-        verifyNoMoreInteractions(dataTransferJob);
-
-        Mono<DataNegotiationResult> dataNegotiationResultCaptured = dataNegotiationResultCaptor.getValue();
-
-        StepVerifier
-                .create(dataNegotiationResultCaptured)
-                .expectNext(expectedDataNegotiationResult)
-                .verifyComplete();
-    }
-
-    @Test
-    void itShouldSyncDataWhenHasNoValidFor() {
-        String issuer = "http://example.org";
-        Mono<String> issuerMono = Mono.just(issuer);
-
-        Mono<List<MVEntity4DataNegotiation>> externalEntityIdsMono = Mono.just(List.of(MVEntity4DataNegotiationMother.sampleNullValidFor()));
-
-        Mono<List<MVEntity4DataNegotiation>> localEntityIdsMono = Mono.just(new ArrayList<>());
-
-        String processId = "0";
-        DataNegotiationEvent dataNegotiationEvent = new DataNegotiationEvent(processId, issuerMono, externalEntityIdsMono, localEntityIdsMono);
-
-        List<MVEntity4DataNegotiation> expectedNewEntitiesToSync = List.of(MVEntity4DataNegotiationMother.sampleNullValidFor());
-
-        List<MVEntity4DataNegotiation> expectedExistingEntitiesToSync = new ArrayList<>();
-
-        DataNegotiationResult expectedDataNegotiationResult = new DataNegotiationResult(issuer, expectedNewEntitiesToSync, expectedExistingEntitiesToSync);
-
-        when(dataTransferJob.syncData(any(), any())).thenReturn(Mono.empty());
-
-        var result = dataNegotiationJob.negotiateDataSyncFromEvent(dataNegotiationEvent);
-
-        StepVerifier
-                .create(result)
-                .verifyComplete();
-
-        verify(dataTransferJob, times(1)).syncData(eq(processId), dataNegotiationResultCaptor.capture());
-        verifyNoMoreInteractions(dataTransferJob);
-
-        Mono<DataNegotiationResult> dataNegotiationResultCaptured = dataNegotiationResultCaptor.getValue();
-
-        StepVerifier
-                .create(dataNegotiationResultCaptured)
-                .assertNext(dataNegotiationResult -> assertThat(dataNegotiationResult).isEqualTo(expectedDataNegotiationResult))
-                .verifyComplete();
-    }
-
-    @Test
-    void itShouldSyncDataWhenIncorrectValidFor() {
-        String issuer = "http://example.org";
-        Mono<String> issuerMono = Mono.just(issuer);
-
-        Mono<List<MVEntity4DataNegotiation>> externalEntityIdsMono = Mono.just(List.of(MVEntity4DataNegotiationMother.sampleIncorrectValidFor()));
-
-        Mono<List<MVEntity4DataNegotiation>> localEntityIdsMono = Mono.just(new ArrayList<>());
-
-        String processId = "0";
-        DataNegotiationEvent dataNegotiationEvent = new DataNegotiationEvent(processId, issuerMono, externalEntityIdsMono, localEntityIdsMono);
-
-        List<MVEntity4DataNegotiation> expectedNewEntitiesToSync = new ArrayList<>();
-
-        List<MVEntity4DataNegotiation> expectedExistingEntitiesToSync = new ArrayList<>();
-
-        DataNegotiationResult expectedDataNegotiationResult = new DataNegotiationResult(issuer, expectedNewEntitiesToSync, expectedExistingEntitiesToSync);
-
-        when(dataTransferJob.syncData(any(), any())).thenReturn(Mono.empty());
+        when(replicationPoliciesService.isMVEntityReplicable(any(), any())).thenReturn(Mono.just(true));
+        when(replicationPoliciesService.isMVEntityReplicable(any(), eq(MVEntity4DataNegotiationMother.fullList().get(0)))).thenReturn(Mono.just(false));
 
         var result = dataNegotiationJob.negotiateDataSyncFromEvent(dataNegotiationEvent);
 

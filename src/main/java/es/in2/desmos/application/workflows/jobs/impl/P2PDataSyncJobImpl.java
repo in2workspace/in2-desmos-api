@@ -171,6 +171,9 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                                                             mvBrokerEntity.getValidFor() != null
                                                                     ? mvBrokerEntity.getValidFor().startDateTime()
                                                                     : null,
+                                                            mvBrokerEntity.getValidFor() != null
+                                                                    ? mvBrokerEntity.getValidFor().endDateTime()
+                                                                    : null,
                                                             mvAuditEntity.hash(),
                                                             mvAuditEntity.hashlink()
                                                     );
