@@ -3,12 +3,13 @@ package es.in2.desmos.domain.services.broker.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import es.in2.desmos.domain.models.BlockchainNotification;
 import es.in2.desmos.domain.models.BrokerEntityWithIdAndType;
+import es.in2.desmos.domain.models.Entity;
 import es.in2.desmos.domain.models.Id;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
 import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import es.in2.desmos.domain.services.broker.adapter.factory.BrokerAdapterFactory;
+import es.in2.desmos.domain.utils.Base64Converter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -16,8 +17,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static es.in2.desmos.domain.utils.ApplicationUtils.extractEntityIdFromDataLocation;
 
 @Slf4j
 @Service
@@ -34,11 +33,10 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
     }
 
     @Override
-    public Mono<Void> publishDataToBroker(String processId, BlockchainNotification blockchainNotification, String retrievedBrokerEntity) {
+    public Mono<Void> publishDataToBroker(String processId, String entityId, String retrievedBrokerEntity) {
         // Get the entity ID from the data location in the blockchain notification.
         // This is used to check if the retrieved entity exists in the local broker or not.
         // If it exists, the entity will be updated, otherwise, it will be created.
-        String entityId = extractEntityIdFromDataLocation(blockchainNotification.dataLocation());
         return getEntityById(processId, entityId)
                 .switchIfEmpty(Mono.just(""))
                 .flatMap(response -> {
@@ -61,7 +59,32 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
     }
 
     @Override
-    public Mono<List<String>> findAllById(String processId, Mono<List<Id>> idsMono, List<Id> processedEntities) {
+    public Mono<List<Entity>> findEntitiesAndItsSubentitiesByIdInBase64(String processId, Mono<List<Id>> idsMono, List<Id> processedEntities){
+        return findEntitiesAndItsSubentitiesById(processId, idsMono, processedEntities)
+                .doOnSuccess(allEntitiesAndSubEntities ->
+                        log.debug("ProcessID: {} - Found local entities and sub-entities in Scorpio. [entities={}]", processId, allEntitiesAndSubEntities))
+                .flatMap(items -> {
+                    var entities = Base64Converter.convertStringListToBase64List(items);
+                    return Flux.fromIterable(entities)
+                            .map(Entity::new)
+                            .collectList();
+                })
+                .doOnSuccess(base64Entities ->
+                        log.debug("ProcessID: {} - Convert local entities and sub-entities in Scorpio to Base64. [entities={}]", processId, base64Entities));
+
+    }
+
+    @Override
+    public Mono<String> getEntityById(String processId, String entityId) {
+        return brokerAdapterService.getEntityById(processId, entityId);
+    }
+
+    @Override
+    public Mono<Void> postEntity(String processId, String requestBody) {
+        return brokerAdapterService.postEntity(processId, requestBody);
+    }
+
+    private Mono<List<String>> findEntitiesAndItsSubentitiesById(String processId, Mono<List<Id>> idsMono, List<Id> processedEntities) {
         return idsMono.flatMapMany(Flux::fromIterable)
                 .flatMap(id -> {
                     if (!processedEntities.contains(id)) {
@@ -70,7 +93,7 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
                                     processedEntities.add(id);
                                     return getEntityRelationshipIds(Mono.just(entity))
                                             .flatMapMany(Flux::fromIterable)
-                                            .flatMap(relatedId -> findAllById(processId, Mono.just(List.of(relatedId)), processedEntities))
+                                            .flatMap(relatedId -> findEntitiesAndItsSubentitiesById(processId, Mono.just(List.of(relatedId)), processedEntities))
                                             .collectList()
                                             .map(relatedEntities -> {
                                                 List<String> resultList = relatedEntities.stream()
@@ -92,16 +115,6 @@ public class BrokerPublisherServiceImpl implements BrokerPublisherService {
                     }
                     return Mono.just(resultList);
                 });
-    }
-
-    @Override
-    public Mono<String> getEntityById(String processId, String entityId) {
-        return brokerAdapterService.getEntityById(processId, entityId);
-    }
-
-    @Override
-    public Mono<Void> postEntity(String processId, String requestBody) {
-        return brokerAdapterService.postEntity(processId, requestBody);
     }
 
     private Mono<List<Id>> getEntityRelationshipIds(Mono<String> entityMono) {

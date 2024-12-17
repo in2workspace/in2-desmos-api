@@ -7,7 +7,6 @@ import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
 import es.in2.desmos.domain.services.sync.DiscoverySyncWebClient;
-import es.in2.desmos.domain.utils.Base64Converter;
 import es.in2.desmos.infrastructure.configs.ApiConfig;
 import es.in2.desmos.infrastructure.configs.ExternalAccessNodesConfig;
 import lombok.RequiredArgsConstructor;
@@ -125,17 +124,7 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
     @Override
     public Mono<List<Entity>> getLocalEntitiesByIdInBase64(String processId, Mono<List<Id>> ids) {
         return brokerPublisherService
-                .findAllById(processId, ids, new ArrayList<>())
-                .doOnSuccess(allEntitiesAndSubEntities ->
-                        log.debug("ProcessID: {} - Found all local entities with sub-entities in Scorpio. [entities={}]", processId, allEntitiesAndSubEntities))
-                .flatMap(items -> {
-                    var entities = Base64Converter.convertStringListToBase64List(items);
-                    return Flux.fromIterable(entities)
-                            .map(Entity::new)
-                            .collectList();
-                })
-                .doOnSuccess(base64Entities ->
-                        log.debug("ProcessID: {} - Convert all local entities with sub-entities in Scorpio to Base64. [entities={}]", processId, base64Entities));
+                .findEntitiesAndItsSubentitiesByIdInBase64(processId, ids, new ArrayList<>());
     }
 
     private static Mono<List<String>> getEntitiesIds(Mono<List<BrokerEntityWithIdTypeLastUpdateAndVersion>> mvBrokerEntities4DataNegotiationMono) {
