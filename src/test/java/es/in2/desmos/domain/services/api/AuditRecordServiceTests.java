@@ -340,7 +340,7 @@ class AuditRecordServiceTests {
 
         StepVerifier
                 .create(result)
-                .expectErrorMatches(throwable -> throwable instanceof JsonProcessingException)
+                .expectErrorMatches(JsonProcessingException.class::isInstance)
                 .verify();
     }
 

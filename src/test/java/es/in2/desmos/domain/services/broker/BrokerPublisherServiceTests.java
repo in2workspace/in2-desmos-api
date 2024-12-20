@@ -262,7 +262,7 @@ class BrokerPublisherServiceTests {
 
         StepVerifier.
                 create(resultMono)
-                .expectErrorMatches(throwable -> throwable instanceof JsonProcessingException)
+                .expectErrorMatches(JsonProcessingException.class::isInstance)
                 .verify();
     }
 

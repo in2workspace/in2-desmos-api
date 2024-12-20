@@ -30,7 +30,7 @@ import java.util.Objects;
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @WithMockUser
-public class EntitiesIntegrationTest {
+class EntitiesIntegrationTest {
 
     @DynamicPropertySource
     static void setDynamicProperties(DynamicPropertyRegistry registry) {
@@ -45,7 +45,7 @@ public class EntitiesIntegrationTest {
 
     private WebTestClient webTestClient;
 
-    private static final String brokerEntitiesJson =
+    private static final String BROKER_ENTITIES_JSON =
             BrokerDataMother.GET_ENTITY_REQUEST_WITH_SUB_ENTITIES_ARRAY_JSON_VARIABLE;
 
     private static final List<String> brokerEntitiesIds = List.of(
@@ -59,7 +59,7 @@ public class EntitiesIntegrationTest {
         String brokerUrl = ContainerManager.getBaseUriForScorpioA();
         ScorpioInflator.addEntitiesToBroker(
                 brokerUrl,
-                brokerEntitiesJson);
+                BROKER_ENTITIES_JSON);
     }
 
     @BeforeEach
@@ -78,8 +78,8 @@ public class EntitiesIntegrationTest {
     @Test
     void test() throws JSONException, JsonProcessingException {
         List<String> expectedBrokerEntities = new ArrayList<>();
-        for (int i = 0; i < new JSONArray(brokerEntitiesJson).length(); i++) {
-            expectedBrokerEntities.add(new JSONArray(brokerEntitiesJson).getString(i));
+        for (int i = 0; i < new JSONArray(BROKER_ENTITIES_JSON).length(); i++) {
+            expectedBrokerEntities.add(new JSONArray(BROKER_ENTITIES_JSON).getString(i));
         }
 
         String expectedEntitiesJson = getJsonNodeFromStringsList(expectedBrokerEntities).toString();

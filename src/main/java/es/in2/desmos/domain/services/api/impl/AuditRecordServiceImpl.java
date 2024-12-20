@@ -187,7 +187,7 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                                                                     // with the hash of the current entity
                                                                     auditRecord.setHashLink(setAuditRecordHashLink(lastAuditRecordRegistered, auditRecordHash));
                                                                     return auditRecordRepository.save(auditRecord)
-                                                                            .doOnSuccess(unused -> log.info("ProcessID: {} - Audit record saved successfully. - Status: {}", processId, status))
+                                                                            .doOnSuccess(unused -> log.info("ProcessID: {} - Audit record for sub-entity saved successfully. - Status: {}", processId, status))
                                                                             .then();
                                                                 } catch (JsonProcessingException |
                                                                          NoSuchAlgorithmException e) {
