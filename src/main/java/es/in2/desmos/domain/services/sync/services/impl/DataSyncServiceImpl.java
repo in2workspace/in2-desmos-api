@@ -1,7 +1,6 @@
 package es.in2.desmos.domain.services.sync.services.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.JOSEException;
 import es.in2.desmos.application.workflows.jobs.P2PDataSyncJob;
 import es.in2.desmos.domain.exceptions.BrokerEntityRetrievalException;
@@ -9,9 +8,11 @@ import es.in2.desmos.domain.exceptions.HashLinkException;
 import es.in2.desmos.domain.exceptions.InvalidTokenException;
 import es.in2.desmos.domain.models.AuditRecord;
 import es.in2.desmos.domain.models.BlockchainNotification;
+import es.in2.desmos.domain.models.Entity;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.api.QueueService;
 import es.in2.desmos.domain.services.sync.services.DataSyncService;
+import es.in2.desmos.domain.utils.Base64Converter;
 import es.in2.desmos.infrastructure.configs.ApiConfig;
 import es.in2.desmos.infrastructure.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.security.NoSuchAlgorithmException;
@@ -32,7 +34,6 @@ import static es.in2.desmos.domain.utils.ApplicationUtils.*;
 public class DataSyncServiceImpl implements DataSyncService {
 
     private final ApiConfig apiConfig;
-    private final ObjectMapper objectMapper;
     private final AuditRecordService auditRecordService;
     private final P2PDataSyncJob p2PDataSyncJob;
     private final QueueService queueServiceImpl;
@@ -68,7 +69,7 @@ public class DataSyncServiceImpl implements DataSyncService {
      *  If the entity is successfully retrieved, the method follows by checking the data integrity of itself.
      */
     @Override
-    public Mono<String> getEntityFromExternalSource(String processId, BlockchainNotification blockchainNotification) {
+    public Flux<String> getEntityFromExternalSource(String processId, BlockchainNotification blockchainNotification) {
         log.debug("ProcessID: {} - Retrieving entity from the external broker...", processId);
         // Get the External Broker URL from the dataLocation
         String externalBrokerURL = extractContextBrokerUrlFromDataLocation(blockchainNotification.dataLocation());
@@ -103,7 +104,9 @@ public class DataSyncServiceImpl implements DataSyncService {
                         clientResponse -> {
                             throw new BrokerEntityRetrievalException("Error occurred while retrieving entity from the external broker");
                         })
-                .bodyToMono(String.class);
+                .bodyToFlux(Entity.class)
+                .map(Entity::value)
+                .map(Base64Converter::convertBase64ToString);
     }
 
     @Override

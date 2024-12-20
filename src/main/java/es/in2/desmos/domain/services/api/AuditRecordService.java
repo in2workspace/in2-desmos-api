@@ -12,6 +12,10 @@ public interface AuditRecordService {
 
     Mono<Void> buildAndSaveAuditRecordFromBlockchainNotification(String processId, BlockchainNotification blockchainNotification, String retrievedBrokerEntity, AuditRecordStatus status);
 
+    Mono<Void> buildAndSaveAuditRecordForSubEntity(String processId, String entityId, String entityType,
+                                                   String retrievedBrokerEntity,
+                                                   AuditRecordStatus status);
+
     Mono<Void> buildAndSaveAuditRecordFromDataSync(String processId, String issuer, MVAuditServiceEntity4DataNegotiation mvAuditServiceEntity4DataNegotiation, AuditRecordStatus status);
 
     Mono<AuditRecord> fetchMostRecentAuditRecord();
