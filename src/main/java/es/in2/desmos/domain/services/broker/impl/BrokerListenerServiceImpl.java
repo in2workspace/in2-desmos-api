@@ -99,9 +99,13 @@ public class BrokerListenerServiceImpl implements BrokerListenerService {
 
                         System.out.println("BrokerNotification entity: " + retrievedBrokerEntity + "\n hash: " + newEntityHash);
 
-                        return auditRecordFound.getEntityHash().equals(newEntityHash)
-                                ? Mono.just(true)
-                                : Mono.just(false);
+                        if (auditRecordFound.getEntityHash().equals(newEntityHash)) {
+                            System.out.println("SG iguals: " + newEntityHash);
+                            return Mono.just(true);
+                        } else {
+                            System.out.println("SG diferents. Hash BrokerNotification: " + newEntityHash + " Hash AuditRecord: " + auditRecordFound.getEntityHash());
+                            return Mono.just(false);
+                        }
                     } catch (JsonProcessingException | NoSuchAlgorithmException e) {
                         log.warn("ProcessID: {} - Error processing JSON: {}", processId, e.getMessage());
                         return Mono.error(new JsonReadingException("Error processsing Broker Notification JSON"));
