@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.in2.desmos.application.workflows.impl.SubscribeWorkflowImpl;
+import es.in2.desmos.domain.exceptions.JsonReadingException;
 import es.in2.desmos.domain.models.AuditRecordStatus;
 import es.in2.desmos.domain.models.BlockchainNotification;
 import es.in2.desmos.domain.models.EventQueue;
@@ -44,6 +45,9 @@ class SubscribeWorkflowTests {
 
     @Mock
     private DataSyncService dataSyncService;
+
+    @Mock
+    EventQueue eventQueue;
 
     @Spy
     private ObjectMapper objectMapper = new ObjectMapper();
@@ -184,6 +188,69 @@ class SubscribeWorkflowTests {
         verify(brokerPublisherService, times(1))
                 .publishDataToBroker(processId, entityId, retrievedBrokerEntity);
         verifyNoInteractions(auditRecordService);
+    }
+
+    @Test
+    void itShouldReturnMonoEmptyIfEntityFromExternalSourceRaiseExceptionWorkflow() {
+        String processId = "processId";
+
+        BlockchainNotification blockchainNotification = BlockchainNotificationMother.Empty();
+
+        when(eventQueue.getEvent()).thenReturn(List.of(blockchainNotification));
+        when(pendingSubscribeEventsQueue.getEventStream()).thenReturn(Flux.just(eventQueue));
+        when(pendingSubscribeEventsQueue.getEventStream())
+                .thenReturn(Flux.just(eventQueue));
+        when(eventQueue.getEvent().get(0))
+                .thenReturn(List.of(blockchainNotification));
+        when(dataSyncService.getEntityFromExternalSource(any(), any())).thenReturn(Flux.error(new JsonReadingException("Error reading json")));
+
+        StepVerifier.create(subscribeWorkflow.startSubscribeWorkflow(processId))
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+    @Test
+    void itShouldRaiseExceptionIfEntityIdJsonIsIncorrect() throws JsonProcessingException {
+        String processId = "processId";
+
+        BlockchainNotification blockchainNotification = BlockchainNotificationMother.Empty();
+
+        when(eventQueue.getEvent()).thenReturn(List.of(blockchainNotification));
+        when(pendingSubscribeEventsQueue.getEventStream()).thenReturn(Flux.just(eventQueue));
+        when(pendingSubscribeEventsQueue.getEventStream())
+                .thenReturn(Flux.just(eventQueue));
+        when(eventQueue.getEvent().get(0))
+                .thenReturn(List.of(blockchainNotification));
+        when(dataSyncService.getEntityFromExternalSource(processId, blockchainNotification))
+                .thenReturn(Flux.just(BrokerDataMother.WITHOUT_ID));
+        when(objectMapper.readTree(anyString())).thenThrow(new JsonProcessingException("Error"){});
+
+        StepVerifier.create(subscribeWorkflow.startSubscribeWorkflow(processId))
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+    @Test
+    void itShouldRaiseExceptionIfEntityTypeJsonIsIncorrect() throws JsonProcessingException {
+        String processId = "processId";
+
+        BlockchainNotification blockchainNotification = BlockchainNotificationMother.Empty();
+
+        when(eventQueue.getEvent()).thenReturn(List.of(blockchainNotification));
+        when(pendingSubscribeEventsQueue.getEventStream()).thenReturn(Flux.just(eventQueue));
+        when(pendingSubscribeEventsQueue.getEventStream())
+                .thenReturn(Flux.just(eventQueue));
+        when(eventQueue.getEvent().get(0))
+                .thenReturn(List.of(blockchainNotification));
+        when(dataSyncService.getEntityFromExternalSource(processId, blockchainNotification))
+                .thenReturn(Flux.just(BrokerDataMother.WITHOUT_ID));
+        when(objectMapper.readTree(anyString()))
+                .thenCallRealMethod()
+                .thenThrow(new JsonProcessingException("Error"){});
+
+        StepVerifier.create(subscribeWorkflow.startSubscribeWorkflow(processId))
+                .expectNextCount(0)
+                .verifyComplete();
     }
 
     private String getEntityId(String brokerData) throws JsonProcessingException {

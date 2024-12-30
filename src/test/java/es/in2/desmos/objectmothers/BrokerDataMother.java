@@ -532,4 +532,12 @@ public final class BrokerDataMother {
                          "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context-v1.7.jsonld"
                      ]
                  }""";
+
+    public static final String WITHOUT_ID = """
+            {
+                 "type": "other",
+                 "@context": [
+                     "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context-v1.7.jsonld"
+                 ]
+             }""";
 }
