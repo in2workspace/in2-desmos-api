@@ -55,6 +55,7 @@ public class BrokerListenerServiceImpl implements BrokerListenerService {
                                         log.info("ProcessID: {} - Broker Notification is self-generated.", processId);
                                         return Mono.empty();
                                     } else {
+                                        log.info("ProcessID: {} - Broker Notification is from external source.", processId);
                                         return auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(processId, dataMap,
                                                         AuditRecordStatus.RECEIVED, null)
                                                 // Set priority for the pendingSubscribeEventsQueue event
@@ -93,7 +94,11 @@ public class BrokerListenerServiceImpl implements BrokerListenerService {
         return auditRecordService.findMostRecentRetrievedOrDeletedByEntityId(processId, id)
                 .flatMap(auditRecordFound -> {
                     try {
+                        String retrievedBrokerEntity = objectMapper.writer().writeValueAsString(dataMap);
                         String newEntityHash = calculateSHA256(objectMapper.writer().writeValueAsString(dataMap));
+
+                        System.out.println("BrokerNotification entity: " + retrievedBrokerEntity + "\n hash: " + newEntityHash);
+
                         return auditRecordFound.getEntityHash().equals(newEntityHash)
                                 ? Mono.just(true)
                                 : Mono.just(false);

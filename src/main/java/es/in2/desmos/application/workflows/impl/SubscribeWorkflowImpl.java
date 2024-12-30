@@ -48,13 +48,16 @@ public class SubscribeWorkflowImpl implements SubscribeWorkflow {
                                                 // verify the data integrity of the retrieved entity
                                                 .flatMap(retrievedBrokerEntity ->
                                                         // Verify the integrity and consistency of the retrieved entity
-                                                        dataSyncService.verifyRetrievedEntityData(processId, blockchainNotification, retrievedBrokerEntity)
-                                                                // Build and save the audit record for RETRIEVED status
-                                                                .then(auditRecordService.buildAndSaveAuditRecordFromBlockchainNotification(processId, blockchainNotification, retrievedBrokerEntity, AuditRecordStatus.RETRIEVED))
-                                                                // Publish the retrieved entity to the local broker
-                                                                .then(brokerPublisherService.publishDataToBroker(processId, blockchainNotification, retrievedBrokerEntity))
-                                                                // Build and save the audit record for PUBLISHED status
-                                                                .then(auditRecordService.buildAndSaveAuditRecordFromBlockchainNotification(processId, blockchainNotification, retrievedBrokerEntity, AuditRecordStatus.PUBLISHED))
+                                                        {
+                                                            System.out.println(" Retrieved broker entity: " + retrievedBrokerEntity);
+                                                            return dataSyncService.verifyRetrievedEntityData(processId, blockchainNotification, retrievedBrokerEntity)
+                                                                    // Build and save the audit record for RETRIEVED status
+                                                                    .then(auditRecordService.buildAndSaveAuditRecordFromBlockchainNotification(processId, blockchainNotification, retrievedBrokerEntity, AuditRecordStatus.RETRIEVED))
+                                                                    // Publish the retrieved entity to the local broker
+                                                                    .then(brokerPublisherService.publishDataToBroker(processId, blockchainNotification, retrievedBrokerEntity))
+                                                                    // Build and save the audit record for PUBLISHED status
+                                                                    .then(auditRecordService.buildAndSaveAuditRecordFromBlockchainNotification(processId, blockchainNotification, retrievedBrokerEntity, AuditRecordStatus.PUBLISHED));
+                                                        }
                                                 )
                                 )
                                 .doOnSuccess(success -> log.info("ProcessID: {} - Subscribe Workflow completed successfully.", processId))
