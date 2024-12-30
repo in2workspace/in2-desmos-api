@@ -35,12 +35,11 @@ class BlockchainConfigTests {
     @Test
     void getEntityTypesReturnsCorrectEntities() {
         // Arrange
-        List<String> expectedEntityTypes = List.of("ProductOffering", "Catalogue", "Category");
-        when(txSubscriptionProperties.entityTypes()).thenReturn(expectedEntityTypes);
+        List<String> expectedEntityTypes = List.of("product-offering", "category", "catalog");
         // Act
         List<String> actualEntityTypes = blockchainConfig.getEntityTypes();
         // Assert
-        assertEquals(expectedEntityTypes, actualEntityTypes, "The entity types should match the mock values");
+        assertEquals(expectedEntityTypes, actualEntityTypes, "The entity types should match the expected values");
     }
 
 }

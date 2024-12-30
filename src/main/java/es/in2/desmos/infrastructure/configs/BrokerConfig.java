@@ -16,12 +16,14 @@ public class BrokerConfig {
     private final BrokerProperties brokerProperties;
     private final NgsiLdSubscriptionProperties ngsiLdSubscriptionProperties;
 
+    private static final List<String> ENTITY_TYPES = List.of("product-offering", "category", "catalog");
+
     public String getNotificationEndpoint() {
         return ngsiLdSubscriptionProperties.notificationEndpoint();
     }
 
     public List<String> getEntityTypes() {
-        return ngsiLdSubscriptionProperties.entityTypes();
+        return ENTITY_TYPES;
     }
 
     public String getEntitiesExternalDomain() { return brokerProperties.internalDomain() + brokerProperties.paths().entities();}

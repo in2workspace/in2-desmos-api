@@ -46,7 +46,7 @@ public final class BlockchainSubscriptionMother {
 
     public static BlockchainSubscription defaultConfigured() {
         List<String> eventTypes = List.of(
-                "ProductOffering", "Category", "Catalogue");
+                "product-offering", "category", "catalog");
 
         List<String> metadata = List.of("local");
 

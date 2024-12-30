@@ -39,8 +39,7 @@ class BrokerConfigTests {
     @Test
     void getEntityTypesReturnsCorrectEntities() {
         // Arrange
-        List<String> expectedEntityTypes = List.of("ProductOffering", "Catalogue", "Category");
-        when(ngsiLdSubscriptionProperties.entityTypes()).thenReturn(expectedEntityTypes);
+        List<String> expectedEntityTypes = List.of("product-offering", "category", "catalog");
         // Act
         List<String> actualEntityTypes = brokerConfig.getEntityTypes();
         // Assert
