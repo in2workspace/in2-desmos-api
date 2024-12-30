@@ -59,8 +59,11 @@ public class ApplicationRunner {
         return setBrokerSubscription(processId)
                 .then(setBlockchainSubscription(processId))
                 .then(setAccessNodePublicKeysFromExternalYaml(processId))
-                .thenMany(initializeDataSync(processId))
-                .then();
+                .doOnTerminate(() -> {
+                    isQueueAuthorizedForEmit.set(true);
+                    initializeQueueProcessing(processId);
+                    log.info("ProcessID: {} - Queues have been authorized and enabled.", processId);
+                });
     }
 
     @Retryable(retryFor = RequestErrorException.class, maxAttempts = 4, backoff = @Backoff(delay = 2000))
