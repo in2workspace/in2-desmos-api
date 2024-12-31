@@ -415,7 +415,7 @@ public class AuditRecordServiceImpl implements AuditRecordService {
 
     private Mono<String> getEntityHash(String processId, Mono<String> entityIdMono) {
         return entityIdMono.flatMap(entityId -> {
-            System.out.println("Xivato 200");
+            System.out.println("Xivato 200. EntityId: " + entityId);
             return brokerPublisherService.getEntityById(processId, entityId)
                     .flatMap(entity -> {
                         System.out.println("Xivato 201");
