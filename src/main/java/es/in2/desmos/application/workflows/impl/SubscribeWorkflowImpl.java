@@ -55,17 +55,14 @@ public class SubscribeWorkflowImpl implements SubscribeWorkflow {
                                                 // verify the data integrity of the retrieved entity
                                                 .concatMap(retrievedBrokerEntity ->
                                                         {
-                                                            System.out.println("Retrieved Broker Entity: " + retrievedBrokerEntity);
                                                             String entityType = getEntityTypeFromJson(retrievedBrokerEntity);
                                                             String entityId = getEntityIdFromJson(retrievedBrokerEntity);
 
-                                                            System.out.println("Xivato 1. Type: " + entityType + " - Id: " + entityId);
                                                             log.debug("ProcessID: {} - Receive object with id: {} has type: {}.", processId, entityId, entityType);
 
                                                             if (hasRootObjectType(entityType)) {
                                                                 if (isCurrentRootObject(blockchainNotification, entityId)) {
                                                                     log.debug("ProcessID: {} - Retrieved entity with id: {} is root object", processId, entityId);
-                                                                    System.out.println("Xivato 2");
 
                                                                     // Verify the integrity and consistency of the retrieved entity
                                                                     return dataSyncService.verifyRetrievedEntityData(processId, blockchainNotification, retrievedBrokerEntity)
@@ -76,7 +73,6 @@ public class SubscribeWorkflowImpl implements SubscribeWorkflow {
                                                                             // Build and save the audit record for PUBLISHED status
                                                                             .then(auditRecordService.buildAndSaveAuditRecordFromBlockchainNotification(processId, blockchainNotification, retrievedBrokerEntity, AuditRecordStatus.PUBLISHED));
                                                                 } else {
-                                                                    System.out.println("Xivato 3");
                                                                     log.debug("ProcessID: {} - Retrieved entity with id: {} has root object type but it isn't the current root object", processId, entityId);
                                                                     return auditRecordService.buildAndSaveAuditRecordForSubEntity(processId, entityId, entityType, retrievedBrokerEntity, AuditRecordStatus.RETRIEVED)
                                                                             .then(brokerPublisherService.publishDataToBroker(processId, entityId, retrievedBrokerEntity))
