@@ -2,6 +2,7 @@ package es.in2.desmos.domain.services.api.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import es.in2.desmos.domain.exceptions.JsonReadingException;
 import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.repositories.AuditRecordRepository;
 import es.in2.desmos.domain.services.api.AuditRecordService;
@@ -158,13 +159,12 @@ public class AuditRecordServiceImpl implements AuditRecordService {
         return fetchMostRecentAuditRecord()
                 .flatMap(lastAuditRecordRegistered -> {
                     System.out.println("Xivato 98");
-                    return getEntityHash(processId, Mono.just(retrievedBrokerEntity))
-                            .flatMap(entityHash -> {
                                 System.out.println("Xivato 99");
                                 return findLatestConsumerPublishedAuditRecordByEntityId(processId, entityId)
                                         .flatMap(previousAuditRecord -> {
                                             System.out.println("Xivato 100");
                                             String previousHashLink = previousAuditRecord.getEntityHashLink();
+                                            String entityHash = calculateHash(retrievedBrokerEntity);
                                             return calculateHashLink(Mono.just(previousHashLink), Mono.just(entityHash))
                                                     .flatMap(entityHashLink -> {
                                                         try {
@@ -200,7 +200,6 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                                                     });
                                         });
                             });
-                });
     }
 
     /**
@@ -440,6 +439,14 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                         return Mono.error(e);
                     }
                 });
+    }
+
+    private String calculateHash(String retrievedBrokerEntity) {
+        try {
+            return ApplicationUtils.calculateSHA256(retrievedBrokerEntity);
+        } catch (NoSuchAlgorithmException | JsonProcessingException e) {
+            throw new JsonReadingException(e.getMessage());
+        }
     }
 
 }
