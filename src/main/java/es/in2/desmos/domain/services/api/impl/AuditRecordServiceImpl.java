@@ -408,17 +408,16 @@ public class AuditRecordServiceImpl implements AuditRecordService {
     }
 
     private Mono<String> getEntityHash(String processId, Mono<String> entityIdMono) {
-        return entityIdMono.flatMap(entityId -> {
-            return brokerPublisherService.getEntityById(processId, entityId)
-                    .flatMap(entity -> {
-                        try {
-                            String hash = ApplicationUtils.calculateSHA256(entity);
-                            return Mono.just(hash);
-                        } catch (NoSuchAlgorithmException | JsonProcessingException e) {
-                            return Mono.error(e);
-                        }
-                    });
-        });
+        return entityIdMono.flatMap(entityId ->
+                brokerPublisherService.getEntityById(processId, entityId)
+                        .flatMap(entity -> {
+                            try {
+                                String hash = ApplicationUtils.calculateSHA256(entity);
+                                return Mono.just(hash);
+                            } catch (NoSuchAlgorithmException | JsonProcessingException e) {
+                                return Mono.error(e);
+                            }
+                        }));
     }
 
     private Mono<String> calculateHashLink(Mono<String> previousHashlink, Mono<String> currentHash) {
