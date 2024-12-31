@@ -55,6 +55,7 @@ public class SubscribeWorkflowImpl implements SubscribeWorkflow {
                                                 // verify the data integrity of the retrieved entity
                                                 .concatMap(retrievedBrokerEntity ->
                                                         {
+                                                            System.out.println("Retrieved Broker Entity: " + retrievedBrokerEntity);
                                                             String entityType = getEntityTypeFromJson(retrievedBrokerEntity);
                                                             String entityId = getEntityIdFromJson(retrievedBrokerEntity);
 
