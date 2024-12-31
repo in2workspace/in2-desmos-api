@@ -153,9 +153,11 @@ public class AuditRecordServiceImpl implements AuditRecordService {
     public Mono<Void> buildAndSaveAuditRecordForSubEntity(String processId, String entityId, String entityType,
                                                           String retrievedBrokerEntity,
                                                           AuditRecordStatus status) {
+        System.out.println("Xivato 97");
         // Get the most recent audit record for the entityId and get the most recent audit record overall
         return fetchMostRecentAuditRecord()
                 .flatMap(lastAuditRecordRegistered -> {
+                    System.out.println("Xivato 98");
                     return getEntityHash(processId, Mono.just(retrievedBrokerEntity))
                             .flatMap(entityHash -> {
                                 System.out.println("Xivato 99");
