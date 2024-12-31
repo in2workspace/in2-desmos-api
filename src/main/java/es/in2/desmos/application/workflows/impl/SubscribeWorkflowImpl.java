@@ -53,7 +53,7 @@ public class SubscribeWorkflowImpl implements SubscribeWorkflow {
                                 .flatMap(blockchainNotification ->
                                         dataSyncService.getEntityFromExternalSource(processId, blockchainNotification)
                                                 // verify the data integrity of the retrieved entity
-                                                .flatMap(retrievedBrokerEntity ->
+                                                .concatMap(retrievedBrokerEntity ->
                                                         {
                                                             String entityType = getEntityTypeFromJson(retrievedBrokerEntity);
                                                             String entityId = getEntityIdFromJson(retrievedBrokerEntity);
