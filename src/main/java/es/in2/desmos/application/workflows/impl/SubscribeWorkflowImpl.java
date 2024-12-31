@@ -59,7 +59,7 @@ public class SubscribeWorkflowImpl implements SubscribeWorkflow {
                                                             String entityType = getEntityTypeFromJson(retrievedBrokerEntity);
                                                             String entityId = getEntityIdFromJson(retrievedBrokerEntity);
 
-                                                            System.out.println("Xivato 1");
+                                                            System.out.println("Xivato 1. Type: " + entityType + " - Id: " + entityId);
                                                             log.debug("ProcessID: {} - Receive object with id: {} has type: {}.", processId, entityId, entityType);
 
                                                             if (hasRootObjectType(entityType)) {
