@@ -12,6 +12,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BlockchainConfig {
 
+    private static final List<String> ENTITY_TYPES = List.of("product-offering", "category", "catalog");
+
     private final TxSubscriptionProperties txSubscriptionProperties;
 
     public String getNotificationEndpoint() {
@@ -19,7 +21,7 @@ public class BlockchainConfig {
     }
 
     public List<String> getEntityTypes() {
-        return txSubscriptionProperties.entityTypes();
+        return ENTITY_TYPES;
     }
 
 }

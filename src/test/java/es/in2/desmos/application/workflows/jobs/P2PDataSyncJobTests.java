@@ -23,7 +23,6 @@ import reactor.test.StepVerifier;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -164,23 +163,16 @@ class P2PDataSyncJobTests {
 
         String entityRequestBrokerJson = BrokerDataMother.GET_ENTITY_REQUEST_BROKER_JSON;
         JSONArray expectedResponseJsonArray = new JSONArray(entityRequestBrokerJson);
-        List<String> localEntities = new ArrayList<>();
+        List<Entity> expectedLocalEntities = new ArrayList<>();
         for (int i = 0; i < expectedResponseJsonArray.length(); i++) {
             String entity = expectedResponseJsonArray.getString(i);
 
-            localEntities.add(entity);
+            expectedLocalEntities.add(new Entity(entity));
         }
-        Mono<List<String>> localEntitiesMono = Mono.just(localEntities);
-
-        List<Entity> expectedLocalEntities = new ArrayList<>();
-        for (var item : localEntities) {
-            String encodedItem = Base64.getEncoder().encodeToString(item.getBytes());
-
-            expectedLocalEntities.add(new Entity(encodedItem));
-        }
+        Mono<List<Entity>> localEntitiesMono = Mono.just(expectedLocalEntities);
 
         String processId = "0";
-        when(brokerPublisherService.findAllById(eq(processId), any(), any())).thenReturn(localEntitiesMono);
+        when(brokerPublisherService.findEntitiesAndItsSubentitiesByIdInBase64(eq(processId), any(), any())).thenReturn(localEntitiesMono);
 
         Mono<List<Entity>> result = p2PDataSyncJob.getLocalEntitiesByIdInBase64(processId, idsMono);
 
@@ -188,10 +180,10 @@ class P2PDataSyncJobTests {
 
         StepVerifier
                 .create(result)
-                .expectNext(expectedLocalEntities)
+                .assertNext(x -> assertThat(x).isEqualTo(expectedLocalEntities))
                 .verifyComplete();
 
-        verify(brokerPublisherService, times(1)).findAllById(eq(processId), any(), any());
+        verify(brokerPublisherService, times(1)).findEntitiesAndItsSubentitiesByIdInBase64(eq(processId), any(), any());
         verifyNoMoreInteractions(brokerPublisherService);
     }
 }

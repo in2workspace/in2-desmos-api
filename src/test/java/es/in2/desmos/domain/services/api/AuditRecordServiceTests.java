@@ -19,10 +19,9 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
@@ -341,7 +340,7 @@ class AuditRecordServiceTests {
 
         StepVerifier
                 .create(result)
-                .expectErrorMatches(throwable -> throwable instanceof JsonProcessingException)
+                .expectErrorMatches(JsonProcessingException.class::isInstance)
                 .verify();
     }
 
@@ -544,5 +543,41 @@ class AuditRecordServiceTests {
                                             .entityHashLink(expectedAuditEntities.get(0).hash())
                                             .trader(AuditRecordTrader.PRODUCER));
                 });
+    }
+
+    @Test
+    void testBuildAndSaveAuditRecordForSubEntity() {
+        String processId = "testProcessId";
+        String entityId = "testEntityId";
+        String entityType = "testEntityType";
+        String retrievedBrokerEntity = "testRetrievedBrokerEntity";
+        AuditRecordStatus status = AuditRecordStatus.RETRIEVED;
+
+        AuditRecord lastAuditRecord = AuditRecord.builder()
+                .id(UUID.randomUUID())
+                .processId(processId)
+                .createdAt(Timestamp.from(Instant.now()))
+                .entityId(entityId)
+                .entityType(entityType)
+                .entityHash("previousHash")
+                .entityHashLink("previousHashLink")
+                .dataLocation("")
+                .status(AuditRecordStatus.PUBLISHED)
+                .trader(AuditRecordTrader.CONSUMER)
+                .hash("previousHash")
+                .hashLink("previousHashLink")
+                .newTransaction(true)
+                .build();
+
+        when(auditRecordRepository.findMostRecentAuditRecord()).thenReturn(Mono.just(lastAuditRecord));
+        when(auditRecordRepository.findLastPublishedConsumerAuditRecordByEntityId(anyString())).thenReturn(Mono.just(lastAuditRecord));
+        when(auditRecordRepository.save(any(AuditRecord.class))).thenReturn(Mono.just(lastAuditRecord));
+
+        Mono<Void> result = auditRecordService.buildAndSaveAuditRecordForSubEntity(processId, entityId, entityType, retrievedBrokerEntity, status);
+
+        StepVerifier.create(result)
+                .verifyComplete();
+
+        verify(auditRecordRepository, times(1)).save(any(AuditRecord.class));
     }
 }

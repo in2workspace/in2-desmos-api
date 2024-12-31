@@ -2,6 +2,7 @@ package es.in2.desmos.domain.services.api.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import es.in2.desmos.domain.exceptions.JsonReadingException;
 import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.repositories.AuditRecordRepository;
 import es.in2.desmos.domain.services.api.AuditRecordService;
@@ -147,6 +148,53 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                         return Mono.error(e);
                     }
                 });
+    }
+
+    @Override
+    public Mono<Void> buildAndSaveAuditRecordForSubEntity(String processId, String entityId, String entityType,
+                                                          String retrievedBrokerEntity,
+                                                          AuditRecordStatus status) {
+        // Get the most recent audit record for the entityId and get the most recent audit record overall
+        return fetchMostRecentAuditRecord()
+                .flatMap(lastAuditRecordRegistered ->
+                        findLatestConsumerPublishedAuditRecordByEntityId(processId, entityId)
+                                .flatMap(previousAuditRecord -> {
+                                    String previousHashLink = previousAuditRecord.getEntityHashLink();
+                                    String entityHash = calculateHash(retrievedBrokerEntity);
+                                    return calculateHashLink(Mono.just(previousHashLink), Mono.just(entityHash))
+                                            .flatMap(entityHashLink -> {
+                                                try {
+                                                    // Create the new audit record
+                                                    AuditRecord auditRecord = AuditRecord.builder()
+                                                            .id(UUID.randomUUID())
+                                                            .processId(processId)
+                                                            .createdAt(Timestamp.from(Instant.now()))
+                                                            .entityId(entityId)
+                                                            .entityType(entityType)
+                                                            .entityHash(entityHash)
+                                                            .entityHashLink(entityHashLink)
+                                                            .dataLocation("")
+                                                            .status(status)
+                                                            .trader(AuditRecordTrader.CONSUMER)
+                                                            .hash("")
+                                                            .hashLink("")
+                                                            .newTransaction(true)
+                                                            .build();
+                                                    // Firstly, we calculate the hash of the entity without the hash and hashLink fields
+                                                    String auditRecordHash = calculateSHA256(objectMapper.writeValueAsString(auditRecord));
+                                                    auditRecord.setHash(auditRecordHash);
+                                                    // Then, we calculate the hashLink of the entity concatenating the previous hashLink
+                                                    // with the hash of the current entity
+                                                    auditRecord.setHashLink(setAuditRecordHashLink(lastAuditRecordRegistered, auditRecordHash));
+                                                    return auditRecordRepository.save(auditRecord)
+                                                            .doOnSuccess(unused -> log.info("ProcessID: {} - Audit record for sub-entity saved successfully. - Status: {}", processId, status))
+                                                            .then();
+                                                } catch (JsonProcessingException |
+                                                         NoSuchAlgorithmException e) {
+                                                    return Mono.error(e);
+                                                }
+                                            });
+                                }));
     }
 
     /**
@@ -382,6 +430,14 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                         return Mono.error(e);
                     }
                 });
+    }
+
+    private String calculateHash(String retrievedBrokerEntity) {
+        try {
+            return ApplicationUtils.calculateSHA256(retrievedBrokerEntity);
+        } catch (NoSuchAlgorithmException | JsonProcessingException e) {
+            throw new JsonReadingException(e.getMessage());
+        }
     }
 
 }

@@ -35,10 +35,10 @@ class BlockchainAdapterServiceTest {
 
         createSubscriptions(expected2, expected3);
 
-        var resultMono = blockchainAdapterService.getSubscriptions("0");
+        var resultFlux = blockchainAdapterService.getSubscriptions("0");
 
         StepVerifier
-                .create(resultMono)
+                .create(resultFlux)
                 .assertNext(result -> assertThat(result).isEqualTo(expected1))
                 .assertNext(result -> assertThat(result).isEqualTo(expected2))
                 .assertNext(result -> assertThat(result).isEqualTo(expected3))

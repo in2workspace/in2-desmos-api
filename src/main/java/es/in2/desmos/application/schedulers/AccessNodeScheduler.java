@@ -15,7 +15,7 @@ public class AccessNodeScheduler {
 
     private final TrustFrameworkConfig trustFrameworkConfig;
 
-    @Scheduled(cron = "0 0 3 * * *")
+    @Scheduled(cron = "0 */5 * * * *")
     public void getPublicKeyFromAccessNodeRepository() {
         String processId = UUID.randomUUID().toString();
 

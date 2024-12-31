@@ -76,11 +76,6 @@ public class BrokerListenerServiceImpl implements BrokerListenerService {
                                 }));
     }
 
-    @Override
-    public Mono<String> getEntityById(String processId, String entityId) {
-        return brokerAdapter.getEntityById(processId, entityId);
-    }
-
     private Mono<Map<String, Object>> getDataFromBrokerNotification(BrokerNotification brokerNotification) {
         //Get data from brokerNotification
         Map<String, Object> dataMap = brokerNotification.data().get(0);
