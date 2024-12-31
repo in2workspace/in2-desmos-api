@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Retry mechanism for Blockchain Adapter and Context Broker.
 - Recover after a failure mechanism for Blockchain Adapter and Context Broker.
 
+## [Released]: v1.0.3
+- Modified the entity endpoint to return the root object along with its sub-objects.
+- Adjust the schedule for the Trusted Access Nodes List task to run every 5 minutes.
+
 ## [Released]: v1.0.2
 - Change the update entity to allow adding new attributes to the entity.
 
