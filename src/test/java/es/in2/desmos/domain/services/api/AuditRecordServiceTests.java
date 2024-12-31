@@ -570,7 +570,6 @@ class AuditRecordServiceTests {
                 .build();
 
         when(auditRecordRepository.findMostRecentAuditRecord()).thenReturn(Mono.just(lastAuditRecord));
-        when(brokerPublisherService.getEntityById(anyString(), anyString())).thenReturn(Mono.just(retrievedBrokerEntity));
         when(auditRecordRepository.findLastPublishedConsumerAuditRecordByEntityId(anyString())).thenReturn(Mono.just(lastAuditRecord));
         when(auditRecordRepository.save(any(AuditRecord.class))).thenReturn(Mono.just(lastAuditRecord));
 
