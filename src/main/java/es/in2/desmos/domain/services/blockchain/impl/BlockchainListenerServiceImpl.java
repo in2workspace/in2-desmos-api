@@ -102,7 +102,7 @@ public class BlockchainListenerServiceImpl implements BlockchainListenerService 
                     .anyMatch(validAddress -> validAddress.equals(currentDltAddress.toLowerCase()));
 
             if (!exists) {
-                throw new UnauthorizedDomeParticipantException("Dome Participant not found");
+                throw new UnauthorizedDomeParticipantException("Dome Participant not found with DLT Address: " + currentDltAddress);
             }
         });
     }
