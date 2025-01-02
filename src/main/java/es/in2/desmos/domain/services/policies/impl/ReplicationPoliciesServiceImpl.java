@@ -1,6 +1,6 @@
 package es.in2.desmos.domain.services.policies.impl;
 
-import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
+import es.in2.desmos.domain.models.MVEntityReplicationPoliciesInfo;
 import es.in2.desmos.domain.models.ReplicationPolicies;
 import es.in2.desmos.domain.services.policies.ReplicationPoliciesService;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ public class ReplicationPoliciesServiceImpl implements ReplicationPoliciesServic
     private static final Set<String> VALID_STATUSES = Set.of("Launched", "Retired", "Obsolete");
 
     @Override
-    public Mono<Boolean> isMVEntityReplicable(String processId, MVEntity4DataNegotiation mvEntity) {
+    public Mono<Boolean> isMVEntityReplicable(String processId, MVEntityReplicationPoliciesInfo mvEntity) {
         boolean isLifecycleStatusReplicable = isLifecycleStatusReplicable(mvEntity.lifecycleStatus());
         if (!isLifecycleStatusReplicable) {
             log.warn("ProcessID: {} - Global policies validation failed for Policy '{}' in Entity with ID '{}'. " +

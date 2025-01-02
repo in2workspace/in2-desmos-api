@@ -9,7 +9,6 @@ import org.json.JSONObject;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -111,91 +110,6 @@ public final class MVEntity4DataNegotiationMother {
         randomVersion = Math.round(randomVersion * 10.0) / 10.0;
 
         return new MVEntity4DataNegotiation(id, PRODUCT_OFFERING_TYPE_NAME, String.valueOf(randomVersion), "2024-04-01T12:00:00Z", LAUNCHED, START_DATE_TIME, END_DATE_TIME, generateRandomSha256(), generateRandomSha256());
-    }
-
-    public static @NotNull MVEntity4DataNegotiation replicationValidFields() {
-        return new MVEntity4DataNegotiation(
-                "entity-1",
-                "type",
-                "Version",
-                "lastUpdate",
-                "Launched",
-                Instant.now().minusSeconds(3600).toString(),
-                Instant.now().plusSeconds(3600000).toString(),
-                "hash",
-                "hashlink"
-        );
-    }
-
-    public static @NotNull MVEntity4DataNegotiation replicationValidFieldsAndNullStartDateTime() {
-        return new MVEntity4DataNegotiation(
-                "entity-1",
-                "type",
-                "Version",
-                "lastUpdate",
-                "Launched",
-                null,
-                Instant.now().plusSeconds(3600000).toString(),
-                "hash",
-                "hashlink"
-        );
-    }
-
-    public static @NotNull MVEntity4DataNegotiation replicationValidFieldsAndNullEndDateTime() {
-        return new MVEntity4DataNegotiation(
-                "entity-1",
-                "type",
-                "Version",
-                "lastUpdate",
-                "Launched",
-                Instant.now().minusSeconds(3600).toString(),
-                null,
-                "hash",
-                "hashlink"
-        );
-    }
-
-    public static @NotNull MVEntity4DataNegotiation replicationInvalidLifecycleStatus() {
-        return new MVEntity4DataNegotiation(
-                "entity-1",
-                "type",
-                "Version",
-                "lastUpdate",
-                "InvalidLifecycleStatus",
-                Instant.now().minusSeconds(3600).toString(),
-                Instant.now().plusSeconds(360000000).toString(),
-                "hash",
-                "hashlink"
-        );
-    }
-
-    public static @NotNull MVEntity4DataNegotiation replicationInvalidFutureStartDateTime() {
-        return new MVEntity4DataNegotiation(
-                "entity-1",
-                "type",
-                "Version",
-                "lastUpdate",
-                "Launched",
-                Instant.now().plusSeconds(3600).toString(),
-                "endDateTime",
-                "hash",
-                "hashlink"
-        );
-    }
-
-    public static @NotNull MVEntity4DataNegotiation replicationInvalidPastEndDateTime() {
-        return new MVEntity4DataNegotiation(
-
-                "entity-1",
-                "type",
-                "Version",
-                "lastUpdate",
-                "Launched",
-                Instant.now().minusSeconds(360000).toString(),
-                Instant.now().minusSeconds(7200).toString(),
-                "hash",
-                "hashlink"
-        );
     }
 
     public static @NotNull List<MVEntity4DataNegotiation> list1And2() throws JSONException, NoSuchAlgorithmException, JsonProcessingException {

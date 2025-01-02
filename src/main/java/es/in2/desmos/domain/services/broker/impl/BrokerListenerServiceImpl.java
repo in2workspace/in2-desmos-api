@@ -10,6 +10,7 @@ import es.in2.desmos.domain.services.api.QueueService;
 import es.in2.desmos.domain.services.broker.BrokerListenerService;
 import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import es.in2.desmos.domain.services.broker.adapter.factory.BrokerAdapterFactory;
+import es.in2.desmos.domain.services.policies.ReplicationPoliciesService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -28,13 +29,16 @@ public class BrokerListenerServiceImpl implements BrokerListenerService {
     private final BrokerAdapterService brokerAdapter;
     private final AuditRecordService auditRecordService;
     private final QueueService pendingPublishEventsQueue;
+    private final ReplicationPoliciesService replicationPoliciesService;
 
     public BrokerListenerServiceImpl(BrokerAdapterFactory brokerAdapterFactory, ObjectMapper objectMapper,
-                                     AuditRecordService auditRecordService, QueueService pendingPublishEventsQueue) {
+                                     AuditRecordService auditRecordService, QueueService pendingPublishEventsQueue,
+                                     ReplicationPoliciesService replicationPoliciesService) {
         this.brokerAdapter = brokerAdapterFactory.getBrokerAdapter();
         this.objectMapper = objectMapper;
         this.auditRecordService = auditRecordService;
         this.pendingPublishEventsQueue = pendingPublishEventsQueue;
+        this.replicationPoliciesService = replicationPoliciesService;
     }
 
     @Override
@@ -46,34 +50,76 @@ public class BrokerListenerServiceImpl implements BrokerListenerService {
     public Mono<Void> processBrokerNotification(String processId, BrokerNotification brokerNotification) {
         log.info("ProcessID: {} - Processing Broker Notification...", processId);
         // Validate BrokerNotification is not null and has data
-        return
-                getDataFromBrokerNotification(brokerNotification)
-                        // Validate if BrokerNotification is from an external source or self-generated
-                        .flatMap(dataMap -> isBrokerNotificationSelfGenerated(processId, dataMap)
-                                .flatMap(isSelfGenerated -> {
-                                    if (isSelfGenerated) {
-                                        log.info("ProcessID: {} - Broker Notification is self-generated.", processId);
-                                        return Mono.empty();
-                                    } else {
-                                        return auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(processId, dataMap,
-                                                        AuditRecordStatus.RECEIVED, null)
-                                                // Set priority for the pendingSubscribeEventsQueue event
-                                                .then(Mono.just(EventQueuePriority.MEDIUM))
-                                                // Enqueue BrokerNotification to DataPublicationQueue
-                                                .flatMap(eventQueuePriority -> pendingPublishEventsQueue.enqueueEvent(EventQueue.builder()
-                                                        .event(Collections.singletonList(brokerNotification))
-                                                        .priority(eventQueuePriority)
-                                                        .build()))
-                                                .doOnSuccess(unused -> log.info("ProcessID: {} - Broker Notification processed successfully.", processId))
-                                                .doOnError(throwable -> {
-                                                    if (throwable instanceof BrokerNotificationSelfGeneratedException) {
-                                                        log.info("ProcessID: {} - Self-Generated Broker Notification. It does not need to do nothing.", processId);
-                                                    } else {
-                                                        log.error("ProcessID: {} - Error processing Broker Notification: {}", processId, throwable.getMessage());
-                                                    }
-                                                });
-                                    }
-                                }));
+        return getDataFromBrokerNotification(brokerNotification)
+                // Validate if BrokerNotification is from an external source or self-generated
+                .flatMap(dataMap -> isBrokerNotificationSelfGenerated(processId, dataMap)
+                        .flatMap(isSelfGenerated -> {
+                            if (Boolean.TRUE.equals(isSelfGenerated)) {
+                                log.info("ProcessID: {} - Broker Notification is self-generated", processId);
+                                return Mono.empty();
+                            } else {
+                                MVEntityReplicationPoliciesInfo mvEntityReplicationPoliciesInfo =
+                                        createMVEntityReplicationPoliciesInfo(dataMap);
+                                return replicationPoliciesService
+                                        .isMVEntityReplicable(processId, mvEntityReplicationPoliciesInfo)
+                                        .flatMap(isReplicable -> {
+                                            if (Boolean.FALSE.equals(isReplicable)) {
+                                                log.info("ProcessID: {} - Broker Notification is not replicable",
+                                                        processId);
+                                                return Mono.empty();
+                                            } else {
+                                                return publishEventAndCreateAuditRecord(processId, brokerNotification, dataMap);
+                                            }
+                                        });
+                            }
+                        }));
+    }
+
+    private Mono<Void> publishEventAndCreateAuditRecord(String processId, BrokerNotification brokerNotification, Map<String, Object> dataMap) {
+        return auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(processId, dataMap,
+                        AuditRecordStatus.RECEIVED, null)
+                // Set priority for the pendingSubscribeEventsQueue event
+                .then(Mono.just(EventQueuePriority.MEDIUM))
+                // Enqueue BrokerNotification to DataPublicationQueue
+                .flatMap(eventQueuePriority -> pendingPublishEventsQueue.enqueueEvent(EventQueue.builder()
+                        .event(Collections.singletonList(brokerNotification))
+                        .priority(eventQueuePriority)
+                        .build()))
+                .doOnSuccess(unused -> log.info("ProcessID: {} - Broker Notification processed successfully.", processId))
+                .doOnError(throwable -> {
+                    if (throwable instanceof BrokerNotificationSelfGeneratedException) {
+                        log.info("ProcessID: {} - Self-Generated Broker Notification. It does not need to do nothing.", processId);
+                    } else {
+                        log.error("ProcessID: {} - Error processing Broker Notification: {}", processId, throwable.getMessage());
+                    }
+                });
+    }
+
+    @SuppressWarnings("unchecked")
+    private MVEntityReplicationPoliciesInfo createMVEntityReplicationPoliciesInfo(Map<String, Object> dataMap) {
+        String lifeCycleStatus = null;
+        if (dataMap.containsKey("lifecycleStatus")) {
+            Map<String, Object> lifeCycleStatusMap = (Map<String, Object>) dataMap.get("lifecycleStatus");
+            lifeCycleStatus = (String) lifeCycleStatusMap.get("value");
+        }
+
+        String startDateTime = null;
+        String endDateTime = null;
+        if (dataMap.containsKey("validFor")) {
+            Map<String, Object> validForMap = (Map<String, Object>) dataMap.get("validFor");
+            Map<String, Object> validForValueMap = (Map<String, Object>) validForMap.get("value");
+            if (validForValueMap != null) {
+                startDateTime = (String) validForValueMap.get("startDateTime");
+                endDateTime = (String) validForValueMap.get("endDateTime");
+            }
+        }
+
+        return new MVEntityReplicationPoliciesInfo(
+                dataMap.get("id").toString(),
+                lifeCycleStatus,
+                startDateTime,
+                endDateTime
+        );
     }
 
     private Mono<Map<String, Object>> getDataFromBrokerNotification(BrokerNotification brokerNotification) {

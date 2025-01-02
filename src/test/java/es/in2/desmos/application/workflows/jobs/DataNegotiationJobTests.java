@@ -2,13 +2,11 @@ package es.in2.desmos.application.workflows.jobs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import es.in2.desmos.application.workflows.jobs.impl.DataNegotiationJobImpl;
-import es.in2.desmos.domain.models.DataNegotiationEvent;
-import es.in2.desmos.domain.models.DataNegotiationResult;
-import es.in2.desmos.domain.models.Issuer;
-import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
+import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.services.policies.ReplicationPoliciesService;
 import es.in2.desmos.objectmothers.DataNegotiationResultMother;
 import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
+import es.in2.desmos.objectmothers.MVEntityReplicationPoliciesInfoMother;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -270,7 +268,8 @@ class DataNegotiationJobTests {
         when(dataTransferJob.syncData(any(), any())).thenReturn(Mono.empty());
 
         when(replicationPoliciesService.isMVEntityReplicable(any(), any())).thenReturn(Mono.just(true));
-        when(replicationPoliciesService.isMVEntityReplicable(any(), eq(MVEntity4DataNegotiationMother.fullList().get(0)))).thenReturn(Mono.just(false));
+        when(replicationPoliciesService.isMVEntityReplicable(any(), eq(MVEntityReplicationPoliciesInfoMother.sample1())))
+                .thenReturn(Mono.just(false));
 
         var result = dataNegotiationJob.negotiateDataSyncFromEvent(dataNegotiationEvent);
 

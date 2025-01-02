@@ -1,8 +1,8 @@
 package es.in2.desmos.domain.services.policies;
 
-import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
+import es.in2.desmos.domain.models.MVEntityReplicationPoliciesInfo;
 import es.in2.desmos.domain.services.policies.impl.ReplicationPoliciesServiceImpl;
-import es.in2.desmos.objectmothers.MVEntity4DataNegotiationMother;
+import es.in2.desmos.objectmothers.MVEntityReplicationPoliciesInfoMother;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,7 +21,7 @@ class ReplicationPoliciesServiceTest {
     @Test
     void itShouldBeReplicableWhenAllFieldsAreValid() {
         String processId = "process-123";
-        MVEntity4DataNegotiation mvEntity = MVEntity4DataNegotiationMother.replicationValidFields();
+        MVEntityReplicationPoliciesInfo mvEntity = MVEntityReplicationPoliciesInfoMother.replicationValidFields();
 
         Mono<Boolean> result = replicationPoliciesService.isMVEntityReplicable(processId, mvEntity);
 
@@ -33,7 +33,7 @@ class ReplicationPoliciesServiceTest {
     @Test
     void itShouldBeReplicableWhenStartDateTimeIsNullAndOtherFieldsAreValid() {
         String processId = "process-123";
-        MVEntity4DataNegotiation mvEntity = MVEntity4DataNegotiationMother.replicationValidFieldsAndNullStartDateTime();
+        MVEntityReplicationPoliciesInfo mvEntity = MVEntityReplicationPoliciesInfoMother.replicationValidFieldsAndNullStartDateTime();
 
         Mono<Boolean> result = replicationPoliciesService.isMVEntityReplicable(processId, mvEntity);
 
@@ -45,7 +45,7 @@ class ReplicationPoliciesServiceTest {
     @Test
     void itShouldBeReplicableWhenEndDateTimeIsNullAndOtherFieldsAreValid() {
         String processId = "process-123";
-        MVEntity4DataNegotiation mvEntity = MVEntity4DataNegotiationMother.replicationValidFieldsAndNullEndDateTime();
+        MVEntityReplicationPoliciesInfo mvEntity = MVEntityReplicationPoliciesInfoMother.replicationValidFieldsAndNullEndDateTime();
 
         Mono<Boolean> result = replicationPoliciesService.isMVEntityReplicable(processId, mvEntity);
 
@@ -57,7 +57,7 @@ class ReplicationPoliciesServiceTest {
     @Test
     void itShouldBeNotReplicableWhenLifecycleStatusIsInvalid() {
         String processId = "process-123";
-        MVEntity4DataNegotiation mvEntity = MVEntity4DataNegotiationMother.replicationInvalidLifecycleStatus();
+        MVEntityReplicationPoliciesInfo mvEntity = MVEntityReplicationPoliciesInfoMother.replicationInvalidLifecycleStatus();
 
         Mono<Boolean> result = replicationPoliciesService.isMVEntityReplicable(processId, mvEntity);
 
@@ -69,7 +69,7 @@ class ReplicationPoliciesServiceTest {
     @Test
     void itShouldBeNotReplicableWhenStartDateTimeIsInTheFuture() {
         String processId = "process-123";
-        MVEntity4DataNegotiation mvEntity = MVEntity4DataNegotiationMother.replicationInvalidFutureStartDateTime();
+        MVEntityReplicationPoliciesInfo mvEntity = MVEntityReplicationPoliciesInfoMother.replicationInvalidFutureStartDateTime();
 
 
         Mono<Boolean> result = replicationPoliciesService.isMVEntityReplicable(processId, mvEntity);
@@ -82,7 +82,7 @@ class ReplicationPoliciesServiceTest {
     @Test
     void itShouldBeNotReplicableWhenEndDateTimeIsInThePast() {
         String processId = "process-123";
-        MVEntity4DataNegotiation mvEntity = MVEntity4DataNegotiationMother.replicationInvalidPastEndDateTime();
+        MVEntityReplicationPoliciesInfo mvEntity = MVEntityReplicationPoliciesInfoMother.replicationInvalidPastEndDateTime();
 
         Mono<Boolean> result = replicationPoliciesService.isMVEntityReplicable(processId, mvEntity);
 

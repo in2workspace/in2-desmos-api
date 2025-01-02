@@ -2,10 +2,7 @@ package es.in2.desmos.application.workflows.jobs.impl;
 
 import es.in2.desmos.application.workflows.jobs.DataNegotiationJob;
 import es.in2.desmos.application.workflows.jobs.DataTransferJob;
-import es.in2.desmos.domain.models.DataNegotiationEvent;
-import es.in2.desmos.domain.models.DataNegotiationResult;
-import es.in2.desmos.domain.models.Issuer;
-import es.in2.desmos.domain.models.MVEntity4DataNegotiation;
+import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.services.policies.ReplicationPoliciesService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +26,7 @@ public class DataNegotiationJobImpl implements DataNegotiationJob {
 
     @Override
     public Mono<Void> negotiateDataSyncWithMultipleIssuers(String processId, Mono<Map<Issuer, List<MVEntity4DataNegotiation>>> externalMVEntities4DataNegotiationByIssuerMono, Mono<List<MVEntity4DataNegotiation>> localMVEntities4DataNegotiationMono) {
-        log.info("ProcessID: {} - Starting Data Negotiation Job", processId);
+        log.info("ProcessID: {} - Starting Data Negotiation Job with multiple issuers", processId);
 
         return localMVEntities4DataNegotiationMono.flatMap(localMVEntities4DataNegotiation ->
                 externalMVEntities4DataNegotiationByIssuerMono
@@ -56,16 +53,23 @@ public class DataNegotiationJobImpl implements DataNegotiationJob {
     private Mono<DataNegotiationResult> getDataNegotiationResultMono(String processId, Mono<List<MVEntity4DataNegotiation>> localMVEntities4DataNegotiationMono, Mono<String> externalIssuerMono, Mono<List<MVEntity4DataNegotiation>> externalMVEntities4DataNegotiation) {
         return externalMVEntities4DataNegotiation
                 .flatMapMany(Flux::fromIterable)
-                .flatMap(externalMVEntities ->
-                        replicationPoliciesService
-                                .isMVEntityReplicable(processId, externalMVEntities)
-                                .flatMap(isValid -> {
-                                    if (isValid) {
-                                        return Mono.just(externalMVEntities);
-                                    } else {
-                                        return Mono.empty();
-                                    }
-                                })).filter(Objects::nonNull)
+                .flatMap(externalMVEntities -> {
+                    MVEntityReplicationPoliciesInfo mvEntityReplicationPoliciesInfo =
+                            new MVEntityReplicationPoliciesInfo(
+                                    externalMVEntities.id(),
+                                    externalMVEntities.lifecycleStatus(),
+                                    externalMVEntities.startDateTime(),
+                                    externalMVEntities.endDateTime());
+                    return replicationPoliciesService
+                            .isMVEntityReplicable(processId, mvEntityReplicationPoliciesInfo)
+                            .flatMap(isReplicable -> {
+                                if (Boolean.TRUE.equals(isReplicable)) {
+                                    return Mono.just(externalMVEntities);
+                                } else {
+                                    return Mono.empty();
+                                }
+                            });
+                }).filter(Objects::nonNull)
                 .collectList()
                 .flatMap(validExternalMvEntities4DataNegotiation -> {
                     Mono<List<MVEntity4DataNegotiation>> externalMVEntities4DataNegotiationMono = Mono.just(validExternalMvEntities4DataNegotiation);
