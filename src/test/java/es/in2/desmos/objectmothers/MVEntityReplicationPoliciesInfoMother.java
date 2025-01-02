@@ -8,6 +8,7 @@ import org.json.JSONException;
 
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.util.List;
 
 public final class MVEntityReplicationPoliciesInfoMother {
 
@@ -76,6 +77,22 @@ public final class MVEntityReplicationPoliciesInfoMother {
                 "Launched",
                 Instant.now().minusSeconds(360000).toString(),
                 Instant.now().minusSeconds(7200).toString()
+        );
+    }
+
+    public static @NotNull List<MVEntityReplicationPoliciesInfo> mvReplicableList() {
+        return List.of(
+                replicationValidFields(),
+                replicationValidFieldsAndNullStartDateTime(),
+                replicationValidFieldsAndNullEndDateTime()
+        );
+    }
+
+    public static @NotNull List<MVEntityReplicationPoliciesInfo> mvNotReplicableList() {
+        return List.of(
+                replicationInvalidLifecycleStatus(),
+                replicationInvalidFutureStartDateTime(),
+                replicationInvalidPastEndDateTime()
         );
     }
 }

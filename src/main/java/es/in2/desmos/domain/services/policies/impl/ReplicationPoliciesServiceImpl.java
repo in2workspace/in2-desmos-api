@@ -1,14 +1,17 @@
 package es.in2.desmos.domain.services.policies.impl;
 
+import es.in2.desmos.domain.models.Id;
 import es.in2.desmos.domain.models.MVEntityReplicationPoliciesInfo;
 import es.in2.desmos.domain.models.ReplicationPolicies;
 import es.in2.desmos.domain.services.policies.ReplicationPoliciesService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 
 @Slf4j
@@ -44,6 +47,14 @@ public class ReplicationPoliciesServiceImpl implements ReplicationPoliciesServic
         } else {
             return Mono.just(false);
         }
+    }
+
+    @Override
+    public Flux<Id> filterReplicableMvEntitiesList(String processId, List<MVEntityReplicationPoliciesInfo> replicationPoliciesInfoList) {
+        return Flux.fromIterable(replicationPoliciesInfoList)
+                .filterWhen(mvEntity -> isMVEntityReplicable(processId, mvEntity))
+                .map(mvEntityReplicationPoliciesInfo ->
+                        new Id(mvEntityReplicationPoliciesInfo.id()));
     }
 
     private boolean isLifecycleStatusReplicable(String lifecycleStatus) {

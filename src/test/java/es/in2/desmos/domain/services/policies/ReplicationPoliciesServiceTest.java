@@ -1,5 +1,6 @@
 package es.in2.desmos.domain.services.policies;
 
+import es.in2.desmos.domain.models.Id;
 import es.in2.desmos.domain.models.MVEntityReplicationPoliciesInfo;
 import es.in2.desmos.domain.services.policies.impl.ReplicationPoliciesServiceImpl;
 import es.in2.desmos.objectmothers.MVEntityReplicationPoliciesInfoMother;
@@ -9,6 +10,9 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -88,6 +92,31 @@ class ReplicationPoliciesServiceTest {
 
         StepVerifier.create(result)
                 .assertNext(isReplicable -> assertThat(isReplicable).isFalse())
+                .verifyComplete();
+    }
+
+    @Test
+    void itShouldReturnReplicableIds() {
+        String processId = "process-123";
+        var mvReplicableList = MVEntityReplicationPoliciesInfoMother.mvReplicableList();
+
+
+        List<MVEntityReplicationPoliciesInfo> mvReplicationPoliciesInfoList =
+                Stream.concat(
+                                mvReplicableList.stream(),
+                                MVEntityReplicationPoliciesInfoMother.mvNotReplicableList().stream())
+                        .toList();
+
+        List<Id> expectedIds =
+                mvReplicableList.stream()
+                        .map(mv ->
+                                new Id(mv.id()))
+                        .toList();
+
+        var result = replicationPoliciesService.filterReplicableMvEntitiesList(processId, mvReplicationPoliciesInfoList);
+
+        StepVerifier.create(result)
+                .expectNextSequence(expectedIds)
                 .verifyComplete();
     }
 }
