@@ -58,7 +58,8 @@ public class BrokerListenerServiceImpl implements BrokerListenerService {
                         .flatMap(isSelfGenerated -> {
                             if (Boolean.TRUE.equals(isSelfGenerated)) {
                                 String id = getIdFromDataMap(brokerNotification.data());
-                                log.info("ProcessID: {} - Broker Notification is self-generated with id: {}", processId, id);
+                                log.info("ProcessID: {} - Replication attempt failed for entity '{}' because it is a" +
+                                        " self-generated entity and not eligible for replication.", processId, id);
                                 return Mono.empty();
                             } else {
                                 MVEntityReplicationPoliciesInfo mvEntityReplicationPoliciesInfo =
