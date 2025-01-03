@@ -11,12 +11,14 @@ import es.in2.desmos.domain.services.broker.BrokerListenerService;
 import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import es.in2.desmos.domain.services.broker.adapter.factory.BrokerAdapterFactory;
 import es.in2.desmos.domain.services.policies.ReplicationPoliciesService;
+import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import static es.in2.desmos.domain.utils.ApplicationUtils.calculateSHA256;
@@ -55,7 +57,8 @@ public class BrokerListenerServiceImpl implements BrokerListenerService {
                 .flatMap(dataMap -> isBrokerNotificationSelfGenerated(processId, dataMap)
                         .flatMap(isSelfGenerated -> {
                             if (Boolean.TRUE.equals(isSelfGenerated)) {
-                                log.info("ProcessID: {} - Broker Notification is self-generated", processId);
+                                String id = getIdFromDataMap(brokerNotification.data());
+                                log.info("ProcessID: {} - Broker Notification is self-generated with id: {}", processId, id);
                                 return Mono.empty();
                             } else {
                                 MVEntityReplicationPoliciesInfo mvEntityReplicationPoliciesInfo =
@@ -73,6 +76,10 @@ public class BrokerListenerServiceImpl implements BrokerListenerService {
                                         });
                             }
                         }));
+    }
+
+    private String getIdFromDataMap(@NotNull(message = "data cannot be null") List<Map<String, Object>> data) {
+        return data.get(0).get("id").toString();
     }
 
     private Mono<Void> publishEventAndCreateAuditRecord(String processId, BrokerNotification brokerNotification, Map<String, Object> dataMap) {
