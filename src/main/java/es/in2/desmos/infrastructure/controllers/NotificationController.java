@@ -31,9 +31,7 @@ public class NotificationController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Mono<Void> postBrokerNotification(@RequestBody @Valid BrokerNotification brokerNotification) {
         String processId = UUID.randomUUID().toString();
-//        String id = getIdFromDataMap(brokerNotification.data());
         log.info("ProcessID: {} - Broker Notification received", processId);
-//        log.debug("ProcessID: {} - Broker Notification received: {}", processId, brokerNotification);
         return brokerListenerService.processBrokerNotification(processId, brokerNotification);
     }
 
@@ -45,9 +43,5 @@ public class NotificationController {
         log.debug("ProcessID: {}, Blockchain Notification received: {}", processId, blockchainNotification);
         return blockchainListenerService.processBlockchainNotification(processId, blockchainNotification);
     }
-
-//    private String getIdFromDataMap(@NotNull(message = "data cannot be null") List<Map<String, Object>> data) {
-//        return data.get(0).get("id").toString();
-//    }
 
 }
