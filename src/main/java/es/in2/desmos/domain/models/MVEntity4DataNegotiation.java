@@ -13,6 +13,7 @@ public record MVEntity4DataNegotiation(
         @JsonProperty("lastUpdate") @NotBlank String lastUpdate,
         @JsonProperty("lifecycleStatus") @NotBlank String lifecycleStatus,
         @JsonProperty("validFor") @NotBlank String startDateTime,
+        @JsonProperty("endDateTime") @NotBlank String endDateTime,
         @JsonProperty("hash") @NotBlank String hash,
         @JsonProperty("hashlink") @NotBlank String hashlink) {
 

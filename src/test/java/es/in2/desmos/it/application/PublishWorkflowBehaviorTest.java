@@ -59,7 +59,7 @@ class PublishWorkflowBehaviorTest {
             Given a BrokerNotification, we will send a POST request emulating the broker behavior.
             When the POST request is received, the application will create a BlockchainTxPayload,
             and publish it into the blockchain.
-            During the process, three AuditRecord will be created with the information of the transaction;
+            During the process, three AuditRecord will be created with the information of the transaction:
             RECEIVED, CREATED, and PUBLISHED.
          */
 
@@ -75,7 +75,10 @@ class PublishWorkflowBehaviorTest {
                             "href": "http://localhost:9090/ngsi-ld/v1/entities/urn:ngsi-ld:ProductOffering:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c",
                             "description": "Example of a Product offering for cloud services suite",
                             "lastUpdate": "2024-04-01T12:00:00Z",
-                            "lifecycleStatus": "Launched",
+                            "lifecycleStatus": {
+                              "type": "Property",
+                              "value": "Launched"
+                            },
                             "name": "Cloud Services Suite",
                             "statusReason": "The product is currently active and available",
                             "version": "v1.2",
@@ -153,8 +156,11 @@ class PublishWorkflowBehaviorTest {
                                 "name": "99.9% Uptime Guarantee"
                             },
                             "validFor": {
-                                "startDateTime": "2024-01-01T00:00:00Z",
-                                "endDateTime": "2024-12-31T23:59:59Z"
+                                "type": "Property",
+                                    "value": {
+                                        "startDateTime": "2024-01-01T00:00:00Z",
+                                        "endDateTime": "9999-12-31T23:59:59Z"
+                                    }
                             }
                         }
                     ],

@@ -38,7 +38,7 @@ class NotificationControllerTests {
         BrokerNotification brokerNotification = BrokerNotification.builder()
                 .id("id")
                 .type("type")
-                .data(List.of(Map.of("key", "value")))
+                .data(List.of(Map.of("id", "value")))
                 .subscriptionId("subscriptionId")
                 .notifiedAt("notifiedAt")
                 .build();
