@@ -33,7 +33,7 @@ public class NotificationController {
         String processId = UUID.randomUUID().toString();
 //        String id = getIdFromDataMap(brokerNotification.data());
         log.info("ProcessID: {} - Broker Notification received", processId);
-        log.debug("ProcessID: {} - Broker Notification received: {}", processId, brokerNotification);
+//        log.debug("ProcessID: {} - Broker Notification received: {}", processId, brokerNotification);
         return brokerListenerService.processBrokerNotification(processId, brokerNotification);
     }
 
