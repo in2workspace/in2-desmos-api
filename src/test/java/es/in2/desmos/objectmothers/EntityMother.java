@@ -64,7 +64,8 @@ public final class EntityMother {
                 "validFor": {
                     "type": "Property",
                     "value": {
-                        "startDateTime": "2024-01-01T00:00:00.000Z"
+                        "startDateTime": "2024-01-01T00:00:00.000Z",
+                        "endDateTime": "2099-01-01T00:00:00.000Z"
                     }
                 },
                 "lastUpdate": {
@@ -95,7 +96,8 @@ public final class EntityMother {
                 "validFor": {
                     "type": "Property",
                     "value": {
-                        "startDateTime": "2024-01-01T00:00:00.000Z"
+                        "startDateTime": "2024-01-01T00:00:00.000Z",
+                        "endDateTime": "2099-01-01T00:00:00.000Z"
                     }
                 },
                 "lastUpdate": {
@@ -130,7 +132,8 @@ public final class EntityMother {
                 "validFor": {
                     "type": "Property",
                     "value": {
-                        "startDateTime": "2024-01-01T00:00:00.000Z"
+                        "startDateTime": "2024-01-01T00:00:00.000Z",
+                        "endDateTime": "2099-01-01T00:00:00.000Z"
                     }
                 },
                 "lastUpdate": {
@@ -165,7 +168,8 @@ public final class EntityMother {
                 "validFor": {
                     "type": "Property",
                     "value": {
-                        "startDateTime": "2024-01-01T00:00:00.000Z"
+                        "startDateTime": "2024-01-01T00:00:00.000Z",
+                        "endDateTime": "2099-01-01T00:00:00.000Z"
                     }
                 },
                 "lastUpdate": {
@@ -200,7 +204,8 @@ public final class EntityMother {
                 "validFor": {
                     "type": "Property",
                     "value": {
-                        "startDateTime": "2024-01-01T00:00:00.000Z"
+                        "startDateTime": "2024-01-01T00:00:00.000Z",
+                        "endDateTime": "2099-01-01T00:00:00.000Z"
                     }
                 },
                 "lastUpdate": {
@@ -235,7 +240,8 @@ public final class EntityMother {
                 "validFor": {
                     "type": "Property",
                     "value": {
-                        "startDateTime": "2024-01-01T00:00:00.000Z"
+                        "startDateTime": "2024-01-01T00:00:00.000Z",
+                        "endDateTime": "2099-01-01T00:00:00.000Z"
                     }
                 },
                 "lastUpdate": {
@@ -270,7 +276,8 @@ public final class EntityMother {
                 "validFor": {
                     "type": "Property",
                     "value": {
-                        "startDateTime": "2024-01-01T00:00:00.000Z"
+                        "startDateTime": "2024-01-01T00:00:00.000Z",
+                        "endDateTime": "2099-01-01T00:00:00.000Z"
                     }
                 },
                 "lastUpdate": {
@@ -305,7 +312,8 @@ public final class EntityMother {
                 "validFor": {
                     "type": "Property",
                     "value": {
-                        "startDateTime": "2024-01-01T00:00:00.000Z"
+                        "startDateTime": "2024-01-01T00:00:00.000Z",
+                        "endDateTime": "2099-01-01T00:00:00.000Z"
                     }
                 },
                 "lastUpdate": {

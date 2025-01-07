@@ -39,6 +39,7 @@ public final class DataNegotiationResultMother {
                         MVEntity4DataNegotiationMother.sample2().lastUpdate(),
                         MVEntity4DataNegotiationMother.sample2().lifecycleStatus(),
                         MVEntity4DataNegotiationMother.sample2().startDateTime(),
+                        MVEntity4DataNegotiationMother.sample2().endDateTime(),
                         "fdafdsa",
                         MVEntity4DataNegotiationMother.sample2().hashlink()));
 

@@ -12,6 +12,7 @@ import es.in2.desmos.domain.services.api.QueueService;
 import es.in2.desmos.domain.services.broker.adapter.BrokerAdapterService;
 import es.in2.desmos.domain.services.broker.adapter.factory.BrokerAdapterFactory;
 import es.in2.desmos.domain.services.broker.impl.BrokerListenerServiceImpl;
+import es.in2.desmos.domain.services.policies.ReplicationPoliciesService;
 import es.in2.desmos.domain.utils.ApplicationUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,13 +31,12 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class BrokerListenerServiceTests {
 
-    AuditRecord auditRecord = AuditRecord.builder()
+    private static final AuditRecord auditRecord = AuditRecord.builder()
             .id(UUID.randomUUID())
             .processId(UUID.randomUUID().toString())
             .entityId(UUID.randomUUID().toString())
@@ -62,6 +62,8 @@ class BrokerListenerServiceTests {
     private BrokerListenerServiceImpl brokerListenerService;
     @Mock
     private ObjectWriter objectWriter;
+    @Mock
+    private ReplicationPoliciesService replicationPoliciesService;
 
     @Test
     void processBrokerNotificationTest_firstNotification() {
@@ -79,6 +81,7 @@ class BrokerListenerServiceTests {
                 .build();
         // Act
         when(auditRecordService.findMostRecentRetrievedOrDeletedByEntityId(anyString(), any())).thenReturn(Mono.empty());
+        when(replicationPoliciesService.isMVEntityReplicable(anyString(), any())).thenReturn(Mono.just(true));
         when(auditRecordService.buildAndSaveAuditRecordFromBrokerNotification(anyString(), any(), any(), any())).thenReturn(Mono.empty());
         when(queueService.enqueueEvent(any())).thenReturn(Mono.empty());
         // Assert
@@ -146,6 +149,7 @@ class BrokerListenerServiceTests {
                 .build();
         // Act
         when(auditRecordService.findMostRecentRetrievedOrDeletedByEntityId(anyString(), any())).thenReturn(Mono.just(auditRecord));
+        when(replicationPoliciesService.isMVEntityReplicable(anyString(), any())).thenReturn(Mono.just(true));
         when(objectMapper.writer()).thenReturn(objectWriter);
         when(objectWriter.writeValueAsString(any())).thenReturn("""
                 {
@@ -213,12 +217,58 @@ class BrokerListenerServiceTests {
 
             // Act & Assert
             StepVerifier.create(brokerListenerService.processBrokerNotification(processId, brokerNotification))
-                    .expectErrorMatches(throwable -> throwable instanceof JsonReadingException)
+                    .expectErrorMatches(JsonReadingException.class::isInstance)
                     .verify();
 
             verify(auditRecordService, never()).buildAndSaveAuditRecordFromBrokerNotification(eq(processId), any(), any(), any());
             verify(queueService, never()).enqueueEvent(any());
         }
+    }
+
+    @Test
+    void itShouldNotPublishedEventIfNotReplicable() throws JsonProcessingException {
+        // Arrange
+        String processId = UUID.randomUUID().toString();
+        BrokerNotification brokerNotification = BrokerNotification.builder()
+                .id("notification:-5106976853901020699")
+                .type("Notification")
+                .data(Collections.singletonList(Map.of("id", "urn:ngsi-ld:ProductOffering:122355255",
+                        "type", "ProductOffering",
+                        "description", Map.of("type", "Property", "value", "Example of a Product offering for cloud services suite"),
+                        "notifiedAt", "2024-04-10T11:33:43.807000Z")))
+                .subscriptionId("urn:ngsi-ld:Subscription:122355255")
+                .notifiedAt(Instant.now().toString())
+                .build();
+        // Act
+        when(auditRecordService.findMostRecentRetrievedOrDeletedByEntityId(anyString(), any())).thenReturn(Mono.just(auditRecord));
+        when(objectMapper.writer()).thenReturn(objectWriter);
+        when(objectWriter.writeValueAsString(any())).thenReturn("""
+                {
+                  "id": "notification:-5106976853901020699",
+                  "type": "Notification",
+                  "data": [
+                    {
+                      "id": "urn:ngsi-ld:ProductOffering:122355255",
+                      "type": "ProductOffering",
+                      "description": {
+                        "type": "Property",
+                        "value": "Example of a Product offering for cloud services suites"
+                      },
+                      "notifiedAt": "2024-04-10T11:33:43.807Z"
+                    }
+                  ],
+                  "subscriptionId": "urn:ngsi-ld:Subscription:122355255",
+                  "notifiedAt": "2023-03-14T16:38:15.123456Z"
+                }""");
+
+        when(replicationPoliciesService.isMVEntityReplicable(anyString(), any())).thenReturn(Mono.just(false));
+
+
+        StepVerifier.create(brokerListenerService.processBrokerNotification(processId, brokerNotification))
+                .verifyComplete();
+
+        verify(auditRecordService, never()).buildAndSaveAuditRecordFromBrokerNotification(eq(processId), any(), any(), any());
+        verify(queueService, never()).enqueueEvent(any());
     }
 
 }

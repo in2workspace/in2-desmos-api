@@ -6,12 +6,15 @@ import es.in2.desmos.domain.services.blockchain.BlockchainListenerService;
 import es.in2.desmos.domain.services.broker.BrokerListenerService;
 import es.in2.desmos.infrastructure.security.JwtTokenProvider;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -28,7 +31,7 @@ public class NotificationController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Mono<Void> postBrokerNotification(@RequestBody @Valid BrokerNotification brokerNotification) {
         String processId = UUID.randomUUID().toString();
-        log.info("ProcessID: {} - Broker Notification received: {}", processId, brokerNotification.toString());
+        log.info("ProcessID: {} - Broker Notification received", processId);
         return brokerListenerService.processBrokerNotification(processId, brokerNotification);
     }
 

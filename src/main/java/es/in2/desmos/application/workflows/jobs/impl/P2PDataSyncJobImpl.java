@@ -6,6 +6,7 @@ import es.in2.desmos.domain.events.DataNegotiationEventPublisher;
 import es.in2.desmos.domain.models.*;
 import es.in2.desmos.domain.services.api.AuditRecordService;
 import es.in2.desmos.domain.services.broker.BrokerPublisherService;
+import es.in2.desmos.domain.services.policies.ReplicationPoliciesService;
 import es.in2.desmos.domain.services.sync.DiscoverySyncWebClient;
 import es.in2.desmos.infrastructure.configs.ApiConfig;
 import es.in2.desmos.infrastructure.configs.ExternalAccessNodesConfig;
@@ -37,6 +38,8 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
 
     private final DiscoverySyncWebClient discoverySyncWebClient;
 
+    private final ReplicationPoliciesService replicationPoliciesService;
+
     private static final String[] BROKER_ENTITY_TYPES = {"product-offering", "category", "catalog"};
 
     @Override
@@ -48,13 +51,15 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                         createLocalMvEntitiesByType(processId, entityType)
                                 .flatMap(localMvEntities4DataNegotiation -> {
                                     log.debug("ProcessID: {} - Local MV Entities 4 Data Negotiation synchronizing data: {}", processId, localMvEntities4DataNegotiation);
-                                    return getExternalMVEntities4DataNegotiationByIssuer(processId, localMvEntities4DataNegotiation, entityType)
-                                            .flatMap(mvEntities4DataNegotiationByIssuer -> {
-                                                Mono<Map<Issuer, List<MVEntity4DataNegotiation>>> externalMVEntities4DataNegotiationByIssuerMono = Mono.just(mvEntities4DataNegotiationByIssuer);
-                                                Mono<List<MVEntity4DataNegotiation>> localMVEntities4DataNegotiationMono = Mono.just(localMvEntities4DataNegotiation);
+                                    return filterReplicableMvEntities(processId, localMvEntities4DataNegotiation)
+                                            .flatMap(replicableMvEntities ->
+                                                    getExternalMVEntities4DataNegotiationByIssuer(processId, replicableMvEntities, entityType)
+                                                            .flatMap(mvEntities4DataNegotiationByIssuer -> {
+                                                                Mono<Map<Issuer, List<MVEntity4DataNegotiation>>> externalMVEntities4DataNegotiationByIssuerMono = Mono.just(mvEntities4DataNegotiationByIssuer);
+                                                                Mono<List<MVEntity4DataNegotiation>> localMVEntities4DataNegotiationMono = Mono.just(localMvEntities4DataNegotiation);
 
-                                                return dataNegotiationJob.negotiateDataSyncWithMultipleIssuers(processId, externalMVEntities4DataNegotiationByIssuerMono, localMVEntities4DataNegotiationMono);
-                                            });
+                                                                return dataNegotiationJob.negotiateDataSyncWithMultipleIssuers(processId, externalMVEntities4DataNegotiationByIssuerMono, localMVEntities4DataNegotiationMono);
+                                                            }));
                                 }))
                 .collectList()
                 .then();
@@ -90,6 +95,29 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                 .collectMap(Map.Entry::getKey, Map.Entry::getValue);
     }
 
+    private Mono<List<MVEntity4DataNegotiation>> filterReplicableMvEntities(
+            String processId,
+            List<MVEntity4DataNegotiation> localMvEntities4DataNegotiation) {
+
+        List<MVEntityReplicationPoliciesInfo> replicationPoliciesInfoList = localMvEntities4DataNegotiation.stream()
+                .map(mvEntity -> new MVEntityReplicationPoliciesInfo(
+                        mvEntity.id(),
+                        mvEntity.lifecycleStatus(),
+                        mvEntity.startDateTime(),
+                        mvEntity.endDateTime()))
+                .toList();
+
+        return replicationPoliciesService.filterReplicableMvEntitiesList(processId, replicationPoliciesInfoList)
+                .map(Id::id)
+                .collectList()
+                .flatMap(replicableIds -> {
+                    Set<String> replicableIdsSet = new HashSet<>(replicableIds);
+                    return Flux.fromIterable(localMvEntities4DataNegotiation)
+                            .filter(mvEntity -> replicableIdsSet.contains(mvEntity.id()))
+                            .collectList();
+                });
+    }
+
     @Override
     public Mono<List<MVEntity4DataNegotiation>> dataDiscovery(String processId, Mono<String> issuer, Mono<List<MVEntity4DataNegotiation>> externalMvEntities4DataNegotiationMono) {
         log.info("ProcessID: {} - Starting P2P Data Synchronization Discovery Workflow", processId);
@@ -112,7 +140,7 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                                                 var dataNegotiationEvent = new DataNegotiationEvent(processId, issuer, Mono.just(externalMvEntities4DataNegotiationOfType), localMvEntities4DataNegotiationMono);
                                                 dataNegotiationEventPublisher.publishEvent(dataNegotiationEvent);
 
-                                                return Mono.just(localMvEntities4DataNegotiation);
+                                                return filterReplicableMvEntities(processId, localMvEntities4DataNegotiation);
                                             });
                                 })
                                 .doOnSuccess(success -> log.info("ProcessID: {} - P2P Data Synchronization Discovery Workflow successfully.", processId))
@@ -152,17 +180,20 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                                             MVAuditServiceEntity4DataNegotiation mvAuditEntity = mvAuditEntitiesById.get(entityId);
 
                                             return new MVEntity4DataNegotiation(
-                                                            entityId,
-                                                            entityType,
-                                                            mvBrokerEntity.getVersion(),
-                                                            mvBrokerEntity.getLastUpdate(),
-                                                            mvBrokerEntity.getLifecycleStatus(),
-                                                            mvBrokerEntity.getValidFor() != null
-                                                                    ? mvBrokerEntity.getValidFor().startDateTime()
-                                                                    : null,
-                                                            mvAuditEntity.hash(),
-                                                            mvAuditEntity.hashlink()
-                                                    );
+                                                    entityId,
+                                                    entityType,
+                                                    mvBrokerEntity.getVersion(),
+                                                    mvBrokerEntity.getLastUpdate(),
+                                                    mvBrokerEntity.getLifecycleStatus(),
+                                                    mvBrokerEntity.getValidFor() != null
+                                                            ? mvBrokerEntity.getValidFor().startDateTime()
+                                                            : null,
+                                                    mvBrokerEntity.getValidFor() != null
+                                                            ? mvBrokerEntity.getValidFor().endDateTime()
+                                                            : null,
+                                                    mvAuditEntity.hash(),
+                                                    mvAuditEntity.hashlink()
+                                            );
                                         })
                                         .collectList();
                             });
