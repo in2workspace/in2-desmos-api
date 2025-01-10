@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
@@ -357,7 +358,8 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                                             );
                                         }))
                                 ))
-                .collectList();
+                .collectList()
+                .subscribeOn(Schedulers.boundedElastic());
     }
 
     private Mono<MVAuditServiceEntity4DataNegotiation> buildAndSaveAuditRecordFromUnregisteredOrOutdatedEntity(String processId, MVAuditServiceEntity4DataNegotiation mvAuditServiceEntity4DataNegotiation, AuditRecordTrader trader, String dataLocation) {
