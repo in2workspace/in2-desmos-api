@@ -357,6 +357,7 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                                             );
                                         }))
                                 ))
+                .limitRate(2)
                 .collectList();
     }
 
