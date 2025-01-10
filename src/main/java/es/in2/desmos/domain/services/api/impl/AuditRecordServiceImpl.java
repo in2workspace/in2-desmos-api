@@ -308,7 +308,7 @@ public class AuditRecordServiceImpl implements AuditRecordService {
     @Override
     public Mono<List<MVAuditServiceEntity4DataNegotiation>> findCreateOrUpdateAuditRecordsByEntityIds(String processId, String entityType, Flux<String> entityIdsMono) {
         return entityIdsMono
-                .publishOn(Schedulers.newParallel("hola", 1))
+                .subscribeOn(Schedulers.newParallel("hola", 1))
                 .flatMap(id -> {
                     log.debug("ProcessID: {} - Get hash", processId);
                     return getEntityHash(processId, Mono.just(id))
