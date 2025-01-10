@@ -343,7 +343,9 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                                                                 });
                                                     }
                                                 }
-                                        ).switchIfEmpty(Mono.defer(() -> {
+                                        )
+                                        .subscribeOn(Schedulers.newParallel("hola", 1))
+                                        .switchIfEmpty(Mono.defer(() -> {
                                             System.out.println("Scope 3");
                                             return buildAndSaveAuditRecordFromUnregisteredOrOutdatedEntity(
                                                     processId,
@@ -357,7 +359,9 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                                                     null
                                             );
                                         }))
+                                        .subscribeOn(Schedulers.newParallel("hola", 1))
                                 ))
+                .subscribeOn(Schedulers.newParallel("hola", 1))
                 .collectList()
                 .subscribeOn(Schedulers.newParallel("hola", 1));
     }
