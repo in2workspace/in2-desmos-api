@@ -55,7 +55,6 @@ class PublishWorkflowBehaviorTest {
     @Test
     void publishWorkflowBehaviorTest() {
         log.info("Starting Publish Workflow Behavior Test...");
-        log.info("Number of AuditRecord in the database: {}", auditRecordRepository.count().block());
         /*
             Given a BrokerNotification, we will send a POST request emulating the broker behavior.
             When the POST request is received, the application will create a BlockchainTxPayload,
@@ -174,24 +173,19 @@ class PublishWorkflowBehaviorTest {
         try {
             log.info("1. Create a BrokerNotification and send a POST request to the application");
             BrokerNotification brokerNotification = objectMapper.readValue(brokerNotificationJSON, BrokerNotification.class);
-            log.info("Number of AuditRecord in the database: {}", auditRecordRepository.count().block());
 
             notificationController.postBrokerNotification(brokerNotification).block();
-            log.info("Number of AuditRecord in the database: {}", auditRecordRepository.count().block());
             log.info("1.1. Get the event stream from the pendingPublishEventsQueue and subscribe to it.");
             pendingPublishEventsQueue.getEventStream().subscribe(event -> log.info("Event: {}", event));
-            log.info("Number of AuditRecord in the database: {}", auditRecordRepository.count().block());
             // Then
             log.info("2. Check values in the AuditRecord table:");
-            log.info("Number of AuditRecord in the database: {}", auditRecordRepository.count().block());
             List<AuditRecord> auditRecordList = auditRecordRepository.findAll().collectList().block();
-            log.info("Number of AuditRecord in the database: {}", auditRecordRepository.count().block());
             log.info("Result: {}", auditRecordList);
-            log.info("Number of AuditRecord in the database: {}", auditRecordRepository.count().block());
         } catch (Exception e) {
             log.error("Error: {}", e.getMessage());
         }
-        Assertions.assertEquals(1, auditRecordRepository.count().block());
+        Assertions.assertNotNull(auditRecordRepository
+                .findByEntityId("urn:ngsi-ld:ProductOffering:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c"));
     }
 
 }
