@@ -185,7 +185,7 @@ class PublishWorkflowBehaviorTest {
             log.error("Error: {}", e.getMessage());
         }
         Assertions.assertNotNull(auditRecordRepository
-                .findByEntityId("urn:ngsi-ld:ProductOffering:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c"));
+                .findByEntityId("urn:ngsi-ld:ProductOffering:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c").blockFirst());
     }
 
 }
