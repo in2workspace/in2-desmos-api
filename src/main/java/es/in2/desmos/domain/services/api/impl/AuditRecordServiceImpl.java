@@ -307,9 +307,11 @@ public class AuditRecordServiceImpl implements AuditRecordService {
 
     @Override
     public Mono<List<MVAuditServiceEntity4DataNegotiation>> findCreateOrUpdateAuditRecordsByEntityIds(String processId, String entityType, Flux<String> entityIdsMono) {
-        return entityIdsMono.flatMap(id ->
+        return entityIdsMono
+                .flatMap(id ->
                         getEntityHash(processId, Mono.just(id))
                                 .flatMap(entityHash -> auditRecordRepository.findMostRecentPublishedAuditRecordByEntityId(id)
+                                        .publishOn(Schedulers.newParallel("hola", 1))
                                         .flatMap(auditRecord -> {
                                                     System.out.println("Scope 1");
                                                     log.debug("ProcessID: {} - AuditRecord find for entity with id: {}", processId, auditRecord.getEntityId());
