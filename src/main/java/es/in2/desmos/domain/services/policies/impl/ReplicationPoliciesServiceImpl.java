@@ -58,7 +58,7 @@ public class ReplicationPoliciesServiceImpl implements ReplicationPoliciesServic
     }
 
     private boolean isLifecycleStatusReplicable(String lifecycleStatus) {
-        return VALID_STATUSES.contains(lifecycleStatus);
+        return lifecycleStatus != null && VALID_STATUSES.contains(lifecycleStatus);
     }
 
     private boolean isValidForReplicable(String startDateTime, String endDateTime) {
