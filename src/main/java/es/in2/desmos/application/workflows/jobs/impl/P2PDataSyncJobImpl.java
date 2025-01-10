@@ -129,20 +129,22 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                                     log.info("ProcessID: {} - Discovery for type: {}", processId, entityType);
                                     log.debug("ProcessID: {} - Local MV Entities 4 Data Negotiation: {}", processId, localMvEntities4DataNegotiation);
 
-                                    return externalMvEntities4DataNegotiationMono
-                                            .flatMap(externalMvEntities4DataNegotiation -> {
-                                                List<MVEntity4DataNegotiation> externalMvEntities4DataNegotiationOfType = externalMvEntities4DataNegotiation
-                                                        .stream()
-                                                        .filter(mvEntity4DataNegotiation -> Objects.equals(mvEntity4DataNegotiation.type(), entityType))
-                                                        .toList();
+                                    return filterReplicableMvEntities(processId, localMvEntities4DataNegotiation);
 
-                                                var localMvEntities4DataNegotiationMono = Mono.just(localMvEntities4DataNegotiation);
-
-                                                var dataNegotiationEvent = new DataNegotiationEvent(processId, issuer, Mono.just(externalMvEntities4DataNegotiationOfType), localMvEntities4DataNegotiationMono);
-                                                dataNegotiationEventPublisher.publishEvent(dataNegotiationEvent);
-
-                                                return filterReplicableMvEntities(processId, localMvEntities4DataNegotiation);
-                                            });
+//                                    return externalMvEntities4DataNegotiationMono
+//                                            .flatMap(externalMvEntities4DataNegotiation -> {
+//                                                List<MVEntity4DataNegotiation> externalMvEntities4DataNegotiationOfType = externalMvEntities4DataNegotiation
+//                                                        .stream()
+//                                                        .filter(mvEntity4DataNegotiation -> Objects.equals(mvEntity4DataNegotiation.type(), entityType))
+//                                                        .toList();
+//
+//                                                var localMvEntities4DataNegotiationMono = Mono.just(localMvEntities4DataNegotiation);
+//
+//                                                var dataNegotiationEvent = new DataNegotiationEvent(processId, issuer, Mono.just(externalMvEntities4DataNegotiationOfType), localMvEntities4DataNegotiationMono);
+//                                                dataNegotiationEventPublisher.publishEvent(dataNegotiationEvent);
+//
+//                                                return filterReplicableMvEntities(processId, localMvEntities4DataNegotiation);
+//                                            });
                                 })
                                 .doOnSuccess(success -> log.info("ProcessID: {} - P2P Data Synchronization Discovery Workflow successfully.", processId))
                                 .doOnError(error -> log.error("ProcessID: {} - Error occurred while processing the P2P Data Synchronization Discovery Workflow: {}", processId, error.getMessage())))
