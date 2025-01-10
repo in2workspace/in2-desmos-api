@@ -311,6 +311,7 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                         .flatMap(id -> getEntityHash(processId, Mono.just(id))
                                 .flatMap(entityHash -> auditRecordRepository.findMostRecentPublishedAuditRecordByEntityId(id)
                                         .flatMap(auditRecord -> {
+                                                    System.out.println("Scope 1");
                                                     if (entityHash.equals(auditRecord.getEntityHash())) {
                                                         return Mono.just(new MVAuditServiceEntity4DataNegotiation(
                                                                 auditRecord.getEntityId(),
@@ -319,6 +320,7 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                                                                 auditRecord.getEntityHashLink()
                                                         ));
                                                     } else {
+                                                        System.out.println("Scope 2");
                                                         return calculateHashLink(Mono.just(auditRecord.getEntityHashLink()), Mono.just(entityHash))
                                                                 .flatMap(calculatedHashLink -> {
 
@@ -340,18 +342,20 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                                                                 });
                                                     }
                                                 }
-                                        ).switchIfEmpty(Mono.defer(() ->
-                                                buildAndSaveAuditRecordFromUnregisteredOrOutdatedEntity(
-                                                        processId,
-                                                        new MVAuditServiceEntity4DataNegotiation(
-                                                                id,
-                                                                entityType,
-                                                                entityHash,
-                                                                entityHash
-                                                        ),
-                                                        AuditRecordTrader.PRODUCER,
-                                                        null
-                                                )))
+                                        ).switchIfEmpty(Mono.defer(() -> {
+                                            System.out.println("Scope 3");
+                                            return buildAndSaveAuditRecordFromUnregisteredOrOutdatedEntity(
+                                                    processId,
+                                                    new MVAuditServiceEntity4DataNegotiation(
+                                                            id,
+                                                            entityType,
+                                                            entityHash,
+                                                            entityHash
+                                                    ),
+                                                    AuditRecordTrader.PRODUCER,
+                                                    null
+                                            );
+                                        }))
                                 ))
                         .collectList()
         );

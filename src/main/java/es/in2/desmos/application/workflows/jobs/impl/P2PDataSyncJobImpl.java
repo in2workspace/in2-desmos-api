@@ -166,6 +166,8 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
 
                     Mono<List<String>> entitiesIdsMono = getEntitiesIds(Mono.just(mvBrokerEntities));
 
+                    System.out.println("Antes AuditRecords");
+
                     return auditRecordService.findCreateOrUpdateAuditRecordsByEntityIds(processId, entityType, entitiesIdsMono)
                             .flatMap(mvAuditEntities -> {
 
