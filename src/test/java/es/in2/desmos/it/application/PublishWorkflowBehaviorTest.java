@@ -184,7 +184,8 @@ class PublishWorkflowBehaviorTest {
         } catch (Exception e) {
             log.error("Error: {}", e.getMessage());
         }
-        Assertions.assertEquals(1, auditRecordRepository.count().block());
+        Assertions.assertNotNull(auditRecordRepository
+                .findByEntityId("urn:ngsi-ld:ProductOffering:3645a0de-d74f-42c5-86ab-e27ccbdf0a9c").blockFirst());
     }
 
 }

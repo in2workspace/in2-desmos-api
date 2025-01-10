@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Retry mechanism for Blockchain Adapter and Context Broker.
 - Recover after a failure mechanism for Blockchain Adapter and Context Broker.
 
+## [Released]: v1.0.5
+- Check empty lifecycleStatus in the Global Policies.
+
 ## [Released]: v1.0.4
 - Implemented Global Policies to validate lifecycleStatus and validFor during entity replication and synchronization.
 

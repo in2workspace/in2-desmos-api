@@ -34,6 +34,15 @@ public final class MVEntityReplicationPoliciesInfoMother {
         );
     }
 
+    public static @NotNull MVEntityReplicationPoliciesInfo replicationNullLifecycleStatus() {
+        return new MVEntityReplicationPoliciesInfo(
+                "entity-1",
+                null,
+                Instant.now().minusSeconds(3600).toString(),
+                Instant.now().plusSeconds(3600000).toString()
+        );
+    }
+
     public static @NotNull MVEntityReplicationPoliciesInfo replicationValidFieldsAndNullStartDateTime() {
         return new MVEntityReplicationPoliciesInfo(
                 "entity-1",
