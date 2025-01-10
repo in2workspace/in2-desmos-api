@@ -18,7 +18,7 @@ class OrionLdAdapterTests {
     @Test
     void itShouldReturnNullWhenGetMvEntities4DataNegotiation() {
         String processId = "0";
-        Mono<BrokerEntityWithIdTypeLastUpdateAndVersion[]> result = orionLdAdapter.findAllIdTypeAndAttributesByType(processId, "ProductOffering", "lastUpdate", "version", "lifecycleStatus", "validFor", BrokerEntityWithIdTypeLastUpdateAndVersion[].class);
+        var result = orionLdAdapter.findAllIdTypeAndAttributesByType(processId, "ProductOffering", "lastUpdate", "version", "lifecycleStatus", "validFor", BrokerEntityWithIdTypeLastUpdateAndVersion.class);
 
         assertNull(result);
     }

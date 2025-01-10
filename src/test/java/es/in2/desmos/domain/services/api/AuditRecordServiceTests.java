@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -360,7 +361,7 @@ class AuditRecordServiceTests {
                 .thenReturn(auditRecord4Mono);
 
         var expectedAuditEntities = MVAuditServiceEntity4DataNegotiationMother.sample3and4();
-        var entityIdsMono = Mono.just(List.of(expectedAuditEntities.get(0).id(), expectedAuditEntities.get(1).id()));
+        var entityIdsMono = Flux.fromIterable(List.of(expectedAuditEntities.get(0).id(), expectedAuditEntities.get(1).id()));
 
         Mono<List<MVAuditServiceEntity4DataNegotiation>> resultMono =
                 auditRecordService.findCreateOrUpdateAuditRecordsByEntityIds(processId, expectedAuditEntities.get(0).type(), entityIdsMono);
@@ -388,7 +389,7 @@ class AuditRecordServiceTests {
                 .thenReturn(auditRecord4Mono);
 
         var expectedAuditEntities = MVAuditServiceEntity4DataNegotiationMother.sample3and4();
-        var entityIdsMono = Mono.just(List.of(expectedAuditEntities.get(0).id(), expectedAuditEntities.get(1).id()));
+        var entityIdsMono = Flux.fromIterable(List.of(expectedAuditEntities.get(0).id(), expectedAuditEntities.get(1).id()));
 
         Mono<List<MVAuditServiceEntity4DataNegotiation>> resultMono =
                 auditRecordService.findCreateOrUpdateAuditRecordsByEntityIds(processId, expectedAuditEntities.get(0).type(), entityIdsMono);
@@ -424,7 +425,7 @@ class AuditRecordServiceTests {
                 .thenReturn(auditRecord3Mono);
 
         var expectedAuditEntities = MVAuditServiceEntity4DataNegotiationMother.sample3and4NewHashlink();
-        var entityIdsMono = Mono.just(List.of(expectedAuditEntities.get(0).id(), expectedAuditEntities.get(1).id()));
+        var entityIdsMono = Flux.fromIterable(List.of(expectedAuditEntities.get(0).id(), expectedAuditEntities.get(1).id()));
 
         Mono<List<MVAuditServiceEntity4DataNegotiation>> resultMono =
                 auditRecordService.findCreateOrUpdateAuditRecordsByEntityIds(processId, expectedAuditEntities.get(0).type(), entityIdsMono);
@@ -442,7 +443,7 @@ class AuditRecordServiceTests {
         String processId = "0";
         var expectedAuditEntities = MVAuditServiceEntity4DataNegotiationMother.sample3and4NewHashlink();
 
-        Mono<List<String>> entityIdsMono = Mono.just(List.of(expectedAuditEntities.get(0).id(), expectedAuditEntities.get(1).id()));
+        var entityIdsMono = Flux.fromIterable(List.of(expectedAuditEntities.get(0).id(), expectedAuditEntities.get(1).id()));
 
         when(brokerPublisherService.getEntityById(eq(processId), any()))
                 .thenReturn(Mono.just(EntityMother.PRODUCT_OFFERING_3))
@@ -490,7 +491,7 @@ class AuditRecordServiceTests {
         String processId = "0";
         var expectedAuditEntities = MVAuditServiceEntity4DataNegotiationMother.sample3EqualsHashAndHashlinkAnd4();
 
-        Mono<List<String>> entityIdsMono = Mono.just(List.of(expectedAuditEntities.get(0).id(), expectedAuditEntities.get(1).id()));
+        var entityIdsMono = Flux.fromIterable(List.of(expectedAuditEntities.get(0).id(), expectedAuditEntities.get(1).id()));
 
         when(brokerPublisherService.getEntityById(eq(processId), any()))
                 .thenReturn(Mono.just(EntityMother.PRODUCT_OFFERING_3))

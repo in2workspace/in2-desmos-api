@@ -61,10 +61,11 @@ class BrokerPublisherServiceIT {
     @Test
     void itShouldReturnEntityIds() {
         String processId = "0";
-        var resultMono = brokerPublisherService.findAllIdTypeAndAttributesByType(processId, MVEntity4DataNegotiationMother.PRODUCT_OFFERING_TYPE_NAME, "lastUpdate", "version", "lifecycleStatus", "validFor", BrokerEntityWithIdTypeLastUpdateAndVersion[].class);
+        var resultMono = brokerPublisherService.findAllIdTypeAndAttributesByType(processId, MVEntity4DataNegotiationMother.PRODUCT_OFFERING_TYPE_NAME, "lastUpdate", "version", "lifecycleStatus", "validFor", BrokerEntityWithIdTypeLastUpdateAndVersion.class);
 
         StepVerifier.create(resultMono)
-                .assertNext(result -> assertThat(result).hasSameElementsAs(initialEntities))
+                .assertNext(result -> assertThat(result).isEqualTo(initialEntities.get(0)))
+                .assertNext(result -> assertThat(result).isEqualTo(initialEntities.get(1)))
                 .verifyComplete();
     }
 }

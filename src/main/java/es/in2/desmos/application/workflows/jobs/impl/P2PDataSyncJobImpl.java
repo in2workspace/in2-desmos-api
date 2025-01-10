@@ -126,6 +126,7 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                 .concatMap(entityType ->
                         createLocalMvEntitiesByType(processId, entityType)
                                 .flatMap(localMvEntities4DataNegotiation -> {
+                                    log.info("ProcessID: {} - Discovery for type: {}", processId, entityType);
                                     log.debug("ProcessID: {} - Local MV Entities 4 Data Negotiation: {}", processId, localMvEntities4DataNegotiation);
 
                                     return externalMvEntities4DataNegotiationMono
@@ -155,16 +156,18 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
                 .findEntitiesAndItsSubentitiesByIdInBase64(processId, ids, new ArrayList<>());
     }
 
-    private static Mono<List<String>> getEntitiesIds(Mono<List<BrokerEntityWithIdTypeLastUpdateAndVersion>> mvBrokerEntities4DataNegotiationMono) {
-        return mvBrokerEntities4DataNegotiationMono.map(x -> x.stream().map(BrokerEntityWithIdTypeLastUpdateAndVersion::getId).toList());
+    private static Flux<String> getEntitiesIds(Flux<BrokerEntityWithIdTypeLastUpdateAndVersion> mvBrokerEntitiesFlux) {
+        return mvBrokerEntitiesFlux
+                .map(BrokerEntityWithIdTypeLastUpdateAndVersion::getId);
     }
 
     private Mono<List<MVEntity4DataNegotiation>> createLocalMvEntitiesByType(String processId, String entityType) {
-        return brokerPublisherService.findAllIdTypeAndAttributesByType(processId, entityType, "lastUpdate", "version", "lifecycleStatus", "validFor", BrokerEntityWithIdTypeLastUpdateAndVersion[].class)
+        return brokerPublisherService.findAllIdTypeAndAttributesByType(processId, entityType, "lastUpdate", "version", "lifecycleStatus", "validFor", BrokerEntityWithIdTypeLastUpdateAndVersion.class)
+                .collectList()
                 .flatMap(mvBrokerEntities -> {
                     log.debug("ProcessID: {} - MV Broker Entities 4 Data Negotiation: {}", processId, mvBrokerEntities);
 
-                    Mono<List<String>> entitiesIdsMono = getEntitiesIds(Mono.just(mvBrokerEntities));
+                    Flux<String> entitiesIdsMono = getEntitiesIds(Flux.fromIterable(mvBrokerEntities));
 
                     System.out.println("Antes AuditRecords");
 
