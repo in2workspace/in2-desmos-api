@@ -359,7 +359,7 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                                         }))
                                 ))
                 .collectList()
-                .subscribeOn(Schedulers.boundedElastic());
+                .subscribeOn(Schedulers.parallel());
     }
 
     private Mono<MVAuditServiceEntity4DataNegotiation> buildAndSaveAuditRecordFromUnregisteredOrOutdatedEntity(String processId, MVAuditServiceEntity4DataNegotiation mvAuditServiceEntity4DataNegotiation, AuditRecordTrader trader, String dataLocation) {
