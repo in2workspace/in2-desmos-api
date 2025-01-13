@@ -310,63 +310,68 @@ public class AuditRecordServiceImpl implements AuditRecordService {
             String entityType,
             Mono<List<String>> entityIdsMono) {
 
-        return entityIdsMono.flatMap(entityIds ->
-                auditRecordRepository.findMostRecentPublishedAuditRecordsByEntityIds(entityIds)
-                        .collectMap(AuditRecord::getEntityId)
-                        .flatMap(auditRecordMap ->
-                                Flux.fromIterable(entityIds)
-                                        .flatMap(id -> {
-                                            Mono<String> entityHashMono = getEntityHash(processId, Mono.just(id));
+        return entityIdsMono.flatMap(entityIds -> {
+                    if (entityIds.isEmpty()) {
+                        return Mono.empty();
+                    }
 
-                                            return entityHashMono.flatMap(entityHash -> {
-                                                AuditRecord auditRecord = auditRecordMap.get(id);
+                    return auditRecordRepository.findMostRecentPublishedAuditRecordsByEntityIds(entityIds)
+                            .collectMap(AuditRecord::getEntityId)
+                            .flatMap(auditRecordMap ->
+                                    Flux.fromIterable(entityIds)
+                                            .flatMap(id -> {
+                                                Mono<String> entityHashMono = getEntityHash(processId, Mono.just(id));
 
-                                                if (auditRecord != null) {
-                                                    log.debug("ProcessID: {} - AuditId: {}", processId, id);
+                                                return entityHashMono.flatMap(entityHash -> {
+                                                    AuditRecord auditRecord = auditRecordMap.get(id);
 
-                                                    if (entityHash.equals(auditRecord.getEntityHash())) {
-                                                        return Mono.just(new MVAuditServiceEntity4DataNegotiation(
-                                                                auditRecord.getEntityId(),
-                                                                auditRecord.getEntityType(),
-                                                                auditRecord.getEntityHash(),
-                                                                auditRecord.getEntityHashLink()
-                                                        ));
+                                                    if (auditRecord != null) {
+                                                        log.debug("ProcessID: {} - AuditId: {}", processId, id);
+
+                                                        if (entityHash.equals(auditRecord.getEntityHash())) {
+                                                            return Mono.just(new MVAuditServiceEntity4DataNegotiation(
+                                                                    auditRecord.getEntityId(),
+                                                                    auditRecord.getEntityType(),
+                                                                    auditRecord.getEntityHash(),
+                                                                    auditRecord.getEntityHashLink()
+                                                            ));
+                                                        } else {
+                                                            return calculateHashLink(Mono.just(auditRecord.getEntityHashLink()), Mono.just(entityHash))
+                                                                    .flatMap(calculatedHashLink -> {
+                                                                        String newAuditRecordDataLocation =
+                                                                                auditRecord.getTrader().equals(AuditRecordTrader.CONSUMER) ? "" : auditRecord.getDataLocation();
+
+                                                                        return buildAndSaveAuditRecordFromUnregisteredOrOutdatedEntity(
+                                                                                processId,
+                                                                                new MVAuditServiceEntity4DataNegotiation(
+                                                                                        auditRecord.getEntityId(),
+                                                                                        auditRecord.getEntityType(),
+                                                                                        entityHash,
+                                                                                        calculatedHashLink
+                                                                                ),
+                                                                                auditRecord.getTrader(),
+                                                                                newAuditRecordDataLocation
+                                                                        );
+                                                                    });
+                                                        }
                                                     } else {
-                                                        return calculateHashLink(Mono.just(auditRecord.getEntityHashLink()), Mono.just(entityHash))
-                                                                .flatMap(calculatedHashLink -> {
-                                                                    String newAuditRecordDataLocation =
-                                                                            auditRecord.getTrader().equals(AuditRecordTrader.CONSUMER) ? "" : auditRecord.getDataLocation();
-
-                                                                    return buildAndSaveAuditRecordFromUnregisteredOrOutdatedEntity(
-                                                                            processId,
-                                                                            new MVAuditServiceEntity4DataNegotiation(
-                                                                                    auditRecord.getEntityId(),
-                                                                                    auditRecord.getEntityType(),
-                                                                                    entityHash,
-                                                                                    calculatedHashLink
-                                                                            ),
-                                                                            auditRecord.getTrader(),
-                                                                            newAuditRecordDataLocation
-                                                                    );
-                                                                });
+                                                        return buildAndSaveAuditRecordFromUnregisteredOrOutdatedEntity(
+                                                                processId,
+                                                                new MVAuditServiceEntity4DataNegotiation(
+                                                                        id,
+                                                                        entityType,
+                                                                        entityHash,
+                                                                        entityHash
+                                                                ),
+                                                                AuditRecordTrader.PRODUCER,
+                                                                null
+                                                        );
                                                     }
-                                                } else {
-                                                    return buildAndSaveAuditRecordFromUnregisteredOrOutdatedEntity(
-                                                            processId,
-                                                            new MVAuditServiceEntity4DataNegotiation(
-                                                                    id,
-                                                                    entityType,
-                                                                    entityHash,
-                                                                    entityHash
-                                                            ),
-                                                            AuditRecordTrader.PRODUCER,
-                                                            null
-                                                    );
-                                                }
-                                            });
-                                        })
-                                        .collectList()
-                        )
+                                                });
+                                            })
+                                            .collectList()
+                            );
+                }
         );
     }
 
