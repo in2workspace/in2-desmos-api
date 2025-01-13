@@ -21,7 +21,7 @@ import reactor.test.StepVerifier;
 
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
-import java.util.UUID;
+import java.util.*;
 
 import static es.in2.desmos.domain.utils.ApplicationUtils.calculateHashLink;
 import static es.in2.desmos.domain.utils.ApplicationUtils.calculateSHA256;
@@ -239,6 +239,49 @@ class AuditRecordRepositoryIT {
                                 .comparingOnlyFields("entityId", "status", "createdAt")
                                 .isEqualTo(expectedAuditRecord))
                 .verifyComplete();
+    }
+
+    @Order(8)
+    @Test
+    void itShouldReturnMostRecentPublishedAuditRecordsByEntityIds() {
+
+        var entityId1 = "1234";
+        var entityId2 = "5678";
+        var entityId3 = "9012";
+
+        List<String> entityIds = List.of(entityId1, entityId2, entityId3);
+
+        Map<String, Timestamp> timestampsByEntityId = new HashMap<>();
+
+        for (var entityId : entityIds) {
+            saveAuditRecordWithEntityIdStatusAndCurrentTimestamp(entityId, AuditRecordStatus.PUBLISHED);
+            saveAuditRecordWithEntityIdStatusAndCurrentTimestamp(entityId, AuditRecordStatus.PUBLISHED);
+            saveAuditRecordWithEntityIdStatusAndCurrentTimestamp(entityId, AuditRecordStatus.PUBLISHED);
+            timestampsByEntityId.put(entityId, saveAuditRecordWithEntityIdStatusAndCurrentTimestamp(entityId, AuditRecordStatus.PUBLISHED));
+            saveAuditRecordWithEntityIdStatusAndCurrentTimestamp(entityId, AuditRecordStatus.DELETED);
+        }
+
+        List<AuditRecord> expectedAuditRecords = new ArrayList<>();
+
+        for (var timestampByEntityId : timestampsByEntityId.entrySet()){
+            expectedAuditRecords.add(AuditRecord
+                    .builder()
+                    .entityId(timestampByEntityId.getKey())
+                    .status(AuditRecordStatus.PUBLISHED)
+                    .createdAt(timestampByEntityId.getValue())
+                    .build());
+        }
+
+        Flux<AuditRecord> receivedAuditRecordFlux = auditRecordRepository
+                .findMostRecentPublishedAuditRecordsByEntityIds(entityIds);
+
+        List<AuditRecord> receivedAuditRecords = receivedAuditRecordFlux.collectList().block();
+
+        System.out.println("List: " + receivedAuditRecords);
+
+        assertThat(receivedAuditRecords)
+                .usingRecursiveFieldByFieldElementComparatorOnFields("entityId", "status", "createdAt")
+                .containsExactlyInAnyOrderElementsOf(expectedAuditRecords);
     }
 
     private Timestamp saveAuditRecordWithEntityIdStatusAndCurrentTimestamp(String entityId, AuditRecordStatus auditRecordStatus) {

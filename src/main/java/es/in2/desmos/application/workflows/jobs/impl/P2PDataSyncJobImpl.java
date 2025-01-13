@@ -49,9 +49,17 @@ public class P2PDataSyncJobImpl implements P2PDataSyncJob {
         return Flux.fromIterable(Arrays.asList(BROKER_ENTITY_TYPES))
                 .concatMap(entityType ->
                         createLocalMvEntitiesByType(processId, entityType)
+                                .switchIfEmpty(Mono.defer(() -> {
+                                    log.debug("ProcessID: {} - No local MV Entities found for entity type: {}", processId, entityType);
+                                    return Mono.just(Collections.emptyList());
+                                }))
                                 .flatMap(localMvEntities4DataNegotiation -> {
                                     log.debug("ProcessID: {} - Local MV Entities 4 Data Negotiation synchronizing data: {}", processId, localMvEntities4DataNegotiation);
                                     return filterReplicableMvEntities(processId, localMvEntities4DataNegotiation)
+                                            .switchIfEmpty(Mono.defer(() -> {
+                                                log.debug("ProcessID: {} - No replicable MV Entities found", processId);
+                                                return Mono.just(Collections.emptyList());
+                                            }))
                                             .flatMap(replicableMvEntities ->
                                                     getExternalMVEntities4DataNegotiationByIssuer(processId, replicableMvEntities, entityType)
                                                             .flatMap(mvEntities4DataNegotiationByIssuer -> {

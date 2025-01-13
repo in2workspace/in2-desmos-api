@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.UUID;
 
 @Repository
@@ -36,6 +37,20 @@ public interface AuditRecordRepository extends ReactiveCrudRepository<AuditRecor
 
     @Query("SELECT * FROM audit_records WHERE entity_id = :entityId AND status = 'PUBLISHED' ORDER BY created_at DESC LIMIT 1")
     Mono<AuditRecord> findMostRecentPublishedAuditRecordByEntityId(String entityId);
+
+    @Query("""
+       SELECT ar.*
+       FROM audit_records ar
+       INNER JOIN (
+           SELECT entity_id, MAX(created_at) AS max_created_at
+           FROM audit_records
+           WHERE entity_id IN (:entityIds) AND status = 'PUBLISHED'
+           GROUP BY entity_id
+       ) AS latest_records
+       ON ar.entity_id = latest_records.entity_id
+       AND ar.created_at = latest_records.max_created_at
+       """)
+    Flux<AuditRecord> findMostRecentPublishedAuditRecordsByEntityIds(List<String> entityIds);
 
     @Query("SELECT * FROM audit_records WHERE entity_id = :entityId AND status = 'PUBLISHED' AND trader = 'PRODUCER' ORDER BY created_at DESC LIMIT 1")
     Mono<AuditRecord> findLatestPublishedAuditRecordForProducerByEntityId(String entityId);
