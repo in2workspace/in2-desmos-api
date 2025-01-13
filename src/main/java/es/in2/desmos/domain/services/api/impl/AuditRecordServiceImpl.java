@@ -311,6 +311,7 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                         .flatMap(id -> getEntityHash(processId, Mono.just(id))
                                 .flatMap(entityHash -> auditRecordRepository.findMostRecentPublishedAuditRecordByEntityId(id)
                                         .flatMap(auditRecord -> {
+                                                    log.debug("ProcessID: {} - AuditId: {}", processId, id);
                                                     if (entityHash.equals(auditRecord.getEntityHash())) {
                                                         return Mono.just(new MVAuditServiceEntity4DataNegotiation(
                                                                 auditRecord.getEntityId(),
