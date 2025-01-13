@@ -328,32 +328,7 @@ public class AuditRecordServiceImpl implements AuditRecordService {
                                                     if (auditRecord != null) {
                                                         log.debug("ProcessID: {} - AuditId: {}", processId, id);
 
-                                                        if (entityHash.equals(auditRecord.getEntityHash())) {
-                                                            return Mono.just(new MVAuditServiceEntity4DataNegotiation(
-                                                                    auditRecord.getEntityId(),
-                                                                    auditRecord.getEntityType(),
-                                                                    auditRecord.getEntityHash(),
-                                                                    auditRecord.getEntityHashLink()
-                                                            ));
-                                                        } else {
-                                                            return calculateHashLink(Mono.just(auditRecord.getEntityHashLink()), Mono.just(entityHash))
-                                                                    .flatMap(calculatedHashLink -> {
-                                                                        String newAuditRecordDataLocation =
-                                                                                auditRecord.getTrader().equals(AuditRecordTrader.CONSUMER) ? "" : auditRecord.getDataLocation();
-
-                                                                        return buildAndSaveAuditRecordFromUnregisteredOrOutdatedEntity(
-                                                                                processId,
-                                                                                new MVAuditServiceEntity4DataNegotiation(
-                                                                                        auditRecord.getEntityId(),
-                                                                                        auditRecord.getEntityType(),
-                                                                                        entityHash,
-                                                                                        calculatedHashLink
-                                                                                ),
-                                                                                auditRecord.getTrader(),
-                                                                                newAuditRecordDataLocation
-                                                                        );
-                                                                    });
-                                                        }
+                                                        return findOrUpdateAuditRecord(processId, entityHash, auditRecord);
                                                     } else {
                                                         return buildAndSaveAuditRecordFromUnregisteredOrOutdatedEntity(
                                                                 processId,
@@ -375,6 +350,34 @@ public class AuditRecordServiceImpl implements AuditRecordService {
         );
     }
 
+    private Mono<MVAuditServiceEntity4DataNegotiation> findOrUpdateAuditRecord(String processId, String entityHash, AuditRecord auditRecord) {
+        if (entityHash.equals(auditRecord.getEntityHash())) {
+            return Mono.just(new MVAuditServiceEntity4DataNegotiation(
+                    auditRecord.getEntityId(),
+                    auditRecord.getEntityType(),
+                    auditRecord.getEntityHash(),
+                    auditRecord.getEntityHashLink()
+            ));
+        } else {
+            return calculateHashLink(Mono.just(auditRecord.getEntityHashLink()), Mono.just(entityHash))
+                    .flatMap(calculatedHashLink -> {
+                        String newAuditRecordDataLocation =
+                                auditRecord.getTrader().equals(AuditRecordTrader.CONSUMER) ? "" : auditRecord.getDataLocation();
+
+                        return buildAndSaveAuditRecordFromUnregisteredOrOutdatedEntity(
+                                processId,
+                                new MVAuditServiceEntity4DataNegotiation(
+                                        auditRecord.getEntityId(),
+                                        auditRecord.getEntityType(),
+                                        entityHash,
+                                        calculatedHashLink
+                                ),
+                                auditRecord.getTrader(),
+                                newAuditRecordDataLocation
+                        );
+                    });
+        }
+    }
 
     private Mono<MVAuditServiceEntity4DataNegotiation> buildAndSaveAuditRecordFromUnregisteredOrOutdatedEntity(String processId, MVAuditServiceEntity4DataNegotiation mvAuditServiceEntity4DataNegotiation, AuditRecordTrader trader, String dataLocation) {
         return fetchMostRecentAuditRecord()
