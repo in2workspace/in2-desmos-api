@@ -69,7 +69,7 @@ public class ReplicationPoliciesServiceImpl implements ReplicationPoliciesServic
         var now = Instant.now();
 
         boolean result = startDateTime == null ||
-                now.isAfter(Instant.parse(startDateTime));
+                now.plusSeconds(2).isAfter(Instant.parse(startDateTime));
 
         System.out.println("Ara: " + now.toString());
         System.out.println("Entitat tal qual: " + startDateTime);
