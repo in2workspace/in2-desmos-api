@@ -67,7 +67,7 @@ public class ReplicationPoliciesServiceImpl implements ReplicationPoliciesServic
 
     private boolean isAfterStartDateTime(String startDateTime) {
         return startDateTime == null ||
-                Instant.now().isAfter(Instant.parse(startDateTime));
+                Instant.now().minusSeconds(1).isAfter(Instant.parse(startDateTime));
     }
 
     private boolean isBeforeEndDateTime(String endDateTime) {
