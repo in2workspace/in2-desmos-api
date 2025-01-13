@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -353,11 +354,8 @@ class AuditRecordServiceTests {
                 .thenReturn(productOffering3Mono)
                 .thenReturn(productOffering4Mono);
 
-        var auditRecord3Mono = Mono.just(AuditRecordMother.list3And4().get(0));
-        var auditRecord4Mono = Mono.just(AuditRecordMother.list3And4().get(1));
-        when(auditRecordRepository.findMostRecentPublishedAuditRecordByEntityId(any()))
-                .thenReturn(auditRecord3Mono)
-                .thenReturn(auditRecord4Mono);
+        when(auditRecordRepository.findMostRecentPublishedAuditRecordsByEntityIds(any()))
+                .thenReturn(Flux.just(AuditRecordMother.list3And4().get(0), AuditRecordMother.list3And4().get(1)));
 
         var expectedAuditEntities = MVAuditServiceEntity4DataNegotiationMother.sample3and4();
         var entityIdsMono = Mono.just(List.of(expectedAuditEntities.get(0).id(), expectedAuditEntities.get(1).id()));
@@ -381,11 +379,11 @@ class AuditRecordServiceTests {
                 .thenReturn(productOffering3Mono)
                 .thenReturn(productOffering4Mono);
 
-        var auditRecord3Mono = Mono.just(AuditRecordMother.list3And4().get(0));
-        var auditRecord4Mono = Mono.just(AuditRecordMother.list3And4().get(1));
-        when(auditRecordRepository.findMostRecentPublishedAuditRecordByEntityId(any()))
-                .thenReturn(auditRecord3Mono)
-                .thenReturn(auditRecord4Mono);
+        when(auditRecordRepository.findMostRecentPublishedAuditRecordsByEntityIds(any()))
+                .thenReturn(
+                        Flux.just(
+                                AuditRecordMother.list3And4().get(0),
+                                AuditRecordMother.list3And4().get(1)));
 
         var expectedAuditEntities = MVAuditServiceEntity4DataNegotiationMother.sample3and4();
         var entityIdsMono = Mono.just(List.of(expectedAuditEntities.get(0).id(), expectedAuditEntities.get(1).id()));
@@ -412,10 +410,12 @@ class AuditRecordServiceTests {
                 .thenReturn(productOffering4Mono);
 
         var auditRecord3Mono = Mono.just(AuditRecordMother.list3OtherHashTraderProducerAnd4().get(0));
-        var auditRecord4Mono = Mono.just(AuditRecordMother.list3OtherHashTraderProducerAnd4().get(1));
-        when(auditRecordRepository.findMostRecentPublishedAuditRecordByEntityId(any()))
-                .thenReturn(auditRecord3Mono)
-                .thenReturn(auditRecord4Mono);
+
+        when(auditRecordRepository.findMostRecentPublishedAuditRecordsByEntityIds(any()))
+                .thenReturn(
+                        Flux.just(
+                                AuditRecordMother.list3OtherHashTraderProducerAnd4().get(0),
+                                AuditRecordMother.list3OtherHashTraderProducerAnd4().get(1)));
 
         when(auditRecordRepository.findMostRecentAuditRecord())
                 .thenReturn(Mono.just(new AuditRecord()));
@@ -448,9 +448,11 @@ class AuditRecordServiceTests {
                 .thenReturn(Mono.just(EntityMother.PRODUCT_OFFERING_3))
                 .thenReturn(Mono.just(EntityMother.PRODUCT_OFFERING_4));
 
-        when(auditRecordRepository.findMostRecentPublishedAuditRecordByEntityId(any()))
-                .thenReturn(Mono.just(AuditRecordMother.list3OtherHashWithTraderConsumerAnd4().get(0)))
-                .thenReturn(Mono.just(AuditRecordMother.list3OtherHashWithTraderConsumerAnd4().get(1)));
+        when(auditRecordRepository.findMostRecentPublishedAuditRecordsByEntityIds(any()))
+                .thenReturn(
+                        Flux.just(
+                                AuditRecordMother.list3OtherHashWithTraderConsumerAnd4().get(0),
+                                AuditRecordMother.list3OtherHashWithTraderConsumerAnd4().get(1)));
 
         when(auditRecordRepository.findMostRecentAuditRecord())
                 .thenReturn(Mono.just(new AuditRecord()));
@@ -496,9 +498,8 @@ class AuditRecordServiceTests {
                 .thenReturn(Mono.just(EntityMother.PRODUCT_OFFERING_3))
                 .thenReturn(Mono.just(EntityMother.PRODUCT_OFFERING_4));
 
-        when(auditRecordRepository.findMostRecentPublishedAuditRecordByEntityId(any()))
-                .thenReturn(Mono.empty())
-                .thenReturn(Mono.just(AuditRecordMother.list3And4().get(1)));
+        when(auditRecordRepository.findMostRecentPublishedAuditRecordsByEntityIds(any()))
+                .thenReturn(Flux.just(AuditRecordMother.list3And4().get(1)));
 
         when(auditRecordRepository.findMostRecentAuditRecord())
                 .thenReturn(Mono.just(new AuditRecord()));
